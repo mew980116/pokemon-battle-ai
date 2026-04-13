@@ -30,25 +30,28 @@
    - 基于概率模型做出最优决策
    - 考虑道具、特性对战斗的影响
 
-## 调用的系统函数
+## 文档结构
 
-本项目调用了以下系统函数：
+为了更好地组织项目文档，我们将详细的技术文档放在 `docs` 目录中：
+- **docs/api/**
+  - [sys-functions.md](docs/api/sys-functions.md) - 系统函数参考文档
+  - [battle-object.md](docs/api/battle-object.md) - battle 对象参考文档
+  - [callback-functions.md](docs/api/callback-functions.md) - 系统回调函数参考文档
+  - [battle-rules.md](docs/api/battle-rules.md) - 对战规则与机制参考文档
 
-- `sys.pokeNum()` - 获取宝可梦编号
-- `sys.pokeBaseStats()` - 获取宝可梦基础属性
-- `sys.move()` - 获取技能信息
-- `sys.ability()` - 获取特性信息
-- `sys.item()` - 获取道具信息
-- `sys.pokemon()` - 获取宝可梦名称
-- `sys.getFileContent()` - 读取文件内容
-- `sys.appendToFile()` - 向文件追加内容
-- `sys.setTimer()` - 设置定时器
-- `sys.rand()` - 生成随机数
-- `sys.moveType()` - 获取技能类型
-- `sys.pokeType1()` - 获取宝可梦第一属性
-- `sys.pokeType2()` - 获取宝可梦第二属性
-- `sys.pokeAbility()` - 获取宝可梦特性
-- `sys.writeToFile()` - 写入文件内容
+- **docs/guide/** - 使用指南和教程
+- **docs/reference/** - 参考资料和数据
+
+## 核心 API 文档
+
+### 1. 系统函数 (`sys`)
+详细说明请参考 [sys-functions.md](docs/api/sys-functions.md)
+
+### 2. battle 对象
+详细说明请参考 [battle-object.md](docs/api/battle-object.md)
+
+### 3. 系统回调函数
+详细说明请参考 [callback-functions.md](docs/api/callback-functions.md)
 
 ## 项目结构
 
@@ -77,6 +80,26 @@
 - 本系统仅适用于特定版本的宝可梦战斗客户端
 - 系统依赖于movedata.json和weight.txt数据文件
 - 战斗AI的决策基于当前战场信息，可能无法预测对手的隐藏信息
+
+## 代码规范
+
+### 兼容性考虑
+- 由于运行环境的JavaScript版本可能较旧，应避免使用ES6+的新特性
+- 字符串操作推荐使用传统方法：
+  - 使用`indexOf`替代`startsWith`
+  - 使用`substring`替代`slice`
+  - 使用`for`循环替代`forEach`等数组方法
+- 避免使用箭头函数、模板字符串等现代JavaScript特性
+- 确保所有变量使用`var`声明，避免使用`let`和`const`
+
+### 输出方法
+- 在Qt引擎窗口环境中，使用`print`函数输出信息，而非`console.log`
+- 避免使用`setTimeout`等浏览器特有的API
+- 直接调用`battle`和`sys`对象，不要重新声明这些变量
+
+### 回调函数格式
+- 回调函数应使用`({})`形式，与主战斗逻辑文件保持一致
+- 确保所有回调函数参数正确，特别是`spot`、`player`等参数的使用
 
 ## 作者
 

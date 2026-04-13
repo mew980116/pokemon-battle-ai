@@ -1,0 +1,25 @@
+# 依赖目录
+node_modules/
+
+# 日志文件
+logs
+*.log
+
+# 环境变量文件
+.env
+
+# IDE 配置文件
+.vscode/
+.idea/
+
+# 操作系统文件
+Thumbs.db
+.DS_Store
+
+# 临时文件
+*.tmp
+*.temp
+
+# 构建产物
+dist/
+build/
