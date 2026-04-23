@@ -23,3 +23,7 @@ Thumbs.db
 # 构建产物
 dist/
 build/
+
+# Claude Code 配置（包含模型策略，不提交）
+.claude/settings.json
+.claude/settings.local.json
