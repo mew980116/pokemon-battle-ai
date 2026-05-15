@@ -2,11 +2,13 @@
 node_modules/
 
 # 日志文件
-logs
+logs/
 *.log
+npm-debug.log*
 
 # 环境变量文件
 .env
+.env.local
 
 # IDE 配置文件
 .vscode/
@@ -19,11 +21,17 @@ Thumbs.db
 # 临时文件
 *.tmp
 *.temp
+*.bak
+*.orig
 
 # 构建产物
 dist/
 build/
+coverage/
 
-# Claude Code 配置（包含模型策略，不提交）
+# Claude Code 配置（包含模型策略和本地调试信息，不提交）
 .claude/settings.json
 .claude/settings.local.json
+.claude/worktrees/
+.claude/todos/
+.claude/plans/

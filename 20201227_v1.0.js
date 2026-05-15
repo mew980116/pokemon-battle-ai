@@ -1,6 +1,15 @@
 ﻿/*
- * Pokemon Battle AI - 宝可梦对战AI系统
+ * Pokemon Battle AI - 宝可梦对战AI系统  [v1.0]
  * 运行环境: Pokemon-Online (PO) 的 Qt ScriptEngine
+ *
+ * v1.0 改动摘要（基于 docs/analysis/decision-logic.md 的分析）：
+ *   改动 A: Path 1 换人路径——对手进攻强化 >= 2 且我方打不死时主动换入强势候选
+ *   改动 B: 自损招式未来价值惩罚——流星群/过热等使用后能力下降的招式，
+ *           无法 KO 时按对手决策池动态扣减得分，避免白白自废武功
+ *   改动 D: 招式选择 softmax 采样——对伤害接近的候选招式做加权随机，
+ *           防止人类玩家通过记忆固定模式剥削 AI
+ *   新增  : getOpponentDecisionPool() 辅助函数——量化对手当前的可选动作空间，
+ *           作为改动 B 和 D 的共享调节信号
  *
  * 属性编号对照表:
  *   0=普通 1=格斗 2=飞行 3=毒 4=地面 5=岩石 6=虫 7=鬼 8=钢
@@ -198,6 +207,74 @@ var SELF_DEF_DROP_MOVES = [370, 620];               // Close Combat / Dragon Asc
 // 对方强化类招式 ID（攻击/特攻/速度提升为主）
 var OFFENSIVE_SETUP_MOVES = [14, 74, 97, 187, 339, 347, 349, 397, 417, 468, 483, 489, 504, 508, 526, 569];
 // Swords Dance/Growth/Agility/Belly Drum/Bulk Up/Calm Mind/Dragon Dance/Rock Polish/Nasty Plot/Hone Claws/Quiver Dance/Coil/Shell Smash/Shift Gear/Work Up/Geomancy
+
+// ===== 改动辅助：对手决策池评估 =====
+// 返回 0-100 整数，表示对手本回合可选动作的空间大小。
+// 设计原则：
+//   - 对手剩余宝可梦越多，可换入选项越丰富，决策池越大
+//   - 对手进攻强化越高，行为越可预测（大概率继续冲），决策池越小
+//   - 对手 HP 越低，被迫行动，决策池越小
+// 结论：
+//   pool 高 → 对手选择多，AI 应提高随机性、加重自损招惩罚
+//   pool 低 → 对手被局势压缩，AI 应果断执行最优解、放宽自损招惩罚
+function getOpponentDecisionPool() {
+    var pool = 30; // 基础分
+
+    // ---- 因子1: 对手存活数（最多 +30，最重要）----
+    var foeAlive = foeInformation.getPokeCount();
+    if (foeAlive >= 5) pool += 30;
+    else if (foeAlive === 4) pool += 24;
+    else if (foeAlive === 3) pool += 16;
+    else if (foeAlive === 2) pool += 8;
+
+    // ---- 因子2: 对手未亮相的宝可梦数（弱边际效应，最多 +11）----
+    // pokeNum===0 且未 KO → 我方完全不知道这只是什么，信息量大
+    var foeUnknownPoke = 0;
+    for (var pi = 0; pi < 6; pi++) {
+        if (foeInformation.pokemon[pi].pokeNum === 0
+                && battle.data.team(battle.opp).poke(pi).status !== 31) {
+            foeUnknownPoke++;
+        }
+    }
+    // 边际递减查表：第1只贡献最多，之后递减
+    var unknownPokeBonus = [0, 3, 5, 7, 9, 10, 11];
+    pool += unknownPokeBonus[foeUnknownPoke > 6 ? 6 : foeUnknownPoke];
+
+    // ---- 因子3: 当前场上宝可梦未知招式数（中等边际效应，最多 +6）----
+    // 依赖 PO 将已使用过的招式暴露在 fpoke(battle.opp).pokemon.move(i).num
+    // 若实测发现未使用招式的 num 也非 0，此因子需要调整
+    var revealedMoves = 0;
+    for (var mi = 0; mi < 4; mi++) {
+        var mv = fpoke(battle.opp).pokemon.move(mi);
+        if (mv && mv.num > 0) revealedMoves++;
+    }
+    var unknownMoves = 4 - revealedMoves;
+    // 4→3 差值小于 3→2（第1、2个未知影响最大）
+    var unknownMoveBonus = [0, 2, 4, 5, 6];
+    pool += unknownMoveBonus[unknownMoves];
+
+    // ---- 因子4: 道具/特性未知（影响较小，各 +1）----
+    if (foeInformation.getItem(foeInformation.currentSlot) === -1) pool += 1;
+    if (foeInformation.getPossibleAbility(foeInformation.currentSlot).length > 1) pool += 1;
+
+    // ---- 因子5: 对手进攻强化（强化后行为趋于线性，决策池收缩）----
+    var foeOffBoost = fpoke(battle.opp).statBoost(1) + fpoke(battle.opp).statBoost(3) + fpoke(battle.opp).statBoost(5);
+    if (foeOffBoost >= 4) pool -= 35;
+    else if (foeOffBoost >= 2) pool -= 25;
+    else if (foeOffBoost >= 1) pool -= 10;
+
+    // ---- 因子6: 对手 HP 低（接近死线，被迫行动，决策池收缩）----
+    var foeHpRatio = fpoke(battle.opp).pokemon.life / fpoke(battle.opp).pokemon.totalLife;
+    if (foeHpRatio < 0.10) pool -= 25;
+    else if (foeHpRatio < 0.25) pool -= 15;
+
+    // 对手只剩 1 只，彻底无换人选项
+    if (foeAlive <= 1) pool -= 20;
+
+    if (pool < 0) pool = 0;
+    if (pool > 100) pool = 100;
+    return pool;
+}
 
 // 上一回合事件记录：追踪回合内发生的关键事件（先手、暴击、伤害、特性触发等）
 var previousTurnEventRecord = {
@@ -2599,6 +2676,39 @@ function getMoveDamage(pokeSlot, enabledAttackSlot) {
 
         }
 
+        // 改动 B: 自损招式未来价值惩罚
+        // 流星群/过热等使用后我方能力下降，视为"承诺型动作"——打完后给对手利用机会。
+        // 规则：只有在无法 KO 对手时才扣分（能 KO 则副作用不延续，不扣）。
+        // 惩罚强度随对手决策池动态调整：
+        //   - 决策池高（对手选择多）→ 对手容易换入抗性利用我方弱化，惩罚加重
+        //   - 决策池低（对手被压缩）→ 对手无路可退，自损招价值较高，惩罚减轻
+        // 使用 minStat(0) 乐观估计对手 HP 上限（假设对手最薄皮），避免过度保守。
+        if (pokeSlot === 0 && movepow[i] > 0) {
+            var dropFoeHp = fpoke(battle.opp).pokemon.life / fpoke(battle.opp).pokemon.totalLife
+                            * fpoke(battle.opp).minStat(0);
+            var dropCanKO = movepow[i] >= dropFoeHp;
+            if (!dropCanKO) {
+                var bPool = getOpponentDecisionPool();
+                var spatkCoeff, atkCoeff, defCoeff;
+                if (bPool >= 70) {
+                    // 对手选择多：承诺风险高，惩罚最重
+                    spatkCoeff = 0.60; atkCoeff = 0.70; defCoeff = 0.75;
+                } else if (bPool >= 40) {
+                    // 中等局面：标准惩罚
+                    spatkCoeff = 0.70; atkCoeff = 0.80; defCoeff = 0.85;
+                } else {
+                    // 对手被局势压缩：承诺风险低，惩罚减轻
+                    spatkCoeff = 0.85; atkCoeff = 0.90; defCoeff = 0.92;
+                }
+                if (SELF_SPATK_DROP_2.indexOf(movenum) !== -1) {
+                    movepow[i] = movepow[i] * spatkCoeff; // 特攻 -2（流星群/过热/精神突破等）
+                } else if (SELF_ATK_DROP_MOVES.indexOf(movenum) !== -1) {
+                    movepow[i] = movepow[i] * atkCoeff;   // 攻击 -1 防御 -1（蛮力）
+                } else if (SELF_DEF_DROP_MOVES.indexOf(movenum) !== -1) {
+                    movepow[i] = movepow[i] * defCoeff;   // 防御 -1 特防 -1（近身战/画龙点睛）
+                }
+            }
+        }
 
         if (movepow[i] > maxmovepow) {
             maxmovepow = movepow[i];
@@ -3057,6 +3167,12 @@ function attemptCommand() {
 
             if (fpoke(battle.me).substitute && sys.rand(0, 3)) rejected = true;
             if (fpoke(battle.opp).statBoost(1) + fpoke(battle.opp).statBoost(2) + fpoke(battle.opp).statBoost(3) + fpoke(battle.opp).statBoost(4) + fpoke(battle.opp).statBoost(5) + fpoke(battle.opp).statBoost(7) > 2 && sys.rand(0, 3)) rejected = true;
+            // 改动 A: 对手进攻强化 >= 2 且我方打不死时，主动换入强势候选
+            // 前提：此处在 bestSwitchList 分支内（standard > 100 的强势换入），换人风险可控。
+            // 对手强化后行为可预测（大概率继续推队），此时换入应果断。
+            // 注意：此行在上一行"对手全属性强化 > 2 随机拒绝"之后，可覆盖并重置 rejected。
+            var foeAtkBoostA = fpoke(battle.opp).statBoost(1) + fpoke(battle.opp).statBoost(3) + fpoke(battle.opp).statBoost(5);
+            if (foeAtkBoostA >= 2 && maxDamagePercent < 0.9) rejected = false;
             if (Math.max(fpoke(battle.opp).statBoost(2) + fpoke(battle.opp).statBoost(4), fpoke(battle.opp).statBoost(7)) > 3) rejected = true;
             if (!rejected && choosetime >= enabledAttackSlot.length) {
                 switchFlag = true;
@@ -3502,6 +3618,37 @@ function attemptCommand() {
         // }, 100, 0);
         //lastBattleCommand = null;
         return;
+    }
+    // ===== 改动 D：softmax 加权采样，防止同局面固定出招 =====
+    // 对手决策池越大 → 随机阈值越低 → 候选集越宽 → 出招越不可预测
+    var smPool = getOpponentDecisionPool();
+    var smThreshold;
+    if (smPool >= 70) smThreshold = 75;
+    else if (smPool >= 40) smThreshold = 85;
+    else smThreshold = 90;
+    var smCandidates = [];
+    var smScores = [];
+    var smTotal = 0;
+    for (var smi = 0; smi < enabledAttackSlot.length; smi++) {
+        if (movepow[smi] > 0 && movepow[smi] * 100 >= maxmovepow * smThreshold) {
+            smCandidates.push(enabledAttackSlot[smi]);
+            smScores.push(Math.floor(movepow[smi]));
+            smTotal += Math.floor(movepow[smi]);
+        }
+    }
+    // 多候选时按伤害权重采样，单候选则行为与原逻辑完全相同
+    if (smCandidates.length > 1 && smTotal > 0) {
+        var smPick = sys.rand(0, smTotal);
+        var smCum = 0;
+        for (var smr = 0; smr < smCandidates.length; smr++) {
+            smCum += smScores[smr];
+            if (smPick < smCum) {
+                usemove = smCandidates[smr];
+                break;
+            }
+        }
+        var smChosenName = sys.move(fpoke(battle.me).pokemon.move(usemove).num);
+        print_s("softmax: pool=" + smPool + " threshold=" + smThreshold + " candidates=" + smCandidates.length + " chosen=" + usemove + "(" + smChosenName + ") scores=" + smScores);
     }
     // ===== Mega进化标记：持有Mega石时设置mega标志 =====
     if (!hasMega && poke(battle.me).item > 2000 && poke(battle.me).item < 3000) {
