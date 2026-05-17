@@ -3877,12 +3877,12 @@ var tpoke = function (ind) {
         sys.setTimer(function () {
             if (!canCloseWindow) sys.setTimer(function () {
                 foeInformation.pokemon = [];
-                battle.close();
+                if (srcname.toLowerCase() !== "mew's") battle.close();
             }, 40000, 0);
             else {
                 canCloseWindow = false;
                 foeInformation.pokemon = [];
-                battle.close();
+                if (srcname.toLowerCase() !== "mew's") battle.close();
             }
         }, 7000, 0);
 
