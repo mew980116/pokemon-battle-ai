@@ -217,6 +217,75 @@ var OFFENSIVE_SETUP_MOVES = [14, 74, 97, 187, 339, 347, 349, 397, 417, 468, 483,
 // 结论：
 //   pool 高 → 对手选择多，AI 应提高随机性、加重自损招惩罚
 //   pool 低 → 对手被局势压缩，AI 应果断执行最优解、放宽自损招惩罚
+// 估算对手下一回合换入某只 bench 宝可梦的概率（0-100）
+// 返回 {prob, slot, pokeNum}：prob=换人概率，slot/pokeNum=最可能换入的宝可梦
+// enabledSlots / movepows：当前场上我方可用招式槽及其 movepow（用于判断 bench 抗性）
+function estimateFoeSwitchProb(enabledSlots, movepows) {
+    var myType1 = fpoke(battle.me).type1();
+    var myType2 = fpoke(battle.me).type2();
+    var bestSlot = -1;
+    var bestNum = 0;
+    var bestScore = 0;
+
+    for (var bpi = 0; bpi < 6; bpi++) {
+        if (bpi === foeInformation.currentSlot) continue;
+        var benchNum = foeInformation.pokemon[bpi].pokeNum;
+        if (benchNum === 0) continue; // 未亮相，无法评估
+        if (battle.data.team(battle.opp).poke(bpi).status === 31) continue; // 已 KO
+
+        var bt1 = sys.pokeType1(benchNum);
+        var bt2 = sys.pokeType2(benchNum);
+
+        // --- 我方最强招式对该 bench 宝可梦的效果（越低 = bench 越是我方 counter）---
+        var bestEffVsBench = 0;
+        for (var msi = 0; msi < enabledSlots.length; msi++) {
+            if (movepows[msi] <= 0) continue;
+            var msType = sys.moveType(fpoke(battle.me).pokemon.move(enabledSlots[msi]).num);
+            var eff = typechart(msType, bt1) * (bt2 < 18 ? typechart(msType, bt2) : 1);
+            if (eff > bestEffVsBench) bestEffVsBench = eff;
+        }
+        // 抗性评分：效果越低，对手换入意愿越高
+        var resistScore;
+        if (bestEffVsBench <= 0) resistScore = 6;       // 完全免疫我方所有招
+        else if (bestEffVsBench < 0.5) resistScore = 3; // 高抗（4× 或以上）
+        else if (bestEffVsBench < 1.0) resistScore = 1.5; // 中抗（2×）
+        else if (bestEffVsBench < 2.0) resistScore = 0.8; // 普通
+        else resistScore = 0.4;                         // 被我方克制，换入意愿低
+
+        // --- bench 宝可梦对我方的进攻威胁 ---
+        var threat = typechart(bt1, myType1) * typechart(bt1, myType2);
+        if (bt2 < 18) {
+            var t2 = typechart(bt2, myType1) * typechart(bt2, myType2);
+            if (t2 > threat) threat = t2;
+        }
+        if (threat < 0.5) threat = 0.5; // 即使无威胁，还有 pivot/setup 换入理由
+
+        // --- HP 与入场伤害（影响换入意愿）---
+        var benchHp = foeInformation.pokemon[bpi].hpPercentageWhenLeave;
+        if (benchHp <= 0) benchHp = 1.0; // 未出场过，假设满血
+        var entryDmg = 0;
+        if (battle.data.field.zone(battle.opp).stealthRocks) {
+            entryDmg += 0.125 * typechart(5, bt1) * (bt2 < 18 ? typechart(5, bt2) : 1);
+        }
+        var spLv = battle.data.field.zone(battle.opp).spikesLevel;
+        if (spLv > 0 && bt1 !== 2 && bt2 !== 2) { // 非地面系 → 受地钉
+            entryDmg += 1.0 / (10 - spLv * 2);
+        }
+        var switchWill = benchHp * (1 - Math.min(entryDmg * 1.5, 0.65));
+
+        var score = resistScore * threat * switchWill;
+        if (score > bestScore) {
+            bestScore = score;
+            bestSlot = bpi;
+            bestNum = benchNum;
+        }
+    }
+
+    // 典型换算：soft counter + 威胁 (3*1.5*0.9≈4) → prob≈60；hard counter (6*2*0.9≈10.8) → prob≈97
+    var prob = Math.min(100, Math.floor(bestScore * 9));
+    return { prob: prob, slot: bestSlot, pokeNum: bestNum };
+}
+
 function getOpponentDecisionPool() {
     var pool = 30; // 基础分
 
@@ -3619,24 +3688,94 @@ function attemptCommand() {
         //lastBattleCommand = null;
         return;
     }
-    // ===== 改动 D：softmax 加权采样，防止同局面固定出招 =====
-    // 对手决策池越大 → 随机阈值越低 → 候选集越宽 → 出招越不可预测
-    var smPool = getOpponentDecisionPool();
-    var smThreshold;
-    if (smPool >= 70) smThreshold = 75;
-    else if (smPool >= 40) smThreshold = 85;
-    else smThreshold = 90;
+    // ===== 改动 D v2：温度 softmax，所有有效招式参与竞争 =====
+    // 变化：
+    //   - 不再用阈值过滤候选，而是全量招式按 movepow^(1/T) 加权采样
+    //   - 温度 T 基于局面紧迫度（非 pool），越紧急越贪心
+    //   - 新增换人招加成（UT/VS）+ 战略动作（岩钉）参与竞争
+    //   - 如果对手 bench 有 counter/check，分数混合当前 vs 预期换入两种评估
+    var smPool = getOpponentDecisionPool(); // 仍计算用于日志
+    var fswResult = estimateFoeSwitchProb(enabledAttackSlot, movepow);
+    var foeSwitchP = fswResult.prob;
+    var smInBenchNum = fswResult.pokeNum;
+    var smInBt1 = smInBenchNum > 0 ? sys.pokeType1(smInBenchNum) : 18;
+    var smInBt2 = smInBenchNum > 0 ? sys.pokeType2(smInBenchNum) : 18;
+
+    // --- 局面温度 T ---
+    var smT = 2.0;
+    var smFoeOff = fpoke(battle.opp).statBoost(1) + fpoke(battle.opp).statBoost(3) + fpoke(battle.opp).statBoost(5);
+    if (smFoeOff >= 3) smT *= 0.45;
+    else if (smFoeOff >= 2) smT *= 0.60;
+    else if (smFoeOff >= 1) smT *= 0.80;
+    var smMyHp = poke(battle.me).life / poke(battle.me).totalLife;
+    if (smMyHp < 0.25) smT *= 0.55;
+    else if (smMyHp < 0.45) smT *= 0.75;
+    if (foeSwitchP > 65) smT *= 1.25; // 对手可能换人，多探索无妨
+    else if (foeSwitchP > 40) smT *= 1.10;
+    if (smT < 0.4) smT = 0.4;
+    if (smT > 4.0) smT = 4.0;
+
+    // --- 构建候选集，计算每招 finalScore ---
     var smCandidates = [];
-    var smScores = [];
-    var smTotal = 0;
+    var smRawW = [];
+    var smLabels = [];
+    var smMaxW = 0;
+
     for (var smi = 0; smi < enabledAttackSlot.length; smi++) {
-        if (movepow[smi] > 0 && movepow[smi] * 100 >= maxmovepow * smThreshold) {
-            smCandidates.push(enabledAttackSlot[smi]);
-            smScores.push(Math.floor(movepow[smi]));
-            smTotal += Math.floor(movepow[smi]);
+        var smSlot = enabledAttackSlot[smi];
+        var smMoveNum = fpoke(battle.me).pokemon.move(smSlot).num;
+        var smBase = movepow[smi];
+        var smFinal = 0;
+
+        if (smBase > 0) {
+            // 攻击招：按对手换人概率混合"打当前"与"打换入"的分数
+            var smScoreCurrent = smBase;
+            var smScoreIncoming = smBase;
+            if (smInBenchNum > 0 && foeSwitchP > 15) {
+                var smMvType = sys.moveType(smMoveNum);
+                var smEffCur = typechart(smMvType, fpoke(battle.opp).type1()) *
+                               typechart(smMvType, fpoke(battle.opp).type2());
+                var smEffIn = typechart(smMvType, smInBt1) *
+                              (smInBt2 < 18 ? typechart(smMvType, smInBt2) : 1);
+                if (smEffCur > 0) smScoreIncoming = smBase * smEffIn / smEffCur;
+            }
+            smFinal = smScoreCurrent * (1 - foeSwitchP / 100) +
+                      smScoreIncoming * (foeSwitchP / 100);
+
+            // UT/VS/Flip Turn：额外加成（出伤 + 自己也能转场，双重价值）
+            if (([369, 521, 838]).indexOf(smMoveNum) !== -1) {
+                smFinal *= (1.0 + foeSwitchP * 0.008); // foeSwitchP=60 → ×1.48
+            }
+        } else {
+            // 变化招：仅岩钉/地钉加战略分，其余暂不参与
+            var smRocksSet = battle.data.field.zone(battle.opp).stealthRocks;
+            var smSpLv = battle.data.field.zone(battle.opp).spikesLevel;
+            if (smMoveNum === 446 && !smRocksSet) {
+                smFinal = 70; // 岩钉未布时高价值
+            } else if (smMoveNum === 191 && smSpLv < 3) {
+                smFinal = smRocksSet ? 40 : 18; // 岩钉已布时地钉才优先，否则岩钉先
+            }
+        }
+
+        if (smFinal > 0) {
+            var smW = Math.pow(smFinal, 1.0 / smT);
+            smCandidates.push(smSlot);
+            smRawW.push(smW);
+            smLabels.push(sys.move(smMoveNum));
+            if (smW > smMaxW) smMaxW = smW;
         }
     }
-    // 多候选时按伤害权重采样，单候选则行为与原逻辑完全相同
+
+    // --- 归一化权重（最大=100）并加权采样 ---
+    var smScores = [];
+    var smTotal = 0;
+    for (var smx = 0; smx < smRawW.length; smx++) {
+        var smNorm = smMaxW > 0 ? Math.floor(smRawW[smx] / smMaxW * 100) : 1;
+        if (smNorm < 1) smNorm = 1;
+        smScores.push(smNorm);
+        smTotal += smNorm;
+    }
+
     if (smCandidates.length > 1 && smTotal > 0) {
         var smPick = sys.rand(0, smTotal);
         var smCum = 0;
@@ -3647,9 +3786,12 @@ function attemptCommand() {
                 break;
             }
         }
-        var smChosenName = sys.move(fpoke(battle.me).pokemon.move(usemove).num);
-        print_s("softmax: pool=" + smPool + " threshold=" + smThreshold + " candidates=" + smCandidates.length + " chosen=" + usemove + "(" + smChosenName + ") scores=" + smScores);
     }
+    var smChosenName = sys.move(fpoke(battle.me).pokemon.move(usemove).num);
+    print_s("softmax: pool=" + smPool + " T=" + Math.floor(smT * 10) / 10 + " switchP=" + foeSwitchP +
+            "(bench=" + smInBenchNum + ") candidates=" + smCandidates.length +
+            " chosen=" + usemove + "(" + smChosenName + ")" +
+            " [" + smLabels + "]=" + smScores);
     // ===== Mega进化标记：持有Mega石时设置mega标志 =====
     if (!hasMega && poke(battle.me).item > 2000 && poke(battle.me).item < 3000) {
         choice.mega = true;
