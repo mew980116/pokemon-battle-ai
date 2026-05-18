@@ -2817,8 +2817,6 @@ function attemptCommand() {
     for (var i = 0; i < 4; i++) {
         if (disabledAttackSlot.indexOf(i) === -1) enabledAttackSlot.push(i);
     }
-    print_s("enabledAttackSlot:" + enabledAttackSlot);
-    print_s("switchesList:" + switchesList);
     if (enabledAttackSlot.length === 0 && switchesList.length > 0) {
         attemptSwitch(true);
         return;
@@ -2885,19 +2883,15 @@ function attemptCommand() {
         tempSlot.push(enabledAttackSlot[tempindex]);
     }
     enabledAttackSlot = tempSlot;
-    print_s("enabledAttackSlot:" + enabledAttackSlot);
     // 交换评估三级体系
     var bestSwitchList = getBestSwitchList();    // 最佳：能OHKO且先手
     var goodSwitchList = getGoodSwitchList();    // 良好：有属性优势
     var goodForSwitch = getGoodForSwitch();      // 可接受：有任何优势
-    print_s("bestSwitchList:" + bestSwitchList + " goodSwitchList:" + goodSwitchList + " goodForSwitch:" + goodForSwitch);
 
     var foeHp = fpoke(battle.opp).pokemon.life / fpoke(battle.opp).pokemon.totalLife * fpoke(battle.opp).maxStat(0);
     var foeMaxHp = sys.rand(fpoke(battle.opp).minStat(0), fpoke(battle.opp).maxStat(0) + 1);
     var maxDamagePercent = maxmovepow / foeMaxHp;
 
-    print_s("maxmove:" + maxmove + " " + maxmovepow);
-    print_s("movepow:" + movepow);
     // if (maxmovepow < 100 && switchesList.length > 0) {
     //     var ut = -1;
     //     var vs = -1;
@@ -2934,8 +2928,15 @@ function attemptCommand() {
 
     // }
     var choosetime = -1;
-    print_s("foe:" + foeHp);
-    print_s("me:" + (poke(battle.me).life / poke(battle.me).totalLife));
+    var smPowList = [];
+    for (var spi = 0; spi < enabledAttackSlot.length; spi++)
+        smPowList.push(sys.move(fpoke(battle.me).pokemon.move(enabledAttackSlot[spi]).num) + ":" + movepow[spi]);
+    var smFoeOB = Math.max(fpoke(battle.opp).statBoost(1), fpoke(battle.opp).statBoost(3));
+    print_s("me=" + Math.floor(poke(battle.me).life / poke(battle.me).totalLife * 100) + "%" +
+        " foe=" + Math.floor(fpoke(battle.opp).pokemon.life / fpoke(battle.opp).pokemon.totalLife * 100) + "%" +
+        (smFoeOB > 0 ? "[+" + smFoeOB + "atk]" : "") +
+        " sw:best=" + bestSwitchList.length + " good=" + goodSwitchList.length + " for=" + goodForSwitch.length +
+        " pow=[" + smPowList + "]");
     // 主决策循环：最多30次迭代，尝试选择最佳技能
     while ((rejected && choosetime < 30) || choosetime < enabledAttackSlot.length * 4) {
         rejected = true;
@@ -2977,7 +2978,6 @@ function attemptCommand() {
         }
         if (choosetime < enabledAttackSlot.length)
             print_s(sys.move(moveNum) + ":power " + power + " accurcy " + accurcy + " damagePercent " + damagePercent);
-        else print_s(sys.move(moveNum));
         var estimateDamage = foeInformation.getCurrentPossibleDamage(moveNum);
         var estimateDamageFlag = false;
         if (estimateDamage[0] > 0 && estimateDamage[1] / estimateDamage[0] < 2) estimateDamageFlag = true;
@@ -3002,9 +3002,7 @@ function attemptCommand() {
             }
             if (poke(battle.me).item > 2999 && poke(battle.me).item < 4000 && !hasZ && poke(battle.opp).life / poke(battle.opp).totalLife > 0.5 && sys.rand(0, 3)) choice.zmove = true;
         }
-        if (([276, 315, 354, 434, 437, 623]).indexOf(moveNum) !== -1 && ([153, 126, 196, 231]).indexOf(poke(battle.me).ability) === -1 && poke(battle.me).item !== 37) { //副作用            
-
-            print_s("副作用判定");
+        if (([276, 315, 354, 434, 437, 623]).indexOf(moveNum) !== -1 && ([153, 126, 196, 231]).indexOf(poke(battle.me).ability) === -1 && poke(battle.me).item !== 37) { //副作用
             if (choosetime < enabledAttackSlot.length * 2) continue;
             if (usemove !== maxmove && sys.rand(0, 2)) rejected = true;
             if (poke(battle.opp).life / poke(battle.opp).totalLife < 0.35 && maxmovepow > foeHp && power * accurcy / 100 < foeHp * 1.2 && sys.rand(0, 3)) rejected = true;
@@ -3014,7 +3012,6 @@ function attemptCommand() {
             //if (!rejected) print_s("使用副作用技能");
         }
         if (([63, 307, 308, 338, 439]).indexOf(moveNum) !== -1) { //硬直
-            print_s("硬直判定");
             if (choosetime < enabledAttackSlot.length * 2) continue;
             if (usemove !== maxmove && sys.rand(0, 2)) rejected = true;
             if (fpoke(battle.opp).pokemon.life / fpoke(battle.opp).pokemon.totalLife < 0.35 && maxmovepow > foeHp && power * accurcy / 100 < foeHp * 1.2 && sys.rand(0, 3)) rejected = true;
