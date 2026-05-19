@@ -1,6 +1,17 @@
 ﻿/*
- * Pokemon Battle AI - 宝可梦对战AI系统  [v1.0]
+ * Pokemon Battle AI - 宝可梦对战AI系统  [v1.1.1]
  * 运行环境: Pokemon-Online (PO) 的 Qt ScriptEngine
+ *
+ * v1.1.1 改动摘要（基于 feedback/v1.1 case 1/2 分析）：
+ *   残局 T 衰减 : 全队剩余 <= 2 只时 smT*0.30，<= 3 只时 smT*0.45
+ *   专爱 T cap  : item in [4,5,6] 且无可换宝可梦时 smT 强制 <= 0.6
+ *   阈值过滤    : finalScore >= maxFinalScore * thresh 才入选候选集
+ *               thresh 随 T 动态：T<=0.8->0.85 / T<=1.5->0.75 / T<=2.5->0.65 / T>2.5->0.55
+ *
+ * v1.1 改动摘要：
+ *   新增 estimateFoeSwitchProb() : 扫描已亮相 bench 估算换人概率（0-100）
+ *   改动 D v2 : 温度参数真 softmax，全量攻击招参与，T 由局面紧迫度决定
+ *             混合"打当前"与"打换入"finalScore，UT/VS 随 switchP 加成
  *
  * v1.0 改动摘要（基于 docs/analysis/decision-logic.md 的分析）：
  *   改动 A: Path 1 换人路径——对手进攻强化 >= 2 且我方打不死时主动换入强势候选
