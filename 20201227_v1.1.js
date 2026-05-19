@@ -3711,13 +3711,19 @@ function attemptCommand() {
     else if (foeSwitchP > 40) smT *= 1.10;
     if (smT < 0.4) smT = 0.4;
     if (smT > 4.0) smT = 4.0;
+    // 残局 T 衰减：全队剩余宝可梦越少越贪心（含当前出战）
+    var smTotalAlive = switchesList.length + 1;
+    if (smTotalAlive <= 2) smT *= 0.30;
+    else if (smTotalAlive <= 3) smT *= 0.45;
+    // 专爱系道具锁招时无法换人，必须贪心
+    if (([4, 5, 6]).indexOf(poke(battle.me).item) !== -1 && switchesList.length === 0) {
+        if (smT > 0.6) smT = 0.6;
+    }
+    if (smT < 0.4) smT = 0.4;
 
-    // --- 构建候选集，计算每招 finalScore ---
-    var smCandidates = [];
-    var smRawW = [];
-    var smLabels = [];
-    var smMaxW = 0;
-
+    // --- 第一遍：计算所有招式的 finalScore ---
+    var smFinals = [];
+    var smFinalNums = [];
     for (var smi = 0; smi < enabledAttackSlot.length; smi++) {
         var smSlot = enabledAttackSlot[smi];
         var smMoveNum = fpoke(battle.me).pokemon.move(smSlot).num;
@@ -3754,11 +3760,35 @@ function attemptCommand() {
             }
         }
 
-        if (smFinal > 0) {
-            var smW = Math.pow(smFinal, 1.0 / smT);
-            smCandidates.push(smSlot);
+        smFinals.push(smFinal);
+        smFinalNums.push(smMoveNum);
+    }
+
+    // --- finalScore 阈值过滤：T 低（场面紧）时排除弱招 ---
+    var smMaxFinal = 0;
+    for (var smfi = 0; smfi < smFinals.length; smfi++) {
+        if (smFinals[smfi] > smMaxFinal) smMaxFinal = smFinals[smfi];
+    }
+    var smThresh;
+    if (smT <= 0.8) smThresh = 0.85;
+    else if (smT <= 1.5) smThresh = 0.75;
+    else if (smT <= 2.5) smThresh = 0.65;
+    else smThresh = 0.55;
+    var smFloor = smMaxFinal * smThresh;
+
+    // --- 第二遍：构建候选集 ---
+    var smCandidates = [];
+    var smRawW = [];
+    var smLabels = [];
+    var smMaxW = 0;
+
+    for (var smi2 = 0; smi2 < enabledAttackSlot.length; smi2++) {
+        var smFinal2 = smFinals[smi2];
+        if (smFinal2 > 0 && smFinal2 >= smFloor) {
+            var smW = Math.pow(smFinal2, 1.0 / smT);
+            smCandidates.push(enabledAttackSlot[smi2]);
             smRawW.push(smW);
-            smLabels.push(sys.move(smMoveNum));
+            smLabels.push(sys.move(smFinalNums[smi2]));
             if (smW > smMaxW) smMaxW = smW;
         }
     }
@@ -3785,8 +3815,10 @@ function attemptCommand() {
         }
     }
     var smChosenName = sys.move(fpoke(battle.me).pokemon.move(usemove).num);
-    print_s("softmax: pool=" + smPool + " T=" + Math.floor(smT * 10) / 10 + " switchP=" + foeSwitchP +
-            "(bench=" + smInBenchNum + ") candidates=" + smCandidates.length +
+    print_s("softmax: pool=" + smPool + " T=" + Math.floor(smT * 10) / 10 +
+            " alive=" + smTotalAlive + " switchP=" + foeSwitchP + "(bench=" + smInBenchNum + ")" +
+            " thresh=" + smThresh + " floor=" + Math.floor(smFloor) +
+            " candidates=" + smCandidates.length +
             " chosen=" + usemove + "(" + smChosenName + ")" +
             " [" + smLabels + "]=" + smScores);
     // ===== Mega进化标记：持有Mega石时设置mega标志 =====

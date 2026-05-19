@@ -58,7 +58,11 @@
 
 > 核心原则修正：服务型 BOT 的随机性应建立在"期望收益接近的合理动作之间"，而非"信息少时盲目发散"。对手 bench 未亮相时不读空气，对手有明确换入收益时才启动混合评分。
 
-- [ ] **softmax 候选集改为基于 `finalScore` 过滤**：当前全量 `movepow > 0` 参与的问题是真正低期望动作也进入采样；应改为 `finalScore >= maxFinalScore * threshold` 才入选，threshold 随局面动态调整：危机局（强化 ≥2 / 我方 HP<25%）= 0.85，普通局 = 0.70，高 switchP（>40）= 0.60，极高 switchP（>65）且有明确 bench = 0.55。关键：过滤基准必须是 `finalScore`（已混合当前+换入期望），不能用 `movepow_vs当前`，否则读换招在 switchP 高时仍会被错误过滤
+- [x] **softmax 候选集改为基于 `finalScore` 过滤（已实施 v1.1.1）**：两轮遍历改造；第一遍计算所有 finalScore，第二遍用 `finalScore >= maxFinalScore * threshold` 过滤；threshold 通过 T 对应：T≤0.8→0.85，T≤1.5→0.75，T≤2.5→0.65，T>2.5→0.55
+
+- [x] **残局 T 衰减（已实施 v1.1.1）**：`switchesList.length + 1 ≤ 2` → smT×0.30，≤3 → smT×0.45；case 1 武道熊师残局场景下 T 从 2.0 降至 0.60，毒击直接被 threshold 过滤
+
+- [x] **专爱系道具 T cap（已实施 v1.1.1）**：item∈[4,5,6] 且 switchesList 为空时 smT 强制 ≤ 0.6，防止锁招状态下仍走随机分叉
 
 - [ ] **UT/VS/Flip Turn 加 KO 保护**：当前 `finalScore *= (1 + switchP * 0.008)` 在有明确 KO 招时可能出现"明明能杀却急速折返"。建议：若候选中存在满足先手斩杀条件的招式，则 UT/VS 的 `finalScore` 不得超过该 KO 招的 0.95 倍（cap，不减成零）；若 UT/VS 本身也能 KO 则不受此限制。UT/VS 的正确定位是"伤害 + 节奏" 复合价值，switchP 加成体现的是换人时转场收益上升，而不是弥补低伤害
 
