@@ -1,6 +1,10 @@
 ﻿/*
- * Pokemon Battle AI - 宝可梦对战AI系统  [v1.1.1]
+ * Pokemon Battle AI - 宝可梦对战AI系统  [v1.1.2]
  * 运行环境: Pokemon-Online (PO) 的 Qt ScriptEngine
+ *
+ * v1.1.2 改动摘要（基于 feedback/v1.1.1 case 7 分析）：
+ *   修复 softmax candidates=1 回归 : 阈值过滤后候选只剩 1 个时强制采用该唯一候选，
+ *               否则 usemove 残留主循环旧值，残局高频打出次优招（case7-R14）
  *
  * v1.1.1 改动摘要（基于 feedback/v1.1 case 1/2 分析）：
  *   残局 T 衰减 : 全队剩余 <= 2 只时 smT*0.30，<= 3 只时 smT*0.45
@@ -3814,7 +3818,12 @@ function attemptCommand() {
         smTotal += smNorm;
     }
 
-    if (smCandidates.length > 1 && smTotal > 0) {
+    // v1.1.2: 阈值过滤后候选可能只剩 1 个，此时必须强制采用该唯一候选。
+    // 否则 usemove 会残留主决策循环最后一次迭代的 slot（可能是次优招），
+    // 导致 candidates=1 时 chosen 与候选集不一致（case7-R14 流星群被过滤剩唯一候选却打出暗影球）。
+    if (smCandidates.length === 1) {
+        usemove = smCandidates[0];
+    } else if (smCandidates.length > 1 && smTotal > 0) {
         var smPick = sys.rand(0, smTotal);
         var smCum = 0;
         for (var smr = 0; smr < smCandidates.length; smr++) {
