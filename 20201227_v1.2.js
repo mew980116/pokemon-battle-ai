@@ -1,6 +1,18 @@
 ﻿/*
- * Pokemon Battle AI - 宝可梦对战AI系统  [v1.1.2]
+ * Pokemon Battle AI - 宝可梦对战AI系统  [v1.2]
  * 运行环境: Pokemon-Online (PO) 的 Qt ScriptEngine
+ *
+ * v1.2 改动摘要（换人决策重构 + 决策流修复，基于 feedback/v1.1.1 + v1.1.2 case 分析）：
+ *   改动 F : standard 主导换人目标选择——抽出 getSwitchStandard()，新增 pickBySwitchStandard()
+ *           剔除被克制候选(standard <= -50)，仅在分数接近(容差30)的候选间随机；
+ *           attemptSwitch 最终选择与兜底均改走 standard，修复"换人选错被克制目标"(case4/5/6)
+ *   改动 E : 被秒风险维度驱动主动换人——新增 getFoeDamageToMe()/getFoeThreatToMe()(0-100)，
+ *           三档换人路径接入：高威胁(对手大概率先手且能秒我)且场下有合适候选时鼓励换人(case7-R3/R7)；
+ *           硬性前提：空候选时威胁再高也不换，避免换人白送
+ *   改动 G : 修复主循环确定性决策被 softmax 覆盖——新增 commandDecided 标志，斩杀/先制/破替身/
+ *           变化招/换人等特殊 break 标记后，softmax 段跳过纯伤害重算(v1.1.2 case3-2 先制斩杀冰砾被覆盖)
+ *   改动 H : 残局收敛——对手只剩最后一只(getPokeCount<=1)时 softmax thresh 拉到 0.97，
+ *           收敛到唯一最优解，不再在等价高伤害招间随机(v1.1.2 case4-4)
  *
  * v1.1.2 改动摘要（基于 feedback/v1.1.1 case 7 分析）：
  *   修复 softmax candidates=1 回归 : 阈值过滤后候选只剩 1 个时强制采用该唯一候选，
@@ -1635,86 +1647,169 @@ function getSwitchPower() {
     return maxpow;
 }
 
+// 改动 E (v1.2): 估算对手某招(给定属性/威力/物理或特殊)对我方当前宝可梦的伤害比例。
+// 复用 getGoodForSwitch 的威胁公式结构。category: 1=物理(用对手物攻/我方防御), 2=特殊。
+// 用 maxStat(对手最强估计) 乐观假设对手满输出，威胁评估宁高勿低。返回占我方总HP的比例。
+function getFoeDamageToMe(moveType, power, category) {
+    if (power < 1) return 0;
+    var foeAtk = category === 1 ? fpoke(battle.opp).maxStat(1) : fpoke(battle.opp).maxStat(3);
+    var myDef = category === 1 ? fpoke(battle.me).stat(2) : fpoke(battle.me).stat(4);
+    if (myDef < 1) return 0;
+    var dmg = (2 * fpoke(battle.opp).pokemon.level + 10) / 250 * foeAtk / myDef * power;
+    var eff = typechart(moveType, fpoke(battle.me).type1(), 0) *
+              (fpoke(battle.me).type2() !== 18 ? typechart(moveType, fpoke(battle.me).type2(), 0) : 1);
+    dmg = dmg * eff;
+    if (moveType === fpoke(battle.opp).type1() || moveType === fpoke(battle.opp).type2()) dmg = dmg * 1.5; // STAB
+    if (poke(battle.me).totalLife < 1) return 0;
+    return dmg / poke(battle.me).totalLife;
+}
+
+// 改动 E (v1.2): 评估对手当前宝可梦对我方当前宝可梦的"先手秒杀"威胁，返回 0-100。
+// 因子: A速度(先手概率) B能否秒我(已亮相招;无亮相招假设本系) C我方残血放大 D对手进攻强化。
+// 仅用于换人路径"被秒风险"维度，高威胁(且场下有合适候选)时鼓励主动换人。
+function getFoeThreatToMe() {
+    if (fpoke(battle.opp).pokemon.isKoed()) return 0;
+    if (poke(battle.me).isKoed()) return 0;
+    var pool = 0;
+    var myHp = poke(battle.me).life / poke(battle.me).totalLife;
+
+    // A. 速度对比（先手概率）0~40
+    var mySpd = fpoke(battle.me).stat(5);
+    var foeSpd = foeInformation.getPossibleSpeed(foeInformation.currentSlot, fpoke(battle.opp).statBoost(5), 1);
+    if (mySpd < foeSpd[0]) pool += 40;
+    else if (mySpd < foeSpd[1]) pool += 22;
+
+    // B. 对手能否秒我 0~45
+    var bestDmg = 0;
+    var hasAtkMove = false;
+    for (var i = 0; i < 4; i++) {
+        var mv = fpoke(battle.opp).pokemon.move(i).num;
+        if (mv <= 0) continue;
+        if (moveDataObj[mv].category === 3) continue; // 变化招不算输出
+        hasAtkMove = true;
+        var d = getFoeDamageToMe(sys.moveType(mv), moveDataObj[mv].power, moveDataObj[mv].category);
+        if (d > bestDmg) bestDmg = d;
+    }
+    // 无任何亮相攻击招：假设对手持本系招(power 80)兜底估算
+    if (!hasAtkMove) {
+        var foeCat = fpoke(battle.opp).maxStat(1) >= fpoke(battle.opp).maxStat(3) ? 1 : 2;
+        var d1 = getFoeDamageToMe(fpoke(battle.opp).type1(), 80, foeCat);
+        if (d1 > bestDmg) bestDmg = d1;
+        if (fpoke(battle.opp).type2() !== 18) {
+            var d2 = getFoeDamageToMe(fpoke(battle.opp).type2(), 80, foeCat);
+            if (d2 > bestDmg) bestDmg = d2;
+        }
+    }
+    if (bestDmg >= 1.0) pool += 45;
+    else if (bestDmg >= 0.8) pool += 32;
+    else if (bestDmg >= 0.6) pool += 15;
+    else if (bestDmg >= 0.45) pool += 6;
+
+    // C. 我方残血放大 0~15
+    if (myHp < 0.35) pool += 15;
+    else if (myHp < 0.5) pool += 8;
+    else if (myHp < 0.7) pool += 3;
+
+    // D. 对手进攻强化 0~15
+    var foeAtkBoost = Math.max(fpoke(battle.opp).statBoost(1), fpoke(battle.opp).statBoost(3));
+    if (foeAtkBoost >= 2) pool += 15;
+    else if (foeAtkBoost === 1) pool += 8;
+
+    if (pool < 0) pool = 0;
+    if (pool > 100) pool = 100;
+    print_s("getFoeThreatToMe threat:" + pool + " bestDmg:" + Math.floor(bestDmg * 100) / 100 + " spd:" + mySpd + "vs[" + foeSpd[0] + "," + foeSpd[1] + "]");
+    return pool;
+}
+
+// 改动 F (v1.2): 抽出单个候选 slot 的 standard 评分逻辑（原 getGoodForSwitch 循环体）。
+// 行为与抽取前完全等价，仅供 getGoodForSwitch 与 attemptSwitch(pickBySwitchStandard) 复用。
+// 返回该 slot 的换入 standard 分数（越高越适合换上），非法 slot 返回 -9999。
+function getSwitchStandard(slot) {
+    if (slot < 0 || slot > 5 || typeof (slot) !== "number") return -9999;
+    var getTypechart = function (type, sl) {
+        if (sl < 0 || sl > 5 || typeof (sl) !== "number") return 0;
+        return typechart(type, sys.pokeType1(tpoke(sl).numRef), 0) * typechart(type, sys.pokeType2(tpoke(sl).numRef), 0);
+    }
+    var standard = 25;
+    if (!poke(battle.me).isKoed())
+        for (var j = 0; j < 18; j++) {
+            if (getTypechart(j, slot) > 1 && getTypechart(j, 0) > 1) {
+                if (j === fpoke(battle.opp).type1() || j === fpoke(battle.opp).type2()) standard -= 50;
+                else if (([5, 17, 7, 9, 12, 14]).indexOf() !== -1) standard -= 20;
+                else standard -= 5;
+            }
+            if (getTypechart(j, slot) < 1 && getTypechart(j, 0) > 1) {
+                if (j === fpoke(battle.opp).type1() || j === fpoke(battle.opp).type2()) standard += 30;
+                else standard += 5;
+            }
+            if (getTypechart(j, slot) < 1 && getTypechart(j, 0) > 2) {
+                if (j === fpoke(battle.opp).type1() || j === fpoke(battle.opp).type2()) standard += 20;
+                else standard += 5;
+            }
+            if (getTypechart(j, slot) === 0 && getTypechart(j, 0) > 1) {
+                if (j === fpoke(battle.opp).type1() || j === fpoke(battle.opp).type2()) standard += 30;
+            }
+        }
+    // if ((2 * fpoke(battle.opp).pokemon.level + 10) / 250 * fpoke(battle.opp).maxStat(1) / tpoke(slot).basestat(2) * 200 - tpoke(slot).life < 0) standard -= 50;
+    // if ((2 * fpoke(battle.opp).pokemon.level + 10) / 250 * fpoke(battle.opp).maxStat(3) / tpoke(slot).basestat(4) * 200 - tpoke(slot).life < 0) standard -= 50;
+    if ((2 * fpoke(battle.opp).pokemon.level + 10) / 250 * fpoke(battle.opp).maxStat(1) / tpoke(slot).basestat(2) * 135 / tpoke(slot).totalLife < 0.3) standard += 30;
+    if ((2 * fpoke(battle.opp).pokemon.level + 10) / 250 * fpoke(battle.opp).maxStat(3) / tpoke(slot).basestat(4) * 135 / tpoke(slot).totalLife < 0.3) standard += 30;
+    if ((2 * fpoke(battle.opp).pokemon.level + 10) / 250 * fpoke(battle.opp).maxStat(1) / tpoke(slot).basestat(2) * 150 / tpoke(slot).totalLife > 0.5) standard -= 30;
+    if ((2 * fpoke(battle.opp).pokemon.level + 10) / 250 * fpoke(battle.opp).maxStat(3) / tpoke(slot).basestat(4) * 150 / tpoke(slot).totalLife > 0.5) standard -= 30;
+    if (getTypechart(fpoke(battle.opp).type1(), slot) > 1) standard -= 50;
+    if (getTypechart(fpoke(battle.opp).type1(), slot) > 2) standard -= 30;
+    if (fpoke(battle.opp).type2() !== 18 && getTypechart(fpoke(battle.opp).type2(), slot) > 1) standard -= 50;
+    if (fpoke(battle.opp).type2() !== 18 && getTypechart(fpoke(battle.opp).type2(), slot) > 1) standard -= 30;
+    if (fpoke(battle.opp).maxStat(1) > 260 && fpoke(battle.opp).maxStat(1) > fpoke(battle.opp).maxStat(3) * 1.5)
+        if (getTypechart(2, slot) > 2 || getTypechart(5, slot) > 2 || getTypechart(16, slot) > 2 || getTypechart(7, slot) > 2) standard -= 30;
+    if (fpoke(battle.opp).maxStat(3) > 260 && fpoke(battle.opp).maxStat(3) > fpoke(battle.opp).maxStat(1) * 1.5)
+        if (getTypechart(9, slot) > 2 || getTypechart(12, slot) > 2 || getTypechart(14, slot) > 2) standard -= 30;
+    if (fpoke(battle.opp).maxStat(1) > 350)
+        if (getTypechart(5, slot) > 1 || getTypechart(17, slot) > 1) standard -= 30;
+    if (fpoke(battle.opp).maxStat(3) > 350)
+        if (getTypechart(9, slot) > 1 || getTypechart(12, slot) > 1) standard -= 30;
+    if (Math.max(fpoke(battle.opp).statBoost(1), fpoke(battle.opp).statBoost(3)) > 0) {
+        standard -= 20;
+        if (tpoke(slot).ability === 109 && !(foeInformation.hasAbility(foeInformation.currentSlot, 104) || foeInformation.hasAbility(foeInformation.currentSlot, 164))) standard += 50;
+    }
+    if (Math.max(fpoke(battle.opp).statBoost(1), fpoke(battle.opp).statBoost(3)) > 1) {
+        standard -= 15;
+        if (tpoke(slot).ability === 109 && !(foeInformation.hasAbility(foeInformation.currentSlot, 104) || foeInformation.hasAbility(foeInformation.currentSlot, 164))) standard += 35;
+    }
+
+    if (battle.data.field.zone(battle.me).stealthRocks && getTypechart(5, slot) > 1) standard -= 30;
+    if (tpoke(slot).life / tpoke(slot).totalLife > 0.7) standard += 20;
+    if (tpoke(slot).life / tpoke(slot).totalLife < 0.4) standard -= 30;
+    if (tpoke(slot).status !== 0) standard -= 20;
+    if ((battle.data.field.zone(battle.me).spikesLevel > 0 || battle.data.field.zone(battle.me).toxicSpikesLevel > 0 || battle.data.field.zone(battle.me).stickyWeb) && isOnLand([sys.pokeType1(tpoke(slot).numRef), sys.pokeType2(tpoke(slot).numRef)], tpoke(slot).item, false, tpoke(slot).ability === 26, false)) standard += 20;
+    if (battle.data.field.zone(battle.me).toxicSpikesLevel > 0 && (sys.pokeType1(tpoke(slot).numRef) === 3 || sys.pokeType2(tpoke(slot).numRef) === 3) && !isOnLand([sys.pokeType1(tpoke(slot).numRef), sys.pokeType2(tpoke(slot).numRef)], tpoke(slot).item, false, tpoke(slot).ability === 26, false)) standard += 30;
+    if (getTypechart(fpoke(battle.opp).type1(), slot) < 1) standard += 20;
+    if (fpoke(battle.opp).type2() !== 18 && getTypechart(fpoke(battle.opp).type2(), slot) < 1) standard += 20;
+    if (getTypechart(fpoke(battle.opp).type1(), slot) === 0) standard += 20;
+    if (fpoke(battle.opp).type2() !== 18 && getTypechart(fpoke(battle.opp).type2(), slot) === 0) standard += 20;
+    if (([4, 5, 6]).indexOf(foeInformation.getItem(foeInformation.currentSlot)) !== -1) {
+        var move = foeInformation.getLastMove();
+        if (move > 0) {
+            if (moveDataObj[move].category === 3) standard += 20;
+            if (getTypechart(sys.moveType(move), slot) < 1) standard += 20;
+            if (getTypechart(sys.moveType(move), slot) === 0) standard += 50;
+        }
+    }
+    if (([3, 2]).indexOf(fpoke(battle.opp).pokemon.status) !== -1) standard += 50;
+    if (([235, 113, 242, 480]).indexOf(poke(battle.opp).numRef) !== -1) standard += 50;
+    return standard;
+}
+
 // 宽松的交换评估：基于属性克制、HP、状态、钉子等因素评分
 // 评分规则：岩石钉-30, HP>70%+20, HP<40%-30, 状态异常-20, 钉子+20, 毒系吸收毒钉+30, 属性抵抗+20, 免疫+50
 function getGoodForSwitch() {
     if (fpoke(battle.opp).pokemon.isKoed()) return switchesList;
-    var getTypechart = function (type, slot) {
-        if (slot < 0 || slot > 5 || typeof (slot) !== "number") return 0;
-        return typechart(type, sys.pokeType1(tpoke(slot).numRef), 0) * typechart(type, sys.pokeType2(tpoke(slot).numRef), 0);
-    }
     var ret1 = [];
     var ret2 = [];
     for (var i = 0; i < switchesList.length; i++) {
         var slot = switchesList[i];
         if (slot < 0 || slot > 5 || typeof (slot) !== "number") continue;
-        var standard = 25;
-        if (!poke(battle.me).isKoed())
-            for (var j = 0; j < 18; j++) {
-                if (getTypechart(j, slot) > 1 && getTypechart(j, 0) > 1) {
-                    if (j === fpoke(battle.opp).type1() || j === fpoke(battle.opp).type2()) standard -= 50;
-                    else if (([5, 17, 7, 9, 12, 14]).indexOf() !== -1) standard -= 20;
-                    else standard -= 5;
-                }
-                if (getTypechart(j, slot) < 1 && getTypechart(j, 0) > 1) {
-                    if (j === fpoke(battle.opp).type1() || j === fpoke(battle.opp).type2()) standard += 30;
-                    else standard += 5;
-                }
-                if (getTypechart(j, slot) < 1 && getTypechart(j, 0) > 2) {
-                    if (j === fpoke(battle.opp).type1() || j === fpoke(battle.opp).type2()) standard += 20;
-                    else standard += 5;
-                }
-                if (getTypechart(j, slot) === 0 && getTypechart(j, 0) > 1) {
-                    if (j === fpoke(battle.opp).type1() || j === fpoke(battle.opp).type2()) standard += 30;
-                }
-            }
-        // if ((2 * fpoke(battle.opp).pokemon.level + 10) / 250 * fpoke(battle.opp).maxStat(1) / tpoke(slot).basestat(2) * 200 - tpoke(slot).life < 0) standard -= 50;
-        // if ((2 * fpoke(battle.opp).pokemon.level + 10) / 250 * fpoke(battle.opp).maxStat(3) / tpoke(slot).basestat(4) * 200 - tpoke(slot).life < 0) standard -= 50;
-        if ((2 * fpoke(battle.opp).pokemon.level + 10) / 250 * fpoke(battle.opp).maxStat(1) / tpoke(slot).basestat(2) * 135 / tpoke(slot).totalLife < 0.3) standard += 30;
-        if ((2 * fpoke(battle.opp).pokemon.level + 10) / 250 * fpoke(battle.opp).maxStat(3) / tpoke(slot).basestat(4) * 135 / tpoke(slot).totalLife < 0.3) standard += 30;
-        if ((2 * fpoke(battle.opp).pokemon.level + 10) / 250 * fpoke(battle.opp).maxStat(1) / tpoke(slot).basestat(2) * 150 / tpoke(slot).totalLife > 0.5) standard -= 30;
-        if ((2 * fpoke(battle.opp).pokemon.level + 10) / 250 * fpoke(battle.opp).maxStat(3) / tpoke(slot).basestat(4) * 150 / tpoke(slot).totalLife > 0.5) standard -= 30;
-        if (getTypechart(fpoke(battle.opp).type1(), slot) > 1) standard -= 50;
-        if (getTypechart(fpoke(battle.opp).type1(), slot) > 2) standard -= 30;
-        if (fpoke(battle.opp).type2() !== 18 && getTypechart(fpoke(battle.opp).type2(), slot) > 1) standard -= 50;
-        if (fpoke(battle.opp).type2() !== 18 && getTypechart(fpoke(battle.opp).type2(), slot) > 1) standard -= 30;
-        if (fpoke(battle.opp).maxStat(1) > 260 && fpoke(battle.opp).maxStat(1) > fpoke(battle.opp).maxStat(3) * 1.5)
-            if (getTypechart(2, slot) > 2 || getTypechart(5, slot) > 2 || getTypechart(16, slot) > 2 || getTypechart(7, slot) > 2) standard -= 30;
-        if (fpoke(battle.opp).maxStat(3) > 260 && fpoke(battle.opp).maxStat(3) > fpoke(battle.opp).maxStat(1) * 1.5)
-            if (getTypechart(9, slot) > 2 || getTypechart(12, slot) > 2 || getTypechart(14, slot) > 2) standard -= 30;
-        if (fpoke(battle.opp).maxStat(1) > 350)
-            if (getTypechart(5, slot) > 1 || getTypechart(17, slot) > 1) standard -= 30;
-        if (fpoke(battle.opp).maxStat(3) > 350)
-            if (getTypechart(9, slot) > 1 || getTypechart(12, slot) > 1) standard -= 30;
-        if (Math.max(fpoke(battle.opp).statBoost(1), fpoke(battle.opp).statBoost(3)) > 0) {
-            standard -= 20;
-            if (tpoke(slot).ability === 109 && !(foeInformation.hasAbility(foeInformation.currentSlot, 104) || foeInformation.hasAbility(foeInformation.currentSlot, 164))) standard += 50;
-        }
-        if (Math.max(fpoke(battle.opp).statBoost(1), fpoke(battle.opp).statBoost(3)) > 1) {
-            standard -= 15;
-            if (tpoke(slot).ability === 109 && !(foeInformation.hasAbility(foeInformation.currentSlot, 104) || foeInformation.hasAbility(foeInformation.currentSlot, 164))) standard += 35;
-        }
-
-        if (battle.data.field.zone(battle.me).stealthRocks && getTypechart(5, slot) > 1) standard -= 30;
-        if (tpoke(slot).life / tpoke(slot).totalLife > 0.7) standard += 20;
-        if (tpoke(slot).life / tpoke(slot).totalLife < 0.4) standard -= 30;
-        if (tpoke(slot).status !== 0) standard -= 20;
-        if ((battle.data.field.zone(battle.me).spikesLevel > 0 || battle.data.field.zone(battle.me).toxicSpikesLevel > 0 || battle.data.field.zone(battle.me).stickyWeb) && isOnLand([sys.pokeType1(tpoke(slot).numRef), sys.pokeType2(tpoke(slot).numRef)], tpoke(slot).item, false, tpoke(slot).ability === 26, false)) standard += 20;
-        if (battle.data.field.zone(battle.me).toxicSpikesLevel > 0 && (sys.pokeType1(tpoke(slot).numRef) === 3 || sys.pokeType2(tpoke(slot).numRef) === 3) && !isOnLand([sys.pokeType1(tpoke(slot).numRef), sys.pokeType2(tpoke(slot).numRef)], tpoke(slot).item, false, tpoke(slot).ability === 26, false)) standard += 30;
-        if (getTypechart(fpoke(battle.opp).type1(), slot) < 1) standard += 20;
-        if (fpoke(battle.opp).type2() !== 18 && getTypechart(fpoke(battle.opp).type2(), slot) < 1) standard += 20;
-        if (getTypechart(fpoke(battle.opp).type1(), slot) === 0) standard += 20;
-        if (fpoke(battle.opp).type2() !== 18 && getTypechart(fpoke(battle.opp).type2(), slot) === 0) standard += 20;
-        if (([4, 5, 6]).indexOf(foeInformation.getItem(foeInformation.currentSlot)) !== -1) {
-            var move = foeInformation.getLastMove();
-            if (move > 0) {
-                if (moveDataObj[move].category === 3) standard += 20;
-                if (getTypechart(sys.moveType(move), slot) < 1) standard += 20;
-                if (getTypechart(sys.moveType(move), slot) === 0) standard += 50;
-            }
-        }
-        if (([3, 2]).indexOf(fpoke(battle.opp).pokemon.status) !== -1) standard += 50;
-        if (([235, 113, 242, 480]).indexOf(poke(battle.opp).numRef) !== -1) standard += 50;
+        var standard = getSwitchStandard(slot);
         print_s(sys.pokemon(tpoke(slot).numRef) + " standard:" + standard);
         if (100 < standard) ret1.push(slot);
         if (50 < standard) ret2.push(slot);
@@ -1722,6 +1817,33 @@ function getGoodForSwitch() {
     //if (ret.length > 0) print_s("较好的交换选择：" + ret);
     if (ret1.length === 0) return ret2;
     return ret1;
+}
+
+// 改动 F (v1.2): 在候选列表里用 standard 分数主导最终换人选择，仅在分数接近的候选间随机。
+// candList 空则用 fallbackList；都空返回 -1。剔除被克制(<= -50)的候选，避免随机抽中被克制单位。
+function pickBySwitchStandard(candList, fallbackList) {
+    var list = candList;
+    if (list.length === 0) list = fallbackList;
+    if (list.length === 0) return -1;
+    var scored = [];
+    var bestStd = -9999;
+    for (var k = 0; k < list.length; k++) {
+        var s = getSwitchStandard(list[k]);
+        scored.push(s);
+        if (s > bestStd) bestStd = s;
+    }
+    // 收集"接近最高分(容差30)且非被克制(> -50)"的候选
+    var top = [];
+    for (var k2 = 0; k2 < list.length; k2++) {
+        if (scored[k2] >= bestStd - 30 && scored[k2] > -50) top.push(list[k2]);
+    }
+    // 全部被克制时退回最高分单个（不随机，选最不坏）
+    if (top.length === 0) {
+        var bi = 0;
+        for (var k3 = 1; k3 < list.length; k3++) if (scored[k3] > scored[bi]) bi = k3;
+        return list[bi];
+    }
+    return top[sys.rand(0, top.length)];
 }
 
 // 最严格的交换评估：返回能OHKO且先手的候选
@@ -1868,15 +1990,20 @@ function attemptSwitch(passive) {
     print_s("好的交换选择：" + alternative);
     print_s("好的防守选择：" + goodForSwitch);
     print_s("好的攻击选择：" + goodAttackSwitch);
-    if (alternative.length > 0) cswitch = alternative[sys.rand(0, alternative.length)];
+    // 改动 F (v1.2): 由 standard 分数主导最终选择，剔除被克制候选；攻击候选退回 switchesList 兜底。
+    if (alternative.length > 0) cswitch = pickBySwitchStandard(alternative, []);
     else {
-        if (goodForSwitch.length > 0) cswitch = goodForSwitch[sys.rand(0, goodForSwitch.length)];
-        else if (goodAttackSwitch.length > 0) cswitch = goodAttackSwitch[sys.rand(0, goodAttackSwitch.length)];
-        if (!passive && goodAttackSwitch.length > 0) cswitch = goodAttackSwitch[sys.rand(0, goodAttackSwitch.length)];
+        if (goodForSwitch.length > 0) cswitch = pickBySwitchStandard(goodForSwitch, []);
+        else if (goodAttackSwitch.length > 0) cswitch = pickBySwitchStandard(goodAttackSwitch, switchesList);
+        if (!passive && goodAttackSwitch.length > 0) cswitch = pickBySwitchStandard(goodAttackSwitch, switchesList);
     }
     if (cswitch < 0 || cswitch > 5 || typeof (cswitch) !== "number") {
-        recordBug("attemptSwitch错误 cswitch=" + cswitch + " alternative=" + alternative + " goodForSwitch=" + goodForSwitch + " goodAttackSwitch=" + goodAttackSwitch);
-        cswitch = switchesList[sys.rand(0, switchesList.length)];
+        // 改动 F (v1.2): 兜底也按全体 standard 选最优（救 case4 类"最优候选分数低进不了列表"场景）
+        cswitch = pickBySwitchStandard(switchesList, []);
+        if (cswitch < 0 || cswitch > 5 || typeof (cswitch) !== "number") {
+            recordBug("attemptSwitch错误 cswitch=" + cswitch + " alternative=" + alternative + " goodForSwitch=" + goodForSwitch + " goodAttackSwitch=" + goodAttackSwitch);
+            cswitch = switchesList[sys.rand(0, switchesList.length)];
+        }
     }
     var choice = {
         "slot": battle.me,
@@ -2817,6 +2944,9 @@ function getMoveDamage(pokeSlot, enabledAttackSlot) {
  * 7. 变化技能评估
  * 8. 自爆/同命/挣扎/接力棒/Z招式/Mega进化
  * 9. 最终发送指令
+ *
+ * 控制流地图（break 点分类、两阶段架构、换人三档详解）见
+ * docs/analysis/attemptCommand-control-flow.md —— 改代码前先读它，避免重啃本函数。
  */
 function attemptCommand() {
     if (battleEnd) return;
@@ -2902,6 +3032,8 @@ function attemptCommand() {
     var bestSwitchList = getBestSwitchList();    // 最佳：能OHKO且先手
     var goodSwitchList = getGoodSwitchList();    // 良好：有属性优势
     var goodForSwitch = getGoodForSwitch();      // 可接受：有任何优势
+    // 改动 E (v1.2): 被秒风险维度，主循环外算一次，三档换人路径共用。
+    var foeThreat = getFoeThreatToMe();
 
     var foeHp = fpoke(battle.opp).pokemon.life / fpoke(battle.opp).pokemon.totalLife * fpoke(battle.opp).maxStat(0);
     var foeMaxHp = sys.rand(fpoke(battle.opp).minStat(0), fpoke(battle.opp).maxStat(0) + 1);
@@ -2943,6 +3075,9 @@ function attemptCommand() {
 
     // }
     var choosetime = -1;
+    // 改动 G (v1.2): 主循环里"确定性决策 break"(斩杀/先制/破替身/变化招/换人招等)标记此位，
+    // 退出循环后 softmax 段据此跳过纯伤害重算，避免覆盖主循环选好的 usemove(case3-2 先制斩杀冰砾被冰柱坠击覆盖)。
+    var commandDecided = false;
     var smPowList = [];
     for (var spi = 0; spi < enabledAttackSlot.length; spi++)
         smPowList.push(sys.move(fpoke(battle.me).pokemon.move(enabledAttackSlot[spi]).num) + ":" + movepow[spi]);
@@ -2952,6 +3087,10 @@ function attemptCommand() {
         (smFoeOB > 0 ? "[+" + smFoeOB + "atk]" : "") +
         " sw:best=" + bestSwitchList.length + " good=" + goodSwitchList.length + " for=" + goodForSwitch.length +
         " pow=[" + smPowList + "]");
+    // ===== 阶段1：主决策循环（确定性决策）=====
+    // 逐招检查斩杀/先制/破替身/变化招/换人等特殊机制，命中即 commandDecided=true 后 break。
+    // 唯一不标记 commandDecided 的 break 是普通攻击招出口（见 docs/analysis/attemptCommand-control-flow.md
+    // 的 break 分类表），它退出循环后交给阶段2 的 softmax 随机化。
     // 主决策循环：最多30次迭代，尝试选择最佳技能
     while ((rejected && choosetime < 30) || choosetime < enabledAttackSlot.length * 4) {
         rejected = true;
@@ -3037,6 +3176,7 @@ function attemptCommand() {
         if (([172, 503, 221, 558, 613, 394, 659]).indexOf(moveNum) !== -1 && poke(battle.me).status === 3 && movepow > 0) { //解冻技能
             print_s("进行解冻");
             flag = false;
+            commandDecided = true;
             break;
         }
         if (power / maxmovepow * 6 < 5 && moveDataObj[moveNum].priority < 1 || power < 10) {
@@ -3054,7 +3194,7 @@ function attemptCommand() {
                 if (accurcy >= 80 && choosetime < enabledAttackSlot.length && sys.rand(0, 100) > accurcy * 4 - 290) continue;
                 if (choice.zmove === true) continue;
                 choice.zmove = false;
-                if (choosetime >= enabledAttackSlot.length && !rejected) break;
+                if (choosetime >= enabledAttackSlot.length && !rejected) { commandDecided = true; break; }
                 print_s("破替身技能生效");
             }
         }
@@ -3066,7 +3206,7 @@ function attemptCommand() {
             if (accurcy >= 80 && choosetime < enabledAttackSlot.length && sys.rand(0, 100) > accurcy * 4 - 290) continue;
             if (choice.zmove === true) continue;
             choice.zmove = false;
-            if (choosetime >= enabledAttackSlot.length && !rejected) break;
+            if (choosetime >= enabledAttackSlot.length && !rejected) { commandDecided = true; break; }
             print_s("破画皮技能生效");
         }
         rejected = true;
@@ -3091,6 +3231,7 @@ function attemptCommand() {
                 if (accurcy >= 90 && choosetime < enabledAttackSlot.length && sys.rand(0, 100) > accurcy * 4 - 290) continue;
                 choice.zmove = false;
                 print_s("先手斩杀生效");
+                commandDecided = true;
                 break;
             }
             if (([120, 153, 194, 858]).indexOf(moveNum) !== -1) { //自杀技能
@@ -3101,6 +3242,7 @@ function attemptCommand() {
                 else if (poke(battle.me).life / poke(battle.me).totalLife < 0.4 && (sys.rand(0, 2) || Math.max(fpoke(battle.opp).statBoost(1), fpoke(battle.opp).statBoost(2), fpoke(battle.opp).statBoost(4), fpoke(battle.opp).statBoost(3)) > 0)) rejected = false;
                 if (choosetime >= enabledAttackSlot.length * 2 && !rejected) {
                     print_s("先手兑子生效");
+                    commandDecided = true;
                     break;
                 }
             }
@@ -3124,6 +3266,7 @@ function attemptCommand() {
                 if (accurcy >= 90 && choosetime < enabledAttackSlot.length && sys.rand(0, 100) > accurcy * 4 - 290) continue;
                 choice.zmove = false;
                 print_s("先制斩杀生效");
+                commandDecided = true;
                 break;
             }
             if (([252, 656]).indexOf(moveNum) !== -1 && damagePercent > (0.1 + foeInformation.getItem(foeInformation.currentSlot) === 15 ? 0.0625 : 0)) {
@@ -3131,6 +3274,7 @@ function attemptCommand() {
                 if (choosetime >= enabledAttackSlot.length) {
                     choice.zmove = false;
                     //print_s("下马威，迎头一击生效");
+                    commandDecided = true;
                     break;
                 }
             }
@@ -3139,6 +3283,7 @@ function attemptCommand() {
                 if (choosetime >= enabledAttackSlot.length) {
                     choice.zmove = false;
                     print_s("残血后手先制技能输出生效");
+                    commandDecided = true;
                     break;
                 }
             }
@@ -3158,6 +3303,7 @@ function attemptCommand() {
                 choice.zmove = false;
                 if (choosetime >= enabledAttackSlot.length) {
                     print_s("斩杀技能生效");
+                    commandDecided = true;
                     break;
                 }
             }
@@ -3170,7 +3316,7 @@ function attemptCommand() {
                 if (moveNum === 600 && getStatusMoveEffectiveForCurrentFoe(moveNum) === 0) continue;
                 //非常需要换人的情况
                 if (myInformation.needSwitch) rejected = false;
-                if (!rejected && choosetime >= enabledAttackSlot.length) break;
+                if (!rejected && choosetime >= enabledAttackSlot.length) { commandDecided = true; break; }
                 //其他的情况
                 if (([4, 5, 6]).indexOf(poke(battle.me).item) !== -1 && !sys.rand(0, 3)) rejected = false;
                 if (fpoke(battle.me).statBoost(1) + fpoke(battle.me).statBoost(2) + fpoke(battle.me).statBoost(3) + fpoke(battle.me).statBoost(4) + fpoke(battle.me).statBoost(5) > 2) rejected = true;
@@ -3187,7 +3333,7 @@ function attemptCommand() {
 
 
                 //print_s("替换技能拒绝：" + rejected);
-                if (!rejected && choosetime >= enabledAttackSlot.length * 2) break;
+                if (!rejected && choosetime >= enabledAttackSlot.length * 2) { commandDecided = true; break; }
             }
         }
         if (usemove === maxmove && damagePercent * accurcy / 100 > 0.5 && sys.rand(0, 2)) rejected = false;
@@ -3212,10 +3358,11 @@ function attemptCommand() {
                 if (!sys.rand(0, 3)) rejected = false;
                 if (ret === 4 && sys.rand(0, 2)) {
                     rejected = false;
+                    commandDecided = true;
                     break;
                 }
 
-                if (choosetime >= enabledAttackSlot.length * 2 && !rejected) break;
+                if (choosetime >= enabledAttackSlot.length * 2 && !rejected) { commandDecided = true; break; }
             }
             if (ret === 1) {
                 if (choosetime < enabledAttackSlot.length * 4 || sys.rand(0, 2)) {
@@ -3224,10 +3371,14 @@ function attemptCommand() {
                 if (sys.rand(0, 3)) rejected = true;
             }
             if (ret === 2 && choosetime >= enabledAttackSlot.length * 3 && !sys.rand(0, 3)) rejected = false;
-            if (!rejected && choosetime >= enabledAttackSlot.length * 3) break;
+            if (!rejected && choosetime >= enabledAttackSlot.length * 3) { commandDecided = true; break; }
             //if (!rejected) print_s("使用该变化技能");
         }
 
+        // ===== 换人三档路径（best/good/goodForSwitch）=====
+        // 三档进入条件与各自的"鼓励换人(rejected=false)"维度详见
+        // docs/analysis/attemptCommand-control-flow.md 的换人路径章节。
+        // v1.2 改动 E 的被秒风险维度(foeThreat)接在各档安全阀之后、switchFlag 之前。
         var switchFlag = false;
         rejected = true;
 
@@ -3255,6 +3406,8 @@ function attemptCommand() {
             var foeAtkBoostA = fpoke(battle.opp).statBoost(1) + fpoke(battle.opp).statBoost(3) + fpoke(battle.opp).statBoost(5);
             if (foeAtkBoostA >= 2 && maxDamagePercent < 0.9) rejected = false;
             if (Math.max(fpoke(battle.opp).statBoost(2) + fpoke(battle.opp).statBoost(4), fpoke(battle.opp).statBoost(7)) > 3) rejected = true;
+            // 改动 E (v1.2): 高威胁(对手大概率先手且能秒我) + 有最佳候选 → 鼓励换人（放安全阀之后可覆盖保守逻辑）
+            if (foeThreat >= 55 && bestSwitchList.length > 0) rejected = false;
             if (!rejected && choosetime >= enabledAttackSlot.length) {
                 switchFlag = true;
             }
@@ -3279,6 +3432,8 @@ function attemptCommand() {
             if (fpoke(battle.me).substitute && sys.rand(0, 3)) rejected = true;
             if (fpoke(battle.opp).statBoost(1) + fpoke(battle.opp).statBoost(2) + fpoke(battle.opp).statBoost(3) + fpoke(battle.opp).statBoost(4) + fpoke(battle.opp).statBoost(5) + fpoke(battle.opp).statBoost(7) > 2 && sys.rand(0, 3)) rejected = true;
             if (Math.max(fpoke(battle.opp).statBoost(2) + fpoke(battle.opp).statBoost(4), fpoke(battle.opp).statBoost(7)) > 3) rejected = true;
+            // 改动 E (v1.2): 高威胁 + 有良好候选 → 鼓励换人（保留随机性，候选稍弱故阈值抬高）
+            if (foeThreat >= 65 && (goodSwitchList.length > 0 || goodForSwitch.length > 0) && sys.rand(0, 3)) rejected = false;
             if (!rejected && choosetime >= enabledAttackSlot.length * 2) {
                 switchFlag = true;
             }
@@ -3313,6 +3468,8 @@ function attemptCommand() {
             if (fpoke(battle.me).substitute && sys.rand(0, 5)) rejected = true;
             if (fpoke(battle.opp).statBoost(1) + fpoke(battle.opp).statBoost(2) + fpoke(battle.opp).statBoost(3) + fpoke(battle.opp).statBoost(4) + fpoke(battle.opp).statBoost(5) + fpoke(battle.opp).statBoost(7) > 1) rejected = true;
             if (Math.max(fpoke(battle.opp).statBoost(2) + fpoke(battle.opp).statBoost(4), fpoke(battle.opp).statBoost(7)) > 2) rejected = true;
+            // 改动 E (v1.2): 高威胁 + 有可接受候选 → 偶尔换人（最弱档，阈值最高、随机性最强）
+            if (foeThreat >= 75 && goodForSwitch.length > 0 && !sys.rand(0, 3)) rejected = false;
             if (!rejected && choosetime >= enabledAttackSlot.length * 3) {
                 switchFlag = true;
             }
@@ -3358,7 +3515,7 @@ function attemptCommand() {
         if (switchFlag) {
             rejected = true;
             if (([369, 521, 838]).indexOf(moveNum) !== -1 && power > 10 || moveNum === 600 && getStatusMoveEffectiveForCurrentFoe(moveNum) > 1) rejected = false;
-            if (!rejected || !switchDisabled) break;
+            if (!rejected || !switchDisabled) { commandDecided = true; break; }
         }
         rejected = true;
 
@@ -3382,8 +3539,8 @@ function attemptCommand() {
         if (([14, 74, 96, 294, 336, 339, 347, 349, 367, 417, 468, 483, 489, 504, 508, 526, 569, 597]).indexOf(moveNum) !== -1) {
             if (maxDamagePercent < 0.4 && ((maxmovepow - getSwitchPower()) / foeMaxHp > -0.1 || switchesList.length === 0 || switchDisabled) && poke(battle.me).life / poke(battle.me).totalLife > 0.5 && !sys.rand(0, 3)) rejected = false;
             if (Math.max(fpoke(battle.me).statBoost(1), fpoke(battle.me).statBoost(3)) > 1 && (sys.rand(0, 2) || maxmovepow > foeHp * 1.2)) rejected = true;
-            if (!rejected && choosetime >= enabledAttackSlot.length * 2 && sys.rand(0, 2)) break;
-            if (!rejected && choosetime >= enabledAttackSlot.length * 3) break;
+            if (!rejected && choosetime >= enabledAttackSlot.length * 2 && sys.rand(0, 2)) { commandDecided = true; break; }
+            if (!rejected && choosetime >= enabledAttackSlot.length * 3) { commandDecided = true; break; }
             //print_s("输出不足，进行强化！");
         }
 
@@ -3445,13 +3602,13 @@ function attemptCommand() {
                     continue;
                 }
                 if (!fpoke(battle.opp).showing && fpoke(battle.me).stat(5) > foeInformation.getPossibleSpeed(foeInformation.currentSlot, fpoke(battle.opp).statBoost(5), 1)[1]) rejected = false;
-                if (!rejected) break;
+                if (!rejected) { commandDecided = true; break; }
                 if (!fpoke(battle.opp).showing) rejected = false;
                 if (!sys.rand(0, 3)) rejected = false;
                 if (fpoke(battle.me).stat(5) < foeInformation.getPossibleSpeed(foeInformation.currentSlot, fpoke(battle.opp).statBoost(5), 1)[0] && maxDamagePercent > 0.5) rejected = true;
                 if (fpoke(battle.opp).maxStat(1) * 1.5 < fpoke(battle.opp).maxStat(3)) rejected = true;
                 if (lastSuccessfulCommand.movenum === moveNum || sys.rand(0, 2)) rejected = true;
-                if (!rejected && choosetime >= enabledAttackSlot.length * 3) break;
+                if (!rejected && choosetime >= enabledAttackSlot.length * 3) { commandDecided = true; break; }
             }
             if (moveNum === 243) {
                 if (fpoke(battle.opp).type1() === 17 || fpoke(battle.opp).type2() === 17) {
@@ -3462,16 +3619,16 @@ function attemptCommand() {
                 if (fpoke(battle.me).stat(5) < foeInformation.getPossibleSpeed(foeInformation.currentSlot, fpoke(battle.opp).statBoost(5), 1)[0] && maxDamagePercent > 0.5) rejected = true;
                 if (fpoke(battle.opp).maxStat(1) * 1.5 < fpoke(battle.opp).maxStat(3)) rejected = true;
                 if (lastSuccessfulCommand.movenum === moveNum || sys.rand(0, 2)) rejected = true;
-                if (!rejected && choosetime >= enabledAttackSlot.length * 3) break;
+                if (!rejected && choosetime >= enabledAttackSlot.length * 3) { commandDecided = true; break; }
             }
             if (moveNum === 368) {
                 if (!fpoke(battle.opp).showing && fpoke(battle.me).stat(5) > foeInformation.getPossibleSpeed(foeInformation.currentSlot, fpoke(battle.opp).statBoost(5), 1)[1]) rejected = false;
-                if (!rejected) break;
+                if (!rejected) { commandDecided = true; break; }
                 if (fpoke(battle.me).stat(5) > foeInformation.getPossibleSpeed(foeInformation.currentSlot, fpoke(battle.opp).statBoost(5), 1)[1] || maxDamagePercent > 0.5) rejected = true;
                 else if (fpoke(battle.me).stat(5) < foeInformation.getPossibleSpeed(foeInformation.currentSlot, fpoke(battle.opp).statBoost(5), 1)[0] && sys.rand(0, 2)) rejected = false;
                 else if (!sys.rand(0, 5)) rejected = false;
                 if (lastSuccessfulCommand.movenum === moveNum || sys.rand(0, 2)) rejected = true;
-                if (!rejected && choosetime >= enabledAttackSlot.length * 3) break;
+                if (!rejected && choosetime >= enabledAttackSlot.length * 3) { commandDecided = true; break; }
             }
         }
         // ===== 起死回生类技能：起死回生(175)/蛮力(179)/双刃头锤(283) =====
@@ -3479,7 +3636,7 @@ function attemptCommand() {
             if (poke(battle.me).life / poke(battle.me).totalLife < 0.2 && sys.rand(0, 3)) rejected = false;
             if (poke(battle.me).life < 5) rejected = false;
             if (fpoke(battle.opp).type1() === 7 || fpoke(battle.opp).type2() === 7) rejected = true;
-            if (!rejected && choosetime >= enabledAttackSlot.length * 2) break;
+            if (!rejected && choosetime >= enabledAttackSlot.length * 2) { commandDecided = true; break; }
             else continue;
         }
         // ===== 豁命(515)：HP高于对手时使用，同归于尽 =====
@@ -3488,7 +3645,7 @@ function attemptCommand() {
             if (maxmovepow > poke(battle.me).life * 0.8) rejected = true;
             if (fpoke(battle.opp).pokemon.life / fpoke(battle.opp).pokemon.totalLife < 0.25) rejected = true;
             if (fpoke(battle.opp).type1() === 7 || fpoke(battle.opp).type2() === 7) rejected = true;
-            if (!rejected && choosetime >= enabledAttackSlot.length * 2) break;
+            if (!rejected && choosetime >= enabledAttackSlot.length * 2) { commandDecided = true; break; }
             else continue;
         }
 
@@ -3558,6 +3715,7 @@ function attemptCommand() {
             }
             if (fpoke(battle.me).statBoost(1) + fpoke(battle.me).statBoost(2) + fpoke(battle.me).statBoost(3) + fpoke(battle.me).statBoost(4) + fpoke(battle.me).statBoost(5) > 2 && (poke(battle.me).life / poke(battle.me).totalLife < 0.5 || maxmovepow < 210)) {
                 rejected = false;
+                commandDecided = true;
                 break;
             }
             if (sys.rand(0, 2)) rejected = true;
@@ -3569,6 +3727,7 @@ function attemptCommand() {
             if (poke(battle.me).item >= 3000 && poke(battle.me).item < 4000 && !hasZ && choosetime >= enabledAttackSlot.length * 2) {
                 choice.zmove = true;
                 rejected = false;
+                commandDecided = true;
                 break;
             } else {
                 rejected = true;
@@ -3700,12 +3859,17 @@ function attemptCommand() {
         //lastBattleCommand = null;
         return;
     }
+    // ===== 阶段2：温度 softmax（改动 D v2，普通攻击招随机化）=====
+    // 仅当阶段1未做确定性决策(commandDecided=false)时执行；详见 docs/analysis/attemptCommand-control-flow.md。
     // ===== 改动 D v2：温度 softmax，所有有效招式参与竞争 =====
     // 变化：
     //   - 不再用阈值过滤候选，而是全量招式按 movepow^(1/T) 加权采样
     //   - 温度 T 基于局面紧迫度（非 pool），越紧急越贪心
     //   - 新增换人招加成（UT/VS）+ 战略动作（岩钉）参与竞争
     //   - 如果对手 bench 有 counter/check，分数混合当前 vs 预期换入两种评估
+    // 改动 G (v1.2): 主循环已做出确定性决策(commandDecided)时跳过整个 softmax 重算，
+    //   直接沿用主循环选好的 usemove/choice.zmove，仅走后续 Mega/Z 标记与 sendCommand。
+    if (!commandDecided) {
     var smPool = getOpponentDecisionPool(); // 仍计算用于日志
     var fswResult = estimateFoeSwitchProb(enabledAttackSlot, movepow);
     var foeSwitchP = fswResult.prob;
@@ -3789,6 +3953,8 @@ function attemptCommand() {
     else if (smT <= 1.5) smThresh = 0.75;
     else if (smT <= 2.5) smThresh = 0.65;
     else smThresh = 0.55;
+    // 改动 H (v1.2): 对手只剩最后一只时无换人博弈，收敛到唯一最优解（case4-4 不再在交错闪电/逆鳞间随机）
+    if (foeInformation.getPokeCount() <= 1) smThresh = 0.97;
     var smFloor = smMaxFinal * smThresh;
 
     // --- 第二遍：构建候选集 ---
@@ -3841,6 +4007,7 @@ function attemptCommand() {
             " candidates=" + smCandidates.length +
             " chosen=" + usemove + "(" + smChosenName + ")" +
             " [" + smLabels + "]=" + smScores);
+    } // 改动 G (v1.2): if (!commandDecided) 结束
     // ===== Mega进化标记：持有Mega石时设置mega标志 =====
     if (!hasMega && poke(battle.me).item > 2000 && poke(battle.me).item < 3000) {
         choice.mega = true;
