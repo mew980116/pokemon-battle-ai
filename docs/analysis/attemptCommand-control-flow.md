@@ -177,20 +177,27 @@ attemptSwitch(passive)
 
 ```
 if (!commandDecided) {              // 改动G: 确定性决策时整段跳过
-  T 计算 (L3886 区):
+  辅助函数(v1.3): smAcc / smPrio / smDebuffRank (J/L 共用)
+  T 计算:
     基础 2.0 → 对手强化×0.45/0.6/0.8 → 我方残血×0.55/0.75
             → 对手换人概率×1.25/1.1 → clamp[0.4,4.0]
             → 残局存活×0.30/0.45 (v1.1.1) → 专爱cap 0.6 (v1.1.1)
   第一遍: 各攻击招 finalScore = 伤害混合(打当前 vs 打预期换入) + UT/VS 加成
+          → 改动M(v1.3): 溢出折减(1.10内全额+溢出×0.1) × 命中率
+          → 改动K(v1.3): 先制度建模(速度分层×1.15/1.3/1.6) + 突袭×0.3
+  改动J(v1.3): 同属性上位招支配 → smDominated[]
+  改动L(v1.3): 自损debuff招非首选 → smDominated[]
   thresh: T≤0.8→0.85 / ≤1.5→0.75 / ≤2.5→0.65 / else 0.55
           → 改动H: getPokeCount<=1 时强制 0.97
   floor = maxFinal * thresh
-  第二遍: finalScore >= floor 的招入候选集
+  第二遍: finalScore >= floor 且 !smDominated 的招入候选集
+          → 候选清空保险: 为空则忽略 smDominated 重建
   采样: candidates==1 → 直接取(v1.1.2修复) / >1 → 加权随机
 }
 ```
 
-**finalScore 只含伤害**——无先制、命中率、附加效果、变化招（除岩钉/地钉特判）。这是 v1.3 统一架构要重构的核心（见 TODO）。
+**finalScore v1.3 已含**：伤害(溢出折减)、命中率、先制度。**仍缺**：附加效果(提速/烧伤等)、变化招(除岩钉/地钉)。完整加权模型(w1有效伤害+w2溢出+w3命中+w4 buff+w5速度差)是远期统一架构终态(见 TODO 5.9)。
+`lastFoeBestDmg`(全局,getFoeThreatToMe 暴露)= 对手对我最大伤害占满血比例,供改动K"对手能秒我"判断。
 
 ---
 

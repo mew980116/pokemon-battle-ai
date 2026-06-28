@@ -1,6 +1,18 @@
 ﻿/*
- * Pokemon Battle AI - 宝可梦对战AI系统  [v1.2]
+ * Pokemon Battle AI - 宝可梦对战AI系统  [v1.3]
  * 运行环境: Pokemon-Online (PO) 的 Qt ScriptEngine
+ *
+ * v1.3 改动摘要（换人回归修复 + softmax 候选质量，基于 feedback/v1.2 case+report 分析）：
+ *   改动 I : 被迫/KO换人纳入高 standard 候选——passive 换人时把全体存活里 standard 接近最高
+ *           且非被克制的墙并入候选(原 goodAttackSwitch 只看输出会漏掉高耐久墙)，修复换人送死(case4/case7)
+ *   改动 M : softmax 溢出折减 + 命中率——伤害基底改为"有效伤害(超对手当前HP的溢出仅×0.1，
+ *           1.10阈值留±5%估算裕量)×命中率"，让高命中招压过溢出多的低命中招(case4 冲浪>水炮)
+ *   改动 K : softmax 先制度建模——以速度劣势分层为主(稳定更快不加权/可能更慢×1.15/稳定更慢×1.3)，
+ *           先制可斩杀+对手能秒我放大到×1.6；突袭(296)在我方稳定更快且有更高伤害斩杀招时×0.3(case7-R3)
+ *   改动 J : softmax 上下位招剔除——同属性下伤害(容差0.98)/命中/先制/自损全不更差的"上位招"存在时，
+ *           下位招不进候选，消除同打击面冗余(冷冻干燥/冰冻光束、突袭/拍落等)
+ *   改动 L : softmax 自损debuff招非首选剔除——流星群等自损招非最高分且有非自损招≥它时剔除，
+ *           能斩杀(最高分)时保留(case7 流星群)
  *
  * v1.2 改动摘要（换人决策重构 + 决策流修复，基于 feedback/v1.1.1 + v1.1.2 case 分析）：
  *   改动 F : standard 主导换人目标选择——抽出 getSwitchStandard()，新增 pickBySwitchStandard()
@@ -1584,6 +1596,7 @@ const megaStoneForNum = [65539, 65542, 131078, 65545, 65601, 65630, 65651, 65663
 
 var switchesList = [];            // 可交换的宝可梦槽位列表
 var commandEffect = false;        // 指令是否已生效
+var lastFoeBestDmg = 0;           // 改动K(v1.3): getFoeThreatToMe 算出的"对手对我最大伤害占当前HP比例"，供 softmax 先制建模复用
 
 // 调试输出（特定bot名称时静默）
 function print_s(content) {
@@ -1717,6 +1730,7 @@ function getFoeThreatToMe() {
 
     if (pool < 0) pool = 0;
     if (pool > 100) pool = 100;
+    lastFoeBestDmg = bestDmg; // 改动K(v1.3): 暴露对手对我最大伤害(占满血比例)供 softmax 先制建模
     print_s("getFoeThreatToMe threat:" + pool + " bestDmg:" + Math.floor(bestDmg * 100) / 100 + " spd:" + mySpd + "vs[" + foeSpd[0] + "," + foeSpd[1] + "]");
     return pool;
 }
@@ -1994,7 +2008,33 @@ function attemptSwitch(passive) {
     if (alternative.length > 0) cswitch = pickBySwitchStandard(alternative, []);
     else {
         if (goodForSwitch.length > 0) cswitch = pickBySwitchStandard(goodForSwitch, []);
-        else if (goodAttackSwitch.length > 0) cswitch = pickBySwitchStandard(goodAttackSwitch, switchesList);
+        else if (goodAttackSwitch.length > 0) {
+            // 改动 I (v1.3): 被迫换人(passive)时, goodAttackSwitch 只看输出会漏掉"高 standard 但输出不够的墙"
+            // (case7-R2 超坏星+35 进不了攻击候选, 结果换上 standard 最低的送死)。
+            // 此时把全体存活里 standard 接近最高(容差50)且非被克制的单位并入候选, 与攻击手一起由 standard 主导。
+            // 设计意图: 早期被动换人偏"抓机会输出"是因主动换人弱; 现主动换人(E/F)已强, 被动换人回归兼顾攻防。
+            if (passive) {
+                var stdCand = [];
+                var bestAllStd = -9999;
+                var ki;
+                for (ki = 0; ki < switchesList.length; ki++) {
+                    var sl = switchesList[ki];
+                    if (sl < 0 || sl > 5 || typeof (sl) !== "number") continue;
+                    var stv = getSwitchStandard(sl);
+                    if (stv > bestAllStd) bestAllStd = stv;
+                }
+                for (ki = 0; ki < switchesList.length; ki++) {
+                    var sl2 = switchesList[ki];
+                    if (sl2 < 0 || sl2 > 5 || typeof (sl2) !== "number") continue;
+                    if (goodAttackSwitch.indexOf(sl2) !== -1) { stdCand.push(sl2); continue; }
+                    if (getSwitchStandard(sl2) >= bestAllStd - 50 && getSwitchStandard(sl2) > -50) stdCand.push(sl2);
+                }
+                print_s("改动I 被迫换人合并候选:" + stdCand + " bestStd:" + bestAllStd);
+                cswitch = pickBySwitchStandard(stdCand, switchesList);
+            } else {
+                cswitch = pickBySwitchStandard(goodAttackSwitch, switchesList);
+            }
+        }
         if (!passive && goodAttackSwitch.length > 0) cswitch = pickBySwitchStandard(goodAttackSwitch, switchesList);
     }
     if (cswitch < 0 || cswitch > 5 || typeof (cswitch) !== "number") {
@@ -3870,6 +3910,22 @@ function attemptCommand() {
     // 改动 G (v1.2): 主循环已做出确定性决策(commandDecided)时跳过整个 softmax 重算，
     //   直接沿用主循环选好的 usemove/choice.zmove，仅走后续 Mega/Z 标记与 sendCommand。
     if (!commandDecided) {
+    // 改动 J/K/L (v1.3): softmax 候选质量辅助函数（只定义一次，J/L 共用）。
+    var smAcc = function (num) {
+        var a = moveDataObj[num].accurcy;
+        if (a > 100 || a <= 0) return 100; // 必中/变化招视为100
+        return a;
+    };
+    var smPrio = function (num) {
+        var p = moveDataObj[num].priority;
+        return (typeof (p) === "number") ? p : 0;
+    };
+    var smDebuffRank = function (num) {
+        if (SELF_SPATK_DROP_2.indexOf(num) !== -1) return 2; // 特攻-2(流星群/过热等)
+        if (SELF_ATK_DROP_MOVES.indexOf(num) !== -1) return 1; // 蛮力
+        if (SELF_DEF_DROP_MOVES.indexOf(num) !== -1) return 1; // 近战/画龙点睛
+        return 0;
+    };
     var smPool = getOpponentDecisionPool(); // 仍计算用于日志
     var fswResult = estimateFoeSwitchProb(enabledAttackSlot, movepow);
     var foeSwitchP = fswResult.prob;
@@ -3928,6 +3984,53 @@ function attemptCommand() {
             if (([369, 521, 838]).indexOf(smMoveNum) !== -1) {
                 smFinal *= (1.0 + foeSwitchP * 0.008); // foeSwitchP=60 → ×1.48
             }
+
+            // 改动 M (v1.3): 溢出折减 + 命中率。名义伤害有边际效应——超过对手当前HP的溢出部分价值很低。
+            // 把 smFinal 的伤害基底换成"有效伤害×命中率"，让"刚好能秒的高命中招"压过"溢出多但低命中招"(case4 冲浪>水炮)。
+            if (foeHp > 0) {
+                var mRatio = smFinal / foeHp; // smFinal 当前是伤害绝对值口径(movepow混合)，foeHp 为对手当前HP绝对值
+                // 1.10 阈值留 ±5% 伤害估算裕量："看似刚好能秒"的招不被误判溢出；溢出部分仅按 0.1 计
+                var mEffRatio = (mRatio < 1.10 ? mRatio : 1.10) + (mRatio > 1.10 ? (mRatio - 1.10) * 0.1 : 0);
+                var mEff = mEffRatio * foeHp; // 折回绝对值，保持与其它分数同量纲
+                // 命中率系数(沿用 L2834 算法，含对手闪避)
+                var mAccV = moveDataObj[smMoveNum].accurcy;
+                if (mAccV < 101 && mAccV > 30) {
+                    var mSb = -fpoke(battle.opp).statBoost(7);
+                    if (mSb > 6) mSb = 6;
+                    if (mSb < -6) mSb = -6;
+                    var mAccEff = mAccV;
+                    if (mSb > 0) mAccEff = mAccEff * (3 + mSb) / 3;
+                    if (mSb < 0) mAccEff = mAccEff * 3 / (3 - mSb);
+                    if (mAccEff > 100) mAccEff = 100;
+                    mEff = mEff * mAccEff / 100;
+                }
+                smFinal = mEff;
+            }
+
+            // 改动 K (v1.3): 先制度建模。先制价值本质来自速度劣势(速度分层为主)，先制斩杀/对手能秒我为放大器。
+            var kPrio = smPrio(smMoveNum);
+            var kFoeSpd = foeInformation.getPossibleSpeed(foeInformation.currentSlot, fpoke(battle.opp).statBoost(5), 1);
+            var kMySpd = fpoke(battle.me).stat(5);
+            var kStableFaster = kMySpd > kFoeSpd[1];   // 稳定更快
+            var kMaybeSlower = kMySpd <= kFoeSpd[1];   // 可能更慢(区间内或更慢)
+            var kStableSlower = kMySpd < kFoeSpd[0];   // 稳定更慢
+            var kPrioKO = movepow[smi] >= foeHp;       // 该先制招能斩杀对手(用原始伤害判断)
+            var kFoeCanKO = lastFoeBestDmg >= smMyHp;  // 对手能秒我(占满血比例 vs 我当前HP占满血比例)
+            if (kPrio > 0 && !kStableFaster) {
+                // 速度分层基础系数
+                var kMul = kStableSlower ? 1.30 : 1.15;
+                // 放大器
+                if (kPrioKO && kFoeCanKO) kMul = 1.60;
+                else if (kPrioKO || kFoeCanKO) kMul = (kMul > 1.30 ? kMul : 1.30);
+                smFinal *= kMul;
+            } else if (smMoveNum === 296) {
+                // 突袭(296)负优先：我方稳定更快 且 存在另一招"伤害更高且能斩杀"时降权(保留小概率)
+                var kHasBetterKO = false;
+                for (var kk = 0; kk < movepow.length; kk++) {
+                    if (kk !== smi && movepow[kk] > movepow[smi] && movepow[kk] >= foeHp) { kHasBetterKO = true; break; }
+                }
+                if (kStableFaster && kHasBetterKO) smFinal *= 0.3;
+            }
         } else {
             // 变化招：仅岩钉/地钉加战略分，其余暂不参与
             var smRocksSet = battle.data.field.zone(battle.opp).stealthRocks;
@@ -3948,6 +4051,48 @@ function attemptCommand() {
     for (var smfi = 0; smfi < smFinals.length; smfi++) {
         if (smFinals[smfi] > smMaxFinal) smMaxFinal = smFinals[smfi];
     }
+
+    // 改动 J/L (v1.3): 候选剔除标记。J=同属性上下位支配剔除；L=自损debuff招非首选剔除。共用 smDominated[]。
+    var smDominated = [];
+    for (var smdi = 0; smdi < smFinals.length; smdi++) smDominated.push(false);
+    // 改动 J: 同属性打击面下，若存在伤害>=(容差0.98)且命中/先制/自损都不更差的"上位招"，下位招剔除。
+    for (var sma = 0; sma < smFinals.length; sma++) {
+        if (smFinals[sma] <= 0) continue; // 变化招不参与
+        var jNumA = smFinalNums[sma];
+        var jTypeA = sys.moveType(jNumA);
+        for (var smb = 0; smb < smFinals.length; smb++) {
+            if (smb === sma || smFinals[smb] <= 0) continue;
+            var jNumB = smFinalNums[smb];
+            if (sys.moveType(jNumB) !== jTypeA) continue;           // 同属性
+            if (smFinals[smb] < smFinals[sma] * 0.98) continue;     // B 伤害不更低(小容差)
+            if (smAcc(jNumB) < smAcc(jNumA)) continue;              // B 命中不更差
+            if (smPrio(jNumB) < smPrio(jNumA)) continue;            // B 先制不更差
+            if (smDebuffRank(jNumB) > smDebuffRank(jNumA)) continue; // B 自损不更重
+            // 完全等价时只保留索引靠前者(movepow降序=上位)，防互相剔除
+            if (smFinals[smb] === smFinals[sma] && smAcc(jNumB) === smAcc(jNumA) &&
+                smPrio(jNumB) === smPrio(jNumA) && smDebuffRank(jNumB) === smDebuffRank(jNumA)) {
+                if (smb > sma) continue;
+            }
+            smDominated[sma] = true;
+            print_s("改动J 剔除下位招:" + sys.move(jNumA) + "(被" + sys.move(jNumB) + "支配)");
+            break;
+        }
+    }
+    // 改动 L: 自损debuff招非首选(smFinal<最高)且存在非自损招smFinal>=它时剔除；首选(能斩杀=最高分)保留。
+    for (var sml = 0; sml < smFinals.length; sml++) {
+        if (smFinals[sml] <= 0) continue;
+        if (smDebuffRank(smFinalNums[sml]) === 0) continue;       // 非自损招不处理
+        if (smFinals[sml] >= smMaxFinal - 0.0001) continue;       // 它本身是首选 → 保留
+        var lHasCleanBetter = false;
+        for (var sml2 = 0; sml2 < smFinals.length; sml2++) {
+            if (sml2 === sml || smFinals[sml2] <= 0) continue;
+            if (smDebuffRank(smFinalNums[sml2]) === 0 && smFinals[sml2] >= smFinals[sml]) { lHasCleanBetter = true; break; }
+        }
+        if (lHasCleanBetter) {
+            smDominated[sml] = true;
+            print_s("改动L 剔除非首选自损招:" + sys.move(smFinalNums[sml]));
+        }
+    }
     var smThresh;
     if (smT <= 0.8) smThresh = 0.85;
     else if (smT <= 1.5) smThresh = 0.75;
@@ -3965,12 +4110,26 @@ function attemptCommand() {
 
     for (var smi2 = 0; smi2 < enabledAttackSlot.length; smi2++) {
         var smFinal2 = smFinals[smi2];
-        if (smFinal2 > 0 && smFinal2 >= smFloor) {
+        // 改动 J/L (v1.3): 跳过被支配/剔除的招
+        if (smFinal2 > 0 && smFinal2 >= smFloor && !smDominated[smi2]) {
             var smW = Math.pow(smFinal2, 1.0 / smT);
             smCandidates.push(enabledAttackSlot[smi2]);
             smRawW.push(smW);
             smLabels.push(sys.move(smFinalNums[smi2]));
             if (smW > smMaxW) smMaxW = smW;
+        }
+    }
+    // 改动 J/L (v1.3): 候选清空保险——若剔除过度导致候选为空，忽略 smDominated 重建一次
+    if (smCandidates.length === 0) {
+        for (var smi3 = 0; smi3 < enabledAttackSlot.length; smi3++) {
+            var smFinal3 = smFinals[smi3];
+            if (smFinal3 > 0 && smFinal3 >= smFloor) {
+                var smW3 = Math.pow(smFinal3, 1.0 / smT);
+                smCandidates.push(enabledAttackSlot[smi3]);
+                smRawW.push(smW3);
+                smLabels.push(sys.move(smFinalNums[smi3]));
+                if (smW3 > smMaxW) smMaxW = smW3;
+            }
         }
     }
 
