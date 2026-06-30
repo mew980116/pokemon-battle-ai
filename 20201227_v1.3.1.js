@@ -1,6 +1,15 @@
 ﻿/*
- * Pokemon Battle AI - 宝可梦对战AI系统  [v1.3]
+ * Pokemon Battle AI - 宝可梦对战AI系统  [v1.3.1]
  * 运行环境: Pokemon-Online (PO) 的 Qt ScriptEngine
+ *
+ * v1.3.1 改动摘要（patch，基于 feedback/v1.3 case1/case2 实测）：
+ *   改动1 : KO 换人走 passive 路径(attemptSwitch false→true)，触发改动I纳入高standard候选，
+ *           修复 KO 换人选 standard 最低送死(case1-R6/case2-R6 致命)
+ *   改动2 : 被动换人纯 standard 候选，去掉 goodAttackSwitch 无条件纳入(原把 standard=-130 铁螯龙虾拉进池)
+ *   改动3 : standard 虚高缓解——①修 L1752 indexOf 漏参死代码 ②耐久加分收紧(+30→+18,阈值0.3→0.22)
+ *           ③加输出过低惩罚(maxmovepow/满血<0.18罚-30,<0.30罚-15)，兜住"抗得住打不动"的墙(丰蜜龙)
+ *   改动4 : 回退改动J(上下位支配剔除)，误删伏特替换；保留改动L(自损非首选剔除)与第二遍守卫
+ *   推迟 : 问题5(威胁评估未露本系)、问题6(threat算法)、问题3结构性(getSwitchStandard复用getFoeDamageToMe)→v1.4
  *
  * v1.3 改动摘要（换人回归修复 + softmax 候选质量，基于 feedback/v1.2 case+report 分析）：
  *   改动 I : 被迫/KO换人纳入高 standard 候选——passive 换人时把全体存活里 standard 接近最高
@@ -1749,7 +1758,7 @@ function getSwitchStandard(slot) {
         for (var j = 0; j < 18; j++) {
             if (getTypechart(j, slot) > 1 && getTypechart(j, 0) > 1) {
                 if (j === fpoke(battle.opp).type1() || j === fpoke(battle.opp).type2()) standard -= 50;
-                else if (([5, 17, 7, 9, 12, 14]).indexOf() !== -1) standard -= 20;
+                else if (([5, 17, 7, 9, 12, 14]).indexOf(j) !== -1) standard -= 20; // 改动3①(v1.3.1): 修复indexOf漏参死代码,危险属性(岩/妖/鬼/火/电/冰)额外-20
                 else standard -= 5;
             }
             if (getTypechart(j, slot) < 1 && getTypechart(j, 0) > 1) {
@@ -1766,8 +1775,9 @@ function getSwitchStandard(slot) {
         }
     // if ((2 * fpoke(battle.opp).pokemon.level + 10) / 250 * fpoke(battle.opp).maxStat(1) / tpoke(slot).basestat(2) * 200 - tpoke(slot).life < 0) standard -= 50;
     // if ((2 * fpoke(battle.opp).pokemon.level + 10) / 250 * fpoke(battle.opp).maxStat(3) / tpoke(slot).basestat(4) * 200 - tpoke(slot).life < 0) standard -= 50;
-    if ((2 * fpoke(battle.opp).pokemon.level + 10) / 250 * fpoke(battle.opp).maxStat(1) / tpoke(slot).basestat(2) * 135 / tpoke(slot).totalLife < 0.3) standard += 30;
-    if ((2 * fpoke(battle.opp).pokemon.level + 10) / 250 * fpoke(battle.opp).maxStat(3) / tpoke(slot).basestat(4) * 135 / tpoke(slot).totalLife < 0.3) standard += 30;
+    // 改动3②(v1.3.1): 耐久加分收紧(+30→+18, 阈值0.3→0.22), 双维+36<克制-50, 不再抵消被克制扣分(修丰蜜龙虚高)
+    if ((2 * fpoke(battle.opp).pokemon.level + 10) / 250 * fpoke(battle.opp).maxStat(1) / tpoke(slot).basestat(2) * 135 / tpoke(slot).totalLife < 0.22) standard += 18;
+    if ((2 * fpoke(battle.opp).pokemon.level + 10) / 250 * fpoke(battle.opp).maxStat(3) / tpoke(slot).basestat(4) * 135 / tpoke(slot).totalLife < 0.22) standard += 18;
     if ((2 * fpoke(battle.opp).pokemon.level + 10) / 250 * fpoke(battle.opp).maxStat(1) / tpoke(slot).basestat(2) * 150 / tpoke(slot).totalLife > 0.5) standard -= 30;
     if ((2 * fpoke(battle.opp).pokemon.level + 10) / 250 * fpoke(battle.opp).maxStat(3) / tpoke(slot).basestat(4) * 150 / tpoke(slot).totalLife > 0.5) standard -= 30;
     if (getTypechart(fpoke(battle.opp).type1(), slot) > 1) standard -= 50;
@@ -1811,6 +1821,17 @@ function getSwitchStandard(slot) {
     }
     if (([3, 2]).indexOf(fpoke(battle.opp).pokemon.status) !== -1) standard += 50;
     if (([235, 113, 242, 480]).indexOf(poke(battle.opp).numRef) !== -1) standard += 50;
+    // 改动3③(v1.3.1): 输出过低惩罚——候选对当前对手 maxmovepow 偏低则减分, 兜住"抗得住但打不动"的墙(丰蜜龙类)。
+    // 是问题2纯standard换人的安全网。maxmovepow/对手满血 <0.18 罚-30, <0.30 罚-15。
+    if (!fpoke(battle.opp).pokemon.isKoed()) {
+        var p3mp = getMoveDamage(slot).maxmovepow;
+        var p3foeMaxHp = (fpoke(battle.opp).minStat(0) + fpoke(battle.opp).maxStat(0)) / 2;
+        if (p3foeMaxHp > 0) {
+            var p3ratio = p3mp / p3foeMaxHp;
+            if (p3ratio < 0.18) standard -= 30;
+            else if (p3ratio < 0.30) standard -= 15;
+        }
+    }
     return standard;
 }
 
@@ -2011,8 +2032,8 @@ function attemptSwitch(passive) {
         else if (goodAttackSwitch.length > 0) {
             // 改动 I (v1.3): 被迫换人(passive)时, goodAttackSwitch 只看输出会漏掉"高 standard 但输出不够的墙"
             // (case7-R2 超坏星+35 进不了攻击候选, 结果换上 standard 最低的送死)。
-            // 此时把全体存活里 standard 接近最高(容差50)且非被克制的单位并入候选, 与攻击手一起由 standard 主导。
-            // 设计意图: 早期被动换人偏"抓机会输出"是因主动换人弱; 现主动换人(E/F)已强, 被动换人回归兼顾攻防。
+            // 改动2 (v1.3.1): 被动换人纯按 standard 选, 不再无条件纳入 goodAttackSwitch(原逻辑把 standard=-130 的铁螯龙虾拉进池)。
+            // 容差30(与 pickBySwitchStandard 内部一致), 剔除被克制(>-50)。输出过低的墙由改动3③在 getSwitchStandard 内惩罚, 此处信任 standard。
             if (passive) {
                 var stdCand = [];
                 var bestAllStd = -9999;
@@ -2026,10 +2047,9 @@ function attemptSwitch(passive) {
                 for (ki = 0; ki < switchesList.length; ki++) {
                     var sl2 = switchesList[ki];
                     if (sl2 < 0 || sl2 > 5 || typeof (sl2) !== "number") continue;
-                    if (goodAttackSwitch.indexOf(sl2) !== -1) { stdCand.push(sl2); continue; }
-                    if (getSwitchStandard(sl2) >= bestAllStd - 50 && getSwitchStandard(sl2) > -50) stdCand.push(sl2);
+                    if (getSwitchStandard(sl2) >= bestAllStd - 30 && getSwitchStandard(sl2) > -50) stdCand.push(sl2);
                 }
-                print_s("改动I 被迫换人合并候选:" + stdCand + " bestStd:" + bestAllStd);
+                print_s("改动I 被迫换人纯standard候选:" + stdCand + " bestStd:" + bestAllStd);
                 cswitch = pickBySwitchStandard(stdCand, switchesList);
             } else {
                 cswitch = pickBySwitchStandard(goodAttackSwitch, switchesList);
@@ -3041,7 +3061,7 @@ function attemptCommand() {
                     };
                     sendCommand(battle.id, choice);
                     lastBattleCommand = choice; */
-        attemptSwitch(false);
+        attemptSwitch(true); // 改动1(v1.3.1): KO被迫换人应走 passive 路径, 触发改动I纳入高standard候选, 修复选standard最低送死(case1-R6/case2-R6)
         print_s("swtich because of ko");
         return;
     }
@@ -4055,7 +4075,9 @@ function attemptCommand() {
     // 改动 J/L (v1.3): 候选剔除标记。J=同属性上下位支配剔除；L=自损debuff招非首选剔除。共用 smDominated[]。
     var smDominated = [];
     for (var smdi = 0; smdi < smFinals.length; smdi++) smDominated.push(false);
-    // 改动 J: 同属性打击面下，若存在伤害>=(容差0.98)且命中/先制/自损都不更差的"上位招"，下位招剔除。
+    // 改动 J (v1.3.1 回退): 误删伏特替换等同属性合法招(有换人效果不该当下位), 本版关闭支配剔除。
+    // smDominated 仍由改动 L 写, 第二遍守卫与候选清空保险保留, 故 L 不受影响。
+    /*
     for (var sma = 0; sma < smFinals.length; sma++) {
         if (smFinals[sma] <= 0) continue; // 变化招不参与
         var jNumA = smFinalNums[sma];
@@ -4078,6 +4100,7 @@ function attemptCommand() {
             break;
         }
     }
+    */
     // 改动 L: 自损debuff招非首选(smFinal<最高)且存在非自损招smFinal>=它时剔除；首选(能斩杀=最高分)保留。
     for (var sml = 0; sml < smFinals.length; sml++) {
         if (smFinals[sml] <= 0) continue;
