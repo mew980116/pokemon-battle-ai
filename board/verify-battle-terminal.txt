@@ -1,0 +1,768 @@
+PO侧打印了(20:06:49) [WEBCALL] done
+
+
+$ Get-NetTCPConnection -LocalPort 8080 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }; Start-Sleep -Seconds 2; & "C:\Program Files\nodejs\node.exe" board/verify-server.js
+#< CLIXML
+PO webCall verify server
+Listening on http://127.0.0.1:8080
+Waiting for requests from PO...
+(GET /health from /wctest, POST /ping from battle callbacks)
+
+--------------------------------------------------
+[2026-07-06T12:00:32.624Z] GET /health
+  raw body: (empty)
+--------------------------------------------------
+[2026-07-06T12:01:06.588Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&prev=0&event=onSendOut
+  parsed (form): {"spot":"0","prev":"0","event":"onSendOut"}
+--------------------------------------------------
+[2026-07-06T12:01:08.738Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&prev=0&event=onSendOut
+  parsed (form): {"spot":"1","prev":"0","event":"onSendOut"}
+--------------------------------------------------
+[2026-07-06T12:01:10.601Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: player=0&event=onOfferChoice
+  parsed (form): {"player":"0","event":"onOfferChoice"}
+--------------------------------------------------
+[2026-07-06T12:01:46.914Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: turn=1&event=onBeginTurn
+  parsed (form): {"turn":"1","event":"onBeginTurn"}
+--------------------------------------------------
+[2026-07-06T12:01:46.967Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&attack=650&event=onUseAttack
+  parsed (form): {"spot":"0","attack":"650","event":"onUseAttack"}
+--------------------------------------------------
+[2026-07-06T12:01:49.827Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&attack=572&event=onUseAttack
+  parsed (form): {"spot":"1","attack":"572","event":"onUseAttack"}
+--------------------------------------------------
+[2026-07-06T12:01:50.132Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&damage=150&event=onDamageDone
+  parsed (form): {"spot":"0","damage":"150","event":"onDamageDone"}
+--------------------------------------------------
+[2026-07-06T12:01:52.487Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: player=0&event=onOfferChoice
+  parsed (form): {"player":"0","event":"onOfferChoice"}
+--------------------------------------------------
+[2026-07-06T12:01:53.504Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: turn=2&event=onBeginTurn
+  parsed (form): {"turn":"2","event":"onBeginTurn"}
+--------------------------------------------------
+[2026-07-06T12:01:53.505Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&attack=412&event=onUseAttack
+  parsed (form): {"spot":"1","attack":"412","event":"onUseAttack"}
+--------------------------------------------------
+[2026-07-06T12:01:53.806Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&damage=184&event=onDamageDone
+  parsed (form): {"spot":"0","damage":"184","event":"onDamageDone"}
+--------------------------------------------------
+[2026-07-06T12:01:55.346Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&attack=650&event=onUseAttack
+  parsed (form): {"spot":"0","attack":"650","event":"onUseAttack"}
+--------------------------------------------------
+[2026-07-06T12:01:59.129Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: player=0&event=onOfferChoice
+  parsed (form): {"player":"0","event":"onOfferChoice"}
+--------------------------------------------------
+[2026-07-06T12:02:20.337Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&event=onSendBack
+  parsed (form): {"spot":"1","event":"onSendBack"}
+--------------------------------------------------
+[2026-07-06T12:02:20.337Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: turn=3&event=onBeginTurn
+  parsed (form): {"turn":"3","event":"onBeginTurn"}
+--------------------------------------------------
+[2026-07-06T12:02:20.970Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&prev=4&event=onSendOut
+  parsed (form): {"spot":"1","prev":"4","event":"onSendOut"}
+--------------------------------------------------
+[2026-07-06T12:02:22.936Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&event=onSendBack
+  parsed (form): {"spot":"0","event":"onSendBack"}
+--------------------------------------------------
+[2026-07-06T12:02:23.570Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&prev=2&event=onSendOut
+  parsed (form): {"spot":"0","prev":"2","event":"onSendOut"}
+--------------------------------------------------
+[2026-07-06T12:02:25.554Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: player=0&event=onOfferChoice
+  parsed (form): {"player":"0","event":"onOfferChoice"}
+--------------------------------------------------
+[2026-07-06T12:02:44.657Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: turn=4&event=onBeginTurn
+  parsed (form): {"turn":"4","event":"onBeginTurn"}
+--------------------------------------------------
+[2026-07-06T12:02:44.725Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&attack=164&event=onUseAttack
+  parsed (form): {"spot":"1","attack":"164","event":"onUseAttack"}
+--------------------------------------------------
+[2026-07-06T12:02:47.124Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&attack=334&event=onUseAttack
+  parsed (form): {"spot":"0","attack":"334","event":"onUseAttack"}
+--------------------------------------------------
+[2026-07-06T12:02:49.222Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: player=0&event=onOfferChoice
+  parsed (form): {"player":"0","event":"onOfferChoice"}
+--------------------------------------------------
+[2026-07-06T12:02:50.819Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: turn=5&event=onBeginTurn
+  parsed (form): {"turn":"5","event":"onBeginTurn"}
+--------------------------------------------------
+[2026-07-06T12:02:50.819Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&event=onSendBack
+  parsed (form): {"spot":"1","event":"onSendBack"}
+--------------------------------------------------
+[2026-07-06T12:02:51.153Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&prev=5&event=onSendOut
+  parsed (form): {"spot":"1","prev":"5","event":"onSendOut"}
+--------------------------------------------------
+[2026-07-06T12:02:53.122Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&attack=360&event=onUseAttack
+  parsed (form): {"spot":"0","attack":"360","event":"onUseAttack"}
+--------------------------------------------------
+[2026-07-06T12:02:53.453Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&damage=36&event=onDamageDone
+  parsed (form): {"spot":"1","damage":"36","event":"onDamageDone"}
+--------------------------------------------------
+[2026-07-06T12:02:55.267Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: player=0&event=onOfferChoice
+  parsed (form): {"player":"0","event":"onOfferChoice"}
+--------------------------------------------------
+[2026-07-06T12:03:05.059Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: turn=6&event=onBeginTurn
+  parsed (form): {"turn":"6","event":"onBeginTurn"}
+--------------------------------------------------
+[2026-07-06T12:03:05.060Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&event=onSendBack
+  parsed (form): {"spot":"1","event":"onSendBack"}
+--------------------------------------------------
+[2026-07-06T12:03:05.686Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&prev=3&event=onSendOut
+  parsed (form): {"spot":"1","prev":"3","event":"onSendOut"}
+--------------------------------------------------
+[2026-07-06T12:03:07.671Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&event=onSendBack
+  parsed (form): {"spot":"0","event":"onSendBack"}
+--------------------------------------------------
+[2026-07-06T12:03:08.302Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&prev=4&event=onSendOut
+  parsed (form): {"spot":"0","prev":"4","event":"onSendOut"}
+--------------------------------------------------
+[2026-07-06T12:03:10.285Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: player=0&event=onOfferChoice
+  parsed (form): {"player":"0","event":"onOfferChoice"}
+--------------------------------------------------
+[2026-07-06T12:03:31.392Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: turn=7&event=onBeginTurn
+  parsed (form): {"turn":"7","event":"onBeginTurn"}
+--------------------------------------------------
+[2026-07-06T12:03:31.459Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&event=onSendBack
+  parsed (form): {"spot":"0","event":"onSendBack"}
+--------------------------------------------------
+[2026-07-06T12:03:32.090Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&prev=1&event=onSendOut
+  parsed (form): {"spot":"0","prev":"1","event":"onSendOut"}
+--------------------------------------------------
+[2026-07-06T12:03:36.803Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&event=onSendBack
+  parsed (form): {"spot":"1","event":"onSendBack"}
+--------------------------------------------------
+[2026-07-06T12:03:37.420Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&prev=4&event=onSendOut
+  parsed (form): {"spot":"1","prev":"4","event":"onSendOut"}
+--------------------------------------------------
+[2026-07-06T12:03:42.139Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: player=0&event=onOfferChoice
+  parsed (form): {"player":"0","event":"onOfferChoice"}
+--------------------------------------------------
+[2026-07-06T12:03:43.931Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: turn=8&event=onBeginTurn
+  parsed (form): {"turn":"8","event":"onBeginTurn"}
+--------------------------------------------------
+[2026-07-06T12:03:43.931Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&attack=542&event=onUseAttack
+  parsed (form): {"spot":"0","attack":"542","event":"onUseAttack"}
+--------------------------------------------------
+[2026-07-06T12:03:44.254Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&damage=26&event=onDamageDone
+  parsed (form): {"spot":"1","damage":"26","event":"onDamageDone"}
+--------------------------------------------------
+[2026-07-06T12:03:44.610Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&status=6&event=onMajorStatusChange
+  parsed (form): {"spot":"1","status":"6","event":"onMajorStatusChange"}
+--------------------------------------------------
+[2026-07-06T12:03:46.136Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&attack=572&event=onUseAttack
+  parsed (form): {"spot":"1","attack":"572","event":"onUseAttack"}
+--------------------------------------------------
+[2026-07-06T12:03:47.253Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&damage=257&event=onDamageDone
+  parsed (form): {"spot":"0","damage":"257","event":"onDamageDone"}
+--------------------------------------------------
+[2026-07-06T12:03:47.554Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&status=31&event=onMajorStatusChange
+  parsed (form): {"spot":"0","status":"31","event":"onMajorStatusChange"}
+--------------------------------------------------
+[2026-07-06T12:03:48.372Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&event=onKo
+  parsed (form): {"spot":"0","event":"onKo"}
+--------------------------------------------------
+[2026-07-06T12:03:52.288Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: player=0&event=onOfferChoice
+  parsed (form): {"player":"0","event":"onOfferChoice"}
+--------------------------------------------------
+[2026-07-06T12:04:02.306Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&prev=4&event=onSendOut
+  parsed (form): {"spot":"0","prev":"4","event":"onSendOut"}
+--------------------------------------------------
+[2026-07-06T12:04:04.306Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: player=0&event=onOfferChoice
+  parsed (form): {"player":"0","event":"onOfferChoice"}
+--------------------------------------------------
+[2026-07-06T12:04:06.601Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: turn=9&event=onBeginTurn
+  parsed (form): {"turn":"9","event":"onBeginTurn"}
+--------------------------------------------------
+[2026-07-06T12:04:06.920Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&damage=11&event=onDamageDone
+  parsed (form): {"spot":"1","damage":"11","event":"onDamageDone"}
+--------------------------------------------------
+[2026-07-06T12:04:08.034Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&attack=334&event=onUseAttack
+  parsed (form): {"spot":"0","attack":"334","event":"onUseAttack"}
+--------------------------------------------------
+[2026-07-06T12:04:12.388Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: player=0&event=onOfferChoice
+  parsed (form): {"player":"0","event":"onOfferChoice"}
+--------------------------------------------------
+[2026-07-06T12:04:13.683Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: turn=10&event=onBeginTurn
+  parsed (form): {"turn":"10","event":"onBeginTurn"}
+--------------------------------------------------
+[2026-07-06T12:04:14.085Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&attack=503&event=onUseAttack
+  parsed (form): {"spot":"1","attack":"503","event":"onUseAttack"}
+--------------------------------------------------
+[2026-07-06T12:04:16.336Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&damage=262&event=onDamageDone
+  parsed (form): {"spot":"0","damage":"262","event":"onDamageDone"}
+--------------------------------------------------
+[2026-07-06T12:04:17.419Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&attack=334&event=onUseAttack
+  parsed (form): {"spot":"0","attack":"334","event":"onUseAttack"}
+--------------------------------------------------
+[2026-07-06T12:04:21.721Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: player=0&event=onOfferChoice
+  parsed (form): {"player":"0","event":"onOfferChoice"}
+--------------------------------------------------
+[2026-07-06T12:04:26.044Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: turn=11&event=onBeginTurn
+  parsed (form): {"turn":"11","event":"onBeginTurn"}
+--------------------------------------------------
+[2026-07-06T12:04:26.044Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&event=onSendBack
+  parsed (form): {"spot":"0","event":"onSendBack"}
+--------------------------------------------------
+[2026-07-06T12:04:26.668Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&prev=5&event=onSendOut
+  parsed (form): {"spot":"0","prev":"5","event":"onSendOut"}
+--------------------------------------------------
+[2026-07-06T12:04:31.769Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&damage=11&event=onDamageDone
+  parsed (form): {"spot":"1","damage":"11","event":"onDamageDone"}
+--------------------------------------------------
+[2026-07-06T12:04:36.220Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: player=0&event=onOfferChoice
+  parsed (form): {"player":"0","event":"onOfferChoice"}
+--------------------------------------------------
+[2026-07-06T12:04:36.669Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: turn=12&event=onBeginTurn
+  parsed (form): {"turn":"12","event":"onBeginTurn"}
+--------------------------------------------------
+[2026-07-06T12:04:37.036Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&attack=503&event=onUseAttack
+  parsed (form): {"spot":"1","attack":"503","event":"onUseAttack"}
+--------------------------------------------------
+[2026-07-06T12:04:39.302Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&damage=320&event=onDamageDone
+  parsed (form): {"spot":"0","damage":"320","event":"onDamageDone"}
+--------------------------------------------------
+[2026-07-06T12:04:40.365Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&attack=446&event=onUseAttack
+  parsed (form): {"spot":"0","attack":"446","event":"onUseAttack"}
+--------------------------------------------------
+[2026-07-06T12:04:47.684Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: player=0&event=onOfferChoice
+  parsed (form): {"player":"0","event":"onOfferChoice"}
+--------------------------------------------------
+[2026-07-06T12:04:57.484Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: turn=13&event=onBeginTurn
+  parsed (form): {"turn":"13","event":"onBeginTurn"}
+--------------------------------------------------
+[2026-07-06T12:04:57.538Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&attack=503&event=onUseAttack
+  parsed (form): {"spot":"1","attack":"503","event":"onUseAttack"}
+--------------------------------------------------
+[2026-07-06T12:05:00.039Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&damage=55&event=onDamageDone
+  parsed (form): {"spot":"0","damage":"55","event":"onDamageDone"}
+--------------------------------------------------
+[2026-07-06T12:05:00.368Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&status=31&event=onMajorStatusChange
+  parsed (form): {"spot":"0","status":"31","event":"onMajorStatusChange"}
+--------------------------------------------------
+[2026-07-06T12:05:01.171Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&event=onKo
+  parsed (form): {"spot":"0","event":"onKo"}
+--------------------------------------------------
+[2026-07-06T12:05:05.642Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: player=0&event=onOfferChoice
+  parsed (form): {"player":"0","event":"onOfferChoice"}
+--------------------------------------------------
+[2026-07-06T12:05:19.538Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&prev=2&event=onSendOut
+  parsed (form): {"spot":"0","prev":"2","event":"onSendOut"}
+--------------------------------------------------
+[2026-07-06T12:05:21.533Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: player=0&event=onOfferChoice
+  parsed (form): {"player":"0","event":"onOfferChoice"}
+--------------------------------------------------
+[2026-07-06T12:05:23.928Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: turn=14&event=onBeginTurn
+  parsed (form): {"turn":"14","event":"onBeginTurn"}
+--------------------------------------------------
+[2026-07-06T12:05:23.928Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&attack=572&event=onUseAttack
+  parsed (form): {"spot":"1","attack":"572","event":"onUseAttack"}
+--------------------------------------------------
+[2026-07-06T12:05:24.252Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&damage=138&event=onDamageDone
+  parsed (form): {"spot":"0","damage":"138","event":"onDamageDone"}
+--------------------------------------------------
+[2026-07-06T12:05:25.633Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&attack=506&event=onUseAttack
+  parsed (form): {"spot":"0","attack":"506","event":"onUseAttack"}
+--------------------------------------------------
+[2026-07-06T12:05:25.953Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&damage=15&event=onDamageDone
+  parsed (form): {"spot":"1","damage":"15","event":"onDamageDone"}
+--------------------------------------------------
+[2026-07-06T12:05:31.307Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: player=0&event=onOfferChoice
+  parsed (form): {"player":"0","event":"onOfferChoice"}
+--------------------------------------------------
+[2026-07-06T12:05:36.302Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: turn=15&event=onBeginTurn
+  parsed (form): {"turn":"15","event":"onBeginTurn"}
+--------------------------------------------------
+[2026-07-06T12:05:36.302Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&attack=412&event=onUseAttack
+  parsed (form): {"spot":"1","attack":"412","event":"onUseAttack"}
+--------------------------------------------------
+[2026-07-06T12:05:36.818Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&damage=37&event=onDamageDone
+  parsed (form): {"spot":"0","damage":"37","event":"onDamageDone"}
+--------------------------------------------------
+[2026-07-06T12:05:37.118Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&status=31&event=onMajorStatusChange
+  parsed (form): {"spot":"0","status":"31","event":"onMajorStatusChange"}
+--------------------------------------------------
+[2026-07-06T12:05:37.951Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&event=onKo
+  parsed (form): {"spot":"0","event":"onKo"}
+--------------------------------------------------
+[2026-07-06T12:05:39.468Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: player=0&event=onOfferChoice
+  parsed (form): {"player":"0","event":"onOfferChoice"}
+--------------------------------------------------
+[2026-07-06T12:05:47.180Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&prev=3&event=onSendOut
+  parsed (form): {"spot":"0","prev":"3","event":"onSendOut"}
+--------------------------------------------------
+[2026-07-06T12:05:49.172Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: player=0&event=onOfferChoice
+  parsed (form): {"player":"0","event":"onOfferChoice"}
+--------------------------------------------------
+[2026-07-06T12:05:51.500Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: turn=16&event=onBeginTurn
+  parsed (form): {"turn":"16","event":"onBeginTurn"}
+--------------------------------------------------
+[2026-07-06T12:05:51.564Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&attack=579&event=onUseAttack
+  parsed (form): {"spot":"0","attack":"579","event":"onUseAttack"}
+--------------------------------------------------
+[2026-07-06T12:05:52.083Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&damage=11&event=onDamageDone
+  parsed (form): {"spot":"1","damage":"11","event":"onDamageDone"}
+--------------------------------------------------
+[2026-07-06T12:05:52.401Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&status=31&event=onMajorStatusChange
+  parsed (form): {"spot":"1","status":"31","event":"onMajorStatusChange"}
+--------------------------------------------------
+[2026-07-06T12:05:53.202Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&event=onKo
+  parsed (form): {"spot":"1","event":"onKo"}
+--------------------------------------------------
+[2026-07-06T12:05:54.651Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&prev=5&event=onSendOut
+  parsed (form): {"spot":"1","prev":"5","event":"onSendOut"}
+--------------------------------------------------
+[2026-07-06T12:05:58.019Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: player=0&event=onOfferChoice
+  parsed (form): {"player":"0","event":"onOfferChoice"}
+--------------------------------------------------
+[2026-07-06T12:05:59.053Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: turn=17&event=onBeginTurn
+  parsed (form): {"turn":"17","event":"onBeginTurn"}
+--------------------------------------------------
+[2026-07-06T12:05:59.054Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&attack=411&event=onUseAttack
+  parsed (form): {"spot":"1","attack":"411","event":"onUseAttack"}
+--------------------------------------------------
+[2026-07-06T12:06:00.485Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&damage=265&event=onDamageDone
+  parsed (form): {"spot":"0","damage":"265","event":"onDamageDone"}
+--------------------------------------------------
+[2026-07-06T12:06:00.786Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&status=31&event=onMajorStatusChange
+  parsed (form): {"spot":"0","status":"31","event":"onMajorStatusChange"}
+--------------------------------------------------
+[2026-07-06T12:06:01.600Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&event=onKo
+  parsed (form): {"spot":"0","event":"onKo"}
+--------------------------------------------------
+[2026-07-06T12:06:03.261Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: player=0&event=onOfferChoice
+  parsed (form): {"player":"0","event":"onOfferChoice"}
+--------------------------------------------------
+[2026-07-06T12:06:03.867Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&prev=1&event=onSendOut
+  parsed (form): {"spot":"0","prev":"1","event":"onSendOut"}
+--------------------------------------------------
+[2026-07-06T12:06:05.839Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: player=0&event=onOfferChoice
+  parsed (form): {"player":"0","event":"onOfferChoice"}
+--------------------------------------------------
+[2026-07-06T12:06:08.076Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: turn=18&event=onBeginTurn
+  parsed (form): {"turn":"18","event":"onBeginTurn"}
+--------------------------------------------------
+[2026-07-06T12:06:08.160Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&attack=164&event=onUseAttack
+  parsed (form): {"spot":"1","attack":"164","event":"onUseAttack"}
+--------------------------------------------------
+[2026-07-06T12:06:10.556Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&attack=187&event=onUseAttack
+  parsed (form): {"spot":"0","attack":"187","event":"onUseAttack"}
+--------------------------------------------------
+[2026-07-06T12:06:14.804Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: player=0&event=onOfferChoice
+  parsed (form): {"player":"0","event":"onOfferChoice"}
+--------------------------------------------------
+[2026-07-06T12:06:23.031Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: turn=19&event=onBeginTurn
+  parsed (form): {"turn":"19","event":"onBeginTurn"}
+--------------------------------------------------
+[2026-07-06T12:06:23.031Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&attack=409&event=onUseAttack
+  parsed (form): {"spot":"0","attack":"409","event":"onUseAttack"}
+--------------------------------------------------
+[2026-07-06T12:06:25.283Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&attack=202&event=onUseAttack
+  parsed (form): {"spot":"1","attack":"202","event":"onUseAttack"}
+--------------------------------------------------
+[2026-07-06T12:06:25.601Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&damage=109&event=onDamageDone
+  parsed (form): {"spot":"0","damage":"109","event":"onDamageDone"}
+--------------------------------------------------
+[2026-07-06T12:06:28.012Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: player=0&event=onOfferChoice
+  parsed (form): {"player":"0","event":"onOfferChoice"}
+--------------------------------------------------
+[2026-07-06T12:06:32.892Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: turn=20&event=onBeginTurn
+  parsed (form): {"turn":"20","event":"onBeginTurn"}
+--------------------------------------------------
+[2026-07-06T12:06:32.892Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&attack=579&event=onUseAttack
+  parsed (form): {"spot":"0","attack":"579","event":"onUseAttack"}
+--------------------------------------------------
+[2026-07-06T12:06:34.155Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&damage=85&event=onDamageDone
+  parsed (form): {"spot":"1","damage":"85","event":"onDamageDone"}
+--------------------------------------------------
+[2026-07-06T12:06:34.467Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&status=31&event=onMajorStatusChange
+  parsed (form): {"spot":"1","status":"31","event":"onMajorStatusChange"}
+--------------------------------------------------
+[2026-07-06T12:06:35.300Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&event=onKo
+  parsed (form): {"spot":"1","event":"onKo"}
+--------------------------------------------------
+[2026-07-06T12:06:36.834Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&prev=4&event=onSendOut
+  parsed (form): {"spot":"1","prev":"4","event":"onSendOut"}
+--------------------------------------------------
+[2026-07-06T12:06:40.416Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: player=0&event=onOfferChoice
+  parsed (form): {"player":"0","event":"onOfferChoice"}
+--------------------------------------------------
+[2026-07-06T12:06:41.524Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: turn=21&event=onBeginTurn
+  parsed (form): {"turn":"21","event":"onBeginTurn"}
+--------------------------------------------------
+[2026-07-06T12:06:41.525Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&attack=409&event=onUseAttack
+  parsed (form): {"spot":"0","attack":"409","event":"onUseAttack"}
+--------------------------------------------------
+[2026-07-06T12:06:42.674Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&damage=75&event=onDamageDone
+  parsed (form): {"spot":"1","damage":"75","event":"onDamageDone"}
+--------------------------------------------------
+[2026-07-06T12:06:43.531Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&status=31&event=onMajorStatusChange
+  parsed (form): {"spot":"1","status":"31","event":"onMajorStatusChange"}
+--------------------------------------------------
+[2026-07-06T12:06:44.353Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&event=onKo
+  parsed (form): {"spot":"1","event":"onKo"}
+--------------------------------------------------
+[2026-07-06T12:06:45.900Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&prev=1&event=onSendOut
+  parsed (form): {"spot":"1","prev":"1","event":"onSendOut"}
+--------------------------------------------------
+[2026-07-06T12:06:49.366Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: player=0&event=onOfferChoice
+  parsed (form): {"player":"0","event":"onOfferChoice"}
+--------------------------------------------------
+[2026-07-06T12:06:50.195Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: turn=22&event=onBeginTurn
+  parsed (form): {"turn":"22","event":"onBeginTurn"}
+--------------------------------------------------
+[2026-07-06T12:06:50.261Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&attack=579&event=onUseAttack
+  parsed (form): {"spot":"0","attack":"579","event":"onUseAttack"}
+--------------------------------------------------
+[2026-07-06T12:06:51.538Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&damage=87&event=onDamageDone
+  parsed (form): {"spot":"1","damage":"87","event":"onDamageDone"}
+--------------------------------------------------
+[2026-07-06T12:06:51.850Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&status=31&event=onMajorStatusChange
+  parsed (form): {"spot":"1","status":"31","event":"onMajorStatusChange"}
+--------------------------------------------------
+[2026-07-06T12:06:52.669Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&event=onKo
+  parsed (form): {"spot":"1","event":"onKo"}
+--------------------------------------------------
+[2026-07-06T12:06:54.226Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&prev=3&event=onSendOut
+  parsed (form): {"spot":"1","prev":"3","event":"onSendOut"}
+--------------------------------------------------
+[2026-07-06T12:06:57.682Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: player=0&event=onOfferChoice
+  parsed (form): {"player":"0","event":"onOfferChoice"}
+--------------------------------------------------
+[2026-07-06T12:06:58.558Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: turn=23&event=onBeginTurn
+  parsed (form): {"turn":"23","event":"onBeginTurn"}
+--------------------------------------------------
+[2026-07-06T12:06:58.628Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&attack=579&event=onUseAttack
+  parsed (form): {"spot":"0","attack":"579","event":"onUseAttack"}
+--------------------------------------------------
+[2026-07-06T12:06:59.598Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&damage=56&event=onDamageDone
+  parsed (form): {"spot":"1","damage":"56","event":"onDamageDone"}
+--------------------------------------------------
+[2026-07-06T12:06:59.918Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&status=31&event=onMajorStatusChange
+  parsed (form): {"spot":"1","status":"31","event":"onMajorStatusChange"}
+--------------------------------------------------
+[2026-07-06T12:07:00.735Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&event=onKo
+  parsed (form): {"spot":"1","event":"onKo"}
+--------------------------------------------------
+[2026-07-06T12:07:02.082Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&prev=2&event=onSendOut
+  parsed (form): {"spot":"1","prev":"2","event":"onSendOut"}
+--------------------------------------------------
+[2026-07-06T12:07:05.513Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: player=0&event=onOfferChoice
+  parsed (form): {"player":"0","event":"onOfferChoice"}
+--------------------------------------------------
+[2026-07-06T12:07:06.369Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: turn=24&event=onBeginTurn
+  parsed (form): {"turn":"24","event":"onBeginTurn"}
+--------------------------------------------------
+[2026-07-06T12:07:06.436Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=0&attack=579&event=onUseAttack
+  parsed (form): {"spot":"0","attack":"579","event":"onUseAttack"}
+--------------------------------------------------
+[2026-07-06T12:07:07.716Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&damage=87&event=onDamageDone
+  parsed (form): {"spot":"1","damage":"87","event":"onDamageDone"}
+--------------------------------------------------
+[2026-07-06T12:07:08.034Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&status=31&event=onMajorStatusChange
+  parsed (form): {"spot":"1","status":"31","event":"onMajorStatusChange"}
+--------------------------------------------------
+[2026-07-06T12:07:08.851Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: spot=1&event=onKo
+  parsed (form): {"spot":"1","event":"onKo"}
+--------------------------------------------------
+[2026-07-06T12:07:10.039Z] POST /ping
+  content-type: application/x-www-form-urlencoded
+  raw body: result=1&winner=0&event=onBattleEnd
+  parsed (form): {"result":"1","winner":"0","event":"onBattleEnd"}
