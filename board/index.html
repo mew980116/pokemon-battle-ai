@@ -296,7 +296,7 @@ var BOOST_LABELS=[["atk","Atk"],["def","Def"],["spa","SpA"],["spd","SpD"],["spe"
 function hpColors(p){return p>50?["#4ade80","#16a34a"]:p>25?["#facc15","#ca8a04"]:["#f87171","#dc2626"];}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
 function typeShort(t){return TYPE_CN[t]||t;}
-function typeChip(t){return '<span class="type-chip" style="background:'+TYPE_COLOR[t]+'">'+typeShort(t)+'</span>';}
+function typeChip(t){ if(!t){return '<span class="type-chip" style="background:#6b7280">?</span>';} return '<span class="type-chip" style="background:'+(TYPE_COLOR[t]||'#6b7280')+'">'+typeShort(t)+'</span>';}
 function statusDot(s){return s?'<span class="st-dot" style="background:'+STATUS[s].c+'">'+STATUS[s].cn+'</span>':'';}
 function hazardsHtml(h){
   return '<div class="hazards">'+
@@ -316,13 +316,13 @@ function boostsHtml(b){
 function moveHtml(m){
   var low=m.pp<=Math.max(1,Math.floor(m.maxPp*0.25))?' low':'';
   return '<div class="move">'+
-    '<span class="mtype" style="background:'+TYPE_COLOR[m.type]+'">'+typeShort(m.type)+'</span>'+
+    '<span class="mtype" style="background:'+(TYPE_COLOR[m.type]||'#6b7280')+'">'+(typeShort(m.type)||'?')+'</span>'+
     '<span class="mname">'+esc(m.name)+'</span>'+
     '<span class="mpp'+low+'">'+m.pp+'/'+m.maxPp+'</span>'+
   '</div>';
 }
 function moveMiniHtml(m){
-  return '<span class="bmv"><i class="bmt" style="background:'+TYPE_COLOR[m.type]+'"></i><span class="nm">'+esc(m.name)+'</span></span>';
+  return '<span class="bmv"><i class="bmt" style="background:'+(TYPE_COLOR[m.type]||'#6b7280')+'"></i><span class="nm">'+esc(m.name)+'</span></span>';
 }
 
 // ===== 各区渲染 =====
@@ -423,8 +423,33 @@ function togglePlay(){ if(playing) pauseDemo(); else playDemo(); }
 function replayDemo(){ pauseDemo(); showStep(0); playDemo(); }
 document.getElementById('btnPlay').onclick=togglePlay;
 document.getElementById('btnReplay').onclick=replayDemo;
+
+// ===== live mode: EventSource 接真实 PO 数据，连上则停 demo =====
+var usingLive=false;
+function setLiveMode(on){
+  usingLive=on;
+  var c=document.querySelector('.controls');
+  if(c) c.style.display=on?'none':'';
+  var t=document.querySelector('.preview-tag');
+  if(t){ t.textContent=on?'LIVE · 实时':'DEMO · SIMULATED'; t.style.display=on?'none':'flex'; }
+}
+function connectLive(){
+  if(!window.EventSource) return;
+  var es;
+  try{ es=new EventSource('/events'); }catch(e){ return; }
+  es.onmessage=function(ev){
+    try{
+      var s=JSON.parse(ev.data);
+      pauseDemo();
+      setLiveMode(true);
+      render(s);
+    }catch(err){}
+  };
+  // 未收到真实数据前 demo 继续；EventSource 断开自动重连
+}
 showStep(0);
 playDemo();
+connectLive();
 </script>
 </body>
 </html>
