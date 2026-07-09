@@ -1,46 +1,49 @@
 // =====================================================================
-// PO Battle Board - state collector & pusher (standalone module)
-// Runs in PO Qt ScriptEngine (pre-ES6). Loaded by the battle script via:
-//   var __boardCb = ({ ...original callbacks... });
-//   try { eval(sys.getFileContent("poke-board.js")); boardHook(__boardCb); } catch(e){ print_s("[board] load err: "+e); }
-//   __boardCb;
+// PO Battle Board - STANDALONE battle script (no AI)
+// Paste this WHOLE file into PO's battle script window. No main AI script
+// needed. Only displays battle state to the board; does NOT make decisions
+// (play manually or spectate).
 //
-// Dependencies (provided by battle script scope): sys, battle, poke, fpoke,
-//   tpoke, moveDataObj, foeInformation, print_s, recordBug
-//
-// Design:
-//   - READ-ONLY: never writes engine/AI state.
-//   - "只加不改": only wraps callbacks (boardHook), never edits AI logic.
-//   - boardEnabled=false -> all pushes no-op.
-//   - Each pokemon / each field wrapped in try/catch -> one failure never
-//     crashes the whole collect (fills placeholder).
-//   - Opponent active: ONLY battle-object-direct fields (hp %, status,
-//     boosts, types, level, name). NO foeInformation inference (ability/item
-//     left null) per layout spec.
-//   - State schema == board/index.html MOCK / DEMO_SCRIPT frame, so the
-//     browser render() needs zero changes.
+// Runtime: PO Qt ScriptEngine (pre-ES6). Depends on PO globals: sys, battle.
+// Optional: movedata.json in PO root dir (for move power; if absent, power=0).
+// Board server: node board/server.js  (default http://127.0.0.1:8080)
 // =====================================================================
 
-// ---- config / globals ----
+// ---- config ----
 var boardEnabled = true;
 var boardUrl = "http://127.0.0.1:8080/state";
 var boardLastPushMs = 0;
 var boardMinIntervalMs = 250;
 var boardForcePush = false;
 var boardCurrentTurn = 0;
+var boardBattleEnded = false;
 
-// ---- number -> string maps (board-side, no inference) ----
-// type num: 0 Normal 1 Fighting 2 Flying 3 Poison 4 Ground 5 Rock 6 Bug
-//           7 Ghost 8 Steel 9 Fire 10 Water 11 Grass 12 Electric
-//           13 Psychic 14 Ice 15 Dragon 16 Dark 17 Fairy 18 none
+// ---- minimal helpers (self-contained, same semantics as main script) ----
+function print_s(m){ print("[board] " + m); }
+function poke(spot){
+    if (spot !== battle.me && spot !== battle.opp) spot = battle.me;
+    return battle.data.team(spot).poke(0);
+}
+function fpoke(spot){
+    if (spot !== battle.me && spot !== battle.opp) spot = battle.me;
+    return battle.data.field.poke(spot);
+}
+function tpoke(ind){
+    if (ind < 0 || ind > 5) ind = 0;
+    return battle.data.team(battle.me).poke(ind);
+}
+
+// ---- move data (optional; for move power display) ----
+var moveDataObj = null;
+try { moveDataObj = JSON.parse(sys.getFileContent("movedata.json")); }
+catch(e){ print_s("movedata.json not loaded (move power will be 0): " + e); }
+
+// ---- number -> string maps ----
 var BOARD_TYPE_NAMES = ["Normal","Fighting","Flying","Poison","Ground","Rock","Bug","Ghost","Steel","Fire","Water","Grass","Electric","Psychic","Ice","Dragon","Dark","Fairy"];
 function boardTypeName(n){
-    // self-built english table; do NOT use sys.type (returns localized name,
-    // would break frontend TYPE_COLOR/TYPE_CN keys which are english).
     if (n === undefined || n === null || n < 0 || n > 17) return null;
     return BOARD_TYPE_NAMES[n];
 }
-// weather num (per main script usage): 1 sandstorm 2 sun 3 hail 4 rain 6 harsh-sun
 function boardWeatherName(w){
     if (w === 1) return "sandstorm";
     if (w === 2 || w === 6) return "sun";
@@ -48,8 +51,6 @@ function boardWeatherName(w){
     if (w === 4) return "rain";
     return null;
 }
-// terrain num: TODO verify at runtime (eval battle.data.field.terrain).
-// Provisional: 1 electric 2 grassy 3 misty 4 psychic
 function boardTerrainName(t){
     if (t === 1) return "electric";
     if (t === 2) return "grassy";
@@ -57,15 +58,13 @@ function boardTerrainName(t){
     if (t === 4) return "psychic";
     return null;
 }
-// status num (per main script): 1 paralysis 2 sleep 3 freeze 4 burn 5 poison 31 KO
 function boardStatusName(s){
     if (s === 1) return "paralysis";
     if (s === 2) return "sleep";
     if (s === 3) return "freeze";
     if (s === 4) return "burn";
     if (s === 5) return "poison";
-    // 6 (confusion) intentionally NOT mapped: confusion is a volatile status,
-    // not a major status, even though PO delivers it via onMajorStatusChange.
+    // 6 (confusion) intentionally not mapped (volatile, not a major status)
     return null;
 }
 function boardPct(l, t){
@@ -79,7 +78,7 @@ function boardMoveName(n){ try { return sys.move(n); } catch(e){ return "?"; } }
 function boardMovePow(n){ try { if (moveDataObj && moveDataObj[n]) return moveDataObj[n].power; } catch(e){} return 0; }
 function boardMoveType(n){ try { return boardTypeName(sys.moveType(n)); } catch(e){ return null; } }
 
-// ---- single pokemon collect (own side; ind 0 = active, 1-5 = bench) ----
+// ---- collectors ----
 function boardCollectMyPoke(ind){
     var o = { name:"?", level:100, types:[], hp:0, maxHp:0, hpPct:0, status:null, ko:false, moves:[] };
     try {
@@ -111,12 +110,12 @@ function boardCollectMyPoke(ind){
                         type: boardMoveType(mv.num),
                         power: boardMovePow(mv.num),
                         pp: mv.PP,
-                        maxPp: mv.totalPP || mv.PP   // totalPP preferred; fall back to PP
+                        maxPp: mv.totalPP || mv.PP
                     });
                 }
             } catch(em){}
         }
-    } catch(e){ print_s("[board] my poke "+ind+" err: "+e); }
+    } catch(e){ print_s("my poke "+ind+" err: "+e); }
     return o;
 }
 function boardCollectMyActiveExtras(a){
@@ -132,10 +131,8 @@ function boardCollectMyActiveExtras(a){
         };
         a.ability = sys.ability(poke(battle.me).ability);
         a.item = poke(battle.me).item ? sys.item(poke(battle.me).item) : null;
-    } catch(e){ print_s("[board] my extras err: "+e); }
+    } catch(e){ print_s("my extras err: "+e); }
 }
-
-// ---- opponent active (ONLY direct fields, no inference) ----
 function boardCollectOppActive(){
     var o = { name:"?", level:100, types:[], hpPct:0, status:null,
               boosts:{atk:0,def:0,spa:0,spd:0,spe:0,acc:0,eva:0}, ability:null, item:null, moves:null };
@@ -153,46 +150,33 @@ function boardCollectOppActive(){
             atk: fp.statBoost(1), def: fp.statBoost(2), spa: fp.statBoost(3),
             spd: fp.statBoost(4), spe: fp.statBoost(5), acc: fp.statBoost(6), eva: fp.statBoost(7)
         };
-        // ability/item intentionally null: those need foeInformation inference
-    } catch(e){ print_s("[board] opp active err: "+e); }
+    } catch(e){ print_s("opp active err: "+e); }
     return o;
 }
-
-// ---- opponent bench (5 non-active; unrevealed -> name null) ----
+// Opponent bench: read battle.data.team(opp).poke(1..5) directly (no foeInformation).
+// Assumes slot 0 = active (same as main script's poke() convention). A bench mon
+// is "revealed" only if PO exposes its numRef (>0). KO if status===31.
 function boardCollectOppBench(){
     var arr = [];
-    try {
-        var activeIdx = -1;
-        try { activeIdx = foeInformation.pokemon[foeInformation.currentSlot].currentIndex; } catch(e){}
-        for (var i = 0; i < 6; i++) {
-            if (i === activeIdx) continue;
-            var b = { name:null, revealed:false, ko:false, hpPct:null };
-            try {
-                var ep = battle.data.team(battle.opp).poke(i);
-                var ko = (ep.status === 31);
-                b.ko = ko;
-                var info = null;
-                try { info = foeInformation.pokemon[foeInformation.findSlotFromIndex(i)]; } catch(e2){}
-                if (info && info.pokeNum > 0) {
-                    b.revealed = true;
-                    b.name = sys.pokemon(info.pokeNum);
-                    if (ko) b.hpPct = 0;
-                    else if (ep.totalLife > 0) b.hpPct = boardPct(ep.life, ep.totalLife);
-                    else { var pct0 = info.hpPercentageWhenLeave; b.hpPct = (pct0 > 0) ? Math.floor(pct0 * 100) : null; }
-                } else if (ko) {
-                    b.revealed = true;
-                    b.name = sys.pokemon(ep.numRef);
-                    b.hpPct = 0;
-                }
-            } catch(eb){}
-            arr.push(b);
-        }
-    } catch(e){ print_s("[board] opp bench err: "+e); }
+    for (var i = 1; i < 6; i++) {
+        var b = { name:null, revealed:false, ko:false, hpPct:null };
+        try {
+            var ep = battle.data.team(battle.opp).poke(i);
+            var ko = (ep.status === 31);
+            b.ko = ko;
+            if (ep.numRef && ep.numRef > 0) {
+                b.revealed = true;
+                b.name = sys.pokemon(ep.numRef);
+                if (ko) b.hpPct = 0;
+                else if (ep.totalLife > 0) b.hpPct = boardPct(ep.life, ep.totalLife);
+            }
+        } catch(e){}
+        arr.push(b);
+    }
     while (arr.length > 5) arr.pop();
     while (arr.length < 5) arr.push({name:null, revealed:false, ko:false, hpPct:null});
     return arr;
 }
-
 function boardCollectHazards(spot){
     var h = { stealthRocks:false, spikes:0, toxicSpikes:0, stickyWeb:false };
     try {
@@ -201,11 +185,9 @@ function boardCollectHazards(spot){
         h.spikes = z.spikesLevel || 0;
         h.toxicSpikes = z.toxicSpikesLevel || 0;
         h.stickyWeb = z.stickyWeb ? true : false;
-    } catch(e){ print_s("[board] hazards err: "+e); }
+    } catch(e){}
     return h;
 }
-
-// ---- full state ----
 function collectBoardState(){
     var meActive = boardCollectMyPoke(0);
     boardCollectMyActiveExtras(meActive);
@@ -225,40 +207,56 @@ function collectBoardState(){
     };
 }
 
-// ---- push (async webCall, fire-and-forget) ----
+// ---- push ----
 function boardPushNow(force){
     if (!boardEnabled) return;
-    if (typeof battleEnd !== "undefined" && battleEnd) return;  // stop after battle end
+    if (boardBattleEnded && !force) return;
     var now = (new Date()).getTime();
     if (force) boardForcePush = true;
-    if (!boardForcePush && (now - boardLastPushMs) < boardMinIntervalMs) return;  // throttle BEFORE collect (save CPU)
+    if (!boardForcePush && (now - boardLastPushMs) < boardMinIntervalMs) return;
     boardLastPushMs = now;
     boardForcePush = false;
     try {
         var state = collectBoardState();
         sys.webCall(boardUrl, " ", { state: JSON.stringify(state) });
-    } catch(e){ print_s("[board] pushNow err: "+e); }
+    } catch(e){ print_s("pushNow err: "+e); }
 }
 
-// ---- callback hook: wrap key callbacks to push after they run ----
-// Runs the original callback first (AI logic untouched), then pushes state.
-function boardHook(cb){
-    function wrap(key, force, before){
-        var orig = cb[key];
-        if (typeof orig !== "function") return;
-        cb[key] = function(){
-            if (before) { try { before.apply(null, arguments); } catch(e){} }
-            var r = orig.apply(this, arguments);
-            try { boardPushNow(force); } catch(e){ print_s("[board] push err "+key+": "+e); }
-            return r;
-        };
-    }
-    wrap("onBeginTurn", true, function(turn){ boardCurrentTurn = turn; });
-    wrap("onDamageDone", false);
-    wrap("onSendOut", true);
-    wrap("onSendBack", true);
-    wrap("onKo", true);
-    wrap("onMajorStatusChange", true);
-    wrap("onStatusOver", true);
-    wrap("onBattleEnd", true);
-}
+// ---- callback object (collects state on key events; no AI decisions) ----
+({
+    onBeginTurn: function (turn) {
+        boardCurrentTurn = turn;
+        boardPushNow(true);
+    },
+    onDamageDone: function (spot, damage) { boardPushNow(false); },
+    onSendOut: function (spot, prevIndex) { boardPushNow(true); },
+    onSendBack: function (spot) { boardPushNow(true); },
+    onKo: function (spot) { boardPushNow(true); },
+    onMajorStatusChange: function (spot, status, multipleTurns, silent) { boardPushNow(true); },
+    onStatusOver: function (spot, status) { boardPushNow(true); },
+    onBattleEnd: function (result, winner) {
+        boardBattleEnded = true;
+        boardPushNow(true);
+    },
+    // no decision logic: PO will let you pick manually (or you're spectating)
+    onOfferChoice: function (player, choice) {},
+    onChoiceSelection: function (player) {},
+    onChoiceCancellation: function (player) {},
+    onChoiceCancelled: function (player) {},
+    onDrawRequest: function (player) {},
+    onMiss: function (spot) {},
+    onAvoid: function (spot) {},
+    onStatusDamage: function (spot, status) { boardPushNow(false); },
+    onUseAttack: function (spot, attack) {},
+    onItemMessage: function (spot, item, part, foe, berry, other) {},
+    onMoveMessage: function (spot, move, part, type, foe, other, q) {},
+    onAbilityMessage: function (spot, ab, part, type, foe, other) {},
+    onTierNotification: function (tier) {},
+    onClauseActivated: function (clause) {},
+    onEffectiveness: function (spot, effectiveness) {},
+    onAttackFailing: function (spot, silent) {},
+    onCriticalHit: function (spot) {},
+    onFlinch: function (spot) {},
+    onPlayerMessage: function (player, message) {},
+    onReconnect: function (player) {}
+});
