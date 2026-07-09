@@ -1,72 +1,106 @@
-# PO webCall 可用性验证
+# PO 对战看板
 
-在定下看板架构前，先验证一件不确定的事：**PO 的 `sys.webCall` 能不能在 battle 回调里被调用、POST 数据能不能发出**。
+实时展示 Pokemon-Online (PO) 对战状态的看板。**纯看板（不含 AI 决策）**，用于直播/视频背景或对战观摩。手动打或观战时显示双方场上/场下、状态、能力等级、招式、天气场地等。
 
-- 能 → 正式架构走「PO 异步 POST → Node 服务 → SSE 推浏览器」，实时性好
-- 不能 → 走「PO `writeToFile` → Node 静态托管 → 浏览器 500ms 轮询」，稳但稍慢
+## 架构
 
-## 文件说明
+```
+PO battle script (board-standalone.js)
+  回调采集状态 → sys.webCall POST(state=<json>) ─┐
+                                                  ▼
+                                   Node 服务 (server.js, 零依赖)
+                                   ├─ POST /state   解析 form 存内存最新状态
+                                   ├─ GET  /events  SSE 推送（新连接补发最新）
+                                   └─ GET  /        静态托管 index.html
+                                                  ▼
+                                   浏览器 (index.html)
+                                   EventSource 收状态 → render() 渲染
+                                   连不上 / 无推送 → 播 demo 剧本
+```
+
+## 文件
 
 | 文件 | 作用 |
-|------|------|
-| `verify-server.js` | Node 零依赖验证服务，监听 `127.0.0.1:8080`，把收到的每个请求的 method/url/content-type/body/解析结果全打印 |
-| `verify-battle.js` | PO battle 验证脚本，在关键回调里调 `sys.webCall` 异步 POST；`/wctest` 聊天命令做同步 GET 基线 |
-| `README.md` | 本文件 |
+|---|---|
+| [board-standalone.js](board-standalone.js) | 纯看板 battle script，贴进 PO battle script 窗口（无 AI） |
+| [server.js](server.js) | Node 零依赖服务（POST /state + SSE /events + 静态托管） |
+| [index.html](index.html) | 看板前端（4 区布局 + 19 帧 demo 剧本 + EventSource 接 live） |
+| [archive/](archive/) | 早期 webCall 可用性验证脚本（verify-server / verify-battle + 终端输出），已被取代，留作参考 |
 
-## 验证步骤
+## 用法
 
-### 1. 启动 Node 服务（终端 1）
+1. **起 Node 服务**：
+   ```
+   node board/server.js
+   ```
+   默认监听 `http://127.0.0.1:8080`，看到 `Waiting for PO state pushes...` 即就绪。
 
-```
-node board/verify-server.js
-```
+2. **PO 根目录**放 `movedata.json`（用于招式威力显示；没有也能用，威力显示 0）。
 
-看到 `Listening on http://127.0.0.1:8080` 即就绪，终端保持开着。
+3. **PO battle script 窗口**：贴 `board-standalone.js` 全文，启用脚本。
 
-### 2. PO 侧加载验证脚本
+4. **浏览器**开 `http://127.0.0.1:8080/`。
 
-1. 打开 PO 的 battle script 窗口
-2. 把 `verify-battle.js` 的全文**临时粘贴进去**（替换主 AI 脚本）
-3. 启用脚本
-4. **验证完务必切回 `20201227_v1.3.1.js`**——这个验证脚本不含 AI 逻辑，只是为了测 webCall
+5. **开一场对战**（手动打或观战）→ 看板从 demo 切 `LIVE · 实时`，随对战刷新。
 
-### 3. 开一场对战
-
-随便进一场对战，正常打几个回合即可。关键回调触发时会向 Node 服务发 POST。
-
-### 4.（可选）手动基线测试
-
-在 PO 聊天框发送：
+## 看板布局
 
 ```
-/wctest
+┌────────────── PO 占位 21:9 ──────────────┐ ┌── 信息区 ──┐
+│  （直播时 OBS 叠加 PO 窗口于此）          │ │ Turn·天气·场地│
+│                                          │ │ 1区 对手6只   │
+│                                          │ │ 2区 对手场上   │
+│                                          │ │ 3区 我方场上   │
+│                                          │ │ 4区 我方6只   │
+└──────────────────────────────────────────┘ └────────────┘
 ```
 
-这会从 client 上下文发一个同步 GET + 一个异步 POST，作为对照基线。
+- **1区** 对手 6 只：HP% + 异常状态（卡片背景色，实机风格）
+- **2区** 对手场上：HP% + 异常 + 能力等级（Atk/Def/SpA/SpD/Spe/Acc/Eva 固定一行）+ 等级 + 属性
+- **3区** 我方场上：HP/总HP + 异常 + 能力等级 + 等级 + 属性 + 4 招式（属性/PP）
+- **4区** 我方 6 只：HP% + 异常 + 4 招式
+- **顶栏** Turn + Weather + Terrain
 
-## 怎么读结果
+异常状态色：烧伤橙、中毒紫、麻痹黄、睡眠蓝、冰冻浅蓝。KO 红色调划线。对手 HP 只显百分比（PO 不给具体值）；对手后备未露面显 `???`。
 
-看 Node 服务终端的输出：
+## 数据契约
 
-| 现象 | 结论 |
-|------|------|
-| `/wctest` 后收到 `GET /health` + `POST /ping` | client 上下文 webCall 可用（基线） |
-| 进对战后收到 `POST /ping`（event=onBeginTurn 等） | **battle 回调里 webCall 可用** ✅ 走实时方案 |
-| 只有 `/wctest` 的请求，battle 回调 POST 没出现 | battle 回调里 webCall 不可用 → 走写文件方案 |
-| `content-type` + `raw body` + `parsed (json/form)` | 判断 args 是 form-data 还是 JSON，定正式服务解析方式 |
-| PO 侧 `[WCVERIFY] !! webCall threw: ...` | webCall 调用直接抛异常，记下 message |
+`board-standalone.js` 推送的 state 结构 = `index.html` 渲染期望：
 
-## 三个关键观察点
+```
+{
+  turn, weather, terrain,
+  me: {
+    active: { name, level, types[], hp, maxHp, hpPct, status, boosts{atk,def,spa,spd,spe,acc,eva}, ability, item, moves[{name,type,power,pp,maxPp}] },
+    bench: [ {name,level,types,hp,maxHp,hpPct,status,ko,moves[]} ×5 ],
+    hazards: { stealthRocks, spikes, toxicSpikes, stickyWeb }
+  },
+  opp: {
+    active: { name, level, types[], hpPct, status, boosts{}, ability, item, moves },  // 仅 HP%，无 hp/maxHp
+    bench: [ {name, revealed, ko, hpPct} ×5 ],   // 未露面 name=null
+    hazards: { ... }
+  },
+  battleLog: [],      // 预留（未来战报流）
+  aiDecision: null    // 预留（未来 AI 决策链）
+}
+```
 
-1. **battle 回调的 POST 到没到** —— 最初的担忧，核心结论
-2. **args 的序列化格式** —— `parsed (json)` 还是 `parsed (form)`，决定正式 Node 服务怎么解析 body
-3. **PO 侧有没有打印 `[WEBCALL] done`** —— webCall 回调 script 是否执行（不影响推数据，但能确认 webCall 没静默失败）
+## 联调验证点（真实 PO 推送时确认）
 
-## 验证完之后
+1. **对手后备可见性**：PO 是否暴露 `battle.data.team(battle.opp).poke(i).numRef`。不暴露则对手后备全 `???`。standalone 没自带 `/eval`，验证需临时加 `print_s(...)`。
+2. **对手场上槽位**：假设 `team(opp).poke(0)`=场上（同主脚本 `poke()` 约定），联调确认。
+3. **中文编码**：PO webCall 推中文 state，看 Node 控制台/看板是否乱码。若乱码，`board-standalone.js` 的 `pushBoard` 改用 `encodeURIComponent(JSON.stringify(state))`。
+4. **招式 totalPP**：`tpoke(i).move(i).totalPP` 是否可靠。不可靠则 `maxPp=pp`（低 PP 高亮失真）。
+5. **terrain 编号**：`1=electric 2=grassy 3=misty 4=psychic`（已从主脚本威力计算确认，见 [20201227_v1.3.1.js:2447-2451](../20201227_v1.3.1.js#L2447-L2451)）。
 
-把 Node 终端的输出贴回来，据此二选一定正式架构：
+## 约束
 
-- **webCall 通** → PO 异步 POST → Node 服务接收 + SSE 推送 → 浏览器
-- **webCall 不通** → PO `writeToFile(state.json)` → Node 静态托管 → 浏览器 500ms 轮询
+- `board-standalone.js` 是 QScript pre-ES6（`var`/`function`/字符串拼接/`for` 循环，无箭头/模板/`let`/`const`/`forEach`）。
+- 只读采集，不写引擎状态；每只精灵/每字段独立 `try/catch`，失败填占位不崩。
+- 不含 AI 决策：`onOfferChoice`/`onChoiceSelection` 空，PO 让你在客户端界面手动选招。
+- `boardEnabled=false` 可关推送（文件顶部配置）。
+- 节流 250ms，关键回调（回合/换人/KO/状态/结束）force 必推。
 
-Phase 1 看板目标：展示双方场上 HP / 能力等级 / 状态异常 / 场地天气 / 陷阱，注重可视化（直播/视频背景页用）。Phase 2 再加 AI 内部决策链（standard 评分 / softmax 候选 / threat），需改 AI 脚本暴露中间变量。
+## 历史
+
+`archive/` 里的 verify 脚本验证了关键前提：`sys.webCall` 在 battle 回调里可用、异步不阻塞、args 以 `application/x-www-form-urlencoded` 发送（见 `archive/verify-battle-terminal.txt`，一场 24 回合对战全部 POST 到达）。这决定了整体架构走 webCall 而非写文件轮询。
