@@ -56,11 +56,14 @@ body{font-family:"Noto Sans SC","Chakra Petch",sans-serif;color:var(--text);font
 /* zone 通用 */
 .zone{background:var(--panel);border:1px solid var(--edge);border-radius:9px;padding:8px 12px;min-height:0;overflow:hidden;display:flex;flex-direction:column}
 .z2,.z3{flex:0 0 auto}
-.z1{flex:1 1 0;min-height:0}
-.z4{flex:1.3 1 0;min-height:0}
+.z1{flex:0.9 1 0;min-height:0}
+.z4{flex:1.6 1 0;min-height:0}
 
-/* z2/z3 横向场上卡 */
-.field-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:0 0 auto}
+/* z2/z3 场上卡（左信息 + 右招式）*/
+.field-card{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:start;flex:0 0 auto}
+.fc-left{display:flex;flex-direction:column;gap:5px;min-width:0}
+.fc-row1{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.fc-hp{display:flex;align-items:center;gap:8px}
 .f-name{font-size:17px;font-weight:700;line-height:1}
 .f-lv{font-family:"Chakra Petch";font-size:13px;color:var(--dim)}
 .type-chip{font-size:11px;font-weight:700;color:#fff;padding:2px 7px;border-radius:3px;text-shadow:0 1px 1px rgba(0,0,0,.4);line-height:1.3}
@@ -77,7 +80,9 @@ body{font-family:"Noto Sans SC","Chakra Petch",sans-serif;color:var(--text);font
 .boost.down{background:rgba(96,165,250,.18);color:var(--down);border:1px solid rgba(96,165,250,.4)}
 .boost.zero{color:var(--faint);background:rgba(120,150,180,.05);border:1px solid rgba(120,150,180,.1)}
 .st-dot{width:15px;height:15px;border-radius:50%;font-size:10px;font-weight:700;color:#fff;display:inline-flex;align-items:center;justify-content:center;line-height:1;flex-shrink:0}
-.moves{display:flex;gap:10px;flex-wrap:wrap;margin-top:5px;flex:0 0 auto;width:100%}
+.fc-moves{display:flex;flex-direction:column;gap:3px;min-width:150px}
+.moverow{display:flex;align-items:center;gap:5px;font-size:12px;padding:2px 6px;border-radius:4px;background:rgba(0,0,0,.2)}
+.fc-empty{min-width:150px;min-height:60px;border:1px dashed rgba(120,150,180,.15);border-radius:5px}
 .move{display:flex;align-items:center;gap:5px;font-size:12px;min-width:0}
 .mtype{flex-shrink:0;min-width:22px;height:16px;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.4);padding:0 3px}
 .mname{color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -97,7 +102,7 @@ body{font-family:"Noto Sans SC","Chakra Petch",sans-serif;color:var(--text);font
 
 /* z4 我方6只 竖排（带招式） */
 .bench-list{display:flex;flex-direction:column;gap:4px;flex:1;min-height:0;overflow:hidden}
-.bench-poke{display:grid;grid-template-columns:110px 1fr;gap:8px;padding:4px 7px;border-radius:6px;background:rgba(0,0,0,.2);align-items:center}
+.bench-poke{display:grid;grid-template-columns:110px 1fr;gap:6px;padding:2px 6px;border-radius:6px;background:rgba(0,0,0,.2);align-items:center}
 .bench-poke.active{box-shadow:0 0 0 1px var(--me) inset,0 0 8px rgba(56,189,248,.18)}
 .bench-poke.ko{opacity:.7;filter:grayscale(.4);background:rgba(248,113,113,.16)}
 .bp-left{display:flex;flex-direction:column;gap:2px;min-width:0}
@@ -111,21 +116,20 @@ body{font-family:"Noto Sans SC","Chakra Petch",sans-serif;color:var(--text);font
 .bmt{width:7px;height:7px;border-radius:50%;flex-shrink:0;display:inline-block}
 .bmv .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 
-/* 分隔条 */
+/* 分隔条：FOE 右上 / 中 Turn天气场地 / ME 左下 */
 .divider{flex:0 0 auto;background:var(--panel);border:1px solid var(--edge);border-radius:9px;padding:8px 14px;display:flex;flex-direction:column;gap:6px}
-.divider .d-vs{display:flex;align-items:center;justify-content:center;gap:10px;font-family:"Chakra Petch";font-size:15px;font-weight:700}
-.divider .d-vs .me{color:var(--me)}
-.divider .d-vs .foe{color:var(--opp)}
-.divider .d-vs .vsx{color:var(--faint);font-weight:500}
-.divider .d-vs .turn{color:var(--text);margin-left:16px}
-.divider .d-vs .turn .lbl{font-size:11px;color:var(--dim);margin-right:5px;font-weight:600}
-.divider .d-env{display:flex;align-items:center;justify-content:center;gap:18px;font-size:13px}
-.divider .d-env .k{font-family:"Chakra Petch";font-size:11px;color:var(--faint);margin-right:5px;font-weight:500}
-.divider .d-env .weather{color:var(--me);font-weight:600}
-.divider .d-env .terrain{color:#c4b5fd;font-weight:600}
-.divider .d-haz{display:flex;align-items:center;justify-content:center;gap:20px}
-.divider .d-haz .side{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--dim)}
-.divider .d-haz .side .lbl{font-family:"Chakra Petch";font-size:10px;letter-spacing:.1em;color:var(--faint)}
+.divider .d-top{display:flex;align-items:center;justify-content:flex-end;gap:10px;font-family:"Chakra Petch";font-size:14px;font-weight:700}
+.divider .d-top .foe{color:var(--opp)}
+.divider .d-mid{display:flex;align-items:center;justify-content:center;gap:18px;font-size:13px}
+.divider .d-mid .turn{font-family:"Chakra Petch";font-weight:700;color:var(--text)}
+.divider .d-mid .turn .lbl{font-size:11px;color:var(--dim);margin-right:5px;font-weight:600}
+.divider .d-mid .k{font-family:"Chakra Petch";font-size:11px;color:var(--faint);margin-right:5px;font-weight:500}
+.divider .d-mid .weather{color:var(--me);font-weight:600}
+.divider .d-mid .terrain{color:#c4b5fd;font-weight:600}
+.divider .d-bot{display:flex;align-items:center;justify-content:flex-start;gap:10px;font-family:"Chakra Petch";font-size:14px;font-weight:700}
+.divider .d-bot .me{color:var(--me)}
+.divider .side{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--dim)}
+.divider .side .lbl{font-family:"Chakra Petch";font-size:10px;letter-spacing:.1em;color:var(--faint)}
 .hazards{display:flex;gap:4px}
 .hz{font-size:11px;font-weight:700;padding:2px 6px;border-radius:3px;background:rgba(120,150,180,.07);color:var(--faint);border:1px solid rgba(120,150,180,.1)}
 .hz.on{color:#fff}
@@ -293,34 +297,33 @@ function moveMiniHtml(m){
 }
 
 // ===== 各区渲染 =====
-// z2 对手场上（横向一行）
-function oppFieldRowHtml(p){
+// z2/z3 场上卡（左：名字+HP+boosts 竖排；右：4招竖排，对手留空）
+function fieldCardHtml(p, isMe){
   var hc=hpColors(p.hpPct);
-  return '<div class="field-row">'+
-    '<span class="f-name" style="color:#ffeef1">'+esc(p.name)+'</span>'+
-    '<span class="f-lv">L'+p.level+'</span>'+
-    p.types.map(typeChip).join('')+
-    statusDot(p.status)+
-    '<div class="hp-bar"><div class="hp-fill" data-pct="'+p.hpPct+'" style="--hp-h:'+hc[0]+';--hp-l:'+hc[1]+'"></div></div>'+
-    '<span class="hp-pct" style="color:'+hc[0]+'">'+p.hpPct+'%</span>'+
-    '<span class="hp-num">仅百分比</span>'+
-    '<div class="boosts">'+boostsHtml(p.boosts)+'</div>'+
+  var nameColor = isMe ? '#eaf6ff' : '#ffeef1';
+  var hpNum = isMe ? '<span class="hp-num"><b>'+p.hp+'</b>/'+p.maxHp+'</span>' : '';
+  var movesHtml;
+  if(isMe && p.moves){
+    movesHtml = '<div class="fc-moves">'+p.moves.map(moveRowHtml).join('')+'</div>';
+  } else {
+    movesHtml = '<div class="fc-empty"></div>';
+  }
+  return '<div class="field-card">'+
+    '<div class="fc-left">'+
+      '<div class="fc-row1"><span class="f-name" style="color:'+nameColor+'">'+esc(p.name)+'</span><span class="f-lv">L'+p.level+'</span>'+p.types.map(typeChip).join('')+statusDot(p.status)+'</div>'+
+      '<div class="fc-hp"><div class="hp-bar"><div class="hp-fill" data-pct="'+p.hpPct+'" style="--hp-h:'+hc[0]+';--hp-l:'+hc[1]+'"></div></div>'+hpNum+'<span class="hp-pct" style="color:'+hc[0]+'">'+p.hpPct+'%</span></div>'+
+      '<div class="boosts">'+boostsHtml(p.boosts)+'</div>'+
+    '</div>'+
+    movesHtml+
   '</div>';
 }
-// z3 我方场上（横向一行 + 4招横排）
-function meFieldRowHtml(p){
-  var hc=hpColors(p.hpPct);
-  return '<div class="field-row">'+
-    '<span class="f-name" style="color:#eaf6ff">'+esc(p.name)+'</span>'+
-    '<span class="f-lv">L'+p.level+'</span>'+
-    p.types.map(typeChip).join('')+
-    statusDot(p.status)+
-    '<div class="hp-bar"><div class="hp-fill" data-pct="'+p.hpPct+'" style="--hp-h:'+hc[0]+';--hp-l:'+hc[1]+'"></div></div>'+
-    '<span class="hp-num"><b>'+p.hp+'</b>/'+p.maxHp+'</span>'+
-    '<span class="hp-pct" style="color:'+hc[0]+'">'+p.hpPct+'%</span>'+
-    '<div class="boosts">'+boostsHtml(p.boosts)+'</div>'+
-  '</div>'+
-  (p.moves?'<div class="moves">'+p.moves.map(moveHtml).join('')+'</div>':'');
+function moveRowHtml(m){
+  var low=m.pp<=Math.max(1,Math.floor(m.maxPp*0.25))?' low':'';
+  return '<div class="moverow">'+
+    '<span class="mtype" style="background:'+(TYPE_COLOR[m.type]||'#6b7280')+'">'+(typeShort(m.type)||'?')+'</span>'+
+    '<span class="mname">'+esc(m.name)+'</span>'+
+    '<span class="mpp'+low+'">'+m.pp+'/'+m.maxPp+'</span>'+
+  '</div>';
 }
 // z1 对手6只（竖排6行）
 function oppRowHtml(p){
@@ -347,23 +350,22 @@ function meBenchHtml(p){
     (p.moves?'<div class="bp-moves">'+p.moves.map(moveMiniHtml).join('')+'</div>':'')+
   '</div>';
 }
-// 分隔条
+// 分隔条：FOE 右上 / 中 Turn天气场地 / ME 左下
 function dividerHtml(s){
   var w=s.weather?WEATHER[s.weather]:null;
   var t=s.terrain?TERRAIN[s.terrain]:null;
-  return '<div class="d-vs">'+
-      '<span class="me">'+esc(s.mePlayer||'ME')+'</span>'+
-      '<span class="vsx">VS</span>'+
+  return '<div class="d-top">'+
+      '<span class="side"><span class="lbl">FOE场</span>'+hazardsHtml(s.opp.hazards)+'</span>'+
       '<span class="foe">'+esc(s.oppPlayer||'FOE')+'</span>'+
-      '<span class="turn"><span class="lbl">TURN</span>'+String(s.turn).padStart(2,"0")+'</span>'+
     '</div>'+
-    '<div class="d-env">'+
+    '<div class="d-mid">'+
+      '<span class="turn"><span class="lbl">TURN</span>'+String(s.turn).padStart(2,"0")+'</span>'+
       '<span><span class="k">天气</span><b class="weather">'+(w?w.cn:'—')+'</b></span>'+
       '<span><span class="k">场地</span><b class="terrain">'+(t?t.cn:'—')+'</b></span>'+
     '</div>'+
-    '<div class="d-haz">'+
-      '<span class="side"><span class="lbl">我方场</span>'+hazardsHtml(s.me.hazards)+'</span>'+
-      '<span class="side"><span class="lbl">对手场</span>'+hazardsHtml(s.opp.hazards)+'</span>'+
+    '<div class="d-bot">'+
+      '<span class="me">'+esc(s.mePlayer||'ME')+'</span>'+
+      '<span class="side"><span class="lbl">ME场</span>'+hazardsHtml(s.me.hazards)+'</span>'+
     '</div>';
 }
 
@@ -374,8 +376,8 @@ function render(s){
   opp6=opp6.concat(s.opp.bench.map(function(b){return {name:b.name,hpPct:b.hpPct,status:b.status||null,ko:b.ko,active:false,revealed:b.revealed};}));
   document.getElementById('z1').innerHTML='<div class="team-list">'+opp6.map(oppRowHtml).join('')+'</div>';
 
-  document.getElementById('z2').innerHTML=oppFieldRowHtml(s.opp.active);
-  document.getElementById('z3').innerHTML=meFieldRowHtml(s.me.active);
+  document.getElementById('z2').innerHTML=fieldCardHtml(s.opp.active, false);
+  document.getElementById('z3').innerHTML=fieldCardHtml(s.me.active, true);
 
   var me6=[{name:s.me.active.name,hp:s.me.active.hp,maxHp:s.me.active.maxHp,hpPct:s.me.active.hpPct,status:s.me.active.status,ko:s.me.active.hpPct===0,moves:s.me.active.moves,active:true}];
   me6=me6.concat(s.me.bench.map(function(b){return {name:b.name,hp:b.hp,maxHp:b.maxHp,hpPct:b.hpPct,status:b.status,ko:b.ko,moves:b.moves,active:false};}));
