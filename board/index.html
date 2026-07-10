@@ -357,11 +357,11 @@ function pcCardHtml(p, isMe){
   var cls='pcard';
   if(p.active) cls += isMe?' active':' opp-active';
   if(p.ko) cls += ' ko';
-  if(!p.revealed) cls += ' unknown';
+  if(!isMe && !p.revealed) cls += ' unknown';
   var bg=p.status?(' style="background:'+STATUS[p.status].bg+'"'):'';
   var name=p.name||'???';
   var head;
-  if(!p.revealed){ head='<span class="pc-name" style="color:var(--faint)">???</span><span class="pc-pct" style="color:var(--faint);font-size:10px">未露</span>'; }
+  if(!isMe && !p.revealed){ head='<span class="pc-name" style="color:var(--faint)">???</span><span class="pc-pct" style="color:var(--faint);font-size:10px">未露</span>'; }
   else if(p.ko){ head='<span class="pc-name">'+esc(name)+'</span><span class="pc-pct" style="color:var(--faint)">KO</span>'; }
   else { head='<span class="pc-name">'+esc(name)+'</span><div class="pc-hpbar"><i data-pct="'+(p.hpPct||0)+'" style="background:'+hc[0]+'"></i></div><span class="pc-pct" style="color:'+hc[0]+'">'+p.hpPct+'%</span>'; }
   var moves;
