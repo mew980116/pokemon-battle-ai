@@ -67,7 +67,7 @@ body{font-family:"Noto Sans SC","Chakra Petch",sans-serif;color:var(--text);font
 .f-lv{font-family:"Chakra Petch";font-size:13px;color:var(--dim)}
 .type-chip{font-size:11px;font-weight:700;color:#fff;padding:2px 7px;border-radius:3px;text-shadow:0 1px 1px rgba(0,0,0,.4);line-height:1.3}
 .hp-bar{flex:0 0 120px;width:120px;height:9px;border-radius:5px;background:rgba(0,0,0,.5);box-shadow:inset 0 1px 2px rgba(0,0,0,.6);overflow:hidden;position:relative}
-.hp-fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:5px;background:linear-gradient(180deg,var(--hp-h),var(--hp-l));transition:width 1s cubic-bezier(.22,1,.36,1)}
+.hp-fill{position:absolute;left:0;top:0;bottom:0;border-radius:5px;background:linear-gradient(180deg,var(--hp-h),var(--hp-l))}
 .hp-fill::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);background-size:50px 100%;animation:shine 2.8s linear infinite}
 @keyframes shine{from{background-position:-50px 0}to{background-position:200px 0}}
 .hp-num{font-family:"Chakra Petch";font-size:12px;color:var(--dim);white-space:nowrap}
@@ -97,7 +97,7 @@ body{font-family:"Noto Sans SC","Chakra Petch",sans-serif;color:var(--text);font
 .pc-head{display:flex;align-items:center;gap:5px;flex:0 0 auto}
 .pc-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:0 1 auto}
 .pc-hpbar{flex:1;height:5px;border-radius:3px;background:rgba(0,0,0,.5);overflow:hidden;min-width:30px}
-.pc-hpbar i{display:block;height:100%;width:0;transition:width .8s cubic-bezier(.22,1,.36,1)}
+.pc-hpbar i{display:block;height:100%}
 .pc-pct{font-family:"Chakra Petch";font-size:11px;font-weight:700;flex-shrink:0}
 .pc-moves{display:flex;flex-direction:column;gap:2px;flex:1;min-height:0}
 .pc-moverow{display:flex;align-items:center;gap:4px;font-size:10px}
@@ -131,7 +131,7 @@ body{font-family:"Noto Sans SC","Chakra Petch",sans-serif;color:var(--text);font
 .bp-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.1}
 .bp-hp{display:flex;align-items:center;gap:4px}
 .bp-hpbar{flex:1;height:5px;border-radius:3px;background:rgba(0,0,0,.5);overflow:hidden}
-.bp-hpbar i{display:block;height:100%;width:0;transition:width .8s cubic-bezier(.22,1,.36,1)}
+.bp-hpbar i{display:block;height:100%}
 .bp-pct{font-family:"Chakra Petch";font-size:11px;font-weight:700}
 .bp-moves{display:flex;gap:6px;align-items:center;min-width:0}
 .bmv{display:inline-flex;align-items:center;justify-content:center;gap:3px;font-size:11px;min-width:0;flex:1 1 0}
@@ -342,7 +342,7 @@ function fieldCardHtml(p, isMe, hz){
         '<span class="f-lv">L'+p.level+'</span>'+
         p.types.map(typeChip).join('')+
         statusDot(p.status)+
-        '<div class="hp-bar"><div class="hp-fill" data-pct="'+p.hpPct+'" style="--hp-h:'+hc[0]+';--hp-l:'+hc[1]+'"></div></div>'+
+        '<div class="hp-bar"><div class="hp-fill" style="width:'+p.hpPct+'%;--hp-h:'+hc[0]+';--hp-l:'+hc[1]+'"></div></div>'+
         hpNum+
         '<span class="hp-pct" style="color:'+hc[0]+'">'+p.hpPct+'%</span>'+
       '</div>'+
@@ -371,7 +371,7 @@ function pcCardHtml(p, isMe){
   var head;
   if(!isMe && !p.revealed){ head='<span class="pc-name" style="color:var(--faint)">???</span>'; }
   else if(p.ko){ head='<span class="pc-name">'+esc(name)+'</span><span class="pc-pct" style="color:var(--faint)">KO</span>'; }
-  else { head='<span class="pc-name">'+esc(name)+'</span><div class="pc-hpbar"><i data-pct="'+(p.hpPct||0)+'" style="background:'+hc[0]+'"></i></div><span class="pc-pct" style="color:'+hc[0]+'">'+p.hpPct+'%</span>'; }
+  else { head='<span class="pc-name">'+esc(name)+'</span><div class="pc-hpbar"><i style="width:'+(p.hpPct||0)+'%;background:'+hc[0]+'"></i></div><span class="pc-pct" style="color:'+hc[0]+'">'+p.hpPct+'%</span>'; }
   var moves;
   if(isMe && p.moves && !p.ko){
     moves='<div class="pc-moves">'+p.moves.map(pcMoveRowHtml).join('')+'</div>';
@@ -408,7 +408,7 @@ function meBenchHtml(p){
   return '<div class="bench-poke'+(p.ko?' ko':'')+(p.active?' active':'')+'"'+st+'>'+
     '<div class="bp-left">'+
       '<div class="bp-name">'+esc(p.name)+'</div>'+
-      '<div class="bp-hp"><div class="bp-hpbar"><i data-pct="'+(p.hpPct||0)+'" style="background:'+hc[0]+'"></i></div><span class="bp-pct" style="color:'+hc[0]+'">'+pctTxt+'</span></div>'+
+      '<div class="bp-hp"><div class="bp-hpbar"><i style="width:'+(p.hpPct||0)+'%;background:'+hc[0]+'"></i></div><span class="bp-pct" style="color:'+hc[0]+'">'+pctTxt+'</span></div>'+
     '</div>'+
     (p.moves?'<div class="bp-moves">'+p.moves.map(moveMiniHtml).join('')+'</div>':'')+
   '</div>';
@@ -438,12 +438,6 @@ function render(s){
   document.getElementById('z2').innerHTML=fieldCardHtml(s.opp.active, false, s.opp.hazards);
   document.getElementById('z3').innerHTML=fieldCardHtml(s.me.active, true, s.me.hazards);
   document.getElementById('z4').innerHTML='<div class="pcards">'+me6.map(function(p){return pcCardHtml(p,true);}).join('')+'</div>';
-
-  setTimeout(function(){
-    document.querySelectorAll('[data-pct]').forEach(function(el){
-      el.style.width=(el.getAttribute('data-pct')||0)+'%';
-    });
-  },80);
 }
 
 // ===== 演示播放器 =====
