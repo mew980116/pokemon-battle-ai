@@ -397,7 +397,7 @@ function oppRowHtml(p){
   var inner;
   if(!p.revealed){ inner='<span class="tr-name" style="color:var(--faint)">???</span><span></span><span class="tr-pct" style="color:var(--faint);font-size:11px">未露</span><span></span>'; }
   else if(p.ko){ inner='<span class="tr-name">'+esc(name)+'</span><span></span><span class="tr-pct" style="color:var(--faint)">KO</span><span></span>'; }
-  else { inner='<span class="tr-name">'+esc(name)+'</span><div class="tr-hpbar"><i data-pct="'+p.hpPct+'" style="background:'+hc[0]+'"></i></div><span class="tr-pct" style="color:'+hc[0]+'">'+p.hpPct+'%</span>'+statusDot(p.status); }
+  else { inner='<span class="tr-name">'+esc(name)+'</span><div class="tr-hpbar"><i style="width:'+p.hpPct+'%;background:'+hc[0]+'"></i></div><span class="tr-pct" style="color:'+hc[0]+'">'+p.hpPct+'%</span>'+statusDot(p.status); }
   return '<div class="'+cls+'"'+bg+'>'+inner+'</div>';
 }
 // z4 我方6只（竖排6行 + 4招）
