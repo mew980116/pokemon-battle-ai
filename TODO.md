@@ -168,6 +168,21 @@
 - [ ] **问题3 结构性：getSwitchStandard 复用 getFoeDamageToMe**：当前防御评估用手写耐久公式+属性循环+抵抗加分（L1749-1803），与 getFoeThreatToMe 用的 getFoeDamageToMe 是两套体系、量纲不一致且有 bug。重构为：防御部分改用 getFoeDamageToMe（对手打候选伤害比例→映射加减分）+ 加完整输出维度（候选打对手），删手写耐久公式+抵抗加分虚高项。standard 变防御+输出综合分。呼应 finalScore 加权模型愿景（5.9）。
 - [ ] **问题6：threat 算法优化**：threat 与 bestDmg 量纲关系（A速度+B伤害独立累加，我方先手时威胁压低）后续专门讨论，可能拆成"秒杀威胁/消耗威胁"两分量或重新设计因子权重。
 
+### 5.11 天气/场地编号核查 + analysePossibleSpeed bug（v1.4，看板联调时发现）
+
+> 来源：board 看板联调反馈"晴天显雨天"，核查主脚本 weather 编号时发现。
+
+**已确认（无需再查）**：
+- weather 编号在主脚本三处逻辑（威力加成 L2435-2440 / 提速特性 L1450-1456 / 招式判断 L2099-2100）一致：`2=雨 4=晴 3=沙暴 1=冰雹 5=大日照 6=大雨`。board-standalone.js 的 boardWeatherName 已据此修正（原 2/4 搞反）。**主脚本 weather 判断没反**。
+- terrain 编号 `1=electric 2=grassy 3=misty 4=psychic`（L2447-2451 威力加成确认）。
+
+**待办**：
+
+- [ ] **bug 修复：analysePossibleSpeed L1290 `var weather = turnMemory.memory.terrain`** → 应为 `.weather`。当前 weather 变量读成 terrain 值，导致 L1300-1306 / 1320-1326 / 1335-1341 所有天气特性（雨速/叶绿素/拨沙/雪走）速度修正判断失效（拿 terrain 值比 weather 编号，几乎不匹配）。影响对手速度区间推断，漏算天气特性加速。对照 getPossibleSpeed L1447 `weather = battle.data.field.weather` 是对的。
+- [ ] **核查特性编号 33/34/146/221/212**：从"提速特性配对应天气"自洽性反推为 33=雨速 / 34=叶绿素 / 146=拨沙 / 221=雪走 / 212=冲浪之尾，但无特性对照表实证。PO 里 `/eval sys.ability(33)` 等打名字确认。顺便补特性编号对照表（见本地可做 1. 字段语义映射）。
+- [ ] **核查天气/场地相关招式编号**：L2099-2107 招 240/241/258/201/588/593/599/633/635 在对应天气/场地失效，确认招名与机制一致（240=日光束 weather2雨无效、241=打雷 weather4晴低命中等已自洽，其余待核）。
+- [ ] **status 编号 3=冰冻 的实证**：1=麻 2=睡 4=烧 5=毒 31=KO 有特性/招式证据，3=冰冻是排除法推断（L1822 与 2 并列），联调时确认。
+
 ### 6. Sacrifice play（长期探索，暂不做）
 
 > 需要跨回合状态记忆，无法在单回合决策框架内实现，工程量大。
