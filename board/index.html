@@ -432,10 +432,10 @@ function render(s){
   var me6=[{name:s.me.active.name,hp:s.me.active.hp,maxHp:s.me.active.maxHp,hpPct:s.me.active.hpPct,status:s.me.active.status,ko:s.me.active.hpPct===0,moves:s.me.active.moves,active:true}];
   me6=me6.concat(s.me.bench.map(function(b){return {name:b.name,hp:b.hp,maxHp:b.maxHp,hpPct:b.hpPct,status:b.status,ko:b.ko,moves:b.moves,active:false};}));
 
-  document.getElementById('z1').innerHTML='<div class="team-list">'+opp6.map(oppRowHtml).join('')+'</div>';
-  document.getElementById('z2').innerHTML='<div class="pcards">'+opp6.map(function(p){return pcCardHtml(p,false);}).join('')+'</div>';
-  document.getElementById('z3').innerHTML='<div class="pcards">'+me6.map(function(p){return pcCardHtml(p,true);}).join('')+'</div>';
-  document.getElementById('z4').innerHTML='<div class="bench-list">'+me6.map(meBenchHtml).join('')+'</div>';
+  document.getElementById('z1').innerHTML='<div class="pcards">'+opp6.map(function(p){return pcCardHtml(p,false);}).join('')+'</div>';
+  document.getElementById('z2').innerHTML=fieldCardHtml(s.opp.active, false);
+  document.getElementById('z3').innerHTML=fieldCardHtml(s.me.active, true);
+  document.getElementById('z4').innerHTML='<div class="pcards">'+me6.map(function(p){return pcCardHtml(p,true);}).join('')+'</div>';
 
   setTimeout(function(){
     document.querySelectorAll('[data-pct]').forEach(function(el){
