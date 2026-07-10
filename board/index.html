@@ -10,8 +10,8 @@
 <style>
 :root{
   --bg:#070b12;
-  --panel:rgba(16,23,33,.62);
-  --panel-2:rgba(20,29,42,.45);
+  --panel:rgba(16,23,33,.88);
+  --panel-2:rgba(20,29,42,.78);
   --edge:rgba(120,170,220,.16);
   --text:#e8f0fa;
   --dim:#b0bed4;
@@ -28,7 +28,7 @@
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%;overflow:hidden;background:transparent}
-body{font-family:"Noto Sans SC","Chakra Petch",sans-serif;color:var(--text);font-size:12px;display:flex;align-items:center;justify-content:center}
+body{font-family:"Noto Sans SC","Chakra Petch",sans-serif;color:var(--text);font-size:14px;display:flex;align-items:flex-start;justify-content:center}
 
 .bg-grid{position:fixed;inset:0;z-index:0;pointer-events:none;
   background-image:linear-gradient(rgba(120,170,220,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(120,170,220,.04) 1px,transparent 1px);
@@ -40,14 +40,14 @@ body{font-family:"Noto Sans SC","Chakra Petch",sans-serif;color:var(--text);font
 /* ===== 左侧 PO 占位区（上栏 + 21:9 占位居中 + 下栏图例）===== */
 .po-slot{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:10px}
 .po-topbar{flex:0 0 auto;padding:10px 16px;background:var(--panel);border:1px solid var(--edge);border-radius:10px;display:flex;align-items:baseline;gap:14px}
-.po-topbar .brand{font-family:"Chakra Petch";font-weight:700;font-size:14px;letter-spacing:.3em;color:var(--text)}
-.po-topbar .brand-sub{font-family:"Chakra Petch";font-size:9px;letter-spacing:.25em;color:var(--dim)}
+.po-topbar .brand{font-family:"Chakra Petch";font-weight:700;font-size:16px;letter-spacing:.3em;color:var(--text)}
+.po-topbar .brand-sub{font-family:"Chakra Petch";font-size:11px;letter-spacing:.25em;color:var(--dim)}
 .po-topbar .spacer{flex:1}
-.po-topbar .vs{font-family:"Chakra Petch";font-size:11px;color:var(--faint);letter-spacing:.12em}
+.po-topbar .vs{font-family:"Chakra Petch";font-size:13px;color:var(--faint);letter-spacing:.12em}
 .po-topbar .vs b{color:var(--me);font-weight:600}
 .po-topbar .vs .foe{color:var(--opp);font-weight:600}
 .po-frame-wrap{flex:1 1 auto;display:flex;align-items:center;justify-content:center;min-height:0}
-.po-frame{width:100%;aspect-ratio:21/9;position:relative;border:1.5px dashed rgba(120,170,220,.22);border-radius:14px;background:linear-gradient(135deg,rgba(15,23,34,.35),rgba(10,16,24,.35));display:flex;align-items:center;justify-content:center;overflow:hidden}
+.po-frame{height:100%;aspect-ratio:21/9;max-width:100%;position:relative;border:1.5px dashed rgba(120,170,220,.22);border-radius:14px;background:linear-gradient(135deg,rgba(15,23,34,.7),rgba(10,16,24,.7));display:flex;align-items:center;justify-content:center;overflow:hidden}
 .po-frame::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(120,170,220,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(120,170,220,.025) 1px,transparent 1px);background-size:32px 32px;pointer-events:none}
 .po-corner{position:absolute;width:20px;height:20px;border:2px solid var(--me);opacity:.45}
 .po-corner.tl{top:12px;left:12px;border-right:none;border-bottom:none;border-radius:4px 0 0 0}
@@ -55,31 +55,31 @@ body{font-family:"Noto Sans SC","Chakra Petch",sans-serif;color:var(--text);font
 .po-corner.bl{bottom:12px;left:12px;border-right:none;border-top:none;border-radius:0 0 0 4px}
 .po-corner.br{bottom:12px;right:12px;border-left:none;border-top:none;border-radius:0 0 4px 0}
 .po-label{text-align:center;color:var(--faint);position:relative;z-index:1}
-.po-l1{font-family:"Chakra Petch";font-size:18px;letter-spacing:.32em;font-weight:600;color:var(--dim)}
-.po-l2{font-size:10px;letter-spacing:.18em;margin-top:5px}
-.po-l3{font-family:"Chakra Petch";font-size:9px;letter-spacing:.2em;margin-top:10px;color:var(--faint);opacity:.6}
+.po-l1{font-family:"Chakra Petch";font-size:20px;letter-spacing:.32em;font-weight:600;color:var(--dim)}
+.po-l2{font-size:12px;letter-spacing:.18em;margin-top:5px}
+.po-l3{font-family:"Chakra Petch";font-size:11px;letter-spacing:.2em;margin-top:10px;color:var(--faint);opacity:.6}
 
 /* ===== 右侧信息区 ===== */
 .info{flex:0 0 440px;min-height:0;display:flex;flex-direction:column;gap:8px}
 
 .status-bar{flex:0 0 auto;display:flex;align-items:center;gap:14px;padding:7px 14px;
   background:var(--panel);border:1px solid var(--edge);border-radius:8px}
-.status-bar .turn{font-family:"Chakra Petch";font-weight:700;font-size:17px;line-height:1}
-.status-bar .turn .lbl{font-size:9px;letter-spacing:.2em;color:var(--dim);margin-right:7px;font-weight:600}
-.status-bar .weather{font-size:12px;font-weight:600;color:var(--me)}
-.status-bar .weather .k{font-family:"Chakra Petch";font-size:9px;letter-spacing:.14em;color:var(--faint);margin-right:5px;font-weight:500}
-.status-bar .terrain{font-size:12px;font-weight:600;color:#c4b5fd}
-.status-bar .terrain .k{font-family:"Chakra Petch";font-size:9px;letter-spacing:.14em;color:var(--faint);margin-right:5px;font-weight:500}
+.status-bar .turn{font-family:"Chakra Petch";font-weight:700;font-size:19px;line-height:1}
+.status-bar .turn .lbl{font-size:11px;letter-spacing:.2em;color:var(--dim);margin-right:7px;font-weight:600}
+.status-bar .weather{font-size:14px;font-weight:600;color:var(--me)}
+.status-bar .weather .k{font-family:"Chakra Petch";font-size:11px;letter-spacing:.14em;color:var(--faint);margin-right:5px;font-weight:500}
+.status-bar .terrain{font-size:14px;font-weight:600;color:#c4b5fd}
+.status-bar .terrain .k{font-family:"Chakra Petch";font-size:11px;letter-spacing:.14em;color:var(--faint);margin-right:5px;font-weight:500}
 .status-bar .spacer{flex:1}
-.status-bar .tag{font-family:"Chakra Petch";font-size:9px;letter-spacing:.2em;color:var(--faint)}
+.status-bar .tag{font-family:"Chakra Petch";font-size:11px;letter-spacing:.2em;color:var(--faint)}
 
 .zone{background:var(--panel);border:1px solid var(--edge);border-radius:9px;padding:8px 10px;min-height:0;overflow:hidden;display:flex;flex-direction:column}
 .zone-head{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex:0 0 auto}
-.zone-head .zt{font-family:"Chakra Petch";font-size:9px;letter-spacing:.2em;color:var(--dim);font-weight:600}
+.zone-head .zt{font-family:"Chakra Petch";font-size:11px;letter-spacing:.2em;color:var(--dim);font-weight:600}
 .zone-head.me .zt{color:var(--me)}
 .zone-head.opp .zt{color:var(--opp)}
 .hazards{display:flex;gap:4px;margin-left:auto}
-.hz{font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;background:rgba(120,150,180,.07);color:var(--faint);border:1px solid rgba(120,150,180,.1)}
+.hz{font-size:11px;font-weight:700;padding:2px 6px;border-radius:3px;background:rgba(120,150,180,.07);color:var(--faint);border:1px solid rgba(120,150,180,.1)}
 .hz.on{color:#fff}
 .hz.rock.on{background:rgba(168,85,247,.22);border-color:rgba(168,85,247,.45)}
 .hz.spike.on{background:rgba(150,180,210,.22);border-color:rgba(150,180,210,.45)}
@@ -93,29 +93,29 @@ body{font-family:"Noto Sans SC","Chakra Petch",sans-serif;color:var(--text);font
 .mini.active{border-color:var(--opp);box-shadow:0 0 0 1px var(--opp) inset,0 0 10px rgba(251,113,133,.15)}
 .mini.unknown{border-style:dashed;border-color:rgba(120,150,180,.18)}
 .mini.ko{opacity:.7;filter:grayscale(.4);background:rgba(248,113,113,.16);border-color:rgba(248,113,133,.4)}
-.mini.ko .m-name{text-decoration:line-through;color:#fca5a5}
-.mini .m-name{font-size:9px;font-weight:600;line-height:1.1;max-width:100%;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-all;text-align:center}
+.mini.ko .m-name{color:#fca5a5}
+.mini .m-name{font-size:11px;font-weight:600;line-height:1.1;max-width:100%;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-all;text-align:center}
 .mini .m-hp{width:100%;height:4px;border-radius:2px;background:rgba(0,0,0,.5);overflow:hidden}
 .mini .m-hp i{display:block;height:100%;width:0;transition:width .8s cubic-bezier(.22,1,.36,1)}
-.mini .m-pct{font-family:"Chakra Petch";font-size:10px;font-weight:700;line-height:1}
+.mini .m-pct{font-family:"Chakra Petch";font-size:12px;font-weight:700;line-height:1}
 .mini .m-st{display:flex;gap:2px;height:13px}
-.st-dot{width:13px;height:13px;border-radius:50%;font-size:8px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;line-height:1}
+.st-dot{width:13px;height:13px;border-radius:50%;font-size:10px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;line-height:1}
 
 /* z2 / z3 场上 */
 .field-head{display:flex;align-items:center;gap:7px;flex-wrap:wrap;flex:0 0 auto}
-.f-name{font-size:15px;font-weight:700;line-height:1}
-.f-lv{font-family:"Chakra Petch";font-size:11px;color:var(--dim)}
-.type-chip{font-size:9px;font-weight:700;color:#fff;padding:2px 7px;border-radius:3px;text-shadow:0 1px 1px rgba(0,0,0,.4);line-height:1.3}
+.f-name{font-size:17px;font-weight:700;line-height:1}
+.f-lv{font-family:"Chakra Petch";font-size:13px;color:var(--dim)}
+.type-chip{font-size:11px;font-weight:700;color:#fff;padding:2px 7px;border-radius:3px;text-shadow:0 1px 1px rgba(0,0,0,.4);line-height:1.3}
 .hp-row{display:flex;align-items:center;gap:8px;margin-top:5px;flex:0 0 auto}
 .hp-bar{flex:1;height:8px;border-radius:4px;background:rgba(0,0,0,.5);box-shadow:inset 0 1px 2px rgba(0,0,0,.6);overflow:hidden;position:relative}
 .hp-fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:4px;background:linear-gradient(180deg,var(--hp-h),var(--hp-l));transition:width 1s cubic-bezier(.22,1,.36,1)}
 .hp-fill::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);background-size:50px 100%;animation:shine 2.8s linear infinite}
 @keyframes shine{from{background-position:-50px 0}to{background-position:200px 0}}
-.hp-num{font-family:"Chakra Petch";font-size:11px;color:var(--dim);white-space:nowrap}
+.hp-num{font-family:"Chakra Petch";font-size:13px;color:var(--dim);white-space:nowrap}
 .hp-num b{color:var(--text);font-weight:600}
-.hp-pct{font-family:"Chakra Petch";font-weight:700;font-size:13px}
+.hp-pct{font-family:"Chakra Petch";font-weight:700;font-size:15px}
 .boosts{display:flex;flex-wrap:nowrap;gap:4px;margin-top:5px;flex:0 0 auto;overflow:hidden}
-.boost{font-family:"Chakra Petch";font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px;letter-spacing:.02em;flex:0 0 auto;white-space:nowrap}
+.boost{font-family:"Chakra Petch";font-size:11px;font-weight:700;padding:2px 5px;border-radius:3px;letter-spacing:.02em;flex:0 0 auto;white-space:nowrap}
 .boost.up{background:rgba(245,158,11,.18);color:var(--up);border:1px solid rgba(245,158,11,.4)}
 .boost.down{background:rgba(96,165,250,.18);color:var(--down);border:1px solid rgba(96,165,250,.4)}
 .boost.zero{color:var(--faint);background:rgba(120,150,180,.05);border:1px solid rgba(120,150,180,.1)}
@@ -123,10 +123,10 @@ body{font-family:"Noto Sans SC","Chakra Petch",sans-serif;color:var(--text);font
 /* z3 我方场上 + 招式 */
 .z3{flex:0 0 auto}
 .moves{display:grid;grid-template-columns:repeat(2,1fr);gap:4px 10px;margin-top:6px;flex:1;align-content:center}
-.move{display:flex;align-items:center;gap:5px;font-size:10px;min-width:0}
-.mtype{flex-shrink:0;min-width:20px;height:15px;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.4);padding:0 3px}
+.move{display:flex;align-items:center;gap:5px;font-size:12px;min-width:0}
+.mtype{flex-shrink:0;min-width:20px;height:15px;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.4);padding:0 3px}
 .mname{flex:1;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mpp{font-family:"Chakra Petch";font-size:9px;color:var(--dim);margin-left:auto}
+.mpp{font-family:"Chakra Petch";font-size:11px;color:var(--dim);margin-left:auto}
 .mpp.low{color:var(--up)}
 
 /* z4 我方场下 */
@@ -135,24 +135,24 @@ body{font-family:"Noto Sans SC","Chakra Petch",sans-serif;color:var(--text);font
 .bench-poke{display:grid;grid-template-columns:120px 1fr;gap:8px;padding:3px 7px;border-radius:6px;background:rgba(0,0,0,.2);align-items:center}
 .bench-poke.active{box-shadow:0 0 0 1px var(--me) inset,0 0 8px rgba(56,189,248,.18)}
 .bench-poke.ko{opacity:.7;filter:grayscale(.4);background:rgba(248,113,113,.16)}
-.bench-poke.ko .bp-name{text-decoration:line-through;color:#fca5a5}
+.bench-poke.ko .bp-name{color:#fca5a5}
 .bp-left{display:flex;flex-direction:column;gap:2px;min-width:0}
-.bp-name{font-size:10px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.1}
+.bp-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.1}
 .bp-hp{display:flex;align-items:center;gap:4px}
 .bp-hpbar{flex:1;height:4px;border-radius:2px;background:rgba(0,0,0,.5);overflow:hidden}
 .bp-hpbar i{display:block;height:100%;width:0;transition:width .8s cubic-bezier(.22,1,.36,1)}
-.bp-pct{font-family:"Chakra Petch";font-size:9px;font-weight:700}
+.bp-pct{font-family:"Chakra Petch";font-size:11px;font-weight:700}
 .bp-moves{display:flex;gap:6px;align-items:center;min-width:0}
-.bmv{display:inline-flex;align-items:center;gap:3px;font-size:9px;min-width:0;flex:1 1 0}
+.bmv{display:inline-flex;align-items:center;gap:3px;font-size:11px;min-width:0;flex:1 1 0}
 .bmt{width:6px;height:6px;border-radius:50%;flex-shrink:0;display:inline-block}
 .bmv .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 
 /* 控制 */
 .controls{position:fixed;right:14px;bottom:10px;z-index:20;display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--panel);border:1px solid var(--edge);border-radius:8px;backdrop-filter:blur(8px)}
-.ctrl-btn{font-family:"Chakra Petch";font-size:10px;font-weight:600;letter-spacing:.12em;color:var(--dim);background:transparent;border:1px solid var(--edge);border-radius:5px;padding:4px 10px;cursor:pointer;transition:all .15s}
+.ctrl-btn{font-family:"Chakra Petch";font-size:12px;font-weight:600;letter-spacing:.12em;color:var(--dim);background:transparent;border:1px solid var(--edge);border-radius:5px;padding:4px 10px;cursor:pointer;transition:all .15s}
 .ctrl-btn:hover{color:var(--text);border-color:var(--me);background:rgba(56,189,248,.1)}
-.step-info{font-family:"Chakra Petch";font-size:10px;color:var(--dim);min-width:42px;text-align:center}
-.preview-tag{position:fixed;left:14px;bottom:10px;z-index:20;font-family:"Chakra Petch";font-size:9px;letter-spacing:.2em;color:var(--faint);display:flex;align-items:center;gap:5px}
+.step-info{font-family:"Chakra Petch";font-size:12px;color:var(--dim);min-width:42px;text-align:center}
+.preview-tag{position:fixed;left:14px;bottom:10px;z-index:20;font-family:"Chakra Petch";font-size:11px;letter-spacing:.2em;color:var(--faint);display:flex;align-items:center;gap:5px}
 .preview-tag::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--me);box-shadow:0 0 6px var(--me);animation:blink 1.4s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 </style>
@@ -162,10 +162,8 @@ body{font-family:"Noto Sans SC","Chakra Petch",sans-serif;color:var(--text);font
 <main class="hud">
   <div class="po-slot">
     <div class="po-topbar">
-      <span class="brand">POKEMON · BATTLE HUD</span>
-      <span class="brand-sub">REAL-TIME OVERLAY</span>
       <span class="spacer"></span>
-      <span class="vs"><b>ME</b> &nbsp;VS&nbsp; <span class="foe">FOE</span></span>
+      <span class="vs" id="vsLabel"><b>ME</b> &nbsp;VS&nbsp; <span class="foe">FOE</span></span>
     </div>
     <div class="po-frame-wrap">
       <div class="po-frame">
@@ -200,6 +198,7 @@ body{font-family:"Noto Sans SC","Chakra Petch",sans-serif;color:var(--text);font
 // 等价于未来 EventSource 收到新状态就 render()——render() 一行不改即可复用。
 var S0 = {
   turn:1, weather:"sun", terrain:null,
+  mePlayer:"mew", oppPlayer:"挑战者",
   me:{
     active:{ name:"烈咬陆鲨", level:100, types:["Dragon","Ground"],
       hp:280, maxHp:280, hpPct:100, status:null,
@@ -332,23 +331,23 @@ function oppMiniHtml(p){
   var name=p.name||'???';
   var st=p.status?(' style="background:'+STATUS[p.status].bg+';border-color:'+STATUS[p.status].c+'"'):'';
   var hp;
-  if(!p.revealed){ hp='<div class="m-hp"></div><div class="m-pct" style="color:var(--faint);font-size:9px">未露</div>'; }
+  if(!p.revealed){ hp='<div class="m-hp"></div><div class="m-pct" style="color:var(--faint);font-size:11px">未露</div>'; }
   else if(p.ko){ hp='<div class="m-hp"></div><div class="m-pct" style="color:var(--faint)">KO</div>'; }
   else { hp='<div class="m-hp"><i data-pct="'+p.hpPct+'" style="background:'+hc[0]+'"></i></div><div class="m-pct" style="color:'+hc[0]+'">'+p.hpPct+'%</div>'; }
   return '<div class="'+cls+'"'+st+'><div class="m-name">'+esc(name)+'</div>'+hp+'</div>';
 }
-function oppFieldHtml(p){
+function oppFieldHtml(p, hz){
   var hc=hpColors(p.hpPct);
-  return '<div class="zone-head opp"><span class="zt">FOE ACTIVE · 对手场上</span></div>'+
+  return '<div class="zone-head opp">'+hazardsHtml(hz)+'</div>'+
     '<div class="field-head"><span class="f-name" style="color:#ffeef1">'+esc(p.name)+'</span><span class="f-lv">L'+p.level+'</span>'+
     p.types.map(typeChip).join('')+statusDot(p.status)+'</div>'+
     '<div class="hp-row"><div class="hp-bar"><div class="hp-fill" data-pct="'+p.hpPct+'" style="--hp-h:'+hc[0]+';--hp-l:'+hc[1]+'"></div></div>'+
     '<span class="hp-pct" style="color:'+hc[0]+'">'+p.hpPct+'%</span><span class="hp-num">仅百分比</span></div>'+
     '<div class="boosts">'+boostsHtml(p.boosts)+'</div>';
 }
-function meFieldHtml(p){
+function meFieldHtml(p, hz){
   var hc=hpColors(p.hpPct);
-  return '<div class="zone-head me"><span class="zt">MY ACTIVE · 我方场上</span></div>'+
+  return '<div class="zone-head me">'+hazardsHtml(hz)+'</div>'+
     '<div class="field-head"><span class="f-name" style="color:#eaf6ff">'+esc(p.name)+'</span><span class="f-lv">L'+p.level+'</span>'+
     p.types.map(typeChip).join('')+statusDot(p.status)+'</div>'+
     '<div class="hp-row"><div class="hp-bar"><div class="hp-fill" data-pct="'+p.hpPct+'" style="--hp-h:'+hc[0]+';--hp-l:'+hc[1]+'"></div></div>'+
@@ -376,23 +375,20 @@ function render(s){
     '<span class="turn"><span class="lbl">TURN</span>'+String(s.turn).padStart(2,"0")+'</span>'+
     '<span class="weather"><span class="k">WEATHER</span>'+(w?w.cn:'—')+'</span>'+
     '<span class="terrain"><span class="k">TERRAIN</span>'+(t?t.cn:'—')+'</span>'+
-    '<span class="spacer"></span>'+
-    '<span class="tag">DEMO</span>';
+    '<span class="spacer"></span>';
+  var vsL=document.getElementById('vsLabel');
+  if(vsL) vsL.innerHTML='<b>'+esc(s.mePlayer||'ME')+'</b> &nbsp;VS&nbsp; <span class="foe">'+esc(s.oppPlayer||'FOE')+'</span>';
 
   // z1: 对手6只 = 场上 + 后备5
   var opp6=[{name:s.opp.active.name,hpPct:s.opp.active.hpPct,status:s.opp.active.status,ko:s.opp.active.hpPct===0,active:true,revealed:true}];
   opp6=opp6.concat(s.opp.bench.map(function(b){return {name:b.name,hpPct:b.hpPct,status:b.status||null,ko:b.ko,active:false,revealed:b.revealed};}));
-  document.getElementById('z1').innerHTML=
-    '<div class="zone-head opp"><span class="zt">FOE TEAM · 对手6只</span>'+hazardsHtml(s.opp.hazards)+'</div>'+
-    '<div class="row6">'+opp6.map(oppMiniHtml).join('')+'</div>';
+  document.getElementById('z1').innerHTML='<div class="row6">'+opp6.map(oppMiniHtml).join('')+'</div>';
 
-  document.getElementById('z2').innerHTML=oppFieldHtml(s.opp.active);
-  document.getElementById('z3').innerHTML=meFieldHtml(s.me.active);
+  document.getElementById('z2').innerHTML=oppFieldHtml(s.opp.active, s.opp.hazards);
+  document.getElementById('z3').innerHTML=meFieldHtml(s.me.active, s.me.hazards);
   var me6=[{name:s.me.active.name,hp:s.me.active.hp,maxHp:s.me.active.maxHp,hpPct:s.me.active.hpPct,status:s.me.active.status,ko:s.me.active.hpPct===0,moves:s.me.active.moves,active:true}];
   me6=me6.concat(s.me.bench.map(function(b){return {name:b.name,hp:b.hp,maxHp:b.maxHp,hpPct:b.hpPct,status:b.status,ko:b.ko,moves:b.moves,active:false};}));
-  document.getElementById('z4').innerHTML=
-    '<div class="zone-head me"><span class="zt">MY TEAM · 我方6只</span>'+hazardsHtml(s.me.hazards)+'</div>'+
-    '<div class="bench-list">'+me6.map(meBenchHtml).join('')+'</div>';
+  document.getElementById('z4').innerHTML='<div class="bench-list">'+me6.map(meBenchHtml).join('')+'</div>';
 
   // HP 填充动画（所有 data-pct 元素下一帧设宽度，触发 transition）
   setTimeout(function(){

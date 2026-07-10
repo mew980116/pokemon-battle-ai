@@ -196,10 +196,15 @@ function collectBoardState(){
     var weather = null, terrain = null;
     try { weather = boardWeatherName(battle.data.field.weather); } catch(e){}
     try { terrain = boardTerrainName(battle.data.field.terrain); } catch(e){}
+    var mePlayer = null, oppPlayer = null;
+    try { mePlayer = battle.data.team(battle.me).name; } catch(e){}
+    try { oppPlayer = battle.data.team(battle.opp).name; } catch(e){}
     return {
         turn: boardCurrentTurn,
         weather: weather,
         terrain: terrain,
+        mePlayer: mePlayer,
+        oppPlayer: oppPlayer,
         me: { active: meActive, bench: meBench, hazards: boardCollectHazards(battle.me) },
         opp: { active: boardCollectOppActive(), bench: boardCollectOppBench(), hazards: boardCollectHazards(battle.opp) },
         battleLog: [],
@@ -240,7 +245,7 @@ function boardPushNow(force){
     },
     // no decision logic: PO will let you pick manually (or you're spectating)
     onOfferChoice: function (player, choice) {},
-    onChoiceSelection: function (player) {},
+    onChoiceSelection: function (player) { boardPushNow(true); },
     onChoiceCancellation: function (player) {},
     onChoiceCancelled: function (player) {},
     onDrawRequest: function (player) {},
