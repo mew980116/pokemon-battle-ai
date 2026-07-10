@@ -152,12 +152,11 @@ body{font-family:"Noto Sans SC","Chakra Petch",sans-serif;color:var(--text);font
 .divider .side{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--dim)}
 .divider .side .lbl{font-family:"Chakra Petch";font-size:10px;letter-spacing:.1em;color:var(--faint)}
 .hazards{display:flex;gap:4px}
-.hz{font-size:11px;font-weight:700;padding:2px 6px;border-radius:3px;background:rgba(120,150,180,.07);color:var(--faint);border:1px solid rgba(120,150,180,.1)}
-.hz.on{color:#fff}
-.hz.rock.on{background:rgba(168,85,247,.22);border-color:rgba(168,85,247,.45)}
-.hz.spike.on{background:rgba(150,180,210,.22);border-color:rgba(150,180,210,.45)}
-.hz.toxic.on{background:rgba(168,85,247,.28);border-color:rgba(168,85,247,.5)}
-.hz.web.on{background:rgba(100,200,180,.22);border-color:rgba(100,200,180,.45)}
+.hz{font-size:11px;font-weight:700;padding:2px 7px;border-radius:3px;color:#fff;border:1px solid;white-space:nowrap}
+.hz-rock{background:rgba(168,85,247,.3);border-color:rgba(168,85,247,.5)}
+.hz-spike{background:rgba(150,180,210,.25);border-color:rgba(150,180,210,.45)}
+.hz-toxic{background:rgba(168,85,247,.35);border-color:rgba(168,85,247,.55)}
+.hz-web{background:rgba(100,200,180,.25);border-color:rgba(100,200,180,.45)}
 
 /* 控制 */
 .controls{position:fixed;right:14px;bottom:10px;z-index:20;display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--panel);border:1px solid var(--edge);border-radius:8px;backdrop-filter:blur(8px)}
@@ -291,12 +290,12 @@ function typeShort(t){return TYPE_CN[t]||t;}
 function typeChip(t){ if(!t){return '<span class="type-chip" style="background:#6b7280">?</span>';} return '<span class="type-chip" style="background:'+(TYPE_COLOR[t]||'#6b7280')+'">'+typeShort(t)+'</span>';}
 function statusDot(s){return s?'<span class="st-dot" style="background:'+STATUS[s].c+'">'+STATUS[s].cn+'</span>':'';}
 function hazardsHtml(h){
-  return '<div class="hazards">'+
-    '<span class="hz rock'+(h.stealthRocks?' on':'')+'">岩'+(h.stealthRocks?'✓':'')+'</span>'+
-    '<span class="hz spike'+(h.spikes?' on':'')+'">菱'+(h.spikes||'')+'</span>'+
-    '<span class="hz toxic'+(h.toxicSpikes?' on':'')+'">毒'+(h.toxicSpikes||'')+'</span>'+
-    '<span class="hz web'+(h.stickyWeb?' on':'')+'">网'+(h.stickyWeb?'✓':'')+'</span>'+
-  '</div>';
+  var parts=[];
+  if(h.stealthRocks) parts.push('<span class="hz hz-rock">隐形岩</span>');
+  if(h.spikes) parts.push('<span class="hz hz-spike">撒菱×'+h.spikes+'</span>');
+  if(h.toxicSpikes) parts.push('<span class="hz hz-toxic">毒菱×'+h.toxicSpikes+'</span>');
+  if(h.stickyWeb) parts.push('<span class="hz hz-web">虫网</span>');
+  return parts.length?'<div class="hazards">'+parts.join('')+'</div>':'';
 }
 function boostsHtml(b){
   return BOOST_LABELS.map(function(bl){
@@ -318,8 +317,8 @@ function moveMiniHtml(m){
 }
 
 // ===== 各区渲染 =====
-// z2/z3 场上卡：左两行(名字Lv属性HP条血量 / 能力等级)，右4招横排(每格名+属性PP)
-function fieldCardHtml(p, isMe){
+// z2/z3 场上卡：左两行(名字Lv属性HP条血量 / 能力等级+陷阱)，右4招横排(每格名+属性PP)
+function fieldCardHtml(p, isMe, hz){
   var hc=hpColors(p.hpPct);
   var nameColor = isMe ? '#eaf6ff' : '#ffeef1';
   var hpNum = isMe ? '<span class="hp-num"><b>'+p.hp+'</b>/'+p.maxHp+'</span>' : '';
@@ -340,7 +339,7 @@ function fieldCardHtml(p, isMe){
         hpNum+
         '<span class="hp-pct" style="color:'+hc[0]+'">'+p.hpPct+'%</span>'+
       '</div>'+
-      '<div class="boosts">'+boostsHtml(p.boosts)+'</div>'+
+      '<div class="boosts">'+boostsHtml(p.boosts)+(hz?hazardsHtml(hz):'')+'</div>'+
     '</div>'+
     movesHtml+
   '</div>';
@@ -411,19 +410,13 @@ function meBenchHtml(p){
 function dividerHtml(s){
   var w=s.weather?WEATHER[s.weather]:null;
   var t=s.terrain?TERRAIN[s.terrain]:null;
-  return '<div class="d-top">'+
-      '<span class="side"><span class="lbl">FOE场</span>'+hazardsHtml(s.opp.hazards)+'</span>'+
-      '<span class="foe">'+esc(s.oppPlayer||'FOE')+'</span>'+
-    '</div>'+
+  return '<div class="d-top"><span class="foe">'+esc(s.oppPlayer||'FOE')+'</span></div>'+
     '<div class="d-mid">'+
       '<span class="turn"><span class="lbl">TURN</span>'+String(s.turn).padStart(2,"0")+'</span>'+
       '<span><span class="k">天气</span><b class="weather">'+(w?w.cn:'—')+'</b></span>'+
       '<span><span class="k">场地</span><b class="terrain">'+(t?t.cn:'—')+'</b></span>'+
     '</div>'+
-    '<div class="d-bot">'+
-      '<span class="me">'+esc(s.mePlayer||'ME')+'</span>'+
-      '<span class="side"><span class="lbl">ME场</span>'+hazardsHtml(s.me.hazards)+'</span>'+
-    '</div>';
+    '<div class="d-bot"><span class="me">'+esc(s.mePlayer||'ME')+'</span></div>';
 }
 
 function render(s){
@@ -435,8 +428,8 @@ function render(s){
   me6=me6.concat(s.me.bench.map(function(b){return {name:b.name,hp:b.hp,maxHp:b.maxHp,hpPct:b.hpPct,status:b.status,ko:b.ko,moves:b.moves,active:false};}));
 
   document.getElementById('z1').innerHTML='<div class="pcards">'+opp6.map(function(p){return pcCardHtml(p,false);}).join('')+'</div>';
-  document.getElementById('z2').innerHTML=fieldCardHtml(s.opp.active, false);
-  document.getElementById('z3').innerHTML=fieldCardHtml(s.me.active, true);
+  document.getElementById('z2').innerHTML=fieldCardHtml(s.opp.active, false, s.opp.hazards);
+  document.getElementById('z3').innerHTML=fieldCardHtml(s.me.active, true, s.me.hazards);
   document.getElementById('z4').innerHTML='<div class="pcards">'+me6.map(function(p){return pcCardHtml(p,true);}).join('')+'</div>';
 
   setTimeout(function(){
