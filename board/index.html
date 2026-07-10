@@ -60,7 +60,7 @@ body{font-family:"Noto Sans SC","Chakra Petch",sans-serif;color:var(--text);font
 .z4{flex:1.6 1 0;min-height:0}
 
 /* z2/z3 场上卡（左信息 + 右招式）*/
-.field-card{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:start;flex:0 0 auto}
+.field-card{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start;flex:0 0 auto}
 .fc-left{display:flex;flex-direction:column;gap:5px;min-width:0}
 .fc-row1{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .f-name{font-size:17px;font-weight:700;line-height:1}
@@ -79,10 +79,10 @@ body{font-family:"Noto Sans SC","Chakra Petch",sans-serif;color:var(--text);font
 .boost.down{background:rgba(96,165,250,.18);color:var(--down);border:1px solid rgba(96,165,250,.4)}
 .boost.zero{color:var(--faint);background:rgba(120,150,180,.05);border:1px solid rgba(120,150,180,.1)}
 .st-dot{width:15px;height:15px;border-radius:50%;font-size:10px;font-weight:700;color:#fff;display:inline-flex;align-items:center;justify-content:center;line-height:1;flex-shrink:0}
-.fc-moves{display:flex;gap:8px;align-items:stretch}
+.fc-moves{display:flex;gap:8px;align-items:stretch;justify-content:center}
 .movecell{display:flex;flex-direction:column;gap:2px;min-width:62px;padding:3px 5px;border-radius:4px;background:rgba(0,0,0,.2)}
-.mc-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.1}
-.mc-bot{display:flex;align-items:center;gap:4px;font-size:11px}
+.mc-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.1;text-align:center}
+.mc-bot{display:flex;align-items:center;justify-content:center;gap:4px;font-size:11px}
 .fc-empty{min-width:200px;min-height:50px;border:1px dashed rgba(120,150,180,.15);border-radius:5px}
 
 /* z2/z3 6只卡片网格 */
