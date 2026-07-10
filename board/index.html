@@ -28,26 +28,20 @@
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%;overflow:hidden;background:transparent}
-body{font-family:"Noto Sans SC","Chakra Petch",sans-serif;color:var(--text);font-size:14px;display:flex;align-items:flex-start;justify-content:center}
+body{font-family:"Noto Sans SC","Chakra Petch",sans-serif;color:var(--text);font-size:14px;display:flex;align-items:center;justify-content:center}
 
 .bg-grid{position:fixed;inset:0;z-index:0;pointer-events:none;
   background-image:linear-gradient(rgba(120,170,220,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(120,170,220,.04) 1px,transparent 1px);
   background-size:42px 42px;
   mask-image:radial-gradient(ellipse 85% 75% at 50% 50%,#000 35%,transparent 100%)}
 
-.hud{position:relative;z-index:5;display:flex;gap:14px;padding:14px;align-items:flex-start;width:100%;max-width:100vw}
+.hud{position:relative;z-index:5;display:flex;gap:14px;padding:14px;align-items:stretch;width:100%;max-width:100vw;box-sizing:border-box}
+.col{display:flex;flex-direction:column;gap:10px;min-height:0}
+.po-col{flex:1 1 auto;min-width:0}
+.info-col{flex:0 0 460px}
 
-/* ===== 左侧 PO 占位区（上栏 + 21:9 占位居中 + 下栏图例）===== */
-.po-slot{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:10px}
-.po-topbar{flex:0 0 auto;padding:10px 16px;background:var(--panel);border:1px solid var(--edge);border-radius:10px;display:flex;align-items:baseline;gap:14px}
-.po-topbar .brand{font-family:"Chakra Petch";font-weight:700;font-size:16px;letter-spacing:.3em;color:var(--text)}
-.po-topbar .brand-sub{font-family:"Chakra Petch";font-size:11px;letter-spacing:.25em;color:var(--dim)}
-.po-topbar .spacer{flex:1}
-.po-topbar .vs{font-family:"Chakra Petch";font-size:13px;color:var(--faint);letter-spacing:.12em}
-.po-topbar .vs b{color:var(--me);font-weight:600}
-.po-topbar .vs .foe{color:var(--opp);font-weight:600}
-.po-frame-wrap{flex:1 1 auto;display:flex;align-items:center;justify-content:center;min-height:0}
-.po-frame{height:100%;aspect-ratio:21/9;max-width:100%;position:relative;border:1.5px dashed rgba(120,170,220,.22);border-radius:14px;background:linear-gradient(135deg,rgba(15,23,34,.7),rgba(10,16,24,.7));display:flex;align-items:center;justify-content:center;overflow:hidden}
+/* PO 占位 21:9 */
+.po-frame{width:100%;aspect-ratio:21/9;flex:0 0 auto;position:relative;border:1.5px dashed rgba(120,170,220,.22);border-radius:14px;background:linear-gradient(135deg,rgba(15,23,34,.7),rgba(10,16,24,.7));display:flex;align-items:center;justify-content:center;overflow:hidden}
 .po-frame::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(120,170,220,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(120,170,220,.025) 1px,transparent 1px);background-size:32px 32px;pointer-events:none}
 .po-corner{position:absolute;width:20px;height:20px;border:2px solid var(--me);opacity:.45}
 .po-corner.tl{top:12px;left:12px;border-right:none;border-bottom:none;border-radius:4px 0 0 0}
@@ -59,93 +53,86 @@ body{font-family:"Noto Sans SC","Chakra Petch",sans-serif;color:var(--text);font
 .po-l2{font-size:12px;letter-spacing:.18em;margin-top:5px}
 .po-l3{font-family:"Chakra Petch";font-size:11px;letter-spacing:.2em;margin-top:10px;color:var(--faint);opacity:.6}
 
-/* ===== 右侧信息区 ===== */
-.info{flex:0 0 440px;min-height:0;display:flex;flex-direction:column;gap:8px}
+/* zone 通用 */
+.zone{background:var(--panel);border:1px solid var(--edge);border-radius:9px;padding:8px 12px;min-height:0;overflow:hidden;display:flex;flex-direction:column}
+.z2,.z3{flex:0 0 auto}
+.z1{flex:1 1 0;min-height:0}
+.z4{flex:1.3 1 0;min-height:0}
 
-.status-bar{flex:0 0 auto;display:flex;align-items:center;gap:14px;padding:7px 14px;
-  background:var(--panel);border:1px solid var(--edge);border-radius:8px}
-.status-bar .turn{font-family:"Chakra Petch";font-weight:700;font-size:19px;line-height:1}
-.status-bar .turn .lbl{font-size:11px;letter-spacing:.2em;color:var(--dim);margin-right:7px;font-weight:600}
-.status-bar .weather{font-size:14px;font-weight:600;color:var(--me)}
-.status-bar .weather .k{font-family:"Chakra Petch";font-size:11px;letter-spacing:.14em;color:var(--faint);margin-right:5px;font-weight:500}
-.status-bar .terrain{font-size:14px;font-weight:600;color:#c4b5fd}
-.status-bar .terrain .k{font-family:"Chakra Petch";font-size:11px;letter-spacing:.14em;color:var(--faint);margin-right:5px;font-weight:500}
-.status-bar .spacer{flex:1}
-.status-bar .tag{font-family:"Chakra Petch";font-size:11px;letter-spacing:.2em;color:var(--faint)}
+/* z2/z3 横向场上卡 */
+.field-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:0 0 auto}
+.f-name{font-size:17px;font-weight:700;line-height:1}
+.f-lv{font-family:"Chakra Petch";font-size:13px;color:var(--dim)}
+.type-chip{font-size:11px;font-weight:700;color:#fff;padding:2px 7px;border-radius:3px;text-shadow:0 1px 1px rgba(0,0,0,.4);line-height:1.3}
+.hp-bar{flex:1 1 80px;min-width:60px;height:9px;border-radius:5px;background:rgba(0,0,0,.5);box-shadow:inset 0 1px 2px rgba(0,0,0,.6);overflow:hidden;position:relative}
+.hp-fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:5px;background:linear-gradient(180deg,var(--hp-h),var(--hp-l));transition:width 1s cubic-bezier(.22,1,.36,1)}
+.hp-fill::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);background-size:50px 100%;animation:shine 2.8s linear infinite}
+@keyframes shine{from{background-position:-50px 0}to{background-position:200px 0}}
+.hp-num{font-family:"Chakra Petch";font-size:12px;color:var(--dim);white-space:nowrap}
+.hp-num b{color:var(--text);font-weight:600}
+.hp-pct{font-family:"Chakra Petch";font-weight:700;font-size:14px}
+.boosts{display:flex;flex-wrap:nowrap;gap:4px;overflow:hidden}
+.boost{font-family:"Chakra Petch";font-size:11px;font-weight:700;padding:2px 5px;border-radius:3px;letter-spacing:.02em;flex:0 0 auto;white-space:nowrap}
+.boost.up{background:rgba(245,158,11,.18);color:var(--up);border:1px solid rgba(245,158,11,.4)}
+.boost.down{background:rgba(96,165,250,.18);color:var(--down);border:1px solid rgba(96,165,250,.4)}
+.boost.zero{color:var(--faint);background:rgba(120,150,180,.05);border:1px solid rgba(120,150,180,.1)}
+.st-dot{width:15px;height:15px;border-radius:50%;font-size:10px;font-weight:700;color:#fff;display:inline-flex;align-items:center;justify-content:center;line-height:1;flex-shrink:0}
+.moves{display:flex;gap:10px;flex-wrap:wrap;margin-top:5px;flex:0 0 auto;width:100%}
+.move{display:flex;align-items:center;gap:5px;font-size:12px;min-width:0}
+.mtype{flex-shrink:0;min-width:22px;height:16px;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.4);padding:0 3px}
+.mname{color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mpp{font-family:"Chakra Petch";font-size:11px;color:var(--dim);margin-left:auto}
+.mpp.low{color:var(--up)}
 
-.zone{background:var(--panel);border:1px solid var(--edge);border-radius:9px;padding:8px 10px;min-height:0;overflow:hidden;display:flex;flex-direction:column}
-.zone-head{display:flex;align-items:center;gap:8px;margin-bottom:6px;flex:0 0 auto}
-.zone-head .zt{font-family:"Chakra Petch";font-size:11px;letter-spacing:.2em;color:var(--dim);font-weight:600}
-.zone-head.me .zt{color:var(--me)}
-.zone-head.opp .zt{color:var(--opp)}
-.hazards{display:flex;gap:4px;margin-left:auto}
+/* z1 对手6只 竖排 */
+.team-list{display:flex;flex-direction:column;gap:4px;flex:1;min-height:0;overflow:hidden}
+.team-row{display:grid;grid-template-columns:86px 1fr 48px 18px;gap:8px;align-items:center;padding:5px 8px;border-radius:6px;background:rgba(0,0,0,.2);min-height:0}
+.team-row.active{box-shadow:0 0 0 1px var(--opp) inset,0 0 8px rgba(251,113,133,.15)}
+.team-row.unknown{border:1px dashed rgba(120,150,180,.18);background:rgba(0,0,0,.1)}
+.team-row.ko{opacity:.7;filter:grayscale(.4);background:rgba(248,113,113,.16)}
+.team-row .tr-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.team-row .tr-hpbar{height:6px;border-radius:3px;background:rgba(0,0,0,.5);overflow:hidden}
+.team-row .tr-hpbar i{display:block;height:100%;width:0;transition:width .8s cubic-bezier(.22,1,.36,1)}
+.team-row .tr-pct{font-family:"Chakra Petch";font-size:12px;font-weight:700;text-align:right;white-space:nowrap}
+
+/* z4 我方6只 竖排（带招式） */
+.bench-list{display:flex;flex-direction:column;gap:4px;flex:1;min-height:0;overflow:hidden}
+.bench-poke{display:grid;grid-template-columns:110px 1fr;gap:8px;padding:4px 7px;border-radius:6px;background:rgba(0,0,0,.2);align-items:center}
+.bench-poke.active{box-shadow:0 0 0 1px var(--me) inset,0 0 8px rgba(56,189,248,.18)}
+.bench-poke.ko{opacity:.7;filter:grayscale(.4);background:rgba(248,113,113,.16)}
+.bp-left{display:flex;flex-direction:column;gap:2px;min-width:0}
+.bp-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.1}
+.bp-hp{display:flex;align-items:center;gap:4px}
+.bp-hpbar{flex:1;height:5px;border-radius:3px;background:rgba(0,0,0,.5);overflow:hidden}
+.bp-hpbar i{display:block;height:100%;width:0;transition:width .8s cubic-bezier(.22,1,.36,1)}
+.bp-pct{font-family:"Chakra Petch";font-size:11px;font-weight:700}
+.bp-moves{display:flex;gap:6px;align-items:center;min-width:0}
+.bmv{display:inline-flex;align-items:center;gap:3px;font-size:11px;min-width:0;flex:1 1 0}
+.bmt{width:7px;height:7px;border-radius:50%;flex-shrink:0;display:inline-block}
+.bmv .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+
+/* 分隔条 */
+.divider{flex:0 0 auto;background:var(--panel);border:1px solid var(--edge);border-radius:9px;padding:8px 14px;display:flex;flex-direction:column;gap:6px}
+.divider .d-vs{display:flex;align-items:center;justify-content:center;gap:10px;font-family:"Chakra Petch";font-size:15px;font-weight:700}
+.divider .d-vs .me{color:var(--me)}
+.divider .d-vs .foe{color:var(--opp)}
+.divider .d-vs .vsx{color:var(--faint);font-weight:500}
+.divider .d-vs .turn{color:var(--text);margin-left:16px}
+.divider .d-vs .turn .lbl{font-size:11px;color:var(--dim);margin-right:5px;font-weight:600}
+.divider .d-env{display:flex;align-items:center;justify-content:center;gap:18px;font-size:13px}
+.divider .d-env .k{font-family:"Chakra Petch";font-size:11px;color:var(--faint);margin-right:5px;font-weight:500}
+.divider .d-env .weather{color:var(--me);font-weight:600}
+.divider .d-env .terrain{color:#c4b5fd;font-weight:600}
+.divider .d-haz{display:flex;align-items:center;justify-content:center;gap:20px}
+.divider .d-haz .side{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--dim)}
+.divider .d-haz .side .lbl{font-family:"Chakra Petch";font-size:10px;letter-spacing:.1em;color:var(--faint)}
+.hazards{display:flex;gap:4px}
 .hz{font-size:11px;font-weight:700;padding:2px 6px;border-radius:3px;background:rgba(120,150,180,.07);color:var(--faint);border:1px solid rgba(120,150,180,.1)}
 .hz.on{color:#fff}
 .hz.rock.on{background:rgba(168,85,247,.22);border-color:rgba(168,85,247,.45)}
 .hz.spike.on{background:rgba(150,180,210,.22);border-color:rgba(150,180,210,.45)}
 .hz.toxic.on{background:rgba(168,85,247,.28);border-color:rgba(168,85,247,.5)}
 .hz.web.on{background:rgba(100,200,180,.22);border-color:rgba(100,200,180,.45)}
-
-/* z1 对手6只 */
-.z1{flex:0 0 auto}
-.row6{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;flex:1}
-.mini{padding:3px 3px;border-radius:6px;background:rgba(0,0,0,.25);border:1px solid rgba(120,150,180,.1);display:flex;flex-direction:column;gap:2px;align-items:center;text-align:center;min-width:0}
-.mini.active{border-color:var(--opp);box-shadow:0 0 0 1px var(--opp) inset,0 0 10px rgba(251,113,133,.15)}
-.mini.unknown{border-style:dashed;border-color:rgba(120,150,180,.18)}
-.mini.ko{opacity:.7;filter:grayscale(.4);background:rgba(248,113,113,.16);border-color:rgba(248,113,133,.4)}
-.mini.ko .m-name{color:#fca5a5}
-.mini .m-name{font-size:11px;font-weight:600;line-height:1.1;max-width:100%;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-all;text-align:center}
-.mini .m-hp{width:100%;height:4px;border-radius:2px;background:rgba(0,0,0,.5);overflow:hidden}
-.mini .m-hp i{display:block;height:100%;width:0;transition:width .8s cubic-bezier(.22,1,.36,1)}
-.mini .m-pct{font-family:"Chakra Petch";font-size:12px;font-weight:700;line-height:1}
-.mini .m-st{display:flex;gap:2px;height:13px}
-.st-dot{width:13px;height:13px;border-radius:50%;font-size:10px;font-weight:700;color:#fff;display:flex;align-items:center;justify-content:center;line-height:1}
-
-/* z2 / z3 场上 */
-.field-head{display:flex;align-items:center;gap:7px;flex-wrap:wrap;flex:0 0 auto}
-.f-name{font-size:17px;font-weight:700;line-height:1}
-.f-lv{font-family:"Chakra Petch";font-size:13px;color:var(--dim)}
-.type-chip{font-size:11px;font-weight:700;color:#fff;padding:2px 7px;border-radius:3px;text-shadow:0 1px 1px rgba(0,0,0,.4);line-height:1.3}
-.hp-row{display:flex;align-items:center;gap:8px;margin-top:5px;flex:0 0 auto}
-.hp-bar{flex:1;height:8px;border-radius:4px;background:rgba(0,0,0,.5);box-shadow:inset 0 1px 2px rgba(0,0,0,.6);overflow:hidden;position:relative}
-.hp-fill{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:4px;background:linear-gradient(180deg,var(--hp-h),var(--hp-l));transition:width 1s cubic-bezier(.22,1,.36,1)}
-.hp-fill::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);background-size:50px 100%;animation:shine 2.8s linear infinite}
-@keyframes shine{from{background-position:-50px 0}to{background-position:200px 0}}
-.hp-num{font-family:"Chakra Petch";font-size:13px;color:var(--dim);white-space:nowrap}
-.hp-num b{color:var(--text);font-weight:600}
-.hp-pct{font-family:"Chakra Petch";font-weight:700;font-size:15px}
-.boosts{display:flex;flex-wrap:nowrap;gap:4px;margin-top:5px;flex:0 0 auto;overflow:hidden}
-.boost{font-family:"Chakra Petch";font-size:11px;font-weight:700;padding:2px 5px;border-radius:3px;letter-spacing:.02em;flex:0 0 auto;white-space:nowrap}
-.boost.up{background:rgba(245,158,11,.18);color:var(--up);border:1px solid rgba(245,158,11,.4)}
-.boost.down{background:rgba(96,165,250,.18);color:var(--down);border:1px solid rgba(96,165,250,.4)}
-.boost.zero{color:var(--faint);background:rgba(120,150,180,.05);border:1px solid rgba(120,150,180,.1)}
-
-/* z3 我方场上 + 招式 */
-.z3{flex:0 0 auto}
-.moves{display:grid;grid-template-columns:repeat(2,1fr);gap:4px 10px;margin-top:6px;flex:1;align-content:center}
-.move{display:flex;align-items:center;gap:5px;font-size:12px;min-width:0}
-.mtype{flex-shrink:0;min-width:20px;height:15px;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.4);padding:0 3px}
-.mname{flex:1;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mpp{font-family:"Chakra Petch";font-size:11px;color:var(--dim);margin-left:auto}
-.mpp.low{color:var(--up)}
-
-/* z4 我方场下 */
-.z4{flex:0 0 auto}
-.bench-list{display:flex;flex-direction:column;gap:4px;flex:1;min-height:0}
-.bench-poke{display:grid;grid-template-columns:120px 1fr;gap:8px;padding:3px 7px;border-radius:6px;background:rgba(0,0,0,.2);align-items:center}
-.bench-poke.active{box-shadow:0 0 0 1px var(--me) inset,0 0 8px rgba(56,189,248,.18)}
-.bench-poke.ko{opacity:.7;filter:grayscale(.4);background:rgba(248,113,113,.16)}
-.bench-poke.ko .bp-name{color:#fca5a5}
-.bp-left{display:flex;flex-direction:column;gap:2px;min-width:0}
-.bp-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.1}
-.bp-hp{display:flex;align-items:center;gap:4px}
-.bp-hpbar{flex:1;height:4px;border-radius:2px;background:rgba(0,0,0,.5);overflow:hidden}
-.bp-hpbar i{display:block;height:100%;width:0;transition:width .8s cubic-bezier(.22,1,.36,1)}
-.bp-pct{font-family:"Chakra Petch";font-size:11px;font-weight:700}
-.bp-moves{display:flex;gap:6px;align-items:center;min-width:0}
-.bmv{display:inline-flex;align-items:center;gap:3px;font-size:11px;min-width:0;flex:1 1 0}
-.bmt{width:6px;height:6px;border-radius:50%;flex-shrink:0;display:inline-block}
-.bmv .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 
 /* 控制 */
 .controls{position:fixed;right:14px;bottom:10px;z-index:20;display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--panel);border:1px solid var(--edge);border-radius:8px;backdrop-filter:blur(8px)}
@@ -160,42 +147,34 @@ body{font-family:"Noto Sans SC","Chakra Petch",sans-serif;color:var(--text);font
 <body>
 <div class="bg-grid"></div>
 <main class="hud">
-  <div class="po-slot">
-    <div class="po-topbar">
-      <span class="spacer"></span>
-      <span class="vs" id="vsLabel"><b>ME</b> &nbsp;VS&nbsp; <span class="foe">FOE</span></span>
-    </div>
-    <div class="po-frame-wrap">
-      <div class="po-frame">
-        <div class="po-corner tl"></div><div class="po-corner tr"></div>
-        <div class="po-corner bl"></div><div class="po-corner br"></div>
-        <div class="po-label">
-          <div class="po-l1">PO 界面占位</div>
-          <div class="po-l2">21 : 9 · 直播时叠加 PO 窗口于此</div>
-          <div class="po-l3">PO BATTLE WINDOW</div>
-        </div>
+  <div class="col po-col">
+    <section class="zone z2" id="z2"></section>
+    <div class="po-frame">
+      <div class="po-corner tl"></div><div class="po-corner tr"></div>
+      <div class="po-corner bl"></div><div class="po-corner br"></div>
+      <div class="po-label">
+        <div class="po-l1">PO 界面占位</div>
+        <div class="po-l2">21 : 9 · 直播时叠加 PO 窗口于此</div>
+        <div class="po-l3">PO BATTLE WINDOW</div>
       </div>
     </div>
-  </div>
-  <aside class="info">
-    <div class="status-bar" id="statusBar"></div>
-    <section class="zone z1" id="z1"></section>
-    <section class="zone z2" id="z2"></section>
     <section class="zone z3" id="z3"></section>
+  </div>
+  <div class="col info-col">
+    <section class="zone z1" id="z1"></section>
+    <div class="divider" id="divider"></div>
     <section class="zone z4" id="z4"></section>
-  </aside>
+  </div>
 </main>
 <div class="preview-tag">DEMO · SIMULATED</div>
 <div class="controls">
   <button id="btnPlay" class="ctrl-btn">PAUSE</button>
   <button id="btnReplay" class="ctrl-btn">REPLAY</button>
-  <span id="stepInfo" class="step-info">1 / 11</span>
+  <span id="stepInfo" class="step-info">1 / 19</span>
 </div>
 
 <script>
 // ===== 演示剧本：模拟一场对战从开局到终局 =====
-// 每帧 state 结构 = 未来 SSE 真实推送结构；播放器依次把每帧喂给 render()，
-// 等价于未来 EventSource 收到新状态就 render()——render() 一行不改即可复用。
 var S0 = {
   turn:1, weather:"sun", terrain:null,
   mePlayer:"mew", oppPlayer:"挑战者",
@@ -242,36 +221,25 @@ var S0 = {
   }
 };
 var STEPS=[
-  // 1: 回合1结算——地震打喷火龙100→72，空气斩打烈咬陆鲨280→230
   function(s){ s.turn=1; s.me.active.hp=230; s.me.active.hpPct=82; s.opp.active.hpPct=72; },
-  // 2: 烈咬陆鲨剑舞 atk+2，被火放打 230→190
   function(s){ s.turn=2; s.me.active.boosts.atk=2; s.me.active.hp=190; s.me.active.hpPct=68; },
-  // 3: 逆鳞打喷火龙 72→30 并烧伤，烈咬陆鲨 190→170
   function(s){ s.turn=3; s.opp.active.hpPct=30; s.opp.active.status="burn"; s.me.active.hp=170; s.me.active.hpPct=61; },
-  // 4: 对手换人 喷火龙→水箭龟，天气晴→雨
   function(s){ s.turn=4; s.weather="rain";
     s.opp.active={name:"水箭龟",level:100,types:["Water"],hpPct:100,status:null,boosts:{atk:0,def:0,spa:0,spd:0,spe:0,acc:0,eva:0},ability:"激流",item:null,moves:null};
     s.opp.bench=[{name:"喷火龙",revealed:true,ko:false,hpPct:30},{name:null,revealed:false,ko:false,hpPct:null},{name:null,revealed:false,ko:false,hpPct:null},{name:null,revealed:false,ko:false,hpPct:null},{name:null,revealed:false,ko:false,hpPct:null}];
   },
-  // 5: 地震打水箭龟 100→65，急冻光线打烈咬陆鲨 170→120
   function(s){ s.turn=5; s.opp.active.hpPct=65; s.me.active.hp=120; s.me.active.hpPct=43; },
-  // 6: 我方换人 烈咬陆鲨→巨沼怪，烈咬陆鲨回后备(120/280)
   function(s){ s.turn=6;
     s.me.active={name:"巨沼怪",level:100,types:["Water","Ground"],hp:240,maxHp:240,hpPct:100,status:null,boosts:{atk:0,def:0,spa:0,spd:0,spe:0,acc:0,eva:0},ability:"激流",item:"剩饭",moves:[{name:"攀瀑",type:"Water",power:80,pp:15,maxPp:15},{name:"地震",type:"Ground",power:100,pp:10,maxPp:10},{name:"岩崩",type:"Rock",power:75,pp:10,maxPp:10},{name:"冷冻拳",type:"Ice",power:15,pp:15,maxPp:15}]};
     s.me.bench[0]={name:"烈咬陆鲨",level:100,types:["Dragon","Ground"],hp:120,maxHp:280,hpPct:43,status:null,ko:false,moves:[{name:"逆鳞",type:"Dragon",power:120,pp:9,maxPp:10},{name:"地震",type:"Ground",power:100,pp:9,maxPp:10},{name:"剑舞",type:"Normal",power:0,pp:19,maxPp:20},{name:"火焰牙",type:"Fire",power:65,pp:14,maxPp:15}]};
   },
-  // 7: 巨沼怪剑舞 atk+1，攀瀑打水箭龟 65→40，急冻光线打巨沼怪 240→200
   function(s){ s.turn=7; s.me.active.boosts.atk=1; s.me.active.hp=200; s.me.active.hpPct=83; s.opp.active.hpPct=40; },
-  // 8: 攀瀑打水箭龟 40→0 KO，对手换人 水箭龟→妙蛙花
   function(s){ s.turn=8;
     s.opp.active={name:"妙蛙花",level:100,types:["Grass","Poison"],hpPct:100,status:null,boosts:{atk:0,def:0,spa:0,spd:0,spe:0,acc:0,eva:0},ability:"深绿",item:null,moves:null};
     s.opp.bench=[{name:"喷火龙",revealed:true,ko:false,hpPct:30},{name:"水箭龟",revealed:true,ko:true,hpPct:0},{name:null,revealed:false,ko:false,hpPct:null},{name:null,revealed:false,ko:false,hpPct:null},{name:null,revealed:false,ko:false,hpPct:null}];
   },
-  // 9: 攀瀑打妙蛙花 100→55，能量球打巨沼怪 200→120（草克水2倍）
   function(s){ s.turn=9; s.opp.active.hpPct=55; s.me.active.hp=120; s.me.active.hpPct=50; },
-  // 10: 终局——攀瀑打妙蛙花 55→0 KO，对手两只倒下
   function(s){ s.turn=10; s.opp.active.hpPct=0; },
-  // 11-18: 状态展示帧（不连贯，仅展示各种异常/boost/天气/陷阱的视觉）
   function(s){ s.turn=11; s.me.bench[1].status="poison"; },
   function(s){ s.turn=12; s.me.bench[2].status="paralysis"; },
   function(s){ s.turn=13; s.opp.bench[0].status="freeze"; },
@@ -325,36 +293,48 @@ function moveMiniHtml(m){
 }
 
 // ===== 各区渲染 =====
-function oppMiniHtml(p){
-  var cls='mini'+(p.active?' active':'')+(!p.revealed?' unknown':'')+(p.ko?' ko':'');
-  var hc=hpColors(p.hpPct||0);
-  var name=p.name||'???';
-  var st=p.status?(' style="background:'+STATUS[p.status].bg+';border-color:'+STATUS[p.status].c+'"'):'';
-  var hp;
-  if(!p.revealed){ hp='<div class="m-hp"></div><div class="m-pct" style="color:var(--faint);font-size:11px">未露</div>'; }
-  else if(p.ko){ hp='<div class="m-hp"></div><div class="m-pct" style="color:var(--faint)">KO</div>'; }
-  else { hp='<div class="m-hp"><i data-pct="'+p.hpPct+'" style="background:'+hc[0]+'"></i></div><div class="m-pct" style="color:'+hc[0]+'">'+p.hpPct+'%</div>'; }
-  return '<div class="'+cls+'"'+st+'><div class="m-name">'+esc(name)+'</div>'+hp+'</div>';
-}
-function oppFieldHtml(p, hz){
+// z2 对手场上（横向一行）
+function oppFieldRowHtml(p){
   var hc=hpColors(p.hpPct);
-  return '<div class="zone-head opp">'+hazardsHtml(hz)+'</div>'+
-    '<div class="field-head"><span class="f-name" style="color:#ffeef1">'+esc(p.name)+'</span><span class="f-lv">L'+p.level+'</span>'+
-    p.types.map(typeChip).join('')+statusDot(p.status)+'</div>'+
-    '<div class="hp-row"><div class="hp-bar"><div class="hp-fill" data-pct="'+p.hpPct+'" style="--hp-h:'+hc[0]+';--hp-l:'+hc[1]+'"></div></div>'+
-    '<span class="hp-pct" style="color:'+hc[0]+'">'+p.hpPct+'%</span><span class="hp-num">仅百分比</span></div>'+
-    '<div class="boosts">'+boostsHtml(p.boosts)+'</div>';
-}
-function meFieldHtml(p, hz){
-  var hc=hpColors(p.hpPct);
-  return '<div class="zone-head me">'+hazardsHtml(hz)+'</div>'+
-    '<div class="field-head"><span class="f-name" style="color:#eaf6ff">'+esc(p.name)+'</span><span class="f-lv">L'+p.level+'</span>'+
-    p.types.map(typeChip).join('')+statusDot(p.status)+'</div>'+
-    '<div class="hp-row"><div class="hp-bar"><div class="hp-fill" data-pct="'+p.hpPct+'" style="--hp-h:'+hc[0]+';--hp-l:'+hc[1]+'"></div></div>'+
-    '<span class="hp-num"><b>'+p.hp+'</b>/'+p.maxHp+'</span><span class="hp-pct" style="color:'+hc[0]+'">'+p.hpPct+'%</span></div>'+
+  return '<div class="field-row">'+
+    '<span class="f-name" style="color:#ffeef1">'+esc(p.name)+'</span>'+
+    '<span class="f-lv">L'+p.level+'</span>'+
+    p.types.map(typeChip).join('')+
+    statusDot(p.status)+
+    '<div class="hp-bar"><div class="hp-fill" data-pct="'+p.hpPct+'" style="--hp-h:'+hc[0]+';--hp-l:'+hc[1]+'"></div></div>'+
+    '<span class="hp-pct" style="color:'+hc[0]+'">'+p.hpPct+'%</span>'+
+    '<span class="hp-num">仅百分比</span>'+
     '<div class="boosts">'+boostsHtml(p.boosts)+'</div>'+
-    (p.moves?'<div class="moves">'+p.moves.map(moveHtml).join('')+'</div>':'');
+  '</div>';
 }
+// z3 我方场上（横向一行 + 4招横排）
+function meFieldRowHtml(p){
+  var hc=hpColors(p.hpPct);
+  return '<div class="field-row">'+
+    '<span class="f-name" style="color:#eaf6ff">'+esc(p.name)+'</span>'+
+    '<span class="f-lv">L'+p.level+'</span>'+
+    p.types.map(typeChip).join('')+
+    statusDot(p.status)+
+    '<div class="hp-bar"><div class="hp-fill" data-pct="'+p.hpPct+'" style="--hp-h:'+hc[0]+';--hp-l:'+hc[1]+'"></div></div>'+
+    '<span class="hp-num"><b>'+p.hp+'</b>/'+p.maxHp+'</span>'+
+    '<span class="hp-pct" style="color:'+hc[0]+'">'+p.hpPct+'%</span>'+
+    '<div class="boosts">'+boostsHtml(p.boosts)+'</div>'+
+  '</div>'+
+  (p.moves?'<div class="moves">'+p.moves.map(moveHtml).join('')+'</div>':'');
+}
+// z1 对手6只（竖排6行）
+function oppRowHtml(p){
+  var hc=hpColors(p.hpPct||0);
+  var cls='team-row'+(p.active?' active':'')+(!p.revealed?' unknown':'')+(p.ko?' ko':'');
+  var bg=p.status?(' style="background:'+STATUS[p.status].bg+'"'):'';
+  var name=p.name||'???';
+  var inner;
+  if(!p.revealed){ inner='<span class="tr-name" style="color:var(--faint)">???</span><span></span><span class="tr-pct" style="color:var(--faint);font-size:11px">未露</span><span></span>'; }
+  else if(p.ko){ inner='<span class="tr-name">'+esc(name)+'</span><span></span><span class="tr-pct" style="color:var(--faint)">KO</span><span></span>'; }
+  else { inner='<span class="tr-name">'+esc(name)+'</span><div class="tr-hpbar"><i data-pct="'+p.hpPct+'" style="background:'+hc[0]+'"></i></div><span class="tr-pct" style="color:'+hc[0]+'">'+p.hpPct+'%</span>'+statusDot(p.status); }
+  return '<div class="'+cls+'"'+bg+'>'+inner+'</div>';
+}
+// z4 我方6只（竖排6行 + 4招）
 function meBenchHtml(p){
   var hc=hpColors(p.hpPct||0);
   var pctTxt=p.ko?'KO':(p.hpPct+'%');
@@ -367,30 +347,40 @@ function meBenchHtml(p){
     (p.moves?'<div class="bp-moves">'+p.moves.map(moveMiniHtml).join('')+'</div>':'')+
   '</div>';
 }
-
-function render(s){
+// 分隔条
+function dividerHtml(s){
   var w=s.weather?WEATHER[s.weather]:null;
   var t=s.terrain?TERRAIN[s.terrain]:null;
-  document.getElementById('statusBar').innerHTML=
-    '<span class="turn"><span class="lbl">TURN</span>'+String(s.turn).padStart(2,"0")+'</span>'+
-    '<span class="weather"><span class="k">WEATHER</span>'+(w?w.cn:'—')+'</span>'+
-    '<span class="terrain"><span class="k">TERRAIN</span>'+(t?t.cn:'—')+'</span>'+
-    '<span class="spacer"></span>';
-  var vsL=document.getElementById('vsLabel');
-  if(vsL) vsL.innerHTML='<b>'+esc(s.mePlayer||'ME')+'</b> &nbsp;VS&nbsp; <span class="foe">'+esc(s.oppPlayer||'FOE')+'</span>';
+  return '<div class="d-vs">'+
+      '<span class="me">'+esc(s.mePlayer||'ME')+'</span>'+
+      '<span class="vsx">VS</span>'+
+      '<span class="foe">'+esc(s.oppPlayer||'FOE')+'</span>'+
+      '<span class="turn"><span class="lbl">TURN</span>'+String(s.turn).padStart(2,"0")+'</span>'+
+    '</div>'+
+    '<div class="d-env">'+
+      '<span><span class="k">天气</span><b class="weather">'+(w?w.cn:'—')+'</b></span>'+
+      '<span><span class="k">场地</span><b class="terrain">'+(t?t.cn:'—')+'</b></span>'+
+    '</div>'+
+    '<div class="d-haz">'+
+      '<span class="side"><span class="lbl">我方场</span>'+hazardsHtml(s.me.hazards)+'</span>'+
+      '<span class="side"><span class="lbl">对手场</span>'+hazardsHtml(s.opp.hazards)+'</span>'+
+    '</div>';
+}
 
-  // z1: 对手6只 = 场上 + 后备5
+function render(s){
+  document.getElementById('divider').innerHTML=dividerHtml(s);
+
   var opp6=[{name:s.opp.active.name,hpPct:s.opp.active.hpPct,status:s.opp.active.status,ko:s.opp.active.hpPct===0,active:true,revealed:true}];
   opp6=opp6.concat(s.opp.bench.map(function(b){return {name:b.name,hpPct:b.hpPct,status:b.status||null,ko:b.ko,active:false,revealed:b.revealed};}));
-  document.getElementById('z1').innerHTML='<div class="row6">'+opp6.map(oppMiniHtml).join('')+'</div>';
+  document.getElementById('z1').innerHTML='<div class="team-list">'+opp6.map(oppRowHtml).join('')+'</div>';
 
-  document.getElementById('z2').innerHTML=oppFieldHtml(s.opp.active, s.opp.hazards);
-  document.getElementById('z3').innerHTML=meFieldHtml(s.me.active, s.me.hazards);
+  document.getElementById('z2').innerHTML=oppFieldRowHtml(s.opp.active);
+  document.getElementById('z3').innerHTML=meFieldRowHtml(s.me.active);
+
   var me6=[{name:s.me.active.name,hp:s.me.active.hp,maxHp:s.me.active.maxHp,hpPct:s.me.active.hpPct,status:s.me.active.status,ko:s.me.active.hpPct===0,moves:s.me.active.moves,active:true}];
   me6=me6.concat(s.me.bench.map(function(b){return {name:b.name,hp:b.hp,maxHp:b.maxHp,hpPct:b.hpPct,status:b.status,ko:b.ko,moves:b.moves,active:false};}));
   document.getElementById('z4').innerHTML='<div class="bench-list">'+me6.map(meBenchHtml).join('')+'</div>';
 
-  // HP 填充动画（所有 data-pct 元素下一帧设宽度，触发 transition）
   setTimeout(function(){
     document.querySelectorAll('[data-pct]').forEach(function(el){
       el.style.width=(el.getAttribute('data-pct')||0)+'%';
@@ -441,7 +431,6 @@ function connectLive(){
       render(s);
     }catch(err){}
   };
-  // 未收到真实数据前 demo 继续；EventSource 断开自动重连
 }
 showStep(0);
 playDemo();
