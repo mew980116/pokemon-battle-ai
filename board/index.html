@@ -152,11 +152,7 @@ body{font-family:"Noto Sans SC","Chakra Petch",sans-serif;color:var(--text);font
 .divider .side{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--dim)}
 .divider .side .lbl{font-family:"Chakra Petch";font-size:10px;letter-spacing:.1em;color:var(--faint)}
 .hazards{display:flex;gap:4px}
-.hz{font-size:11px;font-weight:700;padding:2px 7px;border-radius:3px;color:#fff;border:1px solid;white-space:nowrap}
-.hz-rock{background:rgba(168,85,247,.3);border-color:rgba(168,85,247,.5)}
-.hz-spike{background:rgba(150,180,210,.25);border-color:rgba(150,180,210,.45)}
-.hz-toxic{background:rgba(168,85,247,.35);border-color:rgba(168,85,247,.55)}
-.hz-web{background:rgba(100,200,180,.25);border-color:rgba(100,200,180,.45)}
+.hz{font-size:11px;font-weight:700;padding:2px 7px;border-radius:3px;color:#fff;white-space:nowrap;text-shadow:0 1px 1px rgba(0,0,0,.5)}
 
 /* 控制 */
 .controls{position:fixed;right:14px;bottom:10px;z-index:20;display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--panel);border:1px solid var(--edge);border-radius:8px;backdrop-filter:blur(8px)}
@@ -280,8 +276,8 @@ STEPS.forEach(function(fn){ var s=cloneState(DEMO_SCRIPT[DEMO_SCRIPT.length-1]);
 // ===== 映射表 =====
 var TYPE_CN={Normal:"一般",Fire:"火",Water:"水",Electric:"电",Grass:"草",Ice:"冰",Fighting:"格斗",Poison:"毒",Ground:"地",Flying:"飞",Psychic:"超能",Bug:"虫",Rock:"岩",Ghost:"幽灵",Dragon:"龙",Dark:"恶",Steel:"钢",Fairy:"妖精"};
 var TYPE_COLOR={Normal:"#A8A878",Fire:"#F08030",Water:"#6890F0",Electric:"#F8D030",Grass:"#78C850",Ice:"#98D8D8",Fighting:"#C03028",Poison:"#A040A0",Ground:"#E0C068",Flying:"#A890F0",Psychic:"#F85888",Bug:"#A8B820",Rock:"#B8A038",Ghost:"#705898",Dragon:"#7038F0",Dark:"#705848",Steel:"#B8B8D0",Fairy:"#EE99AC"};
-var WEATHER={rain:{cn:"雨天"},sun:{cn:"晴天"},sandstorm:{cn:"沙暴"},hail:{cn:"冰雹"}};
-var TERRAIN={electric:{cn:"电气场地"},psychic:{cn:"精神场地"},misty:{cn:"薄雾场地"},grassy:{cn:"草原场地"}};
+var WEATHER={rain:{cn:"雨天",type:"Water"},sun:{cn:"晴天",type:"Fire"},sandstorm:{cn:"沙暴",type:"Rock"},hail:{cn:"冰雹",type:"Ice"}};
+var TERRAIN={electric:{cn:"电气场地",type:"Electric"},psychic:{cn:"精神场地",type:"Psychic"},misty:{cn:"薄雾场地",type:"Fairy"},grassy:{cn:"草原场地",type:"Grass"}};
 var STATUS={burn:{cn:"烧",c:"#fb923c",bg:"rgba(251,146,60,.22)"},poison:{cn:"毒",c:"#a855f7",bg:"rgba(168,85,247,.22)"},badpoison:{cn:"毒",c:"#a855f7",bg:"rgba(168,85,247,.26)"},paralysis:{cn:"麻",c:"#fde047",bg:"rgba(253,224,71,.20)"},sleep:{cn:"睡",c:"#60a5fa",bg:"rgba(96,165,250,.20)"},freeze:{cn:"冰",c:"#67e8f9",bg:"rgba(103,232,249,.20)"},confusion:{cn:"乱",c:"#ec4899",bg:"rgba(236,72,153,.20)"}};
 var BOOST_LABELS=[["atk","Atk"],["def","Def"],["spa","SpA"],["spd","SpD"],["spe","Spe"],["acc","Acc"],["eva","Eva"]];
 function hpColors(p){return p>50?["#4ade80","#16a34a"]:p>25?["#facc15","#ca8a04"]:["#f87171","#dc2626"];}
@@ -291,10 +287,10 @@ function typeChip(t){ if(!t){return '<span class="type-chip" style="background:#
 function statusDot(s){return s?'<span class="st-dot" style="background:'+STATUS[s].c+'">'+STATUS[s].cn+'</span>':'';}
 function hazardsHtml(h){
   var parts=[];
-  if(h.stealthRocks) parts.push('<span class="hz hz-rock">隐形岩</span>');
-  if(h.spikes) parts.push('<span class="hz hz-spike">撒菱×'+h.spikes+'</span>');
-  if(h.toxicSpikes) parts.push('<span class="hz hz-toxic">毒菱×'+h.toxicSpikes+'</span>');
-  if(h.stickyWeb) parts.push('<span class="hz hz-web">虫网</span>');
+  if(h.stealthRocks) parts.push('<span class="hz" style="background:'+TYPE_COLOR.Rock+'">隐形岩</span>');
+  if(h.spikes) parts.push('<span class="hz" style="background:'+TYPE_COLOR.Ground+'">撒菱×'+h.spikes+'</span>');
+  if(h.toxicSpikes) parts.push('<span class="hz" style="background:'+TYPE_COLOR.Poison+'">毒菱×'+h.toxicSpikes+'</span>');
+  if(h.stickyWeb) parts.push('<span class="hz" style="background:'+TYPE_COLOR.Bug+'">虫网</span>');
   return parts.length?'<div class="hazards">'+parts.join('')+'</div>':'';
 }
 function boostsHtml(b){
@@ -413,8 +409,8 @@ function dividerHtml(s){
   return '<div class="d-top"><span class="foe">'+esc(s.oppPlayer||'FOE')+'</span></div>'+
     '<div class="d-mid">'+
       '<span class="turn"><span class="lbl">TURN</span>'+String(s.turn).padStart(2,"0")+'</span>'+
-      '<span><span class="k">天气</span><b class="weather">'+(w?w.cn:'—')+'</b></span>'+
-      '<span><span class="k">场地</span><b class="terrain">'+(t?t.cn:'—')+'</b></span>'+
+      '<span><span class="k">天气</span><b style="color:'+(w?TYPE_COLOR[w.type]:'var(--dim)')+'">'+(w?w.cn:'—')+'</b></span>'+
+      '<span><span class="k">场地</span><b style="color:'+(t?TYPE_COLOR[t.type]:'var(--dim)')+'">'+(t?t.cn:'—')+'</b></span>'+
     '</div>'+
     '<div class="d-bot"><span class="me">'+esc(s.mePlayer||'ME')+'</span></div>';
 }
