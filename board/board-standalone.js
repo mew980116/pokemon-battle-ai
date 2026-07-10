@@ -44,11 +44,14 @@ function boardTypeName(n){
     if (n === undefined || n === null || n < 0 || n > 17) return null;
     return BOARD_TYPE_NAMES[n];
 }
+// weather num (from main script L2435-2440 power mods, the direct evidence):
+//   2=rain(水x1.5火x0.5) 4=sun(火x1.5水x0.5) 3=sandstorm(岩石特防x1.5, L2795)
+//   1=hail 5=harsh-sun 6=heavy-rain. 5/6 merged into sun/rain.
 function boardWeatherName(w){
-    if (w === 1) return "sandstorm";
-    if (w === 2 || w === 6) return "sun";
-    if (w === 3) return "hail";
-    if (w === 4) return "rain";
+    if (w === 1) return "hail";
+    if (w === 2 || w === 6) return "rain";
+    if (w === 3) return "sandstorm";
+    if (w === 4 || w === 5) return "sun";
     return null;
 }
 function boardTerrainName(t){
