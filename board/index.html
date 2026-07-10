@@ -88,6 +88,7 @@ body{font-family:"Noto Sans SC","Chakra Petch",sans-serif;color:var(--text);font
 /* z2/z3 6只卡片网格 */
 .pcards{display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:1fr 1fr;gap:6px;flex:1;min-height:0}
 .pcard{display:flex;flex-direction:column;gap:4px;padding:5px 7px;border-radius:6px;background:rgba(0,0,0,.2);min-width:0;overflow:hidden}
+.pcard.opp-card{justify-content:center}
 .pcard.active{box-shadow:0 0 0 1px var(--me) inset}
 .pcard.opp-active{box-shadow:0 0 0 1px var(--opp) inset}
 .pcard.ko{opacity:.7;filter:grayscale(.4);background:rgba(248,113,113,.16)}
@@ -232,7 +233,7 @@ var S0 = {
     active:{ name:"喷火龙", level:100, types:["Fire","Flying"],
       hpPct:100, status:null,
       boosts:{atk:0,def:0,spa:0,spd:0,spe:0,acc:0,eva:0},
-      ability:"猛火", item:null, moves:null
+      ability:"猛火", item:null, moves:[{name:"喷射火焰",type:"Fire",power:90,pp:10,maxPp:10},{name:"空气斩",type:"Flying",power:75,pp:10,maxPp:10}]
     },
     bench:[
       {name:null,revealed:false,ko:false,hpPct:null},
@@ -249,7 +250,7 @@ var STEPS=[
   function(s){ s.turn=2; s.me.active.boosts.atk=2; s.me.active.hp=190; s.me.active.hpPct=68; },
   function(s){ s.turn=3; s.opp.active.hpPct=30; s.opp.active.status="burn"; s.me.active.hp=170; s.me.active.hpPct=61; },
   function(s){ s.turn=4; s.weather="rain";
-    s.opp.active={name:"水箭龟",level:100,types:["Water"],hpPct:100,status:null,boosts:{atk:0,def:0,spa:0,spd:0,spe:0,acc:0,eva:0},ability:"激流",item:null,moves:null};
+    s.opp.active={name:"水箭龟",level:100,types:["Water"],hpPct:100,status:null,boosts:{atk:0,def:0,spa:0,spd:0,spe:0,acc:0,eva:0},ability:"激流",item:null,moves:[{name:"水炮",type:"Water",power:110,pp:5,maxPp:5}]};
     s.opp.bench=[{name:"喷火龙",revealed:true,ko:false,hpPct:30},{name:null,revealed:false,ko:false,hpPct:null},{name:null,revealed:false,ko:false,hpPct:null},{name:null,revealed:false,ko:false,hpPct:null},{name:null,revealed:false,ko:false,hpPct:null}];
   },
   function(s){ s.turn=5; s.opp.active.hpPct=65; s.me.active.hp=120; s.me.active.hpPct=43; },
@@ -259,7 +260,7 @@ var STEPS=[
   },
   function(s){ s.turn=7; s.me.active.boosts.atk=1; s.me.active.hp=200; s.me.active.hpPct=83; s.opp.active.hpPct=40; },
   function(s){ s.turn=8;
-    s.opp.active={name:"妙蛙花",level:100,types:["Grass","Poison"],hpPct:100,status:null,boosts:{atk:0,def:0,spa:0,spd:0,spe:0,acc:0,eva:0},ability:"深绿",item:null,moves:null};
+    s.opp.active={name:"妙蛙花",level:100,types:["Grass","Poison"],hpPct:100,status:null,boosts:{atk:0,def:0,spa:0,spd:0,spe:0,acc:0,eva:0},ability:"深绿",item:null,moves:[{name:"能量球",type:"Grass",power:90,pp:10,maxPp:10},{name:"寄生种子",type:"Grass",power:0,pp:10,maxPp:10}]};
     s.opp.bench=[{name:"喷火龙",revealed:true,ko:false,hpPct:30},{name:"水箭龟",revealed:true,ko:true,hpPct:0},{name:null,revealed:false,ko:false,hpPct:null},{name:null,revealed:false,ko:false,hpPct:null},{name:null,revealed:false,ko:false,hpPct:null}];
   },
   function(s){ s.turn=9; s.opp.active.hpPct=55; s.me.active.hp=120; s.me.active.hpPct=50; },
@@ -323,7 +324,7 @@ function fieldCardHtml(p, isMe){
   var nameColor = isMe ? '#eaf6ff' : '#ffeef1';
   var hpNum = isMe ? '<span class="hp-num"><b>'+p.hp+'</b>/'+p.maxHp+'</span>' : '';
   var movesHtml;
-  if(isMe && p.moves){
+  if(p.moves && p.moves.length){
     movesHtml = '<div class="fc-moves">'+p.moves.map(moveCellHtml).join('')+'</div>';
   } else {
     movesHtml = '<div class="fc-empty"></div>';
@@ -355,6 +356,7 @@ function moveCellHtml(m){
 function pcCardHtml(p, isMe){
   var hc=hpColors(p.hpPct||0);
   var cls='pcard';
+  if(!isMe) cls += ' opp-card';
   if(p.active) cls += isMe?' active':' opp-active';
   if(p.ko) cls += ' ko';
   if(!isMe && !p.revealed) cls += ' unknown';
@@ -368,7 +370,7 @@ function pcCardHtml(p, isMe){
   if(isMe && p.moves && !p.ko){
     moves='<div class="pc-moves">'+p.moves.map(pcMoveRowHtml).join('')+'</div>';
   } else {
-    moves='<div class="pc-empty-moves">'+(isMe?'':'招式未知')+'</div>';
+    moves='';  // 对手卡片不显示招式区（z1 队伍概览）
   }
   return '<div class="'+cls+'"'+bg+'><div class="pc-head">'+head+'</div>'+moves+'</div>';
 }

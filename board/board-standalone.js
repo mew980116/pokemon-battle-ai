@@ -153,6 +153,24 @@ function boardCollectOppActive(){
             atk: fp.statBoost(1), def: fp.statBoost(2), spa: fp.statBoost(3),
             spd: fp.statBoost(4), spe: fp.statBoost(5), acc: fp.statBoost(6), eva: fp.statBoost(7)
         };
+        // revealed moves only (PO exposes num>0 for moves the foe has used;
+        // unrevealed slots give num=0). pp exposure unverified at runtime.
+        var revMoves = [];
+        for (var mi = 0; mi < 4; mi++) {
+            try {
+                var mv = fp.pokemon.move(mi);
+                if (mv && mv.num > 0) {
+                    revMoves.push({
+                        name: boardMoveName(mv.num),
+                        type: boardMoveType(mv.num),
+                        power: boardMovePow(mv.num),
+                        pp: mv.pp || 0,
+                        maxPp: mv.pp || 0
+                    });
+                }
+            } catch(em){}
+        }
+        o.moves = revMoves.length ? revMoves : null;
     } catch(e){ print_s("opp active err: "+e); }
     return o;
 }
