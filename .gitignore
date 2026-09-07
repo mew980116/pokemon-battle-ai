@@ -10,6 +10,12 @@ npm-debug.log*
 .env
 .env.local
 
+# DeepSeek API key（本地凭据，不提交）
+deepseek-bridge/apikey.txt
+
+# 文献知识库 PDF（体积大 / 版权，不提交，仅本地保留）
+docs/research/*.pdf
+
 # IDE 配置文件
 .vscode/
 .idea/
@@ -23,6 +29,7 @@ Thumbs.db
 *.temp
 *.bak
 *.orig
+NDH6SA~M
 
 # 构建产物
 dist/

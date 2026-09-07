@@ -219,6 +219,26 @@
 
 ---
 
+## DeepSeek 接入（LLM 决策，deepseek-bridge/）
+
+> 用 DeepSeek 代替/辅助现有 `attemptCommand()` 决策。链路：PO QScript → 本地 Node 代理 [deepseek-bridge/server.js](deepseek-bridge/server.js) → DeepSeek API。测试脚本 [deepseek-bridge/deepseek-test.js](deepseek-bridge/deepseek-test.js)。
+
+**已完成**：
+
+- [x] 连通性验证：PO ↔ 代理 ↔ DeepSeek 往返（dummy 请求）
+- [x] 最小决策闭环：DeepSeek 返回 attack/switch 指令，PO 用 `battle.battleCommand` 执行（attack 与 switch 执行链路均已验证）
+
+**待办**：
+
+- [ ] 场况注入 prompt：采集双方场上/后备/招式（名称/属性/威力/PP）/HP/能力等级/天气场地，拼进 prompt 让 DeepSeek 基于局势决策
+- [ ] hybrid 预计算：PO 侧复用 `attemptCommand` 里的 `getMoveDamage` / `getBestSwitchList` 等，把每个可用招式的伤害分布、克制倍率、换人评估算好，作为结构化数据注入 prompt（而非让 DeepSeek 动态重算）
+- [ ] 合入主脚本 `20201227.js` 的 `onChoiceSelection`，与现有 `attemptCommand()` 做成开关切换，脱离独立测试脚本
+- [ ] 异步化防超时：用 `sys.webCall` 异步回调替代 `synchronousWebCall`，避免 DeepSeek 延迟阻塞 Qt 事件循环 / 触碰回合计时
+- [ ] **战报历史注入（最终形态）**：把对战已进行的回合战报（谁用了什么招、伤害、换人、KO、状态变化）解析成结构化上下文，随每回合状态一起注入 prompt，让 DeepSeek 具备跨回合记忆 / 长程决策能力（对应 PokeLLMon 的 in-context RL 文本反馈思路，见 docs/research）
+- [ ] **未来形态（远期）· function calling / tool**：把伤害计算等确定性函数包装成 tool 供 DeepSeek 在决策前动态调用（coding 工具那种 agent 模式）。需自建 harness（tool 执行器 + 多轮往返 + 状态管理 + 超时），或把纯函数移植到 Node 代理侧预计算。当前环境 QScript 只能 webCall/同步 GET 且阻塞事件循环，手搓 harness 代价高，**先走 hybrid 预计算注入 prompt 路线**，待链路成熟后再评估是否值得做真 function calling
+
+---
+
 ## 长期重构（低优先，需重新评估收益）
 
 - [ ] 将 [20201227.js](20201227.js) 核心逻辑迁移到 [src/core/battleAI.js](src/core/battleAI.js)（目前只有骨架）
