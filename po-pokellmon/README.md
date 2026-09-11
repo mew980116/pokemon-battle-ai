@@ -1,0 +1,118 @@
+# po-pokellmon — PO 服务型对战机器人（LLM 版）
+
+PO（Pokemon Online）服务型对战机器人的 **LLM 决策版**。第一版移植 [PokeLLMon](https://github.com/mew980116/PokeLLMon)（arXiv 2402.01118）的实现方案。
+
+> 背景：主对战脚本 [20201227.js](../20201227.js) 是非 LLM 的规则 AI，痛点在于定式模式易被对手预判针对。本目录是其 LLM 替代/辅助路线。未来若引入其它方案（如 hybrid 搜索、function calling），另建目录。
+
+## 架构
+
+```
+PO QScript (po-script.js)                     Node 代理 (server.js)
+─────────────────────────                    ─────────────────────
+采集战场状态（sys 接口）   ──HTTP GET──▶     拼数字选项 prompt
+  · 双方场上/后备                              · 历史回合（ICRL）
+  · 招式名/类型/威力/PP/slot                   · 克制描述（KAG[Type]）
+  · HP/Status                                 · 招式 Effect（KAG[Effect]）
+  · 锁招检测（Choice 道具 4/5/6）              · 选项编号 1~N（招式+换人）
+  · 天气/场地                                  ↓
+                                             DeepSeek API
+执行 battleCommand       ◀──slot JSON────    DS 返回 {"choice":N} → 映射回 slot
+  · 直接按 slot 执行                          （数字方案消除招式名/宝可梦名歧义）
+```
+
+## 目录结构
+
+```
+po-pokellmon/
+├── README.md            # 本文件
+├── build-knowledge.js   # 从 movedata.json + data/ 构建 knowledge/*.json
+├── server.js            # Node 代理：prompt 构建 + DeepSeek 决策 + 动作解析
+├── po-script.js         # PO QScript：状态采集 + 动作执行（名字↔slot 映射）
+├── data/                # 上游静态数据（借用 PokeLLMon 的 effect 描述）
+│   ├── moves_effect.json    # 招式效果文字（key=招式名小写）
+│   ├── ability_effect.json  # 特性效果文字
+│   └── item_effect.json     # 道具效果文字
+├── knowledge/           # build-knowledge 产物（git 跟踪）
+│   ├── typechart.json   # 18x18 克制表
+│   └── moves.json       # num → {name,power,category,effect}
+└── logs/                # 决策日志（git 忽略，运行时产生）
+    └── deepseek_YYYYMMDD_battle{id}.log   # JSONL：每次决策的队伍+战报+prompt+reply+action（按场次分文件）
+```
+
+## 日志（战报上下文摸底）
+
+仅当账号为 `mew's` 时自动开启日志。每次 `/choice` 决策写入一行 JSONL 到 `logs/deepseek_YYYYMMDD_battle{id}.log`（按对战 ID 分文件，一天多场互不干扰），字段：
+
+```json
+{"ts":"...", "account":"mew's", "turn":1, "state":{...}, "prompt":"...", "reply":"...", "action":{...}}
+```
+
+- `state`：完整战场快照 —— `myTeam`（我方 6 只含 KO）、`bench`（可换）、`opp`+`oppSeen`（对手场上+已暴露后备）、`history`（近 5 回合战报文本）
+- `prompt`：喂给 DeepSeek 的完整输入（含历史回合 + KAG 克制 + 招式 Effect）
+- `reply`：DeepSeek 原始输出；`action`：解析后的动作
+
+**技术摸底用法**：日志同时记录了「战报上下文（`state.history`）」和「DeepSeek 输入输出」，可事后对比：
+1. 有/无历史回合时，DeepSeek 是否还会「持续用无效招式」（如对储水特性重复用水系）
+2. `state.history` 截断窗口（当前 5 回合）是否足够支撑跨回合决策
+3. KAG 克制描述（`prompt` 里的 `as defender` 行）是否真的影响了招式选择
+
+## 知识库来源
+
+| 数据 | 来源 | 说明 |
+|---|---|---|
+| 招式基础数据（num/power/category/name） | 项目 [movedata.json](../movedata.json) | PO 对齐，`num` 即 `sys.move(num)` 的编号 |
+| 招式效果文字 | PokeLLMon `moves_effect.json` | 按 name 小写合并进 moves.json |
+| 特性/道具效果文字 | PokeLLMon `ability_effect.json` / `item_effect.json` | 备用 |
+| 属性克制表 | [20201227.js](../20201227.js) 的 `typechart()` | 18×18，硬编码进 build-knowledge |
+| 宝可梦种族值/属性 | PO 运行时 `sys.pokeBaseStats` / `sys.pokeType1/2` | 不预构建，运行时采集 |
+
+## 三策略映射（对应论文）
+
+| PokeLLMon 策略 | 本目录实现 |
+|---|---|
+| ICRL（历史回合反馈） | `po-script.js` 采集近 N 回合文本，注入 prompt |
+| KAG[Type]（克制描述） | `server.js` 用 typechart 预计算 `X as defender, WATER deal 2x...` |
+| KAG[Effect]（招式效果） | `server.js` 查 `knowledge/moves.json` 的 effect 拼进招式行 |
+| Consistent Action（SC 投票） | 后续版本（第一版先单次采样） |
+
+## 版本管理
+
+日志每行记录 `serverVersion` 和 `scriptVersion`，用于区分「这份日志是哪一版脚本产生的」，避免版本混用。
+
+| 位置 | 常量 | 说明 |
+|---|---|---|
+| [server.js](server.js) | `SERVER_VERSION` | Node 代理版本 |
+| [po-script.js](po-script.js) | `PKLM_VERSION` | PO 侧脚本版本 |
+
+> 两个版本号**手动保持一致**，改代码时同步 bump。
+
+**改动后 bump 流程**：
+
+1. 改 `server.js` / `po-script.js` 代码
+2. 同步 bump 两个 `*_VERSION` 常量（小改 +0.0.1，大改 +0.1.0）
+3. 重启 server.js；PO 侧重新粘贴 po-script.js
+4. 之后产生的日志即带新版本号，可与旧日志区分
+
+**版本历史（changelog）**：
+
+| 版本 | 变更 |
+|---|---|
+| 0.1.0 | 初始 PokeLLMon 移植：招式名/宝可梦名动作模式，KAG 克制 + Effect，ICRL 历史回合 |
+| 0.2.0 | 数字选项方案：DS 返回 `{"choice":N}`，消除招式名/宝可梦名歧义 |
+| 0.3.0 | 锁招 ban 重决策 + message 进日志 + 评测集（eval/）+ 版本记录 |
+| 0.4.0 | 保底改 attackButton（挣扎）+ DeepSeek 思考模式（reasoning_effort=high）参数化 |
+| 0.4.1 | fallback retry（2 次）+ 取消 max_tokens 限制 + 切回非思考模式（temperature 0.3） |
+| 0.4.2 | 修复：error/非200 fallback 补记日志 + 超时 30s→8s + retry 2→1（避免偶发慢请求拖垮回合） |
+| 0.4.3 | 修复：fallback 招式全不可用时转换人（强制换人死循环）+ 超时 8s→20s |
+| 0.4.4 | 日志新增 `attemptLog`：每次 attempt 详情（耗时/结果/error/dummy ping） |
+| 0.4.5 | **修复关键 bug**：非思考时 `reasoning_effort:'high'` 仍被发送导致实际开了思考模式（慢的根因），改为非思考时显式 `thinking:disabled` 且不带 reasoning_effort |
+| 0.4.6 (server) / 0.4.2 (script) | 修复 4 项：① 对手剩余数改用 `status !== 31`（对齐主脚本 getPokeCount）② 历史伤害对手为百分比、我方为实际 HP ③ 历史补「当前回合」+ 注入能力等级 `Boosts`（避免重复诡计类状态招）④ 关闭 dummy ping（`DUMMY_PING_ENABLED=false`） |
+| 0.4.3 (script) | ① 对手剩余数加 `numRef` 空槽位防御（未带满 6 只不误判）② `Opponent revealed moves` 改为按 `numRef` 区分，只显示当前场上这只已暴露的招式 |
+
+## 使用方法
+
+1. 构建知识库：`node po-pokellmon/build-knowledge.js`
+2. 设 key 并启动代理：`$env:DEEPSEEK_API_KEY="sk-..." ; node po-pokellmon/server.js`
+3. 把 `po-pokellmon/po-script.js` 全文贴进 PO 的 battle script 窗口，开战。
+
+详见 [TODO.md](../TODO.md) 的「项目战略 / 长期目标」与「DeepSeek 接入」章节。

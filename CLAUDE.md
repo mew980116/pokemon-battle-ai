@@ -69,6 +69,21 @@ Described in `docs/architecture/modular-ai-architecture.md` — a 5-module desig
 
 Data flow: Info Gathering → Info Inference → Reasoning → Decision, with Game Rules as foundation. The `src/` directory contains stubs for this refactoring.
 
+## po-pokellmon (LLM Decision Route) — Version & Commit Rule
+
+`po-pokellmon/` is the PokeLLMon-style LLM decision implementation, separate from the monolith:
+
+- `po-pokellmon/server.js` — local Node proxy (`SERVER_VERSION`)
+- `po-pokellmon/po-script.js` — PO-side script (`PKLM_VERSION`), also pre-ES6 / QScript constrained
+
+**After ANY code change under `po-pokellmon/`, MUST:**
+
+1. bump the matching `*_VERSION` constant (small change +0.0.1, large +0.1.0)
+2. add one line to the changelog in `po-pokellmon/README.md`
+3. `git commit` (local is enough — no push required; commit once per version bump)
+
+Version numbers are only log tags and CANNOT recover old code; only git commits/tags can. `po-pokellmon/` was previously never committed — always commit per this rule.
+
 ## Key Files
 
 - `20201227.js` — The monolith containing all battle AI logic
