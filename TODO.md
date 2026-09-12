@@ -306,6 +306,7 @@
   - `onStatusDamage`（状态异常伤害，如烧伤/中毒扣血）
   - `onFlinch`（畏缩）
   - `onItemMessage` / `onAbilityMessage`（道具 / 特性触发）
+  - 映射备注：`onEffectiveness` 取值 `0`=无效 / `2`=效果不好(1/2) / `4`=正常(1x) / `8`=效果绝佳（2x 与 4x 都传 8；PO 通常不传 `1`/`16`，但需兼容 `1`=1/4、`16`=4x）；status 编号 `1`=麻痹 / `2`=睡眠 / `3`=冰冻 / `4`=烧伤 / `5`=中毒 / `6`=混乱 / `31`=KO（见 [board-standalone.js](../board/board-standalone.js) `boardStatusName`）
 
 - **战报细节度不足 → 状态效果体系用不起来**：浸水/剧毒/挡路这类「改属性 + 状态」体系，DS 看不到「对手已被浸水」的效果（history 只记了「使用了浸水」，没记 `onMoveMessage` 的「对手被浸水」）。表现：DS 重复用浸水，且不对被浸水对手用剧毒。
   - 方向 A：提升战报细节度 —— 把 `onMoveMessage` / `onMajorStatusChange` 等效果回调信息记进 history（如「对手被浸水，属性变为水」）。
