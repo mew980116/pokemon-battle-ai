@@ -110,6 +110,7 @@ po-pokellmon/
 | 0.4.3 (script) | ① 对手剩余数加 `numRef` 空槽位防御（未带满 6 只不误判）② `Opponent revealed moves` 改为按 `numRef` 区分，只显示当前场上这只已暴露的招式 |
 | 0.4.7 (server) | 日志新增 `usage`（prompt/completion/total tokens）+ `totalMs`（含重试总耗时），attemptLog 每条也带 `usage` |
 | 0.4.4 (script) | 修正：对手剩余数去掉 `numRef` 防御，仅用 `status !== 31`（对手未露面的宝可梦 `numRef` 可能为 0 但 `status`=0，numRef 判断会误排除） |
+| 0.4.5 (script) | 影子模式（`/llm shadow`）：照发 DS 请求并记 log（state 带 `shadow:true`），但不执行 DS 指令、交回用户手动操作，用于对比人 vs DS 决策 |
 
 ## 使用方法
 

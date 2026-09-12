@@ -9,8 +9,9 @@
 // 依赖本地代理：node po-pokellmon/server.js（默认 127.0.0.1:8091）
 //
 // 聊天命令（战斗内）：
-//   /llm on   -> 开启 LLM 决策
-//   /llm off  -> 关闭（手动操作）
+//   /llm on     -> 开启 LLM 决策（自动执行）
+//   /llm off    -> 关闭（手动操作）
+//   /llm shadow -> 影子模式：照发 DS 请求并记 log，但不执行 DS 指令，改由你手动操作（对比人 vs DS 决策）
 // 自动开启：账号 id 转小写为 "mew's" 时自动开启，无需手动 /llm on；其他账号需手动开启。
 // =====================================================================
 
@@ -18,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8091";
-var PKLM_VERSION = "0.4.4";       // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.4.5";       // 脚本版本（改动时 bump，随日志记录）
 
 // 自动开启：账号 id 转小写为 "mew's" 时自动开启 LLM 决策（其他账号手动 /llm on）
 var pklmAccount = "";             // 我方账号名
@@ -54,6 +55,7 @@ var pklmLockedSlot = -1;          // 当前被锁定的招式槽位（Choice 道
 var pklmBannedSlots = [];         // 本轮被 PO 拒绝的招式槽位（拒绝后 ban 掉重新决策）
 var pklmMessages = [];            // 对战中发送的 message（评论，进日志）
 var pklmFinalAttack = false;      // 保底标志：全 ban 后强制 attack，不再响应取消
+var pklmShadowMode = false;       // 影子模式：照发 DS 请求并记 log，但不执行 DS 指令，改由用户手动操作
 
 // 招式是否不可用（锁招 + 被 ban）
 function pklmIsMoveDisabled(m) {
@@ -271,6 +273,7 @@ function pklmCollectState() {
         battleId: battle.id,
         scriptVersion: PKLM_VERSION,
         turn: pklmCurrentTurn,
+        shadow: pklmShadowMode,
         history: hist,
         messages: pklmMessages.slice(),
         oppRemaining: oppRemaining,
@@ -311,6 +314,12 @@ function pklmDecideAndAct() {
         if (d.fallback) {
             pklmPrint("!! DS FALLBACK (reason=" + (d.reason || "?") + ") 决策质量告警");
         }
+        // 影子模式：DS 决策仅记录不执行，交回用户手动操作（用于对比人 vs DS）
+        if (pklmShadowMode) {
+            var hint = (d.type === "switch") ? ("switch pokeSlot=" + d.pokeSlot) : ("attack attackSlot=" + d.attackSlot);
+            pklmPrint("SHADOW (not executed): DS => " + hint);
+            return;
+        }
         if (d.type === "switch") {
             var ps = parseInt(d.pokeSlot, 10);
             if (ps >= 1 && ps <= 5) {
@@ -328,7 +337,7 @@ function pklmDecideAndAct() {
         }
     } catch (e) {
         pklmPrint("decide error: " + e.message);
-        pklmFallbackAttack();
+        if (!pklmShadowMode) pklmFallbackAttack();   // 影子模式不兜底执行，交回用户手动
     }
 }
 
@@ -354,12 +363,20 @@ function pklmSpotLabel(spot) {
         } catch (e) {}
         if (message.indexOf("/llm on") === 0) {
             useLLM = true;
+            pklmShadowMode = false;
             pklmPrint("LLM decision ON");
             return;
         }
         if (message.indexOf("/llm off") === 0) {
             useLLM = false;
+            pklmShadowMode = false;
             pklmPrint("LLM decision OFF");
+            return;
+        }
+        if (message.indexOf("/llm shadow") === 0) {
+            useLLM = true;
+            pklmShadowMode = true;
+            pklmPrint("SHADOW mode ON: DS 决策仅记录不执行，请手动操作对战");
             return;
         }
     },
