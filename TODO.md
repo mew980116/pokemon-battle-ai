@@ -4,6 +4,32 @@
 
 ---
 
+## 项目战略 / 长期目标
+
+> 背景：PokeLLMon（论文实现）与 foul-play 均基于 Pokémon Showdown；本项目当前在 Pokémon Online（PO）做接口与 AI 响应验证，未来迁移 Showdown（PS）。
+
+**两条最终产品线**：
+
+1. **PO 服务型对战机器人**
+   - 路线 A（有 LLM）：低成本、可私部（甚至本地部署）的小参数 LLM
+   - 路线 B（无 LLM）：继续优化现有主脚本 [20201227.js](20201227.js) 的规则 AI
+2. **PS 宝可梦对战竞技 AI**：结合强大 LLM + 算法（搜索 / 伤害计算）
+
+**可复用资产**（调研结论，详见 [docs/research/](docs/research/)）：
+
+- [PokeLLMon](https://github.com/mew980116/PokeLLMon)（已 fork）：prompt 模板库、KAG 知识库 JSON（typechart / 招式 Effect / 特性 / 图鉴）、状态→文本转换、ICRL / SC 实现 → **初期合入 PO 侧**
+- [foul-play](https://github.com/mew980116/foul-play)：Showdown 搜索式 AI（基于 poke-engine 树搜索）→ 无 LLM 路线 / PS 竞技参考
+- [poke-engine](https://github.com/mew980116/poke-engine)：Rust 战斗搜索引擎（expectiminimax / MCTS / 伤害计算）→ hybrid 预计算参考
+- 本地 [20201227.js](20201227.js)：PO 主脚本，规则 AI 基线，路线 B 的持续优化对象
+
+**分阶段路线**：
+
+1. 短期（PO 验证）：DeepSeek 决策链路 + 场况注入 + KAG 克制 / Effect（见下「DeepSeek 接入」）
+2. 中期：PO 服务化机器人（双路线并行）
+3. 长期：迁移 PS，做竞技 AI
+
+---
+
 ## 已完成（从旧 TODO 中划掉）
 
 - [x] 探索 `battle` 对象及其顶层属性（`me` / `opp` / `id` / `data` 等）→ [docs/reference/battle-object.md](docs/reference/battle-object.md)
@@ -236,6 +262,22 @@
 - [ ] 异步化防超时：用 `sys.webCall` 异步回调替代 `synchronousWebCall`，避免 DeepSeek 延迟阻塞 Qt 事件循环 / 触碰回合计时
 - [ ] **战报历史注入（最终形态）**：把对战已进行的回合战报（谁用了什么招、伤害、换人、KO、状态变化）解析成结构化上下文，随每回合状态一起注入 prompt，让 DeepSeek 具备跨回合记忆 / 长程决策能力（对应 PokeLLMon 的 in-context RL 文本反馈思路，见 docs/research）
 - [ ] **未来形态（远期）· function calling / tool**：把伤害计算等确定性函数包装成 tool 供 DeepSeek 在决策前动态调用（coding 工具那种 agent 模式）。需自建 harness（tool 执行器 + 多轮往返 + 状态管理 + 超时），或把纯函数移植到 Node 代理侧预计算。当前环境 QScript 只能 webCall/同步 GET 且阻塞事件循环，手搓 harness 代价高，**先走 hybrid 预计算注入 prompt 路线**，待链路成熟后再评估是否值得做真 function calling
+
+---
+
+## po-pokellmon（PokeLLMon 路线，LLM 决策）
+
+> 移植 PokeLLMon 方案的正式 LLM 决策实现。代码在 [po-pokellmon/](po-pokellmon/)：服务端 [server.js](po-pokellmon/server.js)、PO 侧 [po-script.js](po-pokellmon/po-script.js)。
+
+**当前状态**：底座完成 —— LLM 正确配置（非思考 `thinking:disabled`、temperature 0.3、数字选项方案、日志含 token 用量与总耗时）。
+
+**后续 3 条基础路线**：
+
+1. **无思考模式**：当前基准，能用但未必强于主脚本 [20201227.js](20201227.js)。最终目标是做对战 bot 服务，需持续优化 prompt / 场况注入质量。
+2. **思考 + hybrid 预计算**：思考模式 + PO 侧复用主脚本的伤害/换人评估，把结构化结果注入 prompt。用时消耗大、易超时，仅适合不开计时器的对战里测 LLM 能力上限。
+3. **思考 + tool**：思考模式 + function calling/tool（伤害计算等确定性函数）。同样耗时长，仅实验用途。
+
+**动态路由（生产方向，待 1/2/3 全跑通后再看）**：在 无LLM / 1 / 2 / 3 之间按局面动态路由，平衡用时与水平。
 
 ---
 
