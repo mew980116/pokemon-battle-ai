@@ -18,7 +18,7 @@ var path = require('path');
 
 var PORT = Number(process.env.POKELLMON_PORT) || 8091;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.4.9';   // 服务版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.4.10';  // 服务版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（可配置，改动后重启生效）====
 var MODEL = 'deepseek-v4-flash';        // 模型名：deepseek-v4-flash / deepseek-v4-pro
@@ -183,22 +183,17 @@ function buildPrompt(state) {
         var oppStatus = opp.status ? 'Status:' + opp.status + ',' : '';
         var oppBoosts = (opp.boosts && opp.boosts.length) ? 'Boosts:[' + opp.boosts.join(',') + '],' : '';
         p += 'Opponent current pokemon:' + opp.name + ':Type:' + oppTypes.join('&') + ',HP:' + (opp.hpPct || 0) + '%,' + oppStatus + oppBoosts + '\n';
-        // 对手已暴露招式
-        if (opp.moves && opp.moves.length) {
-            var om = '';
-            for (var i = 0; i < opp.moves.length; i++) {
-                om += '[' + opp.moves[i].name + ',' + opp.moves[i].type + '],';
+        // 对手已暴露招式（未露的写「未知」，始终补满 4 个槽位）
+        var om = '';
+        var oppMoves = opp.moves || [];
+        for (var i = 0; i < 4; i++) {
+            if (i < oppMoves.length) {
+                om += '[' + oppMoves[i].name + ',' + oppMoves[i].type + '],';
+            } else {
+                om += '[未知,?],';
             }
-            if (om) p += 'Opponent revealed moves: ' + om + '\n';
         }
-        // KAG[Type]：克制描述（我方全部招式类型对对手）
-        var myMoveTypes = [];
-        if (me.moves) for (var a = 0; a < me.moves.length; a++) if (me.moves[a].type) myMoveTypes.push(me.moves[a].type);
-        if (bench.length) for (var b = 0; b < bench.length; b++) {
-            if (bench[b].moves) for (var c = 0; c < bench[b].moves.length; c++) if (bench[b].moves[c].type) myMoveTypes.push(bench[b].moves[c].type);
-        }
-        var adv = buildDefenderAdvantage(opp.name, oppTypes, myMoveTypes);
-        if (adv) p += adv;
+        p += 'Opponent revealed moves: ' + om + '\n';
     }
 
     // 我方当前宝可梦
@@ -215,9 +210,12 @@ function buildPrompt(state) {
         for (var m = 0; m < me.moves.length; m++) {
             var mi = moveInfo(me.moves[m]);
             idx++;
-            var mult = damageMultiplier(mi.type, oppTypes);
-            var multStr = (mult === 0) ? 'no effect' : (mult + 'x');
-            p += idx + '. ' + mi.name + ':Type:' + mi.type + ',Power:' + mi.power + ',Acc:' + mi.acc + '%,vs opponent ' + multStr;
+            p += idx + '. ' + mi.name + ':Type:' + mi.type + ',Power:' + mi.power + ',Acc:' + mi.acc + '%';
+            if (mi.power > 0) {   // 变化招式（Power:0）不写克制关系
+                var mult = damageMultiplier(mi.type, oppTypes);
+                var multStr = (mult === 0) ? 'no effect' : (mult + 'x');
+                p += ',vs opponent ' + multStr;
+            }
             if (mi.effect) p += ',Effect:' + mi.effect;
             p += '\n';
         }
@@ -397,6 +395,7 @@ function handleChoice(res, state) {
             lastReply: lastReply,
             dummyPing: lastPing,
             state: state,
+            systemPrompt: SYSTEM_PROMPT,
             prompt: userPrompt,
             reply: reply,
             action: action

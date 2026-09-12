@@ -113,6 +113,7 @@ po-pokellmon/
 | 0.4.5 (script) | 影子模式（`/llm shadow`）：照发 DS 请求并记 log（state 带 `shadow:true`），但不执行 DS 指令、交回用户手动操作，用于对比人 vs DS 决策 |
 | 0.4.8 (server) / 0.4.6 (script) | ① server 写日志时 `pushToView` 实时推送到可视化 view server（8093）② script 新增 `fullHistory`（完整战报，不限 5 条），供 tool 的 `get_battle_history` 读取 |
 | 0.4.9 (server) | system prompt 改为共享 [prompts.js](prompts.js) 的 `BATTLE_TIPS`（移植 PokeLLMon 的 battle tips），tool 版（0.1.2）同步读取 |
+| 0.4.10 (server) | ① 对手已露招式补「未知」凑满 4 槽位 ② 去掉 KAG[Type] 克制描述（与招式表重复）③ 变化招式（Power:0）不写克制关系 ④ 日志新增 `systemPrompt` 字段 |
 
 ## 使用方法
 

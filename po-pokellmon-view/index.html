@@ -248,7 +248,7 @@ function render(d){
   var h=document.getElementById('history');
   var hist=(d.state&&d.state.history)||[];
   h.innerHTML=hist.map(function(x){ return '<span class="hl">'+esc(x)+'</span>'; }).join('<br>');
-  document.getElementById('prompt').textContent=d.prompt||'';
+  document.getElementById('prompt').textContent='[SYSTEM]\n'+(d.systemPrompt||'(未记录)')+'\n\n[USER]\n'+(d.prompt||'');
   document.getElementById('slider').value=cur;
   document.getElementById('stepInfo').textContent='第 '+(cur+1)+' / '+BATTLE.length+' 条 · turn '+(d.turn!=null?d.turn:'?');
 }
