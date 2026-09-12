@@ -20,6 +20,21 @@
 | 道具 | `items/items.txt` / `item_effects.txt` / `item_messages.txt` | 道具列表/效果/消息 |
 | 状态 | `status/status.txt` / `stats.txt` | 异常状态/能力 |
 
+## 数据 → tool 映射
+
+po-data 是未来「评估依据 tool」（`po-pokellmon-tool/` 路线）的静态知识库来源。映射如下：
+
+| tool（候选） | 依赖的 po-data 数据 |
+|---|---|
+| `calc_damage`（伤害计算） | `pokes/stats.txt`（种族值）+ `pokes/type1/2.txt`（属性）+ `pokes/weight.txt`（重量招）+ `moves/8G/*.txt`（威力/命中/分类/属性/先制）+ `zh-cn/db/natures/nature.txt`（性格）+ `items/`（道具加成）+ `abilities/`（特性加成） |
+| `evaluate_move`（出招评估：克制/免疫/能力修正） | 属性克制（typechart）+ `moves/`（招式数值）+ `abilities/`（特性免疫） |
+| `evaluate_status_move`（变化招适应度） | `moves/move_effect.txt` + `move_description.txt`（招式效果）+ `status/`（状态互斥） |
+| `evaluate_switch`（换人评估） | `pokes/stats.txt` + `pokes/type*.txt` + `pokes/ability*.txt`（种族/属性/特性）+ `moves/`（输出评估） |
+
+> 消息表 `*_message.txt` 不映射到 tool，已由 `po-pokellmon/po-script.js` 做战报解码（战报保存完整性）。
+>
+> **下一步**：先评估「对战到底需要哪些 tool」，列出清单后再开工写 build 脚本，避免盲目堆 tool。
+
 ## 说明
 
 - 目录里还有大量 `.png` 图片（道具/树果图标），这些是 PO 客户端资源，**不进 git、也不用于开发**，后续可加 .gitignore 排除。
