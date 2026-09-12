@@ -28,11 +28,13 @@ body{font-family:"Segoe UI","Microsoft YaHei",sans-serif;color:var(--text);font-
 
 .main{flex:1 1 auto;display:flex;gap:10px;padding:10px;min-height:0}
 .col-left{flex:0 0 560px;display:flex;flex-direction:column;gap:8px;min-height:0;overflow-y:auto}
-.col-right{flex:1 1 auto;display:flex;flex-direction:column;gap:8px;min-height:0}
+.col-right{flex:1 1 auto;display:flex;flex-direction:column;gap:8px;min-height:0;overflow-y:auto}
 
 .panel{background:var(--panel);border:1px solid var(--edge);border-radius:9px;padding:10px;display:flex;flex-direction:column;min-height:0}
 .panel h3{font-size:12px;font-weight:700;letter-spacing:.12em;color:var(--faint);margin-bottom:8px;flex:0 0 auto}
-.grow{flex:1 1 auto;min-height:0;overflow-y:auto}
+.grow{flex:1 1 auto;min-height:110px;overflow-y:auto}
+.llm-panel{flex:0 0 auto;max-height:46%;overflow-y:auto;flex-shrink:0}
+#toolCalls{max-height:170px;overflow-y:auto}
 
 /* 对战卡 */
 .poke{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:7px;background:var(--panel2);margin-bottom:5px}
@@ -107,7 +109,7 @@ body{font-family:"Segoe UI","Microsoft YaHei",sans-serif;color:var(--text);font-
   </div>
 
   <div class="col-right">
-    <div class="panel" style="flex:0 0 auto">
+    <div class="panel llm-panel">
       <h3>LLM 交互（当前这条决策）</h3>
       <div class="llm" id="llmInfo"></div>
       <div class="tokgrid" id="tokGrid"></div>
