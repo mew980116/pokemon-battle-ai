@@ -11,7 +11,7 @@ npm-debug.log*
 .env.local
 
 # DeepSeek API key（本地凭据，不提交）
-deepseek-bridge/apikey.txt
+**/apikey.txt
 
 # 文献知识库 PDF（体积大 / 版权，不提交，仅本地保留）
 docs/research/*.pdf
@@ -42,3 +42,6 @@ coverage/
 .claude/worktrees/
 .claude/todos/
 .claude/plans/
+
+# 服务器脚本（本地服务器运行脚本，不进 git）
+server_scripts/
