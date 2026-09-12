@@ -294,6 +294,7 @@
 **已实证**：
 
 - 挣扎保底（全 ban 后 `attackButton()`）不会导致卡死，兜底有效。
+- PO 无通用 stat 变化回调：剑舞/近身战/冥想等通用 stat 升降不通过 `onMoveMessage` 暴露（`move_message.txt` 里 `rose/fell/sharply` 只有诅咒/装饰/树果/Octolock 等写死的特定招式），战报文本缺「Attack rose sharply / Defense fell」；但 `boosts` 字段（`statBoost` 快照）正确反映能力等级，LLM 可通过 history（用了什么招）+ boosts（能力值）关联推断。**结论：不硬补文本，靠 `boosts` 字段即可**。
 
 **待办（观察项，暂不实施，等再打几把看表现）**：
 
