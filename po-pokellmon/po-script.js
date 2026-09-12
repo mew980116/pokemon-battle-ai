@@ -18,7 +18,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8091";
-var PKLM_VERSION = "0.4.3";       // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.4.4";       // 脚本版本（改动时 bump，随日志记录）
 
 // 自动开启：账号 id 转小写为 "mew's" 时自动开启 LLM 决策（其他账号手动 /llm on）
 var pklmAccount = "";             // 我方账号名
@@ -251,9 +251,9 @@ function pklmCollectState() {
     try {
         for (var i = 0; i < 6; i++) {
             var op = battle.data.team(battle.opp).poke(i);
-            // 31=KO；numRef 为空（0/undefined）表示该槽位未携带宝可梦，一并排除，
-            // 防御对手未带满 6 只时把空槽位误判成存活
-            if (op && op.numRef && (op.numRef % 65536 !== 0) && op.status !== 31) oppRemaining++;
+            // 31=KO（与主脚本 getPokeCount 对齐）。注意：对手未露面的宝可梦 numRef 可能为 0，
+            // 但 status 仍为 0（存活），因此不能靠 numRef 判断存在性，只能用 status !== 31。
+            if (op && op.status !== 31) oppRemaining++;
         }
     } catch (e) {}
 
