@@ -46,6 +46,21 @@ var TOOL_DEFS = [
                 required: ['base_stat', 'boost']
             }
         }
+    },
+    {
+        type: 'function',
+        function: {
+            name: 'get_battle_history',
+            description: 'Read the battle log (turn-by-turn history) for a given turn range. Use this to recall what happened in previous turns instead of guessing. Omit both arguments to read the full history.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    start_turn: { type: 'integer', description: 'First turn to include (1-based, inclusive). Omit for the beginning.' },
+                    end_turn: { type: 'integer', description: 'Last turn to include (1-based, inclusive). Omit for the latest.' }
+                },
+                required: []
+            }
+        }
     }
 ];
 
@@ -72,10 +87,32 @@ function calcStatBoost(args) {
     return { result: v };
 }
 
-// tool 执行器：根据 name 分发
-function runTool(name, args) {
+// 从战报行提取回合号（"Turn N: ..." -> N；开局行无前缀返回 0）
+function parseTurn(line) {
+    var m = String(line).match(/^Turn (\d+):/);
+    return m ? parseInt(m[1], 10) : 0;
+}
+
+// 读取过往战报（按回合范围截取，不传则全文）
+function getBattleHistory(args, state) {
+    var full = (state && state.fullHistory) || (state && state.history) || [];
+    var start = (args.start_turn !== undefined && args.start_turn !== null) ? parseInt(args.start_turn, 10) : null;
+    var end = (args.end_turn !== undefined && args.end_turn !== null) ? parseInt(args.end_turn, 10) : null;
+    var out = [];
+    for (var i = 0; i < full.length; i++) {
+        var t = parseTurn(full[i]);
+        if (start !== null && t < start) continue;
+        if (end !== null && t > end) continue;
+        out.push(String(full[i]));
+    }
+    return { turns: out, count: out.length };
+}
+
+// tool 执行器：根据 name 分发；ctx 含 state（供 get_battle_history 读取战报）
+function runTool(name, args, ctx) {
     if (name === 'get_type_matchup') return getTypeMatchup(args);
     if (name === 'calc_stat_boost') return calcStatBoost(args);
+    if (name === 'get_battle_history') return getBattleHistory(args, ctx && ctx.state);
     return { error: 'unknown tool: ' + name };
 }
 

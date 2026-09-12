@@ -77,6 +77,7 @@ body{font-family:"Segoe UI","Microsoft YaHei",sans-serif;color:var(--text);font-
 <body>
 <div class="topbar">
   <select id="selBattle" onchange="loadBattle(this.value)"></select>
+  <button id="btnLive" onclick="toggleLive()" style="border-color:rgba(74,222,128,.4);color:#86efac">LIVE 实时</button>
   <div class="nav">
     <button onclick="nav(-1)">◀ 上一条</button>
     <input type="range" id="slider" min="0" max="0" value="0" oninput="navTo(parseInt(this.value))">
@@ -279,6 +280,44 @@ fetch('/api/battles').then(function(r){return r.json();}).then(function(list){
   });
   if(list.length) loadBattle(list[0].file);
 });
+
+// ===== 实时模式：SSE 收 /events，边打边追加 =====
+var liveMode=false, liveList=[], es=null;
+function toggleLive(){
+  if(liveMode){ stopLive(); return; }
+  startLive();
+}
+function startLive(){
+  liveMode=true;
+  liveList=[];
+  document.getElementById('btnLive').textContent='LIVE ● 收集中';
+  document.getElementById('btnLive').style.color='#86efac';
+  if(!window.EventSource){ return; }
+  es=new EventSource('/events');
+  es.onmessage=function(ev){
+    var d; try{ d=JSON.parse(ev.data); }catch(e){ return; }
+    var bid=(d.state&&d.state.battleId!=null)?d.state.battleId:'?';
+    if(liveList.length){
+      var lastBid=(liveList[0].state&&liveList[0].state.battleId!=null)?liveList[0].state.battleId:'?';
+      if(lastBid!==bid) liveList=[];   // 新对战，重置累积
+    }
+    liveList.push(d);
+    BATTLE=liveList;
+    cur=liveList.length-1;
+    render(d);
+    document.getElementById('slider').max=Math.max(0,liveList.length-1);
+    var hasTool=d.toolLog&&d.toolLog.length;
+    document.getElementById('toolTag').style.display=hasTool?'inline':'none';
+    document.getElementById('modeTag').style.display=hasTool?'none':'inline';
+  };
+}
+function stopLive(){
+  liveMode=false;
+  if(es){ try{es.close();}catch(e){} es=null; }
+  document.getElementById('btnLive').textContent='LIVE 实时';
+  var sel=document.getElementById('selBattle');
+  if(sel.value) loadBattle(sel.value);
+}
 </script>
 </body>
 </html>

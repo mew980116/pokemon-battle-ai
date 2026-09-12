@@ -18,7 +18,7 @@ var path = require('path');
 
 var PORT = Number(process.env.POKELLMON_PORT) || 8091;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.4.7';   // 服务版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.4.8';   // 服务版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（可配置，改动后重启生效）====
 var MODEL = 'deepseek-v4-flash';        // 模型名：deepseek-v4-flash / deepseek-v4-pro
@@ -281,6 +281,25 @@ function fallbackMove(state) {
     return { type: 'attack', attackSlot: 0 };
 }
 
+// 推送决策到可视化 view server（fire-and-forget，失败不影响主流程）
+var VIEW_PUSH_PORT = 8093;
+function pushToView(entry) {
+    try {
+        var payload = JSON.stringify(entry);
+        var r = http.request({
+            hostname: '127.0.0.1',
+            port: VIEW_PUSH_PORT,
+            path: '/push',
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) }
+        }, function (res) { res.resume(); });
+        r.on('error', function () {});
+        r.setTimeout(2000, function () { r.destroy(); });
+        r.write(payload);
+        r.end();
+    } catch (e) {}
+}
+
 // 写日志（JSONL：每行一次决策的完整记录，含队伍/战报 state + prompt + reply + action）
 // 按 battleId 分文件：deepseek_YYYYMMDD_battle{id}.log，一天多场互不干扰
 function writeLog(entry) {
@@ -292,6 +311,7 @@ function writeLog(entry) {
         var battleId = (entry.state && entry.state.battleId !== undefined && entry.state.battleId !== null) ? entry.state.battleId : 'unknown';
         var file = path.join(LOG_DIR, 'deepseek_' + d.getFullYear() + mm + dd + '_battle' + battleId + '.log');
         fs.appendFileSync(file, JSON.stringify(entry) + '\n');
+        pushToView(entry);
     } catch (e) {
         console.log('[log] write error: ' + e.message);
     }

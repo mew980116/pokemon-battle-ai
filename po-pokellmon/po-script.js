@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8091";
-var PKLM_VERSION = "0.4.5";       // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.4.6";       // 脚本版本（改动时 bump，随日志记录）
 
 // 自动开启：账号 id 转小写为 "mew's" 时自动开启 LLM 决策（其他账号手动 /llm on）
 var pklmAccount = "";             // 我方账号名
@@ -46,6 +46,7 @@ var PKLM_TYPE_NAMES = ["Normal", "Fighting", "Flying", "Poison", "Ground", "Rock
 
 // 历史回合记录（ICRL）：最近 N 回合文本
 var pklmHistory = [];
+var pklmFullHistory = [];          // 完整战报（不限长度，供 tool 的 get_battle_history 读取）
 var pklmTurnLog = "";
 var pklmCurrentTurn = 0;
 var pklmOppMoves = {};           // 对手每只宝可梦（按 numRef 区分）已暴露招式 { numRef: [{name,type}] }
@@ -267,6 +268,13 @@ function pklmCollectState() {
         if (pklmTurnLog.length > prefix.length) hist.push(pklmTurnLog);
     }
 
+    // 完整战报（含当前回合），供 tool 的 get_battle_history 按需读取
+    var fullHist = pklmFullHistory.slice();
+    if (pklmTurnLog) {
+        var prefix2 = "Turn " + pklmCurrentTurn + ": ";
+        if (pklmTurnLog.length > prefix2.length) fullHist.push(pklmTurnLog);
+    }
+
     return {
         account: pklmAccount,
         log: pklmLogEnabled,
@@ -275,6 +283,7 @@ function pklmCollectState() {
         turn: pklmCurrentTurn,
         shadow: pklmShadowMode,
         history: hist,
+        fullHistory: fullHist,
         messages: pklmMessages.slice(),
         oppRemaining: oppRemaining,
         opp: pklmCollectOppActive(),
@@ -346,6 +355,7 @@ function pklmPushTurn() {
     if (pklmTurnLog) {
         pklmHistory.push(pklmTurnLog);
         if (pklmHistory.length > 5) pklmHistory.shift();
+        pklmFullHistory.push(pklmTurnLog);   // 完整战报，不截断（供 get_battle_history tool）
     }
     pklmTurnLog = "";
 }

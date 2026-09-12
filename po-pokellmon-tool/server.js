@@ -20,7 +20,7 @@ var tools = require('./tools.js');
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.1.0';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.1.1';   // tool 分支版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（tool 分支：思考 high，超时/maxtoken 放宽）====
 var MODEL = 'deepseek-v4-flash';
@@ -30,7 +30,7 @@ var MAX_TOKENS = null;                  // 不限制输出 token（思考链 + �
 var TIMEOUT_MS = 180000;                // 放宽：180s（tool 多轮往返慢）
 var MAX_TOOL_ROUNDS = 5;                // 最多 function calling 轮数，超过则 fallback
 
-var SYSTEM_PROMPT = 'You are playing a Pokemon battle and the goal is to win. You may call tools to compute type matchups or stat boosts before deciding.';
+var SYSTEM_PROMPT = 'You are playing a Pokemon battle and the goal is to win. You may call tools to compute type matchups, apply stat boosts, or read the battle history before deciding.';
 
 // 复用 po-pokellmon 知识库
 var KNOWLEDGE_DIR = path.join(__dirname, '..', 'po-pokellmon', 'knowledge');
@@ -171,8 +171,10 @@ function buildPrompt(state) {
     var bench = state.bench || [];
     var oppTypes = opp.types || [];
 
-    if (state.history && state.history.length) {
-        p += 'Historical turns:\n' + state.history.join('\n') + '\n';
+    // 战报不塞进 prompt，改由 get_battle_history tool 按需读取（省初始 token）
+    var histN = (state.fullHistory && state.fullHistory.length) ? state.fullHistory.length : 0;
+    if (histN > 0) {
+        p += 'Battle history (' + histN + ' turns) is available via the get_battle_history tool.\n';
     }
 
     var oppRemaining = state.oppRemaining !== undefined ? state.oppRemaining : 6;
@@ -278,6 +280,25 @@ function fallbackAction(state, reason) {
     return a;
 }
 
+// 推送决策到可视化 view server（fire-and-forget，失败不影响主流程）
+var VIEW_PUSH_PORT = 8093;
+function pushToView(entry) {
+    try {
+        var payload = JSON.stringify(entry);
+        var r = http.request({
+            hostname: '127.0.0.1',
+            port: VIEW_PUSH_PORT,
+            path: '/push',
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(payload) }
+        }, function (res) { res.resume(); });
+        r.on('error', function () {});
+        r.setTimeout(2000, function () { r.destroy(); });
+        r.write(payload);
+        r.end();
+    } catch (e) {}
+}
+
 function writeLog(entry) {
     try {
         fs.mkdirSync(LOG_DIR, { recursive: true });
@@ -287,6 +308,7 @@ function writeLog(entry) {
         var battleId = (entry.state && entry.state.battleId !== undefined && entry.state.battleId !== null) ? entry.state.battleId : 'unknown';
         var file = path.join(LOG_DIR, 'deepseek_tool_' + d.getFullYear() + mm + dd + '_battle' + battleId + '.log');
         fs.appendFileSync(file, JSON.stringify(entry) + '\n');
+        pushToView(entry);
     } catch (e) {
         console.log('[log] write error: ' + e.message);
     }
@@ -366,7 +388,7 @@ function handleChoice(res, state) {
                     var tc = toolCalls[i];
                     var args = {};
                     try { args = JSON.parse(tc.function.arguments || '{}'); } catch (e) {}
-                    var result = tools.runTool(tc.function.name, args);
+                    var result = tools.runTool(tc.function.name, args, { state: state });
                     called.push({ name: tc.function.name, args: args, result: result });
                     messages.push({ role: 'tool', tool_call_id: tc.id, content: JSON.stringify(result) });
                 }

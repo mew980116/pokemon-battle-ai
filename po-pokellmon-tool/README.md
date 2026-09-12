@@ -23,10 +23,13 @@
 3. 若返回 `tool_calls` → 执行 tool → 结果追加进 messages → 再调（最多 `MAX_TOOL_ROUNDS=5` 轮）
 4. 直到返回最终 `{"choice":N}` → 解析成 slot 动作
 
-**最小 tool**（[tools.js](tools.js)）先做两个**纯函数**（不依赖种族值/运行时数据，快速验证链路）：
+**tool**（[tools.js](tools.js)）：
 
 - `get_type_matchup(attack_type, defend_types)` —— 类型克制倍率（移植 `typechart`）
 - `calc_stat_boost(base_stat, boost)` —— 能力等级修正（移植 `calcStatWhenBoost`）
+- `get_battle_history(start_turn?, end_turn?)` —— 读取过往战报（按回合范围，不传则全文；数据来自 PO 侧 `state.fullHistory`）
+
+战报不再一开始塞进 prompt（省初始 token），由 DS 按需调 `get_battle_history` 读取。
 
 ## 下一步（未实现）
 

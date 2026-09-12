@@ -22,6 +22,28 @@ var LOG_DIRS = [
     path.join(__dirname, '..', 'po-pokellmon-tool', 'logs')
 ];
 
+// 实时推送：po-pokellmon server 写日志时 POST /push，这里 SSE 广播给浏览器
+var latestEntry = null;
+var clients = [];
+
+function broadcast(obj) {
+    var payload = 'data: ' + JSON.stringify(obj) + '\n\n';
+    var dead = [];
+    clients.forEach(function (res) {
+        try { res.write(payload); } catch (e) { dead.push(res); }
+    });
+    dead.forEach(function (res) {
+        var i = clients.indexOf(res);
+        if (i !== -1) clients.splice(i, 1);
+    });
+}
+
+setInterval(function () {
+    clients.forEach(function (res) {
+        try { res.write(': ping\n\n'); } catch (e) {}
+    });
+}, 15000);
+
 function listLogFiles() {
     var out = [];
     LOG_DIRS.forEach(function (dir) {
@@ -73,6 +95,47 @@ function readBattle(file) {
 
 var server = http.createServer(function (req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
+
+    // POST /push  (po-pokellmon server 写日志时推送一条决策)
+    if (req.method === 'POST' && req.url.indexOf('/push') === 0) {
+        var body = '';
+        req.on('data', function (c) {
+            body += c;
+            if (body.length > 2e6) req.destroy();
+        });
+        req.on('end', function () {
+            try {
+                var entry = JSON.parse(body);
+                latestEntry = entry;
+                broadcast(entry);
+                res.writeHead(200, { 'Content-Type': 'text/plain' });
+                res.end('ok');
+            } catch (e) {
+                res.writeHead(400, { 'Content-Type': 'text/plain' });
+                res.end('parse error: ' + e.message);
+            }
+        });
+        return;
+    }
+
+    // GET /events  (SSE，新连接补发最新一条)
+    if (req.method === 'GET' && req.url.indexOf('/events') === 0) {
+        res.writeHead(200, {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive'
+        });
+        res.write('retry: 3000\n\n');
+        if (latestEntry) {
+            res.write('data: ' + JSON.stringify(latestEntry) + '\n\n');
+        }
+        clients.push(res);
+        req.on('close', function () {
+            var i = clients.indexOf(res);
+            if (i !== -1) clients.splice(i, 1);
+        });
+        return;
+    }
 
     if (req.method === 'GET' && req.url.indexOf('/api/battles') === 0) {
         res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
