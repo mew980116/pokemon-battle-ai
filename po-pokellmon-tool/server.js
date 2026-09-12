@@ -20,7 +20,7 @@ var tools = require('./tools.js');
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.1.1';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.1.2';   // tool 分支版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（tool 分支：思考 high，超时/maxtoken 放宽）====
 var MODEL = 'deepseek-v4-flash';
@@ -30,7 +30,7 @@ var MAX_TOKENS = null;                  // 不限制输出 token（思考链 + �
 var TIMEOUT_MS = 180000;                // 放宽：180s（tool 多轮往返慢）
 var MAX_TOOL_ROUNDS = 5;                // 最多 function calling 轮数，超过则 fallback
 
-var SYSTEM_PROMPT = 'You are playing a Pokemon battle and the goal is to win. You may call tools to compute type matchups, apply stat boosts, or read the battle history before deciding.';
+var SYSTEM_PROMPT = require('../po-pokellmon/prompts.js').BATTLE_TIPS + ' You may call tools to compute type matchups, apply stat boosts, or read the battle history before deciding.';
 
 // 复用 po-pokellmon 知识库
 var KNOWLEDGE_DIR = path.join(__dirname, '..', 'po-pokellmon', 'knowledge');

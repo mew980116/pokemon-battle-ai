@@ -112,6 +112,7 @@ po-pokellmon/
 | 0.4.4 (script) | 修正：对手剩余数去掉 `numRef` 防御，仅用 `status !== 31`（对手未露面的宝可梦 `numRef` 可能为 0 但 `status`=0，numRef 判断会误排除） |
 | 0.4.5 (script) | 影子模式（`/llm shadow`）：照发 DS 请求并记 log（state 带 `shadow:true`），但不执行 DS 指令、交回用户手动操作，用于对比人 vs DS 决策 |
 | 0.4.8 (server) / 0.4.6 (script) | ① server 写日志时 `pushToView` 实时推送到可视化 view server（8093）② script 新增 `fullHistory`（完整战报，不限 5 条），供 tool 的 `get_battle_history` 读取 |
+| 0.4.9 (server) | system prompt 改为共享 [prompts.js](prompts.js) 的 `BATTLE_TIPS`（移植 PokeLLMon 的 battle tips），tool 版（0.1.2）同步读取 |
 
 ## 使用方法
 

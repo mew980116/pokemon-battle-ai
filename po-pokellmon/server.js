@@ -18,7 +18,7 @@ var path = require('path');
 
 var PORT = Number(process.env.POKELLMON_PORT) || 8091;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.4.8';   // 服务版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.4.9';   // 服务版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（可配置，改动后重启生效）====
 var MODEL = 'deepseek-v4-flash';        // 模型名：deepseek-v4-flash / deepseek-v4-pro
@@ -27,7 +27,7 @@ var REASONING_EFFORT = 'high';          // 思考强度：high / max（仅思考
 var TEMPERATURE = 0.3;                  // 采样温度（低温度=决策稳定；仅非思考模式生效）
 var MAX_TOKENS = null;                  // 最大输出 token（null = 不限制，用模型默认最大输出）
 
-var SYSTEM_PROMPT = 'You are playing a Pokemon battle and the goal is to win.';
+var SYSTEM_PROMPT = require('./prompts.js').BATTLE_TIPS + ' Choose the best action.';
 
 // 加载知识库
 var KNOWLEDGE_DIR = path.join(__dirname, 'knowledge');
