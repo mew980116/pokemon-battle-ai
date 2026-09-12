@@ -114,6 +114,7 @@ po-pokellmon/
 | 0.4.8 (server) / 0.4.6 (script) | ① server 写日志时 `pushToView` 实时推送到可视化 view server（8093）② script 新增 `fullHistory`（完整战报，不限 5 条），供 tool 的 `get_battle_history` 读取 |
 | 0.4.9 (server) | system prompt 改为共享 [prompts.js](prompts.js) 的 `BATTLE_TIPS`（移植 PokeLLMon 的 battle tips），tool 版（0.1.2）同步读取 |
 | 0.4.10 (server) | ① 对手已露招式补「未知」凑满 4 槽位 ② 去掉 KAG[Type] 克制描述（与招式表重复）③ 变化招式（Power:0）不写克制关系 ④ 日志新增 `systemPrompt` 字段 |
+| 0.4.7 (script) | 修复 `pklmStatusName` 状态编号映射：1=麻痹/4=烧伤（之前写反，对齐 board-standalone.js 与主脚本 status===1 减速语义） |
 
 ## 使用方法
 

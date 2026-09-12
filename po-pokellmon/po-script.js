@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8091";
-var PKLM_VERSION = "0.4.6";       // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.4.7";       // 脚本版本（改动时 bump，随日志记录）
 
 // 自动开启：账号 id 转小写为 "mew's" 时自动开启 LLM 决策（其他账号手动 /llm on）
 var pklmAccount = "";             // 我方账号名
@@ -93,10 +93,11 @@ function pklmTypeName(n) {
 
 function pklmStatusName(s) {
     if (s === undefined || s === null || s === 0) return null;
-    if (s === 1) return "burn";
+    // PO status 编号（对齐 board-standalone.js 的 boardStatusName + 主脚本 status===1 减速语义）
+    if (s === 1) return "paralysis";   // 麻痹（速度减半）
     if (s === 2) return "sleep";
     if (s === 3) return "freeze";
-    if (s === 4) return "paralysis";
+    if (s === 4) return "burn";        // 烧伤（物理攻击减半）
     if (s === 5) return "poison";
     return null;
 }
