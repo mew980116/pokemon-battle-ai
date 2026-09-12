@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8091";
-var PKLM_VERSION = "0.4.7";       // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.5.0";       // 脚本版本（改动时 bump，随日志记录）
 
 // 自动开启：账号 id 转小写为 "mew's" 时自动开启 LLM 决策（其他账号手动 /llm on）
 var pklmAccount = "";             // 我方账号名
@@ -57,6 +57,8 @@ var pklmBannedSlots = [];         // 本轮被 PO 拒绝的招式槽位（拒绝
 var pklmMessages = [];            // 对战中发送的 message（评论，进日志）
 var pklmFinalAttack = false;      // 保底标志：全 ban 后强制 attack，不再响应取消
 var pklmShadowMode = false;       // 影子模式：照发 DS 请求并记 log，但不执行 DS 指令，改由用户手动操作
+var pklmLastMove = {};            // { spot: 最后使用的招式名 }，供消息解码 %m 占位符
+var pklmMsgTables = { move: null, item: null, ability: null, berry: null };  // 消息表懒加载缓存
 
 // 招式是否不可用（锁招 + 被 ban）
 function pklmIsMoveDisabled(m) {
@@ -99,12 +101,108 @@ function pklmStatusName(s) {
     if (s === 3) return "freeze";
     if (s === 4) return "burn";        // 烧伤（物理攻击减半）
     if (s === 5) return "poison";
+    if (s === 6) return "confusion";   // 混乱（回调 onStatusDamage/onMajorStatusChange 用到）
     return null;
 }
 
 // 名字归一化：小写 + 去空格/连字符（中文名保持不变，英文名去分隔）
 function pklmNorm(s) {
     return String(s).toLowerCase().replace(/\s+/g, "").replace(/-/g, "");
+}
+
+// ==== 战报消息解码（PO 侧读 *_message.txt 把「消息编号」还原成文本）====
+// 回调 onMoveMessage/onItemMessage/onAbilityMessage 的 move/item/berry/ab 是「消息编号」，
+// 不是真实编号。此处读 PO 根目录下的消息表文件（与 movedata.json 同级）解码。
+// 部署：把 po-data/moves/move_message.txt、po-data/items/item_messages.txt、
+//       po-data/items/berry_messages.txt、po-data/abilities/ability_messages.txt
+//       复制到 PO 根目录；缺文件时相关回调静默降级为不产生文本。
+var PKLM_STAT_NAMES = [null, "Attack", "Defense", "Sp. Atk", "Sp. Def", "Speed", "Accuracy", "Evasion"];
+
+// 解析消息表：每行「编号 文本」，文本用 | 分隔多个变体（part 参数选第几个变体）
+function pklmParseMsgTable(fileName) {
+    var map = {};
+    try {
+        var raw = sys.getFileContent(fileName);
+        if (!raw) return map;
+        var lines = String(raw).split(/\r\n|\r|\n/);
+        for (var i = 0; i < lines.length; i++) {
+            var line = lines[i].replace(/^\uFEFF/, '');
+            var sp = -1;
+            for (var j = 0; j < line.length; j++) {
+                var c = line.charAt(j);
+                if (c === ' ' || c === '\t') { sp = j; break; }
+            }
+            if (sp <= 0) continue;
+            var num = parseInt(line.substring(0, sp), 10);
+            if (isNaN(num)) continue;
+            map[num] = line.substring(sp + 1).replace(/^\s+/, '').split('|');
+        }
+    } catch (e) {}
+    return map;
+}
+
+// 懒加载消息表（首次使用时读文件并缓存；读不到则缓存空表，避免每回合重试）
+function pklmGetMsgTable(kind, fileName) {
+    if (pklmMsgTables[kind] !== null) return pklmMsgTables[kind];
+    pklmMsgTables[kind] = pklmParseMsgTable(fileName);
+    return pklmMsgTables[kind];
+}
+
+// 渲染一条消息：查表 -> 选变体 -> 替换占位符
+// ctx: { s,f,m,i,t,a,q,st,p,ts,tf }
+function pklmRenderMsg(kind, fileName, msgNum, part, ctx) {
+    if (msgNum === undefined || msgNum === null || msgNum === 0) return null;
+    var map = pklmGetMsgTable(kind, fileName);
+    var variants = map[msgNum];
+    if (!variants || !variants.length) return null;
+    if (part === undefined || part === null || part < 0 || part >= variants.length) part = 0;
+    var t = variants[part];
+    if (!t) return null;
+    // 先替换三字符占位符（%st/%ts/%tf），避免被 %s/%t/%f 误伤
+    var order = [['%st', ctx.st], ['%ts', ctx.ts], ['%tf', ctx.tf],
+                 ['%s', ctx.s], ['%f', ctx.f], ['%m', ctx.m], ['%i', ctx.i],
+                 ['%t', ctx.t], ['%a', ctx.a], ['%q', ctx.q], ['%p', ctx.p]];
+    for (var k = 0; k < order.length; k++) {
+        var val = order[k][1];
+        if (val === undefined || val === null) val = '';
+        t = t.split(order[k][0]).join(val);
+    }
+    return t;
+}
+
+function pklmOtherSpot(spot) {
+    return spot === battle.me ? battle.opp : battle.me;
+}
+
+function pklmActiveName(spot) {
+    try { return sys.pokemon(pklmFpoke(spot).pokemon.numRef); } catch (e) { return "?"; }
+}
+
+function pklmItemName(n) {
+    if (!n) return '';
+    try { return sys.item(n); } catch (e) { return ''; }
+}
+
+function pklmAbilityName(n) {
+    if (!n) return '';
+    try { return sys.ability(n); } catch (e) { return ''; }
+}
+
+// 构建消息替换上下文（%i/%a 用当前宝可梦持有的道具/特性，未知时为空——尽力而为）
+function pklmMsgCtx(spot, type, other, q) {
+    return {
+        s: pklmActiveName(spot),
+        f: pklmActiveName(pklmOtherSpot(spot)),
+        m: pklmLastMove[spot] || '',
+        i: pklmItemName(pklmPoke(spot).item),
+        t: pklmTypeName(type) || '',
+        a: pklmAbilityName(pklmPoke(spot).ability),
+        q: (q !== undefined && q !== null && q !== 0) ? String(q) : '',
+        st: PKLM_STAT_NAMES[other] || '',
+        p: pklmActiveName(spot),
+        ts: pklmActiveName(spot),
+        tf: pklmActiveName(pklmOtherSpot(spot))
+    };
 }
 
 function pklmPoke(spot) {
@@ -401,6 +499,7 @@ function pklmSpotLabel(spot) {
     onUseAttack: function (spot, attack) {
         try {
             pklmTurnLog += pklmSpotLabel(spot) + " used " + sys.move(attack) + ". ";
+            pklmLastMove[spot] = sys.move(attack);   // 记录最后招式名（供 %m 占位符）
             if (spot === battle.opp) {
                 var mv = { name: sys.move(attack), type: pklmTypeName(sys.moveType(attack)) };
                 // 记到「当前场上这只」名下（按 numRef 区分），换人后招式不串
@@ -450,22 +549,63 @@ function pklmSpotLabel(spot) {
     },
     onBattleEnd: function (result, winner) { battleEnd = true; },
 
-    // 其余回调保留空实现（保持 28 个钩子完整，避免 PO 报错）
-    onMiss: function (spot) {},
-    onAvoid: function (spot) {},
-    onStatusDamage: function (spot, status) {},
-    onSendBack: function (spot) {},
-    onItemMessage: function (spot, item, part, foe, berry, other) {},
-    onMoveMessage: function (spot, move, part, type, foe, other, q) {},
-    onAbilityMessage: function (spot, ab, part, type, foe, other) {},
+    // ===== 战报细节回调：把战斗过程细节补进 pklmTurnLog（进 history/fullHistory）=====
+    onMiss: function (spot) {
+        try { pklmTurnLog += pklmSpotLabel(spot) + "'s attack missed. "; } catch (e) {}
+    },
+    onAvoid: function (spot) {
+        try { pklmTurnLog += pklmSpotLabel(spot) + " avoided the attack. "; } catch (e) {}
+    },
+    onStatusDamage: function (spot, status) {
+        try {
+            var sn = pklmStatusName(status) || "status";
+            pklmTurnLog += pklmSpotLabel(spot) + " suffered " + sn + " damage. ";
+        } catch (e) {}
+    },
+    onSendBack: function (spot) {
+        try { pklmTurnLog += pklmSpotLabel(spot) + " called back its pokemon. "; } catch (e) {}
+    },
+    onItemMessage: function (spot, item, part, foe, berry, other) {
+        try {
+            var kind = (berry && berry !== 0) ? 'berry' : 'item';
+            var file = (kind === 'berry') ? 'berry_messages.txt' : 'item_messages.txt';
+            var msgNum = (kind === 'berry') ? berry : item;
+            var txt = pklmRenderMsg(kind, file, msgNum, part, pklmMsgCtx(spot, undefined, other, undefined));
+            if (txt) pklmTurnLog += txt + ". ";
+        } catch (e) {}
+    },
+    onMoveMessage: function (spot, move, part, type, foe, other, q) {
+        try {
+            var txt = pklmRenderMsg('move', 'move_message.txt', move, part, pklmMsgCtx(spot, type, other, q));
+            if (txt) pklmTurnLog += txt + ". ";
+        } catch (e) {}
+    },
+    onAbilityMessage: function (spot, ab, part, type, foe, other) {
+        try {
+            var txt = pklmRenderMsg('ability', 'ability_messages.txt', ab, part, pklmMsgCtx(spot, type, other, undefined));
+            if (txt) pklmTurnLog += txt + ". ";
+        } catch (e) {}
+    },
     onTierNotification: function (tier) {
         pklmAutoEnable();
     },
     onClauseActivated: function (clause) {},
-    onEffectiveness: function (spot, effectiveness) {},
-    onAttackFailing: function (spot, silent) {},
+    onEffectiveness: function (spot, effectiveness) {
+        try {
+            var t = null;
+            if (effectiveness === 0) t = "It had no effect";
+            else if (effectiveness === 1 || effectiveness === 2) t = "It's not very effective";
+            else if (effectiveness === 8 || effectiveness === 16) t = "It's super effective";
+            if (t) pklmTurnLog += t + ". ";
+        } catch (e) {}
+    },
+    onAttackFailing: function (spot, silent) {
+        try { if (!silent) pklmTurnLog += pklmSpotLabel(spot) + "'s attack failed. "; } catch (e) {}
+    },
     onOfferChoice: function (player, choice) {},
-    onCriticalHit: function (spot) {},
+    onCriticalHit: function (spot) {
+        try { pklmTurnLog += "A critical hit! "; } catch (e) {}
+    },
     onChoiceCancellation: function (player) {
         if (player !== battle.me) return;
         if (battleEnd || !useLLM) return;
@@ -488,8 +628,20 @@ function pklmSpotLabel(spot) {
     },
     onDrawRequest: function (player) {},
     onChoiceCancelled: function (player) {},
-    onMajorStatusChange: function (spot, status, multipleTurns, silent) {},
-    onStatusOver: function (spot, status) {},
-    onFlinch: function (spot) {},
+    onMajorStatusChange: function (spot, status, multipleTurns, silent) {
+        try {
+            var sn = pklmStatusName(status) || ("status " + status);
+            pklmTurnLog += pklmSpotLabel(spot) + " is now " + sn + ". ";
+        } catch (e) {}
+    },
+    onStatusOver: function (spot, status) {
+        try {
+            var sn = pklmStatusName(status) || ("status " + status);
+            pklmTurnLog += pklmSpotLabel(spot) + "'s " + sn + " ended. ";
+        } catch (e) {}
+    },
+    onFlinch: function (spot) {
+        try { pklmTurnLog += pklmSpotLabel(spot) + " flinched. "; } catch (e) {}
+    },
     onReconnect: function (player) {}
 });

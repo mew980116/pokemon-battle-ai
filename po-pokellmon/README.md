@@ -115,11 +115,13 @@ po-pokellmon/
 | 0.4.9 (server) | system prompt 改为共享 [prompts.js](prompts.js) 的 `BATTLE_TIPS`（移植 PokeLLMon 的 battle tips），tool 版（0.1.2）同步读取 |
 | 0.4.10 (server) | ① 对手已露招式补「未知」凑满 4 槽位 ② 去掉 KAG[Type] 克制描述（与招式表重复）③ 变化招式（Power:0）不写克制关系 ④ 日志新增 `systemPrompt` 字段 |
 | 0.4.7 (script) | 修复 `pklmStatusName` 状态编号映射：1=麻痹/4=烧伤（之前写反，对齐 board-standalone.js 与主脚本 status===1 减速语义） |
+| 0.5.0 (script) | 战报保存完整性：补全 onMiss/onAvoid/onStatusDamage/onSendBack/onEffectiveness/onAttackFailing/onCriticalHit/onMajorStatusChange/onStatusOver/onFlinch；onMoveMessage/onItemMessage/onAbilityMessage 用 PO 侧读 `*_message.txt` 把「消息编号」解码成文本（含 %s/%f/%m/%i/%t/%a/%q/%st/%p 占位符替换，`part` 选变体）。需把 4 个消息表文件复制到 PO 根目录 |
 
 ## 使用方法
 
 1. 构建知识库：`node po-pokellmon/build-knowledge.js`
 2. 设 key 并启动代理：`$env:DEEPSEEK_API_KEY="sk-..." ; node po-pokellmon/server.js`
 3. 把 `po-pokellmon/po-script.js` 全文贴进 PO 的 battle script 窗口，开战。
+4. （可选，战报细节解码）把消息表文件复制到 PO 根目录（与 `movedata.json` 同级）：`po-data/moves/move_message.txt`、`po-data/items/item_messages.txt`、`po-data/items/berry_messages.txt`、`po-data/abilities/ability_messages.txt`。缺文件时 onMoveMessage/onItemMessage/onAbilityMessage 静默降级，其余战报回调不受影响。
 
 详见 [TODO.md](../TODO.md) 的「项目战略 / 长期目标」与「DeepSeek 接入」章节。
