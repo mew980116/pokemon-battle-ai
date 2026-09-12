@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8091";
-var PKLM_VERSION = "0.5.1";       // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.5.2";       // 脚本版本（改动时 bump，随日志记录）
 
 // 自动开启：账号 id 转小写为 "mew's" 时自动开启 LLM 决策（其他账号手动 /llm on）
 var pklmAccount = "";             // 我方账号名
@@ -542,11 +542,12 @@ function pklmSpotLabel(spot) {
     },
     onDamageDone: function (spot, damage) {
         try {
+            var nm = pklmActiveName(spot);
             // 对手 damage 是血量百分比，我方是实际 HP（与主脚本 onDamageDone 语义一致）
             if (spot === battle.opp) {
-                pklmTurnLog += "opposing lost " + damage + "%. ";
+                pklmTurnLog += "opposing " + nm + " lost " + damage + "%. ";
             } else {
-                pklmTurnLog += "You lost " + damage + " HP. ";
+                pklmTurnLog += "You " + nm + " lost " + damage + " HP. ";
             }
         } catch (e) {}
     },
@@ -657,6 +658,7 @@ function pklmSpotLabel(spot) {
     onChoiceCancelled: function (player) {},
     onMajorStatusChange: function (spot, status, multipleTurns, silent) {
         try {
+            if (status === 31) return;   // 31=濒死(faint)，已由 onKo 记录，避免重复
             var sn = pklmStatusName(status) || ("status " + status);
             pklmTurnLog += pklmSpotLabel(spot) + " is now " + sn + ". ";
         } catch (e) {}
