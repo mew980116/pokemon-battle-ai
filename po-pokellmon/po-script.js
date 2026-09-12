@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8091";
-var PKLM_VERSION = "0.5.0";       // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.5.1";       // 脚本版本（改动时 bump，随日志记录）
 
 // 自动开启：账号 id 转小写为 "mew's" 时自动开启 LLM 决策（其他账号手动 /llm on）
 var pklmAccount = "";             // 我方账号名
@@ -146,6 +146,32 @@ function pklmGetMsgTable(kind, fileName) {
     if (pklmMsgTables[kind] !== null) return pklmMsgTables[kind];
     pklmMsgTables[kind] = pklmParseMsgTable(fileName);
     return pklmMsgTables[kind];
+}
+
+// 战报消息表文件清单（需部署到 PO 根目录，与 movedata.json 同级）
+var PKLM_MSG_FILES = [
+    { kind: 'move', file: 'move_message.txt' },
+    { kind: 'item', file: 'item_messages.txt' },
+    { kind: 'berry', file: 'berry_messages.txt' },
+    { kind: 'ability', file: 'ability_messages.txt' }
+];
+
+// 对战启动时扫描消息表文件：预热缓存 + 缺失告警（缺失则相关回调静默降级）
+function pklmCheckMsgFiles() {
+    var missing = [];
+    for (var i = 0; i < PKLM_MSG_FILES.length; i++) {
+        var f = PKLM_MSG_FILES[i];
+        var map = pklmGetMsgTable(f.kind, f.file);
+        var has = false;
+        for (var k in map) { has = true; break; }
+        if (!has) missing.push(f.file);
+    }
+    if (missing.length) {
+        pklmPrint("WARN 缺战报消息表文件，相关效果无法解码（静默降级）: " + missing.join(", "));
+        pklmPrint("请把这几个 *_message.txt 复制到 PO 根目录（与 movedata.json 同级）");
+    } else {
+        pklmPrint("战报消息表已就绪（" + PKLM_MSG_FILES.length + " 个）");
+    }
 }
 
 // 渲染一条消息：查表 -> 选变体 -> 替换占位符
@@ -588,6 +614,7 @@ function pklmSpotLabel(spot) {
     },
     onTierNotification: function (tier) {
         pklmAutoEnable();
+        pklmCheckMsgFiles();   // 对战启动扫描消息表文件依赖，缺失则提示
     },
     onClauseActivated: function (clause) {},
     onEffectiveness: function (spot, effectiveness) {
