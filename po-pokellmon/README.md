@@ -120,6 +120,7 @@ po-pokellmon/
 | 0.5.2 (script) | 修复：① onMajorStatusChange 跳过 status 31（濒死已由 onKo 记录，消除 "is now status 31" 冗余）② onDamageDone 带宝可梦名（"opposing 泥巴鱼 lost 67%." / "You 西狮海壬 lost 146 HP."） |
 | 0.5.3 (script) | 调试工具：新增 `/eval`（执行任意 JS 观察状态）+ `/llm cb`（回调探针，print onMoveMessage/onItemMessage/onAbilityMessage/onMajorStatusChange/onStatusOver/onStatusDamage/onEffectiveness 原始参数），用于定位 stat 变化等消息来源 |
 | 0.5.4 (script) | mew's 账号自动启用改为默认影子模式（只记 log 不执行 DS 指令），需执行时手动 `/llm on` |
+| 0.5.5 (script) | 修复 shadow 模式不生效根因（pklmAutoEnable 在 pklmShadowMode 声明前调用，var 提升导致 true 被 false 覆盖，改为仅靠 onTierNotification 触发）；mew's 默认开回调探针（调试专用账号） |
 
 ## 使用方法
 

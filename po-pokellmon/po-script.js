@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8091";
-var PKLM_VERSION = "0.5.4";       // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.5.5";       // 脚本版本（改动时 bump，随日志记录）
 
 // 自动开启：账号 id 转小写为 "mew's" 时自动开启 LLM 决策（其他账号手动 /llm on）
 var pklmAccount = "";             // 我方账号名
@@ -31,7 +31,8 @@ function pklmAutoEnable() {
             if (!useLLM) {
                 useLLM = true;
                 pklmShadowMode = true;   // mew's 默认影子模式：只记 log 不执行 DS 指令；需执行时手动 /llm on
-                print("[POKELLMON] auto-enabled (account: mew's, shadow mode)");
+                pklmCbLog = true;        // mew's 默认开回调探针（调试专用账号）
+                print("[POKELLMON] auto-enabled (account: mew's, shadow mode + callback log)");
             }
             if (!pklmLogEnabled) {
                 pklmLogEnabled = true;
@@ -40,7 +41,6 @@ function pklmAutoEnable() {
         }
     } catch (e) {}
 }
-pklmAutoEnable();
 
 // 属性编号 -> 名称（0-17，与 PO 的 sys.type 对齐）
 var PKLM_TYPE_NAMES = ["Normal", "Fighting", "Flying", "Poison", "Ground", "Rock", "Bug", "Ghost", "Steel", "Fire", "Water", "Grass", "Electric", "Psychic", "Ice", "Dragon", "Dark", "Fairy"];
