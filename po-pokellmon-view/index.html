@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LLM 对战可视化 · po-pokellmon</title>
+<style>
+:root{
+  --bg:#070b12; --panel:#101a26; --panel2:#0d141f; --edge:rgba(120,170,220,.14);
+  --text:#e8f0fa; --dim:#a8b8d0; --faint:#7c8ca5;
+  --me:#38bdf8; --opp:#fb7185; --up:#f59e0b; --down:#60a5fa;
+  --hp-hi:#4ade80; --hp-mid:#facc15; --hp-lo:#f87171;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:"Segoe UI","Microsoft YaHei",sans-serif;color:var(--text);font-size:13px;background:var(--bg);display:flex;flex-direction:column;overflow:hidden}
+
+.topbar{flex:0 0 auto;display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--panel);border-bottom:1px solid var(--edge);flex-wrap:wrap}
+.topbar select{background:var(--panel2);color:var(--text);border:1px solid var(--edge);border-radius:6px;padding:6px 10px;font-size:13px;max-width:420px}
+.topbar button{background:transparent;color:var(--dim);border:1px solid var(--edge);border-radius:6px;padding:6px 12px;cursor:pointer;font-size:13px}
+.topbar button:hover{color:var(--text);border-color:var(--me)}
+.topbar .nav{display:flex;align-items:center;gap:8px}
+.topbar .nav input[type=range]{width:200px}
+.topbar .stepinfo{font-family:Consolas,monospace;color:var(--dim);font-size:12px;min-width:120px}
+.topbar .tag{font-size:11px;padding:2px 8px;border-radius:4px;font-weight:700;letter-spacing:.05em}
+.topbar .tag.notool{background:rgba(56,189,248,.15);color:var(--me)}
+.topbar .tag.tool{background:rgba(245,158,11,.15);color:var(--up)}
+
+.main{flex:1 1 auto;display:flex;gap:10px;padding:10px;min-height:0}
+.col-left{flex:0 0 560px;display:flex;flex-direction:column;gap:8px;min-height:0;overflow-y:auto}
+.col-right{flex:1 1 auto;display:flex;flex-direction:column;gap:8px;min-height:0}
+
+.panel{background:var(--panel);border:1px solid var(--edge);border-radius:9px;padding:10px;display:flex;flex-direction:column;min-height:0}
+.panel h3{font-size:12px;font-weight:700;letter-spacing:.12em;color:var(--faint);margin-bottom:8px;flex:0 0 auto}
+.grow{flex:1 1 auto;min-height:0;overflow-y:auto}
+
+/* 对战卡 */
+.poke{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:7px;background:var(--panel2);margin-bottom:5px}
+.poke .name{font-weight:700;font-size:14px}
+.poke .types{display:flex;gap:4px}
+.tchip{font-size:10px;font-weight:700;color:#fff;padding:2px 6px;border-radius:3px;text-shadow:0 1px 1px rgba(0,0,0,.4)}
+.hpbar{flex:1;height:8px;border-radius:4px;background:rgba(0,0,0,.5);overflow:hidden;min-width:60px}
+.hpbar i{display:block;height:100%;border-radius:4px}
+.pct{font-family:Consolas,monospace;font-weight:700;font-size:13px;min-width:40px;text-align:right}
+.ko{opacity:.6;filter:grayscale(.5)}
+.boost{font-family:Consolas,monospace;font-size:11px;font-weight:700;padding:1px 5px;border-radius:3px}
+.boost.up{background:rgba(245,158,11,.18);color:var(--up)}
+.boost.down{background:rgba(96,165,250,.18);color:var(--down)}
+.moves{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px}
+.mv{font-size:11px;padding:2px 6px;border-radius:4px;background:rgba(0,0,0,.25);display:inline-flex;align-items:center;gap:4px}
+.mv .t{width:9px;height:9px;border-radius:50%;display:inline-block}
+.mv .pp{color:var(--faint);font-family:Consolas,monospace}
+.st{font-size:10px;font-weight:700;color:#fff;padding:2px 5px;border-radius:3px}
+.row-label{font-size:11px;color:var(--faint);letter-spacing:.1em;margin:8px 0 4px;font-weight:700}
+
+/* 战报 */
+.hist{font-family:Consolas,"Microsoft YaHei",monospace;font-size:12px;line-height:1.6;white-space:pre-wrap;color:var(--dim)}
+.hist .hl{color:var(--text)}
+
+/* LLM 交互 */
+.llm .kv{display:flex;gap:8px;margin-bottom:5px;align-items:flex-start}
+.llm .kv .k{flex:0 0 84px;color:var(--faint);font-size:11px;letter-spacing:.05em;padding-top:1px}
+.llm .kv .v{flex:1;font-family:Consolas,monospace;font-size:12px;word-break:break-all}
+.llm .kv .v.json{color:#a5d6ff}
+.llm pre{font-family:Consolas,"Microsoft YaHei",monospace;font-size:11px;line-height:1.5;color:var(--dim);white-space:pre-wrap;word-break:break-all;background:var(--panel2);border-radius:6px;padding:8px;max-height:200px;overflow-y:auto}
+.toolcall{background:rgba(245,158,11,.06);border-left:2px solid var(--up);padding:6px 8px;border-radius:4px;margin-bottom:5px}
+.toolcall .fn{color:var(--up);font-weight:700;font-size:12px}
+.badge{font-size:10px;padding:1px 6px;border-radius:3px;font-weight:700}
+.badge.fb{background:rgba(248,113,113,.2);color:#fca5a5}
+.badge.ok{background:rgba(74,222,128,.15);color:#86efac}
+.tokgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:4px}
+.tok{background:var(--panel2);border-radius:6px;padding:6px;text-align:center}
+.tok .n{font-family:Consolas,monospace;font-size:16px;font-weight:700}
+.tok .l{font-size:10px;color:var(--faint);margin-top:2px}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <select id="selBattle" onchange="loadBattle(this.value)"></select>
+  <div class="nav">
+    <button onclick="nav(-1)">◀ 上一条</button>
+    <input type="range" id="slider" min="0" max="0" value="0" oninput="navTo(parseInt(this.value))">
+    <button onclick="nav(1)">下一条 ▶</button>
+  </div>
+  <span class="stepinfo" id="stepInfo">-</span>
+  <span class="tag notool" id="modeTag" style="display:none">NO-THINK</span>
+  <span class="tag tool" id="toolTag" style="display:none">TOOL</span>
+</div>
+
+<div class="main">
+  <div class="col-left">
+    <div class="panel">
+      <h3>对战界面 · 对手</h3>
+      <div id="oppActive"></div>
+      <div class="row-label">对手后备（已露）</div>
+      <div id="oppBench"></div>
+    </div>
+    <div class="panel">
+      <h3>对战界面 · 我方</h3>
+      <div id="meActive"></div>
+      <div class="row-label">我方后备（含招式）</div>
+      <div id="meBench"></div>
+      <div class="row-label">我方六只</div>
+      <div id="meTeam"></div>
+    </div>
+  </div>
+
+  <div class="col-right">
+    <div class="panel" style="flex:0 0 auto">
+      <h3>LLM 交互（当前这条决策）</h3>
+      <div class="llm" id="llmInfo"></div>
+      <div class="tokgrid" id="tokGrid"></div>
+      <div id="toolCalls"></div>
+    </div>
+    <div class="panel grow">
+      <h3>历史战报（该决策时刻）</h3>
+      <div class="hist" id="history"></div>
+    </div>
+    <div class="panel grow">
+      <h3>完整 Prompt</h3>
+      <pre id="prompt"></pre>
+    </div>
+  </div>
+</div>
+
+<script>
+var TYPE_CN={Normal:"一般",Fire:"火",Water:"水",Electric:"电",Grass:"草",Ice:"冰",Fighting:"格斗",Poison:"毒",Ground:"地",Flying:"飞",Psychic:"超能",Bug:"虫",Rock:"岩",Ghost:"幽灵",Dragon:"龙",Dark:"恶",Steel:"钢",Fairy:"妖精"};
+var TYPE_COLOR={Normal:"#A8A878",Fire:"#F08030",Water:"#6890F0",Electric:"#F8D030",Grass:"#78C850",Ice:"#98D8D8",Fighting:"#C03028",Poison:"#A040A0",Ground:"#E0C068",Flying:"#A890F0",Psychic:"#F85888",Bug:"#A8B820",Rock:"#B8A038",Ghost:"#705898",Dragon:"#7038F0",Dark:"#705848",Steel:"#B8B8D0",Fairy:"#EE99AC"};
+var STATUS={burn:{cn:"烧",c:"#fb923c"},sleep:{cn:"睡",c:"#60a5fa"},freeze:{cn:"冰",c:"#67e8f9"},paralysis:{cn:"麻",c:"#fde047"},poison:{cn:"毒",c:"#a855f7"}};
+
+var BATTLE=null, cur=0;
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+function hpColor(p){return p>50?["#4ade80","#16a34a"]:p>25?["#facc15","#ca8a04"]:["#f87171","#dc2626"];}
+function typeChip(t){ if(!t) return '<span class="tchip" style="background:#6b7280">?</span>'; return '<span class="tchip" style="background:'+(TYPE_COLOR[t]||'#6b7280')+'">'+(TYPE_CN[t]||t)+'</span>';}
+function statusChip(s){ return s&&STATUS[s]?'<span class="st" style="background:'+STATUS[s].c+'">'+STATUS[s].cn+'</span>':''; }
+function boostsHtml(arr){ if(!arr||!arr.length) return ''; return arr.map(function(b){ var up=b.indexOf('-')===-1; return '<span class="boost '+(up?'up':'down')+'">'+esc(b)+'</span>'; }).join(' '); }
+
+function moveHtml(m){ // m 可能是 {name,type,pp} 或 {name,type}
+  return '<span class="mv"><i class="t" style="background:'+(TYPE_COLOR[m.type]||'#6b7280')+'"></i>'+esc(m.name)+(m.pp!=null?'<span class="pp">'+m.pp+'</span>':'')+'</span>';
+}
+
+function hpBarHtml(pct){ var c=hpColor(pct); return '<div class="hpbar"><i style="width:'+pct+'%;background:'+c[0]+'"></i></div><span class="pct" style="color:'+c[0]+'">'+pct+'%</span>'; }
+
+function renderActive(el, p, isMe){
+  var hc=hpColor(p.hpPct||0);
+  var nameColor=isMe?'#eaf6ff':'#ffeef1';
+  var moves=(p.moves||[]).map(moveHtml).join('');
+  var boosts=boostsHtml(p.boosts);
+  el.innerHTML='<div class="poke'+(p.hpPct===0?' ko':'')+'">'+
+    '<span class="name" style="color:'+nameColor+'">'+esc(p.name||'?')+'</span>'+
+    (p.types||[]).map(typeChip).join('')+
+    statusChip(p.status)+
+    hpBarHtml(p.hpPct||0)+
+  '</div>'+
+  (boosts?'<div style="margin-bottom:5px">'+boosts+'</div>':'')+
+  (moves?'<div class="moves">'+moves+'</div>':'');
+}
+
+function renderBench(el, bench){
+  if(!bench||!bench.length){ el.innerHTML='<div style="color:var(--faint);font-size:12px">无</div>'; return; }
+  el.innerHTML=bench.map(function(b){
+    return '<div class="poke'+(b.ko?' ko':'')+'">'+
+      '<span class="name">'+esc(b.name)+'</span>'+
+      (b.types||[]).map(typeChip).join('')+
+      statusChip(b.status)+
+      hpBarHtml(b.hpPct||0)+
+    '</div>'+
+    (b.moves&&b.moves.length?'<div class="moves" style="margin:-2px 0 5px 20px">'+b.moves.map(moveHtml).join('')+'</div>':'');
+  }).join('');
+}
+
+function renderTeam(el, team){
+  if(!team||!team.length){ el.innerHTML=''; return; }
+  el.innerHTML=team.map(function(t){
+    return '<div class="poke'+(t.ko?' ko':'')+'">'+
+      '<span class="name">'+esc(t.name)+'</span>'+
+      statusChip(t.status)+
+      (t.ko?'<span class="pct" style="color:var(--faint)">KO</span>':hpBarHtml(t.hpPct||0))+
+    '</div>';
+  }).join('');
+}
+
+function renderBattle(st){
+  if(!st){ return; }
+  renderActive(document.getElementById('oppActive'), st.opp||{}, false);
+  // 对手后备：只有 oppSeen 名字 + oppRemaining，无 HP（隐藏）
+  var oppSeen=(st.oppSeen||[]).filter(function(n){ return st.opp && n!==st.opp.name; });
+  var ob=document.getElementById('oppBench');
+  if(oppSeen.length){
+    ob.innerHTML='<div style="color:var(--dim);font-size:12px;margin-bottom:4px">剩余 '+st.oppRemaining+' 只</div>'+
+      oppSeen.map(function(n){ return '<div class="poke"><span class="name">'+esc(n)+'</span></div>'; }).join('');
+  } else {
+    ob.innerHTML='<div style="color:var(--faint);font-size:12px">剩余 '+st.oppRemaining+' 只（未露）</div>';
+  }
+  renderActive(document.getElementById('meActive'), st.me||{}, true);
+  renderBench(document.getElementById('meBench'), st.bench||[]);
+  renderTeam(document.getElementById('meTeam'), st.myTeam||[]);
+}
+
+function renderLLM(d){
+  var info=document.getElementById('llmInfo');
+  var act='—';
+  if(d.action){
+    if(d.action.type==='switch') act='换人 pokeSlot='+d.action.pokeSlot;
+    else act='出招 attackSlot='+d.action.attackSlot;
+    if(d.fallback) act+=' (fallback: '+d.action.reason+')';
+  }
+  var rounds=(d.rounds!=null)?(' · rounds='+d.rounds):'';
+  info.innerHTML=
+    '<div class="kv"><span class="k">决策</span><span class="v json">'+esc(act)+'</span></div>'+
+    '<div class="kv"><span class="k">回复原文</span><span class="v json">'+esc(d.reply||'')+'</span></div>'+
+    '<div class="kv"><span class="k">耗时</span><span class="v">'+(d.totalMs!=null?d.totalMs+' ms'+rounds:'—')+'</span></div>'+
+    '<div class="kv"><span class="k">状态</span><span class="v">'+(d.fallback?'<span class="badge fb">FALLBACK</span>':'<span class="badge ok">OK</span>')+'</span></div>';
+
+  var g=document.getElementById('tokGrid');
+  var u=d.usage||{};
+  var reason=(u.completion_tokens_details&&u.completion_tokens_details.reasoning_tokens)||0;
+  g.innerHTML=
+    '<div class="tok"><div class="n">'+(u.total_tokens||0)+'</div><div class="l">total</div></div>'+
+    '<div class="tok"><div class="n">'+(u.prompt_tokens||0)+'</div><div class="l">prompt</div></div>'+
+    '<div class="tok"><div class="n">'+(u.completion_tokens||0)+'</div><div class="l">completion</div></div>'+
+    '<div class="tok"><div class="n">'+reason+'</div><div class="l">reasoning</div></div>'+
+    '<div class="tok"><div class="n">'+(u.prompt_cache_hit_tokens||0)+'</div><div class="l">cached</div></div>';
+
+  var tc=document.getElementById('toolCalls');
+  if(d.toolLog&&d.toolLog.length){
+    var html='<div class="row-label">Tool 调用</div>';
+    d.toolLog.forEach(function(round){
+      round.calls.forEach(function(c){
+        html+='<div class="toolcall"><div class="fn">'+esc(c.name)+'</div>'+
+          '<div style="font-size:11px;color:var(--dim)">args: '+esc(JSON.stringify(c.args))+'</div>'+
+          '<div style="font-size:11px;color:var(--dim)">→ '+esc(JSON.stringify(c.result))+'</div></div>';
+      });
+    });
+    tc.innerHTML=html;
+  } else {
+    tc.innerHTML='';
+  }
+}
+
+function render(d){
+  renderBattle(d.state);
+  renderLLM(d);
+  var h=document.getElementById('history');
+  var hist=(d.state&&d.state.history)||[];
+  h.innerHTML=hist.map(function(x){ return '<span class="hl">'+esc(x)+'</span>'; }).join('<br>');
+  document.getElementById('prompt').textContent=d.prompt||'';
+  document.getElementById('slider').value=cur;
+  document.getElementById('stepInfo').textContent='第 '+(cur+1)+' / '+BATTLE.length+' 条 · turn '+(d.turn!=null?d.turn:'?');
+}
+
+function navTo(i){
+  if(!BATTLE||!BATTLE.length) return;
+  if(i<0)i=0; if(i>=BATTLE.length)i=BATTLE.length-1;
+  cur=i; render(BATTLE[cur]);
+}
+function nav(delta){ navTo(cur+delta); }
+
+function loadBattle(file){
+  fetch('/api/battle?file='+encodeURIComponent(file)).then(function(r){return r.json();}).then(function(arr){
+    BATTLE=arr;
+    cur=0;
+    document.getElementById('slider').max=Math.max(0,arr.length-1);
+    var hasTool=arr.some(function(d){return d.toolLog&&d.toolLog.length;});
+    document.getElementById('toolTag').style.display=hasTool?'inline':'none';
+    document.getElementById('modeTag').style.display=hasTool?'none':'inline';
+    if(arr.length) render(arr[0]);
+  });
+}
+
+// 初始化：加载 battle 列表
+fetch('/api/battles').then(function(r){return r.json();}).then(function(list){
+  var sel=document.getElementById('selBattle');
+  list.forEach(function(f){
+    var o=document.createElement('option');
+    o.value=f.file; o.textContent='['+(f.source==='tool'?'TOOL':'NO-THINK')+'] '+f.name+' ('+Math.round(f.bytes/1024)+'KB)';
+    sel.appendChild(o);
+  });
+  if(list.length) loadBattle(list[0].file);
+});
+</script>
+</body>
+</html>
