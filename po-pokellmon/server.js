@@ -18,7 +18,7 @@ var path = require('path');
 
 var PORT = Number(process.env.POKELLMON_PORT) || 8091;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.4.6';   // 服务版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.4.7';   // 服务版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（可配置，改动后重启生效）====
 var MODEL = 'deepseek-v4-flash';        // 模型名：deepseek-v4-flash / deepseek-v4-pro
@@ -101,6 +101,17 @@ function extractReply(data) {
         return data;
     } catch (e) {
         return data;
+    }
+}
+
+// 从 DeepSeek 响应提取 token 用量（prompt_tokens / completion_tokens / total_tokens）
+function extractUsage(data) {
+    try {
+        var obj = JSON.parse(data);
+        if (obj.usage) return obj.usage;
+        return null;
+    } catch (e) {
+        return null;
     }
 }
 
@@ -346,6 +357,8 @@ function handleChoice(res, state) {
     var lastReply = '';
     var lastPing = '';
     var attemptLog = [];   // 每次尝试的详细记录
+    var lastUsage = null;  // 最后一次响应的 token 用量（含重试）
+    var startTime = Date.now();   // 本次决策总耗时起点（含重试）
 
     // 写日志（含 error/非200 fallback 的情况 + 每次 attempt 详情）
     function logEntry(reply, action) {
@@ -357,6 +370,8 @@ function handleChoice(res, state) {
             account: state.account || '',
             turn: state.turn,
             attempts: attempt,
+            totalMs: Date.now() - startTime,
+            usage: lastUsage,
             attemptLog: attemptLog,
             fallback: !!action.fallback,
             lastReply: lastReply,
@@ -411,10 +426,12 @@ function handleChoice(res, state) {
             }
 
             var reply = extractReply(data);
+            var usage = extractUsage(data);
+            lastUsage = usage;
             var action = parseAction(reply, state);
             if (!action) {
                 lastReply = reply;
-                attemptLog.push({ attempt: attempt, result: 'parse_failed', ms: ms, reply: reply.slice(0, 100) });
+                attemptLog.push({ attempt: attempt, result: 'parse_failed', ms: ms, usage: usage, reply: reply.slice(0, 100) });
                 console.log('[choice] parse failed (attempt ' + attempt + '/' + (FALLBACK_RETRY + 1) + ') ' + ms + 'ms, reply=' + reply.slice(0, 200));
                 if (attempt <= FALLBACK_RETRY) {
                     tryDecide();   // fallback retry：DS 返回无法解析，重试
@@ -422,10 +439,11 @@ function handleChoice(res, state) {
                 }
                 action = fallbackAction(state, 'parse_failed');
             } else {
-                attemptLog.push({ attempt: attempt, result: 'success', ms: ms });
+                attemptLog.push({ attempt: attempt, result: 'success', ms: ms, usage: usage });
             }
 
-            console.log('[choice] => ' + JSON.stringify(action) + (action.fallback ? ' (FALLBACK)' : ''));
+            var tokStr = (usage && usage.total_tokens !== undefined) ? (' ' + usage.total_tokens + 'tok') : '';
+            console.log('[choice] => ' + JSON.stringify(action) + (action.fallback ? ' (FALLBACK)' : '') + ' ' + ms + 'ms' + tokStr);
             logEntry(reply, action);
             res.writeHead(200);
             res.end(JSON.stringify(action));

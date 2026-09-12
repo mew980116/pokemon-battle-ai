@@ -108,6 +108,7 @@ po-pokellmon/
 | 0.4.5 | **修复关键 bug**：非思考时 `reasoning_effort:'high'` 仍被发送导致实际开了思考模式（慢的根因），改为非思考时显式 `thinking:disabled` 且不带 reasoning_effort |
 | 0.4.6 (server) / 0.4.2 (script) | 修复 4 项：① 对手剩余数改用 `status !== 31`（对齐主脚本 getPokeCount）② 历史伤害对手为百分比、我方为实际 HP ③ 历史补「当前回合」+ 注入能力等级 `Boosts`（避免重复诡计类状态招）④ 关闭 dummy ping（`DUMMY_PING_ENABLED=false`） |
 | 0.4.3 (script) | ① 对手剩余数加 `numRef` 空槽位防御（未带满 6 只不误判）② `Opponent revealed moves` 改为按 `numRef` 区分，只显示当前场上这只已暴露的招式 |
+| 0.4.7 (server) | 日志新增 `usage`（prompt/completion/total tokens）+ `totalMs`（含重试总耗时），attemptLog 每条也带 `usage` |
 
 ## 使用方法
 
