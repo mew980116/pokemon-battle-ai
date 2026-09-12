@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8091";
-var PKLM_VERSION = "0.5.2";       // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.5.3";       // 脚本版本（改动时 bump，随日志记录）
 
 // 自动开启：账号 id 转小写为 "mew's" 时自动开启 LLM 决策（其他账号手动 /llm on）
 var pklmAccount = "";             // 我方账号名
@@ -59,6 +59,7 @@ var pklmFinalAttack = false;      // 保底标志：全 ban 后强制 attack，�
 var pklmShadowMode = false;       // 影子模式：照发 DS 请求并记 log，但不执行 DS 指令，改由用户手动操作
 var pklmLastMove = {};            // { spot: 最后使用的招式名 }，供消息解码 %m 占位符
 var pklmMsgTables = { move: null, item: null, ability: null, berry: null };  // 消息表懒加载缓存
+var pklmCbLog = false;            // 回调探针：开启后 print 各回调原始参数（/llm cb 切换，调试观察用）
 
 // 招式是否不可用（锁招 + 被 ban）
 function pklmIsMoveDisabled(m) {
@@ -248,6 +249,11 @@ function pklmTpoke(ind) {
 
 function pklmPrint(m) {
     print("[POKELLMON] " + m);
+}
+
+// 回调探针：pklmCbLog 开启时打印回调原始参数（观察实际触发哪些回调）
+function pklmCb(name, args) {
+    if (pklmCbLog) print("[CB] " + name + " " + args);
 }
 
 // 采集一个宝可梦的招式列表（我方含 num/pp/slot，对手只含 name/type）
@@ -514,6 +520,20 @@ function pklmSpotLabel(spot) {
             pklmPrint("SHADOW mode ON: DS 决策仅记录不执行，请手动操作对战");
             return;
         }
+        if (message.indexOf("/llm cb") === 0) {
+            pklmCbLog = !pklmCbLog;
+            pklmPrint("callback log " + (pklmCbLog ? "ON" : "OFF"));
+            return;
+        }
+        if (message.indexOf("/eval ") === 0) {
+            try {
+                var res = eval(message.substring(6));
+                pklmPrint("eval => " + res);
+            } catch (e) {
+                pklmPrint("eval error: " + e);
+            }
+            return;
+        }
     },
     onBeginTurn: function (turn) {
         pklmCurrentTurn = turn;
@@ -585,6 +605,7 @@ function pklmSpotLabel(spot) {
     },
     onStatusDamage: function (spot, status) {
         try {
+            pklmCb("onStatusDamage", "status=" + status);
             var sn = pklmStatusName(status) || "status";
             pklmTurnLog += pklmSpotLabel(spot) + " suffered " + sn + " damage. ";
         } catch (e) {}
@@ -594,6 +615,7 @@ function pklmSpotLabel(spot) {
     },
     onItemMessage: function (spot, item, part, foe, berry, other) {
         try {
+            pklmCb("onItemMessage", "item=" + item + " part=" + part + " foe=" + foe + " berry=" + berry + " other=" + other);
             var kind = (berry && berry !== 0) ? 'berry' : 'item';
             var file = (kind === 'berry') ? 'berry_messages.txt' : 'item_messages.txt';
             var msgNum = (kind === 'berry') ? berry : item;
@@ -603,12 +625,14 @@ function pklmSpotLabel(spot) {
     },
     onMoveMessage: function (spot, move, part, type, foe, other, q) {
         try {
+            pklmCb("onMoveMessage", "move=" + move + " part=" + part + " type=" + type + " foe=" + foe + " other=" + other + " q=" + q);
             var txt = pklmRenderMsg('move', 'move_message.txt', move, part, pklmMsgCtx(spot, type, other, q));
             if (txt) pklmTurnLog += txt + ". ";
         } catch (e) {}
     },
     onAbilityMessage: function (spot, ab, part, type, foe, other) {
         try {
+            pklmCb("onAbilityMessage", "ab=" + ab + " part=" + part + " type=" + type + " foe=" + foe + " other=" + other);
             var txt = pklmRenderMsg('ability', 'ability_messages.txt', ab, part, pklmMsgCtx(spot, type, other, undefined));
             if (txt) pklmTurnLog += txt + ". ";
         } catch (e) {}
@@ -620,6 +644,7 @@ function pklmSpotLabel(spot) {
     onClauseActivated: function (clause) {},
     onEffectiveness: function (spot, effectiveness) {
         try {
+            pklmCb("onEffectiveness", "effectiveness=" + effectiveness);
             var t = null;
             if (effectiveness === 0) t = "It had no effect";
             else if (effectiveness === 1 || effectiveness === 2) t = "It's not very effective";
@@ -658,6 +683,7 @@ function pklmSpotLabel(spot) {
     onChoiceCancelled: function (player) {},
     onMajorStatusChange: function (spot, status, multipleTurns, silent) {
         try {
+            pklmCb("onMajorStatusChange", "status=" + status + " multi=" + multipleTurns + " silent=" + silent);
             if (status === 31) return;   // 31=濒死(faint)，已由 onKo 记录，避免重复
             var sn = pklmStatusName(status) || ("status " + status);
             pklmTurnLog += pklmSpotLabel(spot) + " is now " + sn + ". ";
@@ -665,6 +691,7 @@ function pklmSpotLabel(spot) {
     },
     onStatusOver: function (spot, status) {
         try {
+            pklmCb("onStatusOver", "status=" + status);
             var sn = pklmStatusName(status) || ("status " + status);
             pklmTurnLog += pklmSpotLabel(spot) + "'s " + sn + " ended. ";
         } catch (e) {}

@@ -118,6 +118,7 @@ po-pokellmon/
 | 0.5.0 (script) | 战报保存完整性：补全 onMiss/onAvoid/onStatusDamage/onSendBack/onEffectiveness/onAttackFailing/onCriticalHit/onMajorStatusChange/onStatusOver/onFlinch；onMoveMessage/onItemMessage/onAbilityMessage 用 PO 侧读 `*_message.txt` 把「消息编号」解码成文本（含 %s/%f/%m/%i/%t/%a/%q/%st/%p 占位符替换，`part` 选变体）。需把 4 个消息表文件复制到 PO 根目录 |
 | 0.5.1 (script) | 对战启动时（onTierNotification）扫描 4 个消息表文件依赖，缺失则 `print` 提示（预热缓存 + 缺失告警），不再静默 |
 | 0.5.2 (script) | 修复：① onMajorStatusChange 跳过 status 31（濒死已由 onKo 记录，消除 "is now status 31" 冗余）② onDamageDone 带宝可梦名（"opposing 泥巴鱼 lost 67%." / "You 西狮海壬 lost 146 HP."） |
+| 0.5.3 (script) | 调试工具：新增 `/eval`（执行任意 JS 观察状态）+ `/llm cb`（回调探针，print onMoveMessage/onItemMessage/onAbilityMessage/onMajorStatusChange/onStatusOver/onStatusDamage/onEffectiveness 原始参数），用于定位 stat 变化等消息来源 |
 
 ## 使用方法
 
