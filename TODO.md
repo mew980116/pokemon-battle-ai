@@ -285,6 +285,17 @@
 
 **待办（观察项，暂不实施，等再打几把看表现）**：
 
+- [ ] **战报保存完整性（基于回调 function 补全战报细节）**：当前 po-script.js 只记 `onUseAttack`/`onDamageDone`/`onKo`/`onSendOut`，大量效果信息丢失。需把以下回调补进 `pklmTurnLog`（进而进 history/fullHistory，供 tool 的 `get_battle_history` 读取），让战报能完整还原「有效/无效/招式效果/状态变化」：
+  - `onEffectiveness`（有效 / 效果绝佳 / 效果不好 / 无效）
+  - `onAttackFailing`（攻击失败）
+  - `onMiss` / `onAvoid`（未命中 / 被避开）
+  - `onCriticalHit`（会心一击）
+  - `onMoveMessage`（招式效果消息，如「对手被浸水，属性变水」）
+  - `onMajorStatusChange` / `onStatusOver`（状态变化 / 结束，如浸水、烧伤、中毒、麻痹）
+  - `onStatusDamage`（状态异常伤害，如烧伤/中毒扣血）
+  - `onFlinch`（畏缩）
+  - `onItemMessage` / `onAbilityMessage`（道具 / 特性触发）
+
 - **战报细节度不足 → 状态效果体系用不起来**：浸水/剧毒/挡路这类「改属性 + 状态」体系，DS 看不到「对手已被浸水」的效果（history 只记了「使用了浸水」，没记 `onMoveMessage` 的「对手被浸水」）。表现：DS 重复用浸水，且不对被浸水对手用剧毒。
   - 方向 A：提升战报细节度 —— 把 `onMoveMessage` / `onMajorStatusChange` 等效果回调信息记进 history（如「对手被浸水，属性变为水」）。
   - 方向 B：追加 prompt 预设评估 —— 把体系规则（浸水→对手变水→剧毒可命中、挡路封锁换人）预注入 prompt。
