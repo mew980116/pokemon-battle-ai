@@ -20,7 +20,7 @@ var tools = require('./tools.js');
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.1.6';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.1.7';   // tool 分支版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（tool 分支：非思考 + tool，快）====
 var MODEL = 'deepseek-v4-flash';
@@ -244,7 +244,16 @@ function buildPrompt(state) {
         for (var s = 0; s < bench.length; s++) {
             idx++;
             var bk = bench[s];
-            p += idx + '. switch to ' + bk.name + ':Type:' + (bk.types || []).join('&') + ',HP:' + (bk.hpPct || 0) + '%' + (bk.status ? ',Status:' + bk.status : '') + '\n';
+            var sw = idx + '. switch to ' + bk.name + ':Type:' + (bk.types || []).join('&') + ',HP:' + (bk.hpPct || 0) + '%' + (bk.status ? ',Status:' + bk.status : '');
+            if (bk.moves && bk.moves.length) {
+                var ms = '';
+                for (var mi = 0; mi < bk.moves.length; mi++) {
+                    if (mi > 0) ms += '|';
+                    ms += bk.moves[mi].name + ',' + bk.moves[mi].type;
+                }
+                sw += ',Moves:[' + ms + ']';
+            }
+            p += sw + '\n';
         }
     }
 

@@ -124,6 +124,7 @@ po-pokellmon/
 | 0.5.6 (script) | 新增正式执行账号「木偶」析构万理的发条公主 自动启用 LLM 决策（非 shadow、不开探针、开日志） |
 | 0.4.11 (server) / 0.5.7 (script) | 对手 bench 详情进 prompt：移除「Opponent has N pokemons left」，改为 current pokemon 下展示后备槽位 [Name,HP%,status]/[Name,fainted]/[unknown]（PO 侧新增 oppTeam 采集；board 同步补 bench status） |
 | 0.4.12 (server) | bench 未亮相占位符 unknown → ???（避免与未知图腾 Unown 混淆） |
+| 0.4.13 (server) / 0.5.8 (script) | ① switch 选项带上后备宝可梦 4 招 ② 修复 ability message 的 %a 特性名解析（改用 other 参数，对手特性未公开也能拿到名字） |
 
 ## 使用方法
 

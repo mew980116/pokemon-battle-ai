@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8091";
-var PKLM_VERSION = "0.5.7";       // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.5.8";       // 脚本版本（改动时 bump，随日志记录）
 
 // 自动开启：账号 id 转小写为 "mew's" 时自动开启 LLM 决策（其他账号手动 /llm on）
 var pklmAccount = "";             // 我方账号名
@@ -228,14 +228,14 @@ function pklmAbilityName(n) {
 }
 
 // 构建消息替换上下文（%i/%a 用当前宝可梦持有的道具/特性，未知时为空——尽力而为）
-function pklmMsgCtx(spot, type, other, q) {
+function pklmMsgCtx(spot, type, other, q, abilityId) {
     return {
         s: pklmActiveName(spot),
         f: pklmActiveName(pklmOtherSpot(spot)),
         m: pklmLastMove[spot] || '',
         i: pklmItemName(pklmPoke(spot).item),
         t: pklmTypeName(type) || '',
-        a: pklmAbilityName(pklmPoke(spot).ability),
+        a: pklmAbilityName((abilityId !== undefined && abilityId !== null && abilityId !== 0) ? abilityId : pklmPoke(spot).ability),
         q: (q !== undefined && q !== null && q !== 0) ? String(q) : '',
         st: PKLM_STAT_NAMES[other] || '',
         p: pklmActiveName(spot),
@@ -669,7 +669,7 @@ function pklmSpotLabel(spot) {
     onAbilityMessage: function (spot, ab, part, type, foe, other) {
         try {
             pklmCb("onAbilityMessage", "ab=" + ab + " part=" + part + " type=" + type + " foe=" + foe + " other=" + other);
-            var txt = pklmRenderMsg('ability', 'ability_messages.txt', ab, part, pklmMsgCtx(spot, type, other, undefined));
+            var txt = pklmRenderMsg('ability', 'ability_messages.txt', ab, part, pklmMsgCtx(spot, type, other, undefined, other));
             if (txt) pklmTurnLog += txt + ". ";
         } catch (e) {}
     },
