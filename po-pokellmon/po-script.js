@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8091";
-var PKLM_VERSION = "0.5.13";       // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.5.14";       // 脚本版本（改动时 bump，随日志记录）
 
 // 自动开启：账号 id 转小写为 "mew's" 时自动开启 LLM 决策（其他账号手动 /llm on）
 var pklmAccount = "";             // 我方账号名
@@ -423,19 +423,21 @@ function pklmCollectOppTeam() {
 // 天气/场地取值 -> 英文名（与主脚本 battle.data.field.weather/terrain 编码对齐）
 function pklmWeatherName(n) {
     switch (n) {
-        case 1: return 'Rain';
-        case 2: return 'Sun';
+        case 1: return 'Hail';
+        case 2: return 'Rain';
         case 3: return 'Sandstorm';
-        case 4: return 'Hail';
+        case 4: return 'Sun';
+        case 5: return 'Harsh Sunlight';
+        case 6: return 'Heavy Rain';
         default: return '';
     }
 }
 function pklmTerrainName(n) {
     switch (n) {
-        case 1: return 'Grassy Terrain';
-        case 2: return 'Electric Terrain';
-        case 3: return 'Psychic Terrain';
-        case 4: return 'Misty Terrain';
+        case 1: return 'Electric Terrain';
+        case 2: return 'Grassy Terrain';
+        case 3: return 'Misty Terrain';
+        case 4: return 'Psychic Terrain';
         default: return '';
     }
 }
@@ -561,11 +563,28 @@ function pklmDecideAndAct() {
 // 历史回合记录辅助
 function pklmPushTurn() {
     if (pklmTurnLog) {
+        pklmTurnLog += pklmTurnSnapshot();
         pklmHistory.push(pklmTurnLog);
         if (pklmHistory.length > 5) pklmHistory.shift();
         pklmFullHistory.push(pklmTurnLog);   // 完整战报，不截断（供 get_battle_history tool）
     }
     pklmTurnLog = "";
+}
+
+// 采集「回合结束时」的场况快照（天气/场地/双方场上能力等级），追加进战报文本。
+// 弥补 PO 无通用 stat 变化回调（剑舞/近身战等）、天气/场地特性触发消息不走 onAbilityMessage 的缺口。
+function pklmTurnSnapshot() {
+    try {
+        var w = pklmWeatherName(battle.data.field.weather) || 'None';
+        var t = pklmTerrainName(battle.data.field.terrain) || 'None';
+        var mb = pklmCollectBoosts(battle.me);
+        var ob = pklmCollectBoosts(battle.opp);
+        return '[Weather:' + w + ', Terrain:' + t +
+            ', You:' + (mb.length ? mb.join('+') : 'None') +
+            ', Opp:' + (ob.length ? ob.join('+') : 'None') + '] ';
+    } catch (e) {
+        return '';
+    }
 }
 
 function pklmSpotLabel(spot) {
