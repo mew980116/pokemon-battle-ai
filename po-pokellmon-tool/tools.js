@@ -207,7 +207,7 @@ var TOOL_DEFS = [
         type: 'function',
         function: {
             name: 'run_js',
-            description: 'Run a small JavaScript snippet in a sandbox to compute something no built-in tool covers (e.g. speed comparison, batch damage over a set of pokemon, custom scoring). The sandbox exposes `data` (pokemon/moves/natures/typechart), helper functions `typeMul`, `effStat`, `resolvePokemon`, `resolveMove`, `calcDamage`, and `print`/`console.log` for output. The last expression value is returned. Use this only for computation you cannot do with the built-in tools.',
+            description: 'Run a small JavaScript snippet in a sandbox to compute something no built-in tool covers (e.g. speed comparison, batch damage over a set of pokemon, custom scoring). Sandbox exposes: data.pokemon/data.moves/data.natures/data.types/data.typechart, typeMul(attackType, defendTypes), effStat(baseStat, boost?, level?), resolvePokemon(nameOrNum), resolveMove(name), calcDamage(attackerObj, defenderObj, moveObj), and print/console.log for output. The last expression value is returned. Use only for computation you cannot do with built-in tools.',
             parameters: {
                 type: 'object',
                 properties: {
@@ -509,6 +509,7 @@ function runJs(args) {
     var printed = [];
 
     // 沙箱 helper：包一层让 LLM 传参更自然（resolvePokemon/resolveMove 直接吃字符串）
+    // effStat(baseStat, boost, level) —— 单个能力值（0 EV、31 IV、中性性格），boost 默认 0，level 默认 100
     function sbTypeMul(attackType, defendTypes) {
         var ai = typeIndex(attackType);
         if (ai < 0) return 1;
@@ -521,8 +522,13 @@ function runJs(args) {
         }
         return m;
     }
-    function sbEffStat(baseStats, level, ev, iv, nature, boosts, statIdx) {
-        return effectiveStat(baseStats, level, ev, iv, resolveNature({ nature: nature }), boosts, statIdx);
+    function sbEffStat(baseStat, boost, level) {
+        var lv = level || 100;
+        var b = boost || 0;
+        var val = Math.floor((2 * baseStat + 31) * lv / 100 + 5);
+        if (b > 0) val = Math.floor(val * (2 + b) / 2);
+        if (b < 0) val = Math.floor(val * 2 / (2 - b));
+        return val;
     }
     function sbResolvePokemon(poke) {
         return resolvePokemonInput({ poke: poke });
@@ -547,8 +553,8 @@ function runJs(args) {
         resolvePokemon: sbResolvePokemon,
         resolveMove: sbResolveMove,
         calcDamage: sbCalcDamage,
-        print: function (s) { printed.push(String(s)); },
-        console: { log: function (s) { printed.push(String(s)); } }
+        print: function () { printed.push(Array.prototype.slice.call(arguments).map(String).join(' ')); },
+        console: { log: function () { printed.push(Array.prototype.slice.call(arguments).map(String).join(' ')); } }
     };
 
     var result;
