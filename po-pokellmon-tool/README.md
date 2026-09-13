@@ -29,7 +29,7 @@
 - `calc_stat_boost(base_stat, boost)` —— 能力等级修正（移植 `calcStatWhenBoost`）
 - `get_battle_history(start_turn?, end_turn?)` —— 读取过往战报（按回合范围，不传则全文；数据来自 PO 侧 `state.fullHistory`）
 
-战报不再一开始塞进 prompt（省初始 token），由 DS 按需调 `get_battle_history` 读取。
+最后 2 回合战报显式贴进 prompt；更早的战报由 DS 按需调 `get_battle_history` 读取（省 token）。
 
 ## 下一步（未实现）
 

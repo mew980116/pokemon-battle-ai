@@ -20,7 +20,7 @@ var tools = require('./tools.js');
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.1.8';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.1.9';   // tool 分支版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（tool 分支：思考 + tool，强度 low）====
 var MODEL = 'deepseek-v4-flash';
@@ -192,10 +192,18 @@ function buildPrompt(state) {
     var bench = state.bench || [];
     var oppTypes = opp.types || [];
 
-    // 战报不塞进 prompt，改由 get_battle_history tool 按需读取（省初始 token）
-    var histN = (state.fullHistory && state.fullHistory.length) ? state.fullHistory.length : 0;
+    // 最后 2 回合战报显式贴进 prompt；更早的走 get_battle_history tool 按需读
+    var srcHist = (state.fullHistory && state.fullHistory.length) ? state.fullHistory : (state.history || []);
+    var histN = srcHist.length;
+    var recent = [];
+    for (var i = Math.max(0, histN - 2); i < histN; i++) {
+        recent.push(srcHist[i]);
+    }
+    if (recent.length) {
+        p += 'Recent turns:\n' + recent.join('\n') + '\n';
+    }
     if (histN > 0) {
-        p += 'Battle history (' + histN + ' turns) is available via the get_battle_history tool.\n';
+        p += 'Earlier battle history (' + histN + ' turns) is available via the get_battle_history tool.\n';
     }
 
     if (opp.name) {
