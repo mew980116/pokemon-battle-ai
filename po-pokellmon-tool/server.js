@@ -20,12 +20,12 @@ var tools = require('./tools.js');
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.1.7';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.1.8';   // tool 分支版本（改动时 bump，随日志记录）
 
-// ==== DeepSeek 模型参数（tool 分支：非思考 + tool，快）====
+// ==== DeepSeek 模型参数（tool 分支：思考 + tool，强度 low）====
 var MODEL = 'deepseek-v4-flash';
-var THINKING_ENABLED = false;           // 非思考模式（tool 调用快；思考模式 30s/次太慢）
-var REASONING_EFFORT = 'high';          // 仅思考模式生效（非思考忽略）
+var THINKING_ENABLED = true;            // 思考模式（非思考拉垮且不调 tool）
+var REASONING_EFFORT = 'low';           // 思考强度 low（high 太慢，先试 low）
 var MAX_TOKENS = null;                  // 不限制输出 token（思考链 + 最终答案）
 var TIMEOUT_MS = 180000;                // 放宽：180s（tool 多轮往返慢）
 var MAX_TOOL_ROUNDS = 5;                // 最多 function calling 轮数，超过则 fallback

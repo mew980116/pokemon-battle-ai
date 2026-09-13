@@ -1,13 +1,13 @@
-# po-pokellmon-tool（路线 3：非思考 + tool）
+# po-pokellmon-tool（路线 3：思考 + tool）
 
-移植 PokeLLMon 的第三条基础路线：**非思考模式 + function calling / tool**。
+移植 PokeLLMon 的第三条基础路线：**思考模式 + function calling / tool**。
 把主脚本 [20201227_v1.3.1.js](../20201227_v1.3.1.js) 里的确定性计算封装成 tool，供 DeepSeek 在决策前动态调用（类似 coding agent 的 tool 模式）。
 
 ## 与 po-pokellmon（路线 1）的关系
 
 | | po-pokellmon（无思考） | po-pokellmon-tool（本目录） |
 |---|---|---|
-| 思考模式 | `thinking:disabled` | `thinking:disabled` |
+| 思考模式 | `thinking:disabled` | `thinking:enabled`（reasoning_effort:low） |
 | 超时 | 20s | 180s（放宽，tool 多轮往返慢） |
 | max_tokens | null | null（不限制，思考链 + 最终答案） |
 | tool | 无 | 有（function calling） |
@@ -19,7 +19,7 @@
 **harness**（[server.js](server.js)）已跑通 function calling 多轮 loop：
 
 1. 接收 PO 采集的 `state` → 拼 prompt + `tools` 定义
-2. 调 DeepSeek（非思考 + tool）
+2. 调 DeepSeek（思考 low + tool）
 3. 若返回 `tool_calls` → 执行 tool → 结果追加进 messages → 再调（最多 `MAX_TOOL_ROUNDS=5` 轮）
 4. 直到返回最终 `{"choice":N}` → 解析成 slot 动作
 
