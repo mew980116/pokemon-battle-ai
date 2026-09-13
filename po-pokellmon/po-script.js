@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8091";
-var PKLM_VERSION = "0.5.5";       // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.5.6";       // 脚本版本（改动时 bump，随日志记录）
 
 // 自动开启：账号 id 转小写为 "mew's" 时自动开启 LLM 决策（其他账号手动 /llm on）
 var pklmAccount = "";             // 我方账号名
@@ -33,6 +33,17 @@ function pklmAutoEnable() {
                 pklmShadowMode = true;   // mew's 默认影子模式：只记 log 不执行 DS 指令；需执行时手动 /llm on
                 pklmCbLog = true;        // mew's 默认开回调探针（调试专用账号）
                 print("[POKELLMON] auto-enabled (account: mew's, shadow mode + callback log)");
+            }
+            if (!pklmLogEnabled) {
+                pklmLogEnabled = true;
+                print("[POKELLMON] logging enabled");
+            }
+        } else if (pklmAccount === "「木偶」析构万理的发条公主") {
+            // 正式执行账号：自动 LLM 决策（非 shadow，不开探针）
+            if (!useLLM) {
+                useLLM = true;
+                pklmShadowMode = false;
+                print("[POKELLMON] auto-enabled (account: 「木偶」析构万理的发条公主)");
             }
             if (!pklmLogEnabled) {
                 pklmLogEnabled = true;

@@ -121,6 +121,7 @@ po-pokellmon/
 | 0.5.3 (script) | 调试工具：新增 `/eval`（执行任意 JS 观察状态）+ `/llm cb`（回调探针，print onMoveMessage/onItemMessage/onAbilityMessage/onMajorStatusChange/onStatusOver/onStatusDamage/onEffectiveness 原始参数），用于定位 stat 变化等消息来源 |
 | 0.5.4 (script) | mew's 账号自动启用改为默认影子模式（只记 log 不执行 DS 指令），需执行时手动 `/llm on` |
 | 0.5.5 (script) | 修复 shadow 模式不生效根因（pklmAutoEnable 在 pklmShadowMode 声明前调用，var 提升导致 true 被 false 覆盖，改为仅靠 onTierNotification 触发）；mew's 默认开回调探针（调试专用账号） |
+| 0.5.6 (script) | 新增正式执行账号「木偶」析构万理的发条公主 自动启用 LLM 决策（非 shadow、不开探针、开日志） |
 
 ## 使用方法
 
