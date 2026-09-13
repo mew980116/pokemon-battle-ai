@@ -119,6 +119,20 @@ var TOOL_DEFS = [
                 required: []
             }
         }
+    },
+    {
+        type: 'function',
+        function: {
+            name: 'submit_feedback',
+            description: 'Submit feedback about what tool or capability you wish you had (e.g. damage calculation, speed comparison, opponent move prediction). Use this when the available tools are insufficient for the decision.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    text: { type: 'string', description: 'Describe the tool/capability you want and why' }
+                },
+                required: ['text']
+            }
+        }
     }
 ];
 
@@ -213,6 +227,16 @@ function getStrategy(args, ctx) {
     return { strategies: t };
 }
 
+// 提交「想要的 tool」反馈，累积到 notes.feedback（对战结束随 summary 记到 log 末尾）
+function submitFeedback(args, ctx) {
+    if (!args.text) return { error: 'text required' };
+    var notes = ctx && ctx.notes;
+    if (!notes) return { error: 'no notes store' };
+    if (!notes.feedback) notes.feedback = [];
+    notes.feedback.push({ turn: ctx.turn || 0, text: String(args.text) });
+    return { ok: true, count: notes.feedback.length };
+}
+
 // tool 执行器：根据 name 分发；ctx 含 state（供 get_battle_history 读取战报）+ notes（笔记存储）+ turn
 function runTool(name, args, ctx) {
     if (name === 'get_type_matchup') return getTypeMatchup(args);
@@ -222,6 +246,7 @@ function runTool(name, args, ctx) {
     if (name === 'save_strategy') return saveStrategy(args, ctx);
     if (name === 'get_observation') return getObservation(args, ctx);
     if (name === 'get_strategy') return getStrategy(args, ctx);
+    if (name === 'submit_feedback') return submitFeedback(args, ctx);
     return { error: 'unknown tool: ' + name };
 }
 
