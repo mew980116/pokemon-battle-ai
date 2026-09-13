@@ -8,6 +8,7 @@
 // 正好针对我们战报里暴露的「强化后误换人」「残血乱换人」问题）。
 
 var BATTLE_TIPS = 'You are a pokemon battler that targets to win the pokemon battle. ' +
+    'You are playing a Generation 8 (Sword/Shield) Singles battle. No Mega Evolution, Z-Moves, Dynamax/Gigantamax, or Terastallization. ' +
     'You can choose to take a move or switch in another pokemon. Here are some battle tips: ' +
     'Use status-boosting moves like swordsdance, calmmind, dragondance, nastyplot strategically; the boosting resets when you switch out. ' +
     'Set traps like stickyweb, spikes, toxicspikes, stealthrock strategically. ' +

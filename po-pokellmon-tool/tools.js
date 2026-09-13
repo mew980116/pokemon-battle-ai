@@ -66,12 +66,13 @@ var TOOL_DEFS = [
         type: 'function',
         function: {
             name: 'save_observation',
-            description: 'Record or update your observation about ONE opposing pokemon (e.g. revealed moves, likely item/ability, damage estimate). Overwrites the previous note for the same pokemon.',
+            description: 'Record or update your observation about ONE opposing pokemon (e.g. revealed moves, likely item/ability, damage estimate). Overwrites the previous note by default; set append=true to append instead.',
             parameters: {
                 type: 'object',
                 properties: {
                     pokemon: { type: 'string', description: 'Opposing pokemon name' },
-                    text: { type: 'string', description: 'Your observation text' }
+                    text: { type: 'string', description: 'Your observation text' },
+                    append: { type: 'boolean', description: 'If true, append to the existing note instead of overwriting. Default false.' }
                 },
                 required: ['pokemon', 'text']
             }
@@ -165,14 +166,19 @@ function getBattleHistory(args, state) {
     return { turns: out, count: out.length };
 }
 
-// 记录对某只对手宝可梦的观察（覆盖同名旧笔记）
+// 记录对某只对手宝可梦的观察（默认覆盖同名旧笔记；append=true 时追加）
 function saveObservation(args, ctx) {
     if (!args.pokemon || !args.text) return { error: 'pokemon and text required' };
     var notes = ctx && ctx.notes;
     if (!notes) return { error: 'no notes store' };
     if (!notes.pokemon) notes.pokemon = {};
-    notes.pokemon[String(args.pokemon)] = String(args.text);
-    return { ok: true, pokemon: args.pokemon };
+    var key = String(args.pokemon);
+    if (args.append && notes.pokemon[key]) {
+        notes.pokemon[key] = notes.pokemon[key] + ' | ' + String(args.text);
+    } else {
+        notes.pokemon[key] = String(args.text);
+    }
+    return { ok: true, pokemon: args.pokemon, mode: (args.append ? 'append' : 'overwrite') };
 }
 
 // 记录当前回合的战略思路（默认用当前 turn；可显式指定 turn）

@@ -127,6 +127,8 @@ po-pokellmon/
 | 0.4.13 (server) / 0.5.8 (script) | ① switch 选项带上后备宝可梦 4 招 ② 修复 ability message 的 %a 特性名解析（改用 other 参数，对手特性未公开也能拿到名字） |
 | 0.2.0 (tool server) / 0.5.9 (script) | LLM 笔记 tool：新增 save/get_observation + save/get_strategy（跨回合记忆）；prompt 默认注入对手场上观察 + 最近 2 回合思路；opp.fainted 提示对手会换人；MAX_TOOL_ROUNDS 5→10 |
 | 0.2.1 (tool server) / 0.5.10 (script) | 对战结束（onBattleEnd）通知 server 追加 LLM 笔记汇总到 log 末尾（/summary 端点，type:summary 行） |
+| 0.2.2 (tool server) | SYSTEM_PROMPT 显式引导使用笔记 tool（save_observation/save_strategy） |
+| 0.2.3 (tool server) | ① system prompt 加环境说明（Gen 8 单打，无 Mega/Z/极巨化/钛晶化）② save_observation 支持 append 参数（覆写/追加都允许） |
 
 ## 使用方法
 
