@@ -134,6 +134,7 @@ po-pokellmon/
 | 0.2.6 (tool) / 0.5.12 (script) / 0.4.15 (main) | state 加 myHazards/oppHazards（入场陷阱：隐形岩/地钉/毒钉/虫网，读 battle.data.field.zone）+ prompt 显示双方陷阱 |
 | 0.2.7 (tool) / 0.5.13 (script) / 0.4.16 (main) | 我方宝可梦（场上+后备）采集 ability/item 进 state，prompt 显示 Ability/Item 名字 |
 | 0.3.0 (tool) | 新增 `calc_damage` tool：标准宝可梦伤害公式（最多 10 组 leg，返回 0.85x/1.0x 随机档伤害 + 防守方 HP 百分比 + detail）。新增 `po-pokellmon-tool/build-knowledge.js` 生成 `pokemon.json`（种族值/属性/中英文名索引）、`natures.json`（性格 buff/debuff）、`moves.json`（含招式 type + 中文名）。system prompt 引导 LLM 算伤后与战报实际伤害对比、异常（≈2x 差）提交 submit_feedback |
+| 0.3.1 (tool) | 新增 `run_js` 逃生舱 tool：LLM 可在 `vm` 沙箱跑一段同步 JS 覆盖无现成 tool 的计算（暴露 data/typeMul/effStat/resolvePokemon/resolveMove/calcDamage + print/console.log）。限制：同步、无 require/process/fs、2s 超时、结果/输出截 2000 字符 |
 
 ## 使用方法
 

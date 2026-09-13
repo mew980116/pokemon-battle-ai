@@ -6,6 +6,7 @@
 // 复用 po-pokellmon 的知识库（typechart.json 由 build-knowledge.js 生成）。
 
 var path = require('path');
+var vm = require('vm');
 var TYPECHART = require('../po-pokellmon/knowledge/typechart.json');
 var POKEMON = require('./knowledge/pokemon.json');
 var NATURES = require('./knowledge/natures.json');
@@ -199,6 +200,20 @@ var TOOL_DEFS = [
                     }
                 },
                 required: ['legs']
+            }
+        }
+    },
+    {
+        type: 'function',
+        function: {
+            name: 'run_js',
+            description: 'Run a small JavaScript snippet in a sandbox to compute something no built-in tool covers (e.g. speed comparison, batch damage over a set of pokemon, custom scoring). The sandbox exposes `data` (pokemon/moves/natures/typechart), helper functions `typeMul`, `effStat`, `resolvePokemon`, `resolveMove`, `calcDamage`, and `print`/`console.log` for output. The last expression value is returned. Use this only for computation you cannot do with the built-in tools.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    code: { type: 'string', description: 'JavaScript code to execute. It must be synchronous and not use require/process/fs. Use print(...) or console.log(...) to emit text.' }
+                },
+                required: ['code']
             }
         }
     }
@@ -482,6 +497,79 @@ function calcDamage(args) {
     return { legs: out };
 }
 
+// ===== run_js 逃生舱：让 LLM 在沙箱里跑一小段同步 JS，覆盖没有现成 tool 的计算 =====
+// 沙箱内可用：data（pokemon/moves/natures/typechart）、typeMul/effStat/resolvePokemon/resolveMove/calcDamage、print/console.log
+// 限制：同步、无 require/process/fs、2s 超时、结果/输出各截 2000 字符。
+
+function runJs(args) {
+    if (!args.code) return { error: 'code required' };
+    var code = String(args.code);
+    if (code.length > 20000) return { error: 'code too long (' + code.length + ' chars, max 20000)' };
+
+    var printed = [];
+
+    // 沙箱 helper：包一层让 LLM 传参更自然（resolvePokemon/resolveMove 直接吃字符串）
+    function sbTypeMul(attackType, defendTypes) {
+        var ai = typeIndex(attackType);
+        if (ai < 0) return 1;
+        if (!defendTypes) return 1;
+        var arr = Array.isArray(defendTypes) ? defendTypes : [defendTypes];
+        var m = 1;
+        for (var i = 0; i < arr.length; i++) {
+            var di = typeIndex(arr[i]);
+            if (di >= 0) m *= CHART[ai][di];
+        }
+        return m;
+    }
+    function sbEffStat(baseStats, level, ev, iv, nature, boosts, statIdx) {
+        return effectiveStat(baseStats, level, ev, iv, resolveNature({ nature: nature }), boosts, statIdx);
+    }
+    function sbResolvePokemon(poke) {
+        return resolvePokemonInput({ poke: poke });
+    }
+    function sbResolveMove(name) {
+        return resolveMoveInput({ name: name });
+    }
+    function sbCalcDamage(attacker, defender, move) {
+        return calcOneLeg({ attacker: attacker, defender: defender, move: move }, 0);
+    }
+
+    var sandbox = {
+        data: {
+            pokemon: POKEMON.byNum,
+            moves: MOVES,
+            natures: NATURES.byNum,
+            types: TYPE_NAMES,
+            typechart: CHART
+        },
+        typeMul: sbTypeMul,
+        effStat: sbEffStat,
+        resolvePokemon: sbResolvePokemon,
+        resolveMove: sbResolveMove,
+        calcDamage: sbCalcDamage,
+        print: function (s) { printed.push(String(s)); },
+        console: { log: function (s) { printed.push(String(s)); } }
+    };
+
+    var result;
+    try {
+        var ctx = vm.createContext(sandbox);
+        result = vm.runInContext(code, ctx, { timeout: 2000 });
+    } catch (e) {
+        return { error: (e && e.message) ? e.message : String(e), printed: printed.join('\n').slice(0, 2000) };
+    }
+
+    var out = { printed: printed.join('\n').slice(0, 2000) };
+    if (result !== undefined) {
+        var s;
+        try { s = JSON.stringify(result); } catch (e) { s = String(result); }
+        if (s === undefined) s = String(result);
+        if (s && s.length > 2000) s = s.slice(0, 2000) + '...(truncated)';
+        out.result = s;
+    }
+    return out;
+}
+
 // tool 执行器：根据 name 分发；ctx 含 state（供 get_battle_history 读取战报）+ notes（笔记存储）+ turn
 function runTool(name, args, ctx) {
     if (name === 'get_type_matchup') return getTypeMatchup(args);
@@ -493,6 +581,7 @@ function runTool(name, args, ctx) {
     if (name === 'get_strategy') return getStrategy(args, ctx);
     if (name === 'submit_feedback') return submitFeedback(args, ctx);
     if (name === 'calc_damage') return calcDamage(args);
+    if (name === 'run_js') return runJs(args);
     return { error: 'unknown tool: ' + name };
 }
 
