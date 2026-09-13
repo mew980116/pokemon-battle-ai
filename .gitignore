@@ -45,3 +45,6 @@ coverage/
 
 # 服务器脚本（本地服务器运行脚本，不进 git）
 server_scripts/
+
+# PO 数据图片（道具/树果图标，客户端资源，不进 git）
+po-data/**/*.png
