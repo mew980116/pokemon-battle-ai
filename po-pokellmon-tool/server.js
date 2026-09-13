@@ -20,7 +20,7 @@ var tools = require('./tools.js');
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.3.3';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.3.4';   // tool 分支版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（tool 分支：思考 + tool，强度 low）====
 var MODEL = 'deepseek-v4-flash';
@@ -29,6 +29,7 @@ var REASONING_EFFORT = 'low';           // 思考强度 low（high 太慢，先�
 var MAX_TOKENS = null;                  // 不限制输出 token（思考链 + 最终答案）
 var TIMEOUT_MS = 240000;                // 放宽：240s（tool 多轮往返慢）
 var MAX_TOOL_ROUNDS = 15;               // 最多 function calling 轮数，超过则 fallback
+var RETRY_DELAYS = [2000, 5000, 10000]; // 单次请求失败后的重试延迟：第1次2s、第2次5s、第3次10s（第3次降级 no think），再失败 fallback
 
 var SYSTEM_PROMPT = require('../po-pokellmon/prompts.js').BATTLE_TIPS +
     ' You may call tools to compute type matchups, apply stat boosts, read the battle history, or record/read your notes before deciding. ' +
@@ -60,7 +61,7 @@ function getApiKey() {
     return null;
 }
 
-function callDeepSeek(messages, cb) {
+function callDeepSeek(messages, noThink, cb) {
     var apiKey = getApiKey();
     if (!apiKey) {
         cb(new Error('missing DEEPSEEK_API_KEY (set env var or create apikey.txt)'));
@@ -74,7 +75,7 @@ function callDeepSeek(messages, cb) {
     };
     var mt = MAX_TOKENS;
     if (mt) payloadObj.max_tokens = mt;
-    if (THINKING_ENABLED) {
+    if (THINKING_ENABLED && !noThink) {
         payloadObj.thinking = { type: 'enabled' };
         if (REASONING_EFFORT) payloadObj.reasoning_effort = REASONING_EFFORT;
     } else {
@@ -471,11 +472,24 @@ function handleChoice(res, state) {
 
     function loop() {
         rounds++;
+        attempt(0);
+    }
+
+    // 单次 DeepSeek 请求 + 重试阶梯：第1次失败等2s、第2次失败等5s、第3次失败等10s且降级 no think，再失败才 fallback。
+    // 重试不消耗 rounds（tool 轮数预算只统计成功拿到回复并处理 tool 的轮数）。
+    function attempt(retryIdx) {
+        var noThink = retryIdx >= RETRY_DELAYS.length;   // 最后一次重试用 no think
         var t0 = Date.now();
-        callDeepSeek(messages, function (err, statusCode, data) {
+        callDeepSeek(messages, noThink, function (err, statusCode, data) {
             var ms = Date.now() - t0;
 
             if (err || statusCode !== 200) {
+                if (retryIdx < RETRY_DELAYS.length) {
+                    var delay = RETRY_DELAYS[retryIdx];
+                    console.log('[choice] fail ' + ms + 'ms (' + (err ? err.message : ('http ' + statusCode)) + '), retry ' + (retryIdx + 1) + '/' + RETRY_DELAYS.length + ' in ' + delay + 'ms' + (retryIdx + 1 >= RETRY_DELAYS.length ? ' [no think]' : ''));
+                    setTimeout(function () { attempt(retryIdx + 1); }, delay);
+                    return;
+                }
                 console.log('[choice] error ' + ms + 'ms: ' + (err ? err.message : ('http ' + statusCode)));
                 var fa = fallbackAction(state, err ? 'error' : ('http' + statusCode));
                 respond(fa, 'ERROR: ' + (err ? err.message : ('http ' + statusCode)));
