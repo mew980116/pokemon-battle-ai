@@ -6,7 +6,7 @@
 //       po-pokellmon/server.js 的 /choice → 解析动作（招式名/宝可梦名）
 //       → 名字映射回 slot → battle.battleCommand 执行。
 //
-// 依赖本地代理：node po-pokellmon/server.js（默认 127.0.0.1:8091）
+// 依赖本地代理：node po-pokellmon-tool/server.js（tool 版，默认 127.0.0.1:8092）
 //
 // 聊天命令（战斗内）：
 //   /llm on     -> 开启 LLM 决策（自动执行）
@@ -18,8 +18,8 @@
 var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
-var PKLM_URL = "http://127.0.0.1:8091";
-var PKLM_VERSION = "0.5.19";       // 脚本版本（改动时 bump，随日志记录）
+var PKLM_URL = "http://127.0.0.1:8092";
+var PKLM_VERSION = "0.5.20";       // 脚本版本（改动时 bump，随日志记录）
 var pklmLastWebFailTime = 0;       // 上次 webCall 失败时间戳（ms），用于断线时节流重发
 var pklmSilent = false;            // 静默模式：清分少女等无人值守 BOT 账号不向 PO 窗口 print 任何脚本输出
 
@@ -52,14 +52,11 @@ function pklmAutoEnable() {
                 pklmPrint("logging enabled");
             }
         } else if (pklmAccount.toLowerCase() === "[lv0.吧服bot]清分少女") {
-            // 服务器无人值守 BOT 账号：自动 LLM 决策（非 shadow）+ 静默（PO 窗口无任何脚本输出）
+            // 服务器无人值守 BOT 账号：自动 LLM 决策（非 shadow）+ 静默（无输出、不写日志）
             pklmSilent = true;
             if (!useLLM) {
                 useLLM = true;
                 pklmShadowMode = false;
-            }
-            if (!pklmLogEnabled) {
-                pklmLogEnabled = true;   // 日志仍写文件（server 端落盘），只是不 print 到 PO 窗口
             }
         }
     } catch (e) {}
@@ -745,6 +742,12 @@ function pklmSpotLabel(spot) {
             var su = PKLM_URL + "/summary?battleId=" + battle.id + "&result=" + encodeURIComponent(String(result)) + "&winner=" + winner;
             sys.synchronousWebCall(su);
         } catch (e) {}
+        // 清分少女无人值守：战斗结束 7 秒后自动关闭战斗窗口（对齐主脚本）
+        if (pklmAccount.toLowerCase() === "[lv0.吧服bot]清分少女") {
+            sys.setTimer(function () {
+                try { battle.close(); } catch (e) {}
+            }, 7000, 0);
+        }
     },
 
     // ===== 战报细节回调：把战斗过程细节补进 pklmTurnLog（进 history/fullHistory）=====
