@@ -20,7 +20,7 @@ var tools = require('./tools.js');
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.3.2';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.3.3';   // tool 分支版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（tool 分支：思考 + tool，强度 low）====
 var MODEL = 'deepseek-v4-flash';
@@ -220,15 +220,13 @@ function buildPrompt(state, notes) {
         p += 'Earlier battle history (' + histN + ' turns) is available via the get_battle_history tool.\n';
     }
 
-    // 天气/场地/入场陷阱（天气特性触发消息与陷阱都不走回调，改用 battle.data.field 直读）
-    var env = [];
-    if (state.weather) env.push('Weather:' + state.weather);
-    if (state.terrain) env.push('Terrain:' + state.terrain);
+    // 天气/场地/入场陷阱：固定加载，无则写 None（避免 LLM 误以为信息缺失）
     var mh = state.myHazards || [];
     var oh = state.oppHazards || [];
-    if (mh.length) env.push('My hazards:[' + mh.join(',') + ']');
-    if (oh.length) env.push('Opp hazards:[' + oh.join(',') + ']');
-    if (env.length) p += env.join(' | ') + '\n';
+    p += 'Weather:' + (state.weather || 'None') +
+        ' | Terrain:' + (state.terrain || 'None') +
+        ' | My hazards:' + (mh.length ? '[' + mh.join(',') + ']' : 'None') +
+        ' | Opp hazards:' + (oh.length ? '[' + oh.join(',') + ']' : 'None') + '\n';
 
     // 默认注入笔记：对手场上这只的观察 + 最近 2 回合思路
     if (notes) {
