@@ -298,7 +298,7 @@
 
 **待办（观察项，暂不实施，等再打几把看表现）**：
 
-- [ ] **战报保存完整性（基于回调 function 补全战报细节）**：当前 po-script.js 只记 `onUseAttack`/`onDamageDone`/`onKo`/`onSendOut`，大量效果信息丢失。需把以下回调补进 `pklmTurnLog`（进而进 history/fullHistory，供 tool 的 `get_battle_history` 读取），让战报能完整还原「有效/无效/招式效果/状态变化」：
+- [x] **战报保存完整性（基于回调 function 补全战报细节）**：当前 po-script.js 只记 `onUseAttack`/`onDamageDone`/`onKo`/`onSendOut`，大量效果信息丢失。需把以下回调补进 `pklmTurnLog`（进而进 history/fullHistory，供 tool 的 `get_battle_history` 读取），让战报能完整还原「有效/无效/招式效果/状态变化」：
   - `onEffectiveness`（有效 / 效果绝佳 / 效果不好 / 无效）
   - `onAttackFailing`（攻击失败）
   - `onMiss` / `onAvoid`（未命中 / 被避开）
