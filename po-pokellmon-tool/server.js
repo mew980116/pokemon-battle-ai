@@ -20,7 +20,7 @@ var tools = require('./tools.js');
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.3.7';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.3.8';   // tool 分支版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（tool 分支：思考 + tool，强度 low）====
 var MODEL = 'deepseek-v4-flash';
@@ -37,6 +37,7 @@ var SYSTEM_PROMPT = require('../po-pokellmon/prompts.js').BATTLE_TIPS +
     'Before committing to a move, use calc_damage to check whether your moves can KO or how much damage they deal (it returns the 0.85x and 1.0x random rolls and the % of the defender max HP). ' +
     'For speed comparison, use get_my_stats to read your own pokemon actual stats, and calc_stats to compute any pokemon stats under a given EV/IV/nature/boost (e.g. estimate whether you outspeed the opponent). ' +
     'Record the speed matchup via save_observation using this consistent format so you can recall it later without recomputing: "Speed:<current>(<spread>)|<boostMove>+<stage>:<boosted>|<reference>:<speed>", e.g. "Speed:259(252Spe Adamant)|DragonDance+1:388|Garchomp:303". ' +
+    'Each turn, before deciding, review the previous turn(s) battle log and infer any speed observation from it (who moved first, any speed boost like Dragon Dance/Agility, speed drop, paralysis, Tailwind, or Choice Scarf clues), then record it via save_observation so your speed-line notes stay up to date. ' +
     'After using calc_damage, compare its result with the actual damage shown in the battle log (via get_battle_history). If the calculated damage differs from the observed damage by a large factor (roughly 2x or more) and no obvious modifier explains it, call submit_feedback to report the discrepancy (state which attacker/move/defender and the expected vs actual damage). ' +
     'If no built-in tool covers a computation you need (e.g. speed comparison, batch damage, custom scoring), you may write a small synchronous JS snippet and run it via run_js; it exposes data/typeMul/effStat/resolvePokemon/resolveMove/calcDamage and print/console.log. Prefer the built-in tools first and use run_js only as a fallback. ' +
     'If you need battle information or computation that no available tool provides, call submit_feedback to tell us what tool you wish you had.';
