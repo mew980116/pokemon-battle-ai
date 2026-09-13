@@ -19,7 +19,8 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8091";
-var PKLM_VERSION = "0.5.17";       // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.5.18";       // 脚本版本（改动时 bump，随日志记录）
+var pklmLastWebFailTime = 0;       // 上次 webCall 失败时间戳（ms），用于断线时节流重发
 
 // 自动开启：账号 id 转小写为 "mew's" 时自动开启 LLM 决策（其他账号手动 /llm on）
 var pklmAccount = "";             // 我方账号名
@@ -549,6 +550,13 @@ function pklmFallbackAttack() {
 // 主决策：采集状态 -> 调 /choice -> server.js 返回 slot 模式 -> 直接执行
 function pklmDecideAndAct() {
     pklmCheckLock();   // 先检测锁招（Choice 道具）
+
+    // 断线节流：上次 webCall 失败后 2 秒内不再重发（避免断线时 onChoiceCancellation 快速循环刷屏 / 触发 antidos）
+    var now = new Date().getTime();
+    if (pklmLastWebFailTime > 0 && (now - pklmLastWebFailTime) < 2000) {
+        return;
+    }
+
     var state = pklmCollectState();
     var u = PKLM_URL + "/choice?state=" + encodeURIComponent(JSON.stringify(state));
     try {
@@ -556,6 +564,7 @@ function pklmDecideAndAct() {
         resp = String(resp).replace(/^\s+|\s+$/g, "");
         pklmPrint("raw => " + resp);
         var d = JSON.parse(resp);
+        pklmLastWebFailTime = 0;   // 成功，重置失败时间戳
         // fallback 告警：DS 返回无法解析（重试后仍失败），PO 界面可见
         if (d.fallback) {
             pklmPrint("!! DS FALLBACK (reason=" + (d.reason || "?") + ") 决策质量告警");
@@ -582,6 +591,7 @@ function pklmDecideAndAct() {
             pklmLastAttackSlot = ms;   // 记录上一回合攻击槽位（用于下回合锁招检测）
         }
     } catch (e) {
+        pklmLastWebFailTime = new Date().getTime();   // 记录失败时间戳，供节流
         pklmPrint("decide error: " + e.message);
         if (!pklmShadowMode) pklmFallbackAttack();   // 影子模式不兜底执行，交回用户手动
     }

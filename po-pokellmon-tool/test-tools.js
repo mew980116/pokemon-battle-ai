@@ -1,4 +1,4 @@
-// po-pokellmon-tool/test-tools.js — 测试 LLM 是否主动调用各类 tool（calc_damage / run_js / get_type_matchup）
+// po-pokellmon-tool/test-tools.js — 测试 LLM 是否主动调用各类 tool（calc_stats / get_my_stats / calc_damage / run_js）
 //
 // 构造一个明确引导的场景，跑完整 function-calling loop，打印每轮 tool 调用 + 结果 + 最终决策。
 // 运行：node po-pokellmon-tool/test-tools.js
@@ -16,6 +16,15 @@ const REASONING_EFFORT = 'low';
 const MAX_ROUNDS = 15;
 const TIMEOUT_MS = 240000;
 
+// mock state：带 myStats（我方实际 ev/iv/nature/level），供 get_my_stats 读取
+const MOCK_STATE = {
+    turn: 1,
+    myStats: [
+        { slot: 0, name: 'Garchomp', numRef: 445, level: 100, ev: [0, 252, 0, 0, 0, 252], iv: [31, 31, 31, 31, 31, 31], nature: 3 },
+        { slot: 1, name: 'Blissey', numRef: 242, level: 100, ev: [252, 0, 252, 0, 0, 0], iv: [31, 31, 31, 31, 31, 31], nature: 5 }
+    ]
+};
+
 function getApiKey() {
     if (process.env.DEEPSEEK_API_KEY) return process.env.DEEPSEEK_API_KEY;
     const candidates = [path.join(__dirname, 'apikey.txt'), path.join(__dirname, '..', 'po-pokellmon', 'apikey.txt')];
@@ -29,18 +38,19 @@ function getApiKey() {
 }
 
 const SYSTEM_PROMPT = require('../po-pokellmon/prompts.js').BATTLE_TIPS +
-    ' You have tools available. Use them to compute type matchups, damage ranges, or run small JS snippets before deciding.';
+    ' You have tools available. Use them to compute type matchups, damage ranges, stats, or run small JS snippets before deciding.';
 
 const USER_PROMPT =
     'Your current pokemon: Garchomp (Ground/Dragon), HP 100%. ' +
-    'Moves: Earthquake (Ground, power 100, physical), Outrage (Dragon, power 120, physical), Fire Fang (Fire, power 65, physical), Swords Dance (Normal, status). ' +
-    'Ability: Rough Skin. Item: Leftovers.\n' +
-    'Opponent current pokemon: Blissey (Normal), HP 100%.\n\n' +
-    'Before deciding, you MUST do all three of the following:\n' +
-    '1. Call get_type_matchup to check the effectiveness of Outrage against Blissey.\n' +
-    '2. Call calc_damage to compute how much damage Outrage deals to Blissey (level 100, IV 31, EV 0, neutral nature, no boosts).\n' +
-    '3. Call run_js to compute who is faster: Garchomp (base speed 102) at +1 speed boost, or Blissey (base speed 55) at +0. Write JS using effStat to compare their effective Speed at level 100.\n\n' +
-    'Then output your final decision as a JSON object: {"choice": 1} (1=Outrage).';
+    'Opponent current pokemon: Dragonite (Dragon/Flying), HP 100%.\n\n' +
+    'The opponent Dragonite is known to run Dragon Dance (boosts Attack and Speed by +1 each). ' +
+    'Its typical spread is 252 Attack / 252 Speed with an Adamant nature.\n\n' +
+    'Before deciding, analyze the speed relationship carefully:\n' +
+    '1. Call get_my_stats with poke "Garchomp" to read your actual Garchomp stats.\n' +
+    '2. Call calc_stats to compute Dragonite current Speed (level 100, 252 Spe EVs, 31 IV, Adamant nature, no boosts, return only "spe").\n' +
+    '3. Call calc_stats to compute Dragonite Speed AFTER one Dragon Dance (same spread but boosts {"spe":1}, return only "spe").\n\n' +
+    'Then determine: do you outspeed it NOW? Will it outspeed you after one Dragon Dance? ' +
+    'Output your final decision as a JSON object: {"choice": 1} (1=Earthquake).';
 
 function callDeepSeek(messages) {
     return new Promise((resolve, reject) => {
@@ -86,7 +96,7 @@ function extractUsage(data) {
 }
 
 async function main() {
-    console.log('=== test-tools: 验证 LLM 是否调用 get_type_matchup / calc_damage / run_js ===\n');
+    console.log('=== test-tools: 验证 LLM 是否调用 calc_stats / get_my_stats ===\n');
     console.log('model=' + MODEL + ' thinking=' + (THINKING_ENABLED ? REASONING_EFFORT : 'off'));
     console.log('system_prompt_len=' + SYSTEM_PROMPT.length + ' user_prompt_len=' + USER_PROMPT.length + '\n');
 
@@ -121,7 +131,7 @@ async function main() {
             for (const tc of toolCalls) {
                 let args = {};
                 try { args = JSON.parse(tc.function.arguments || '{}'); } catch (e) {}
-                const result = tools.runTool(tc.function.name, args, { state: {}, notes: { pokemon: {}, turns: {} }, turn: 1 });
+                const result = tools.runTool(tc.function.name, args, { state: MOCK_STATE, notes: { pokemon: {}, turns: {} }, turn: 1 });
                 console.log('    - ' + tc.function.name + ' ' + JSON.stringify(args));
                 console.log('      => ' + JSON.stringify(result).slice(0, 400));
                 messages.push({ role: 'tool', tool_call_id: tc.id, content: JSON.stringify(result) });
