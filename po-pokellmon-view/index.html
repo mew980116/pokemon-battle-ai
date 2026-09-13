@@ -187,15 +187,15 @@ function renderTeam(el, team){
 function renderBattle(st){
   if(!st){ return; }
   renderActive(document.getElementById('oppActive'), st.opp||{}, false);
-  // 对手后备：只有 oppSeen 名字 + oppRemaining，无 HP（隐藏）
-  var oppSeen=(st.oppSeen||[]).filter(function(n){ return st.opp && n!==st.opp.name; });
+  // 对手后备：用 oppTeam 展示详情（HP%/状态/KO/未亮相），跳过 slot 0（场上已在 oppActive 展示）
   var ob=document.getElementById('oppBench');
-  if(oppSeen.length){
-    ob.innerHTML='<div style="color:var(--dim);font-size:12px;margin-bottom:4px">剩余 '+st.oppRemaining+' 只</div>'+
-      oppSeen.map(function(n){ return '<div class="poke"><span class="name">'+esc(n)+'</span></div>'; }).join('');
-  } else {
-    ob.innerHTML='<div style="color:var(--faint);font-size:12px">剩余 '+st.oppRemaining+' 只（未露）</div>';
-  }
+  var oppTeam=(st.oppTeam||[]).slice(1, 6);
+  ob.innerHTML='<div style="color:var(--dim);font-size:12px;margin-bottom:4px">剩余 '+(st.oppRemaining!=null?st.oppRemaining:'?')+' 只</div>'+
+    oppTeam.map(function(b){
+      if(b.ko) return '<div class="poke ko"><span class="name">'+esc(b.name||'???')+'</span><span class="pct" style="color:var(--faint)">KO</span></div>';
+      if(b.revealed) return '<div class="poke"><span class="name">'+esc(b.name)+'</span>'+statusChip(b.status)+hpBarHtml(b.hpPct||0)+'</div>';
+      return '<div class="poke"><span class="name" style="color:var(--faint)">???</span></div>';
+    }).join('');
   renderActive(document.getElementById('meActive'), st.me||{}, true);
   renderBench(document.getElementById('meBench'), st.bench||[]);
   renderTeam(document.getElementById('meTeam'), st.myTeam||[]);
