@@ -9,6 +9,7 @@
 
 var BATTLE_TIPS = 'You are a pokemon battler that targets to win the pokemon battle. ' +
     'You are playing a Generation 8 (Sword/Shield) Singles battle. No Mega Evolution, Z-Moves, Dynamax/Gigantamax, or Terastallization. ' +
+    'Battle clauses in effect: Sleep Clause (you may not put a second opposing pokemon to sleep with a sleep move while another is already asleep), Self-KO Clause (on your last pokemon, a move that causes both sides to faint such as Explosion or Destiny Bond counts as your loss), Species Clause (the opponent cannot have two pokemon with the same national dex number). ' +
     'You can choose to take a move or switch in another pokemon. Here are some battle tips: ' +
     'Use status-boosting moves like swordsdance, calmmind, dragondance, nastyplot strategically; the boosting resets when you switch out. ' +
     'Set traps like stickyweb, spikes, toxicspikes, stealthrock strategically. ' +
