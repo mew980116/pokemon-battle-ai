@@ -20,7 +20,7 @@ var tools = require('./tools.js');
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.1.4';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.1.5';   // tool 分支版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（tool 分支：思考 high，超时/maxtoken 放宽）====
 var MODEL = 'deepseek-v4-flash';
@@ -164,14 +164,14 @@ function moveInfo(m) {
     return { name: m.name || base.name || '?', type: m.type || '?', power: power, pp: m.pp, acc: acc, effect: effect };
 }
 
-// 对手 bench 槽位详情（[Name,HP%,status] / [Name,fainted] / [unknown]）
+// 对手 bench 槽位详情（[Name,HP%,status] / [Name,fainted] / [???]）
 function buildOppBench(state) {
     var team = state.oppTeam || [];
     var parts = [];
     for (var i = 1; i < team.length; i++) {
         var t = team[i];
         if (t.ko) {
-            parts.push('[' + (t.name || 'unknown') + ',fainted]');
+            parts.push('[' + (t.name || '???') + ',fainted]');
         } else if (t.revealed) {
             var s = '[' + t.name;
             if (t.hpPct !== null && t.hpPct !== undefined) s += ',' + t.hpPct + '%';
@@ -179,7 +179,7 @@ function buildOppBench(state) {
             s += ']';
             parts.push(s);
         } else {
-            parts.push('[unknown]');
+            parts.push('[???]');
         }
     }
     return parts.join('');

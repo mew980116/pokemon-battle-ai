@@ -18,7 +18,7 @@ var path = require('path');
 
 var PORT = Number(process.env.POKELLMON_PORT) || 8091;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.4.11';  // 服务版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.4.12';  // 服务版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（可配置，改动后重启生效）====
 var MODEL = 'deepseek-v4-flash';        // 模型名：deepseek-v4-flash / deepseek-v4-pro
@@ -163,14 +163,14 @@ function moveInfo(m) {
     return { name: m.name || base.name || '?', type: m.type || '?', power: power, pp: m.pp, acc: acc, effect: effect };
 }
 
-// 对手 bench 槽位详情（[Name,HP%,status] / [Name,fainted] / [unknown]）
+// 对手 bench 槽位详情（[Name,HP%,status] / [Name,fainted] / [???]）
 function buildOppBench(state) {
     var team = state.oppTeam || [];
     var parts = [];
     for (var i = 1; i < team.length; i++) {
         var t = team[i];
         if (t.ko) {
-            parts.push('[' + (t.name || 'unknown') + ',fainted]');
+            parts.push('[' + (t.name || '???') + ',fainted]');
         } else if (t.revealed) {
             var s = '[' + t.name;
             if (t.hpPct !== null && t.hpPct !== undefined) s += ',' + t.hpPct + '%';
@@ -178,7 +178,7 @@ function buildOppBench(state) {
             s += ']';
             parts.push(s);
         } else {
-            parts.push('[unknown]');
+            parts.push('[???]');
         }
     }
     return parts.join('');
