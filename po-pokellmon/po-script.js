@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8091";
-var PKLM_VERSION = "0.5.11";       // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.5.12";       // 脚本版本（改动时 bump，随日志记录）
 
 // 自动开启：账号 id 转小写为 "mew's" 时自动开启 LLM 决策（其他账号手动 /llm on）
 var pklmAccount = "";             // 我方账号名
@@ -435,6 +435,18 @@ function pklmTerrainName(n) {
         default: return '';
     }
 }
+// 采集某方场地的入场陷阱（隐形岩/地钉/毒钉/虫网），返回文本数组
+function pklmCollectHazards(spot) {
+    var parts = [];
+    try {
+        var z = battle.data.field.zone(spot);
+        if (z.stealthRocks) parts.push('Stealth Rock');
+        if (z.spikesLevel > 0) parts.push('Spikes x' + z.spikesLevel);
+        if (z.toxicSpikesLevel > 0) parts.push('Toxic Spikes x' + z.toxicSpikesLevel);
+        if (z.stickyWeb) parts.push('Sticky Web');
+    } catch (e) {}
+    return parts;
+}
 
 function pklmCollectState() {
     var oppRemaining = 0;
@@ -475,6 +487,8 @@ function pklmCollectState() {
         oppRemaining: oppRemaining,
         weather: pklmWeatherName(battle.data.field.weather) || null,
         terrain: pklmTerrainName(battle.data.field.terrain) || null,
+        myHazards: pklmCollectHazards(battle.me),
+        oppHazards: pklmCollectHazards(battle.opp),
         opp: pklmCollectOppActive(),
         oppTeam: pklmCollectOppTeam(),
         oppSeen: pklmOppSeen.slice(),

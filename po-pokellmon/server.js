@@ -18,7 +18,7 @@ var path = require('path');
 
 var PORT = Number(process.env.POKELLMON_PORT) || 8091;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.4.14';  // 服务版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.4.15';  // 服务版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（可配置，改动后重启生效）====
 var MODEL = 'deepseek-v4-flash';        // 模型名：deepseek-v4-flash / deepseek-v4-pro
@@ -197,10 +197,14 @@ function buildPrompt(state) {
         p += 'Historical turns:\n' + state.history.join('\n') + '\n';
     }
 
-    // 天气/场地（天气特性如 Drizzle 的触发消息不走 onAbilityMessage，改用 battle.data.field 直接读）
+    // 天气/场地/入场陷阱（天气特性触发消息与陷阱都不走回调，改用 battle.data.field 直读）
     var env = [];
     if (state.weather) env.push('Weather:' + state.weather);
     if (state.terrain) env.push('Terrain:' + state.terrain);
+    var mh = state.myHazards || [];
+    var oh = state.oppHazards || [];
+    if (mh.length) env.push('My hazards:[' + mh.join(',') + ']');
+    if (oh.length) env.push('Opp hazards:[' + oh.join(',') + ']');
     if (env.length) p += env.join(' | ') + '\n';
 
     // 对手
