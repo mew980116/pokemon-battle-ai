@@ -20,7 +20,7 @@ var tools = require('./tools.js');
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.2.6';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.2.7';   // tool 分支版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（tool 分支：思考 + tool，强度 low）====
 var MODEL = 'deepseek-v4-flash';
@@ -271,7 +271,9 @@ function buildPrompt(state, notes) {
     if (me.name) {
         var meStatus = me.status ? 'Status:' + me.status + ',' : '';
         var meBoosts = (me.boosts && me.boosts.length) ? 'Boosts:[' + me.boosts.join(',') + '],' : '';
-        p += 'Your current pokemon:' + me.name + ',Type:' + (me.types || []).join('&') + ',HP:' + (me.hpPct || 0) + '%,' + meStatus + meBoosts + '\n';
+        var meAbi = me.ability ? 'Ability:' + me.ability + ',' : '';
+        var meItem = me.item ? 'Item:' + me.item + ',' : '';
+        p += 'Your current pokemon:' + me.name + ',Type:' + (me.types || []).join('&') + ',HP:' + (me.hpPct || 0) + '%,' + meAbi + meItem + meStatus + meBoosts + '\n';
     }
 
     p += '\nAvailable actions (choose one number):\n';
@@ -294,7 +296,7 @@ function buildPrompt(state, notes) {
         for (var s = 0; s < bench.length; s++) {
             idx++;
             var bk = bench[s];
-            var sw = idx + '. switch to ' + bk.name + ':Type:' + (bk.types || []).join('&') + ',HP:' + (bk.hpPct || 0) + '%' + (bk.status ? ',Status:' + bk.status : '');
+            var sw = idx + '. switch to ' + bk.name + ':Type:' + (bk.types || []).join('&') + ',HP:' + (bk.hpPct || 0) + '%' + (bk.status ? ',Status:' + bk.status : '') + (bk.ability ? ',Ability:' + bk.ability : '') + (bk.item ? ',Item:' + bk.item : '');
             if (bk.moves && bk.moves.length) {
                 var ms = '';
                 for (var mi = 0; mi < bk.moves.length; mi++) {

@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8091";
-var PKLM_VERSION = "0.5.12";       // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.5.13";       // 脚本版本（改动时 bump，随日志记录）
 
 // 自动开启：账号 id 转小写为 "mew's" 时自动开启 LLM 决策（其他账号手动 /llm on）
 var pklmAccount = "";             // 我方账号名
@@ -323,6 +323,8 @@ function pklmCollectMyActive() {
         o.status = pklmStatusName(tp.status);
         o.moves = pklmCollectMoves(tp, true, true);
         o.boosts = pklmCollectBoosts(battle.me);
+        o.ability = pklmAbilityName(tp.ability);
+        o.item = pklmItemName(tp.item);
     } catch (e) {}
     return o;
 }
@@ -361,7 +363,9 @@ function pklmCollectBench() {
                 types: [],
                 hpPct: (tp.totalLife > 0) ? Math.floor(tp.life / tp.totalLife * 100) : 0,
                 status: pklmStatusName(tp.status),
-                moves: pklmCollectMoves(tp, false, false)
+                moves: pklmCollectMoves(tp, false, false),
+                ability: pklmAbilityName(tp.ability),
+                item: pklmItemName(tp.item)
             };
             var f = pklmFpoke(battle.me); // 场上类型用 field 拿，后备用 sys.pokeType1/2
             var bt1 = pklmTypeName(sys.pokeType1(tp.numRef));

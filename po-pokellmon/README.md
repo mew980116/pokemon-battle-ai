@@ -132,6 +132,7 @@ po-pokellmon/
 | 0.2.4 (tool server) | 新增 submit_feedback tool + system prompt 引导 LLM 反馈「想要的 tool」（记到 log 末尾 summary.notes.feedback，收集需求用） |
 | 0.2.5 (tool) / 0.5.11 (script) / 0.4.14 (main) | state 加 weather/terrain 字段（读 battle.data.field，天气特性如 Drizzle 触发消息不走 onAbilityMessage，改用直读）+ prompt 显示 Weather/Terrain |
 | 0.2.6 (tool) / 0.5.12 (script) / 0.4.15 (main) | state 加 myHazards/oppHazards（入场陷阱：隐形岩/地钉/毒钉/虫网，读 battle.data.field.zone）+ prompt 显示双方陷阱 |
+| 0.2.7 (tool) / 0.5.13 (script) / 0.4.16 (main) | 我方宝可梦（场上+后备）采集 ability/item 进 state，prompt 显示 Ability/Item 名字 |
 
 ## 使用方法
 
