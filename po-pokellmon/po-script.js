@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8091";
-var PKLM_VERSION = "0.5.8";       // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.5.9";       // 脚本版本（改动时 bump，随日志记录）
 
 // 自动开启：账号 id 转小写为 "mew's" 时自动开启 LLM 决策（其他账号手动 /llm on）
 var pklmAccount = "";             // 我方账号名
@@ -341,6 +341,7 @@ function pklmCollectOppActive() {
         var t = fp.pokemon.totalLife;
         o.hpPct = (t > 0) ? Math.floor(l / t * 100) : 0;
         o.status = pklmStatusName(fp.pokemon.status);
+        o.fainted = (fp.pokemon.status === 31);   // 对手场上是否濒死（供 prompt 提示「会换人」）
         o.moves = pklmOppMoves[fp.pokemon.numRef] || [];   // 只取当前场上这只已暴露的招式
         o.boosts = pklmCollectBoosts(battle.opp);
     } catch (e) {}

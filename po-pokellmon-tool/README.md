@@ -28,6 +28,10 @@
 - `get_type_matchup(attack_type, defend_types)` —— 类型克制倍率（移植 `typechart`）
 - `calc_stat_boost(base_stat, boost)` —— 能力等级修正（移植 `calcStatWhenBoost`）
 - `get_battle_history(start_turn?, end_turn?)` —— 读取过往战报（按回合范围，不传则全文；数据来自 PO 侧 `state.fullHistory`）
+- `save_observation(pokemon, text)` —— 记录/覆盖对某只对手宝可梦的观察
+- `save_strategy(text)` —— 记录当前回合的战略思路
+- `get_observation(pokemon?)` —— 读观察（不传返回全部）
+- `get_strategy(turn?)` —— 读思路（不传返回全部）
 
 最后 2 回合战报显式贴进 prompt；更早的战报由 DS 按需调 `get_battle_history` 读取（省 token）。
 

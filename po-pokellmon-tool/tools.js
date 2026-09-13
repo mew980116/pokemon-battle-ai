@@ -61,6 +61,63 @@ var TOOL_DEFS = [
                 required: []
             }
         }
+    },
+    {
+        type: 'function',
+        function: {
+            name: 'save_observation',
+            description: 'Record or update your observation about ONE opposing pokemon (e.g. revealed moves, likely item/ability, damage estimate). Overwrites the previous note for the same pokemon.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    pokemon: { type: 'string', description: 'Opposing pokemon name' },
+                    text: { type: 'string', description: 'Your observation text' }
+                },
+                required: ['pokemon', 'text']
+            }
+        }
+    },
+    {
+        type: 'function',
+        function: {
+            name: 'save_strategy',
+            description: 'Record your current strategic thinking/plan for this turn (e.g. "opponent likely switches to X, so I should use Y"). Stored per turn.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    text: { type: 'string', description: 'Your strategy/thinking text' }
+                },
+                required: ['text']
+            }
+        }
+    },
+    {
+        type: 'function',
+        function: {
+            name: 'get_observation',
+            description: 'Read your saved pokemon observations. Omit pokemon to read all observations.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    pokemon: { type: 'string', description: 'Pokemon name to read; omit for all' }
+                },
+                required: []
+            }
+        }
+    },
+    {
+        type: 'function',
+        function: {
+            name: 'get_strategy',
+            description: 'Read your saved strategic thinking by turn. Omit turn to read all turns.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    turn: { type: 'integer', description: 'Turn number to read; omit for all' }
+                },
+                required: []
+            }
+        }
     }
 ];
 
@@ -108,11 +165,57 @@ function getBattleHistory(args, state) {
     return { turns: out, count: out.length };
 }
 
-// tool 执行器：根据 name 分发；ctx 含 state（供 get_battle_history 读取战报）
+// 记录对某只对手宝可梦的观察（覆盖同名旧笔记）
+function saveObservation(args, ctx) {
+    if (!args.pokemon || !args.text) return { error: 'pokemon and text required' };
+    var notes = ctx && ctx.notes;
+    if (!notes) return { error: 'no notes store' };
+    if (!notes.pokemon) notes.pokemon = {};
+    notes.pokemon[String(args.pokemon)] = String(args.text);
+    return { ok: true, pokemon: args.pokemon };
+}
+
+// 记录当前回合的战略思路（默认用当前 turn；可显式指定 turn）
+function saveStrategy(args, ctx) {
+    if (!args.text) return { error: 'text required' };
+    var notes = ctx && ctx.notes;
+    if (!notes) return { error: 'no notes store' };
+    if (!notes.turns) notes.turns = {};
+    var t = (args.turn !== undefined && args.turn !== null) ? parseInt(args.turn, 10) : (ctx.turn || 0);
+    notes.turns[String(t)] = String(args.text);
+    return { ok: true, turn: t };
+}
+
+// 读取观察（不传 pokemon 返回全部）
+function getObservation(args, ctx) {
+    var notes = ctx && ctx.notes;
+    var p = (notes && notes.pokemon) || {};
+    if (args.pokemon) {
+        return { pokemon: args.pokemon, observation: p[String(args.pokemon)] || null };
+    }
+    return { observations: p };
+}
+
+// 读取战略思路（不传 turn 返回全部）
+function getStrategy(args, ctx) {
+    var notes = ctx && ctx.notes;
+    var t = (notes && notes.turns) || {};
+    if (args.turn !== undefined && args.turn !== null) {
+        var ti = parseInt(args.turn, 10);
+        return { turn: ti, strategy: t[String(ti)] || null };
+    }
+    return { strategies: t };
+}
+
+// tool 执行器：根据 name 分发；ctx 含 state（供 get_battle_history 读取战报）+ notes（笔记存储）+ turn
 function runTool(name, args, ctx) {
     if (name === 'get_type_matchup') return getTypeMatchup(args);
     if (name === 'calc_stat_boost') return calcStatBoost(args);
     if (name === 'get_battle_history') return getBattleHistory(args, ctx && ctx.state);
+    if (name === 'save_observation') return saveObservation(args, ctx);
+    if (name === 'save_strategy') return saveStrategy(args, ctx);
+    if (name === 'get_observation') return getObservation(args, ctx);
+    if (name === 'get_strategy') return getStrategy(args, ctx);
     return { error: 'unknown tool: ' + name };
 }
 

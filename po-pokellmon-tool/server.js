@@ -20,7 +20,7 @@ var tools = require('./tools.js');
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.1.9';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.2.0';   // tool 分支版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（tool 分支：思考 + tool，强度 low）====
 var MODEL = 'deepseek-v4-flash';
@@ -28,7 +28,7 @@ var THINKING_ENABLED = true;            // 思考模式（非思考拉垮且不�
 var REASONING_EFFORT = 'low';           // 思考强度 low（high 太慢，先试 low）
 var MAX_TOKENS = null;                  // 不限制输出 token（思考链 + 最终答案）
 var TIMEOUT_MS = 180000;                // 放宽：180s（tool 多轮往返慢）
-var MAX_TOOL_ROUNDS = 5;                // 最多 function calling 轮数，超过则 fallback
+var MAX_TOOL_ROUNDS = 10;               // 最多 function calling 轮数，超过则 fallback
 
 var SYSTEM_PROMPT = require('../po-pokellmon/prompts.js').BATTLE_TIPS + ' You may call tools to compute type matchups, apply stat boosts, or read the battle history before deciding.';
 
@@ -185,7 +185,15 @@ function buildOppBench(state) {
     return parts.join('');
 }
 
-function buildPrompt(state) {
+// 跨回合笔记存储（按 battleId 隔离）：{ battleId: { pokemon:{name:text}, turns:{turn:text} } }
+var notesStore = {};
+function getNotes(battleId) {
+    var id = (battleId !== undefined && battleId !== null) ? String(battleId) : 'unknown';
+    if (!notesStore[id]) notesStore[id] = { pokemon: {}, turns: {} };
+    return notesStore[id];
+}
+
+function buildPrompt(state, notes) {
     var p = '';
     var opp = state.opp || {};
     var me = state.me || {};
@@ -206,10 +214,31 @@ function buildPrompt(state) {
         p += 'Earlier battle history (' + histN + ' turns) is available via the get_battle_history tool.\n';
     }
 
+    // 默认注入笔记：对手场上这只的观察 + 最近 2 回合思路
+    if (notes) {
+        var noteLines = [];
+        var pn = notes.pokemon || {};
+        if (opp.name && pn[opp.name]) {
+            noteLines.push('Observation on ' + opp.name + ': ' + pn[opp.name]);
+        }
+        var tn = notes.turns || {};
+        var tkeys = Object.keys(tn).sort(function (a, b) { return parseInt(a, 10) - parseInt(b, 10); });
+        var recentT = tkeys.slice(-2);
+        for (var ti = 0; ti < recentT.length; ti++) {
+            noteLines.push('Strategy note (turn ' + recentT[ti] + '): ' + tn[recentT[ti]]);
+        }
+        if (noteLines.length) {
+            p += 'Your notes:\n' + noteLines.join('\n') + '\n';
+        }
+    }
+
     if (opp.name) {
         var oppStatus = opp.status ? 'Status:' + opp.status + ',' : '';
         var oppBoosts = (opp.boosts && opp.boosts.length) ? 'Boosts:[' + opp.boosts.join(',') + '],' : '';
         p += 'Opponent current pokemon:' + opp.name + ':Type:' + oppTypes.join('&') + ',HP:' + (opp.hpPct || 0) + '%,' + oppStatus + oppBoosts + '\n';
+        if (opp.fainted) {
+            p += 'NOTE: The opponent current pokemon has fainted and will send out a replacement this turn.\n';
+        }
         // 对手后备（bench）槽位详情
         var ob = buildOppBench(state);
         if (ob) p += 'Opponent bench: ' + ob + '\n';
@@ -354,7 +383,8 @@ function writeLog(entry) {
 }
 
 function handleChoice(res, state) {
-    var prompt = buildPrompt(state);
+    var notes = getNotes(state.battleId);
+    var prompt = buildPrompt(state, notes);
     var constraint = 'Choose the best action. Output ONLY a JSON object: {"choice": <number>} where <number> is the number of the action you choose. No other text.\n';
     var userPrompt = prompt + '\n' + constraint;
 
@@ -428,7 +458,7 @@ function handleChoice(res, state) {
                     var tc = toolCalls[i];
                     var args = {};
                     try { args = JSON.parse(tc.function.arguments || '{}'); } catch (e) {}
-                    var result = tools.runTool(tc.function.name, args, { state: state });
+                    var result = tools.runTool(tc.function.name, args, { state: state, notes: notes, turn: state.turn });
                     called.push({ name: tc.function.name, args: args, result: result });
                     messages.push({ role: 'tool', tool_call_id: tc.id, content: JSON.stringify(result) });
                 }
