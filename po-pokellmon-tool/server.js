@@ -20,7 +20,7 @@ var tools = require('./tools.js');
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.2.0';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.2.1';   // tool 分支版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（tool 分支：思考 + tool，强度 low）====
 var MODEL = 'deepseek-v4-flash';
@@ -382,6 +382,29 @@ function writeLog(entry) {
     }
 }
 
+// 对战结束时汇总 LLM 笔记，追加到 log 末尾（供事后复盘）
+function appendSummary(battleId, result, winner) {
+    try {
+        var notes = getNotes(battleId);
+        var d = new Date();
+        var mm = String(d.getMonth() + 1); if (mm.length < 2) mm = '0' + mm;
+        var dd = String(d.getDate()); if (dd.length < 2) dd = '0' + dd;
+        var file = path.join(LOG_DIR, 'deepseek_tool_' + d.getFullYear() + mm + dd + '_battle' + battleId + '.log');
+        var summary = {
+            type: 'summary',
+            ts: new Date().toISOString(),
+            battleId: battleId,
+            result: result || null,
+            winner: (winner !== undefined && winner !== null) ? winner : null,
+            notes: notes
+        };
+        fs.appendFileSync(file, JSON.stringify(summary) + '\n');
+        console.log('[summary] battle ' + battleId + ' notes: ' + Object.keys(notes.pokemon || {}).length + ' pokemon, ' + Object.keys(notes.turns || {}).length + ' turns');
+    } catch (e) {
+        console.log('[summary] write error: ' + e.message);
+    }
+}
+
 function handleChoice(res, state) {
     var notes = getNotes(state.battleId);
     var prompt = buildPrompt(state, notes);
@@ -506,6 +529,14 @@ var server = http.createServer(function (req, res) {
             }
         }
         handleChoice(res, state);
+        return;
+    }
+
+    if (req.method === 'GET' && u.pathname === '/summary') {
+        appendSummary(u.query.battleId, u.query.result, u.query.winner);
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        res.writeHead(200);
+        res.end('ok');
         return;
     }
 

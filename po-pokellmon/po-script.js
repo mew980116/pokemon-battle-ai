@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8091";
-var PKLM_VERSION = "0.5.9";       // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.5.10";       // 脚本版本（改动时 bump，随日志记录）
 
 // 自动开启：账号 id 转小写为 "mew's" 时自动开启 LLM 决策（其他账号手动 /llm on）
 var pklmAccount = "";             // 我方账号名
@@ -631,7 +631,14 @@ function pklmSpotLabel(spot) {
         if (!useAI || battleEnd || !useLLM) return;
         pklmDecideAndAct();
     },
-    onBattleEnd: function (result, winner) { battleEnd = true; },
+    onBattleEnd: function (result, winner) {
+        battleEnd = true;
+        // 对战结束：通知 server 追加 LLM 笔记汇总到 log 末尾（fire-and-forget，404 也无妨）
+        try {
+            var su = PKLM_URL + "/summary?battleId=" + battle.id + "&result=" + encodeURIComponent(String(result)) + "&winner=" + winner;
+            sys.synchronousWebCall(su);
+        } catch (e) {}
+    },
 
     // ===== 战报细节回调：把战斗过程细节补进 pklmTurnLog（进 history/fullHistory）=====
     onMiss: function (spot) {
