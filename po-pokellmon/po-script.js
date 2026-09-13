@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8091";
-var PKLM_VERSION = "0.5.10";       // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.5.11";       // 脚本版本（改动时 bump，随日志记录）
 
 // 自动开启：账号 id 转小写为 "mew's" 时自动开启 LLM 决策（其他账号手动 /llm on）
 var pklmAccount = "";             // 我方账号名
@@ -416,6 +416,26 @@ function pklmCollectOppTeam() {
 }
 
 // 组合完整战场状态
+// 天气/场地取值 -> 英文名（与主脚本 battle.data.field.weather/terrain 编码对齐）
+function pklmWeatherName(n) {
+    switch (n) {
+        case 1: return 'Rain';
+        case 2: return 'Sun';
+        case 3: return 'Sandstorm';
+        case 4: return 'Hail';
+        default: return '';
+    }
+}
+function pklmTerrainName(n) {
+    switch (n) {
+        case 1: return 'Grassy Terrain';
+        case 2: return 'Electric Terrain';
+        case 3: return 'Psychic Terrain';
+        case 4: return 'Misty Terrain';
+        default: return '';
+    }
+}
+
 function pklmCollectState() {
     var oppRemaining = 0;
     try {
@@ -453,6 +473,8 @@ function pklmCollectState() {
         fullHistory: fullHist,
         messages: pklmMessages.slice(),
         oppRemaining: oppRemaining,
+        weather: pklmWeatherName(battle.data.field.weather) || null,
+        terrain: pklmTerrainName(battle.data.field.terrain) || null,
         opp: pklmCollectOppActive(),
         oppTeam: pklmCollectOppTeam(),
         oppSeen: pklmOppSeen.slice(),
