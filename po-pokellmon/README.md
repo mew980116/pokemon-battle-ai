@@ -134,6 +134,7 @@ po-pokellmon/
 | 0.2.6 (tool) / 0.5.12 (script) / 0.4.15 (main) | state 加 myHazards/oppHazards（入场陷阱：隐形岩/地钉/毒钉/虫网，读 battle.data.field.zone）+ prompt 显示双方陷阱 |
 | 0.2.7 (tool) / 0.5.13 (script) / 0.4.16 (main) | 我方宝可梦（场上+后备）采集 ability/item 进 state，prompt 显示 Ability/Item 名字 |
 | 0.5.14 (script) | ① 修复 weather/terrain 编号映射（原 pklmWeatherName 1=Rain 2=Sun 4=Hail 全反、pklmTerrainName 四个全错，对齐 board-standalone.js 正确版）② 战报每回合末追加场况快照 `[Weather:.., Terrain:.., You:.., Opp:..]`（能力等级 + 天气场地，弥补 PO 无通用 stat 回调、天气特性不走 onAbilityMessage 的缺口） |
+| 0.5.15 (script) | 临时 probe：onTierNotification / onClauseActivated 打印参数 typeof + 值，实测确认 tier/clause 是数字掩码还是字符串（为 clause 提示进 prompt 做准备） |
 | 0.3.0 (tool) | 新增 `calc_damage` tool：标准宝可梦伤害公式（最多 10 组 leg，返回 0.85x/1.0x 随机档伤害 + 防守方 HP 百分比 + detail）。新增 `po-pokellmon-tool/build-knowledge.js` 生成 `pokemon.json`（种族值/属性/中英文名索引）、`natures.json`（性格 buff/debuff）、`moves.json`（含招式 type + 中文名）。system prompt 引导 LLM 算伤后与战报实际伤害对比、异常（≈2x 差）提交 submit_feedback |
 | 0.3.1 (tool) | 新增 `run_js` 逃生舱 tool：LLM 可在 `vm` 沙箱跑一段同步 JS 覆盖无现成 tool 的计算（暴露 data/typeMul/effStat/resolvePokemon/resolveMove/calcDamage + print/console.log）。限制：同步、无 require/process/fs、2s 超时、结果/输出截 2000 字符 |
 | 0.3.2 (tool) | 修复 run_js 沙箱 2 个 bug：① `effStat` 签名从 7 参数简化为 `effStat(baseStat, boost?, level?)`（LLM 原 7 参数签名用错得 NaN，被迫手写公式）② `print`/`console.log` 改 `arguments` 全量拼接（原只收单参数丢输出）。新增 [test-tools.js](../po-pokellmon-tool/test-tools.js) 回归测试（验证 LLM 调用 get_type_matchup/calc_damage/run_js）。调参：`MAX_TOOL_ROUNDS` 10→15、`TIMEOUT_MS` 180s→240s |

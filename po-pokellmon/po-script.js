@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8091";
-var PKLM_VERSION = "0.5.14";       // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.5.15";       // 脚本版本（改动时 bump，随日志记录）
 
 // 自动开启：账号 id 转小写为 "mew's" 时自动开启 LLM 决策（其他账号手动 /llm on）
 var pklmAccount = "";             // 我方账号名
@@ -743,8 +743,11 @@ function pklmSpotLabel(spot) {
     onTierNotification: function (tier) {
         pklmAutoEnable();
         pklmCheckMsgFiles();   // 对战启动扫描消息表文件依赖，缺失则提示
+        pklmPrint("PROBE tier typeof=" + typeof tier + " value=[" + tier + "]");
     },
-    onClauseActivated: function (clause) {},
+    onClauseActivated: function (clause) {
+        pklmPrint("PROBE clause typeof=" + typeof clause + " value=[" + clause + "]");
+    },
     onEffectiveness: function (spot, effectiveness) {
         try {
             pklmCb("onEffectiveness", "effectiveness=" + effectiveness);
