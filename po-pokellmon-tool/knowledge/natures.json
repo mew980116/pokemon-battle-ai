@@ -1,0 +1,206 @@
+{
+  "byNum": {
+    "0": {
+      "name_zh": "勤奋",
+      "name_en": "Hardy",
+      "buff": 0,
+      "debuff": 0
+    },
+    "1": {
+      "name_zh": "怕寂寞",
+      "name_en": "Lonely",
+      "buff": 1,
+      "debuff": 2
+    },
+    "2": {
+      "name_zh": "勇敢",
+      "name_en": "Brave",
+      "buff": 1,
+      "debuff": 5
+    },
+    "3": {
+      "name_zh": "固执",
+      "name_en": "Adamant",
+      "buff": 1,
+      "debuff": 3
+    },
+    "4": {
+      "name_zh": "顽皮",
+      "name_en": "Naughty",
+      "buff": 1,
+      "debuff": 4
+    },
+    "5": {
+      "name_zh": "大胆",
+      "name_en": "Bold",
+      "buff": 2,
+      "debuff": 1
+    },
+    "6": {
+      "name_zh": "坦率",
+      "name_en": "Docile",
+      "buff": 0,
+      "debuff": 0
+    },
+    "7": {
+      "name_zh": "悠闲",
+      "name_en": "Relaxed",
+      "buff": 2,
+      "debuff": 5
+    },
+    "8": {
+      "name_zh": "淘气",
+      "name_en": "Impish",
+      "buff": 2,
+      "debuff": 3
+    },
+    "9": {
+      "name_zh": "乐天",
+      "name_en": "Lax",
+      "buff": 2,
+      "debuff": 4
+    },
+    "10": {
+      "name_zh": "胆小",
+      "name_en": "Timid",
+      "buff": 5,
+      "debuff": 1
+    },
+    "11": {
+      "name_zh": "急躁",
+      "name_en": "Hasty",
+      "buff": 5,
+      "debuff": 2
+    },
+    "12": {
+      "name_zh": "认真",
+      "name_en": "Serious",
+      "buff": 0,
+      "debuff": 0
+    },
+    "13": {
+      "name_zh": "爽朗",
+      "name_en": "Jolly",
+      "buff": 5,
+      "debuff": 3
+    },
+    "14": {
+      "name_zh": "天真",
+      "name_en": "Naive",
+      "buff": 5,
+      "debuff": 4
+    },
+    "15": {
+      "name_zh": "内敛",
+      "name_en": "Modest",
+      "buff": 3,
+      "debuff": 1
+    },
+    "16": {
+      "name_zh": "慢吞吞",
+      "name_en": "Mild",
+      "buff": 3,
+      "debuff": 2
+    },
+    "17": {
+      "name_zh": "冷静",
+      "name_en": "Quiet",
+      "buff": 3,
+      "debuff": 5
+    },
+    "18": {
+      "name_zh": "害羞",
+      "name_en": "Bashful",
+      "buff": 0,
+      "debuff": 0
+    },
+    "19": {
+      "name_zh": "马虎",
+      "name_en": "Rash",
+      "buff": 3,
+      "debuff": 4
+    },
+    "20": {
+      "name_zh": "温和",
+      "name_en": "Calm",
+      "buff": 4,
+      "debuff": 1
+    },
+    "21": {
+      "name_zh": "温顺",
+      "name_en": "Gentle",
+      "buff": 4,
+      "debuff": 2
+    },
+    "22": {
+      "name_zh": "自大",
+      "name_en": "Sassy",
+      "buff": 4,
+      "debuff": 5
+    },
+    "23": {
+      "name_zh": "慎重",
+      "name_en": "Careful",
+      "buff": 4,
+      "debuff": 3
+    },
+    "24": {
+      "name_zh": "浮躁",
+      "name_en": "Quirky",
+      "buff": 0,
+      "debuff": 0
+    }
+  },
+  "byName": {
+    "hardy": 0,
+    "勤奋": 0,
+    "lonely": 1,
+    "怕寂寞": 1,
+    "brave": 2,
+    "勇敢": 2,
+    "adamant": 3,
+    "固执": 3,
+    "naughty": 4,
+    "顽皮": 4,
+    "bold": 5,
+    "大胆": 5,
+    "docile": 6,
+    "坦率": 6,
+    "relaxed": 7,
+    "悠闲": 7,
+    "impish": 8,
+    "淘气": 8,
+    "lax": 9,
+    "乐天": 9,
+    "timid": 10,
+    "胆小": 10,
+    "hasty": 11,
+    "急躁": 11,
+    "serious": 12,
+    "认真": 12,
+    "jolly": 13,
+    "爽朗": 13,
+    "naive": 14,
+    "天真": 14,
+    "modest": 15,
+    "内敛": 15,
+    "mild": 16,
+    "慢吞吞": 16,
+    "quiet": 17,
+    "冷静": 17,
+    "bashful": 18,
+    "害羞": 18,
+    "rash": 19,
+    "马虎": 19,
+    "calm": 20,
+    "温和": 20,
+    "gentle": 21,
+    "温顺": 21,
+    "sassy": 22,
+    "自大": 22,
+    "careful": 23,
+    "慎重": 23,
+    "quirky": 24,
+    "浮躁": 24
+  }
+}

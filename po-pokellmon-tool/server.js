@@ -20,7 +20,7 @@ var tools = require('./tools.js');
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.2.7';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.3.0';   // tool 分支版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（tool 分支：思考 + tool，强度 low）====
 var MODEL = 'deepseek-v4-flash';
@@ -33,7 +33,9 @@ var MAX_TOOL_ROUNDS = 10;               // 最多 function calling 轮数，超�
 var SYSTEM_PROMPT = require('../po-pokellmon/prompts.js').BATTLE_TIPS +
     ' You may call tools to compute type matchups, apply stat boosts, read the battle history, or record/read your notes before deciding. ' +
     'IMPORTANT: use save_observation to record what you learn about each opposing pokemon (revealed moves, likely item/ability, damage estimate), and save_strategy to record your current plan each turn, so you can recall them in later turns. ' +
-    'If you need battle information or computation that no available tool provides (e.g. damage calculation, speed comparison, opponent move prediction), call submit_feedback to tell us what tool you wish you had.';
+    'Before committing to a move, use calc_damage to check whether your moves can KO or how much damage they deal (it returns the 0.85x and 1.0x random rolls and the % of the defender max HP). ' +
+    'After using calc_damage, compare its result with the actual damage shown in the battle log (via get_battle_history). If the calculated damage differs from the observed damage by a large factor (roughly 2x or more) and no obvious modifier explains it, call submit_feedback to report the discrepancy (state which attacker/move/defender and the expected vs actual damage). ' +
+    'If you need battle information or computation that no available tool provides, call submit_feedback to tell us what tool you wish you had.';
 
 // 复用 po-pokellmon 知识库
 var KNOWLEDGE_DIR = path.join(__dirname, '..', 'po-pokellmon', 'knowledge');

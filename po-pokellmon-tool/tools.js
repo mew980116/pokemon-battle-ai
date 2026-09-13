@@ -7,6 +7,9 @@
 
 var path = require('path');
 var TYPECHART = require('../po-pokellmon/knowledge/typechart.json');
+var POKEMON = require('./knowledge/pokemon.json');
+var NATURES = require('./knowledge/natures.json');
+var MOVES = require('./knowledge/moves.json');
 
 var TYPE_NAMES = TYPECHART.types;   // 18 个属性名，与主脚本 sys.type 顺序对齐
 var CHART = TYPECHART.chart;        // 18x18 克制矩阵
@@ -133,6 +136,71 @@ var TOOL_DEFS = [
                 required: ['text']
             }
         }
+    },
+    {
+        type: 'function',
+        function: {
+            name: 'calc_damage',
+            description: 'Compute the damage range of up to 10 attacker/defender/move combinations using the standard Pokemon damage formula. Returns the minimum (0.85x roll) and maximum (1.0x roll) damage, plus the percentage of the defender max HP. NOTE: this is a SIMPLIFIED calculator — it does NOT auto-apply item/ability/weather/terrain/burn/critical-hit/STAB-removal etc.; pass an extra multiplier (e.g. 1.5 for critical hit, 0.5 for burn) if needed. Use it to check KO thresholds, then compare the result against the actual damage in the battle log.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    legs: {
+                        type: 'array',
+                        description: 'List of damage calculations to perform (1 to 10).',
+                        items: {
+                            type: 'object',
+                            properties: {
+                                attacker: {
+                                    type: 'object',
+                                    description: 'Attacking pokemon. Either give its name/number, or give explicit base stats.',
+                                    properties: {
+                                        poke: { type: 'string', description: 'Pokemon name (English or Chinese) or Pokedex number, e.g. "Garchomp" or "445"' },
+                                        level: { type: 'integer', description: 'Level, default 100' },
+                                        ev: { type: 'array', items: { type: 'number' }, description: 'EVs [HP,Atk,Def,SpA,SpD,Spe], default all 0' },
+                                        iv: { type: 'array', items: { type: 'number' }, description: 'IVs [HP,Atk,Def,SpA,SpD,Spe], default all 31' },
+                                        nature: { type: 'string', description: 'Nature name (English or Chinese) or number, default neutral' },
+                                        boosts: { type: 'object', description: 'Stat stages, e.g. {"atk":1,"spa":-1}', additionalProperties: { type: 'integer' } },
+                                        base_stats: { type: 'array', items: { type: 'number' }, description: 'Explicit base stats [HP,Atk,Def,SpA,SpD,Spe] (alternative to poke name)' },
+                                        types: { type: 'array', items: { type: 'string' }, description: 'Types (required if base_stats given, for STAB check)' }
+                                    },
+                                    required: []
+                                },
+                                defender: {
+                                    type: 'object',
+                                    description: 'Defending pokemon, same structure as attacker.',
+                                    properties: {
+                                        poke: { type: 'string', description: 'Pokemon name (English or Chinese) or Pokedex number' },
+                                        level: { type: 'integer', description: 'Level, default 100' },
+                                        ev: { type: 'array', items: { type: 'number' }, description: 'EVs [HP,Atk,Def,SpA,SpD,Spe], default all 0' },
+                                        iv: { type: 'array', items: { type: 'number' }, description: 'IVs [HP,Atk,Def,SpA,SpD,Spe], default all 31' },
+                                        nature: { type: 'string', description: 'Nature name or number, default neutral' },
+                                        boosts: { type: 'object', description: 'Stat stages, e.g. {"def":1}', additionalProperties: { type: 'integer' } },
+                                        base_stats: { type: 'array', items: { type: 'number' }, description: 'Explicit base stats [HP,Atk,Def,SpA,SpD,Spe]' },
+                                        types: { type: 'array', items: { type: 'string' }, description: 'Types (required if base_stats given)' }
+                                    },
+                                    required: []
+                                },
+                                move: {
+                                    type: 'object',
+                                    description: 'The move used by the attacker. Either give its name, or explicit power/category/type.',
+                                    properties: {
+                                        name: { type: 'string', description: 'Move name (English), e.g. "Outrage"' },
+                                        power: { type: 'integer', description: 'Move base power (alternative to name)' },
+                                        category: { type: 'string', description: '"Physical" or "Special" (required if power given)' },
+                                        type: { type: 'string', description: 'Move type, e.g. "Dragon" (required if power given)' }
+                                    },
+                                    required: []
+                                },
+                                extra: { type: 'number', description: 'Extra fixed multiplier to apply (critical hit 1.5, burn 0.5, etc.), default 1.0' }
+                            },
+                            required: ['attacker', 'defender', 'move']
+                        }
+                    }
+                },
+                required: ['legs']
+            }
+        }
     }
 ];
 
@@ -237,6 +305,183 @@ function submitFeedback(args, ctx) {
     return { ok: true, count: notes.feedback.length };
 }
 
+// ===== 伤害计算（标准宝可梦伤害公式）=====
+// 能力值 = floor((2*Base + IV + floor(EV/4)) * Lv/100 + 5) * 性格修正 * 能力等级修正
+// HP     = floor((2*Base + IV + floor(EV/4)) * Lv/100 + 10 + Lv)
+// 伤害   = floor(floor(((2*Lv/5 + 2) * Power * A) / D) / 50) + 2，再乘 STAB*克制*extra，最后 0.85/1.0 随机档
+
+var STAT_NAMES = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
+
+// 解析宝可梦输入：支持 {poke:名/编号} 或 {base_stats:[...], types:[...]}
+// 返回 {baseStats, types, name} 或 {error}
+function resolvePokemonInput(spec) {
+    if (!spec) return { error: 'attacker/defender missing' };
+    if (spec.base_stats && spec.base_stats.length === 6) {
+        return { baseStats: spec.base_stats, types: spec.types || [], name: null };
+    }
+    var key = null;
+    if (spec.poke !== undefined && spec.poke !== null) {
+        var s = String(spec.poke);
+        if (POKEMON.byNum[s] !== undefined) key = s;
+        else if (POKEMON.byName[s.toLowerCase()] !== undefined) key = POKEMON.byName[s.toLowerCase()];
+    }
+    if (key === null || !POKEMON.byNum[key]) return { error: 'unknown pokemon: ' + (spec.poke || '(no name)') };
+    var p = POKEMON.byNum[key];
+    return { baseStats: p.baseStats, types: p.types, name: p.name_en };
+}
+
+// 解析招式输入：支持 {name}（英文或中文）或 {power, category, type}
+function resolveMoveInput(spec) {
+    if (!spec) return { error: 'move missing' };
+    if (spec.name) {
+        var name = String(spec.name);
+        var lower = name.toLowerCase();
+        for (var k in MOVES) {
+            var m = MOVES[k];
+            if ((m.name && m.name.toLowerCase() === lower) || (m.name_zh && m.name_zh === name)) {
+                return { name: m.name, power: m.power, category: m.category, type: m.type };
+            }
+        }
+        return { error: 'unknown move: ' + spec.name };
+    }
+    if (spec.power !== undefined && spec.category && spec.type) {
+        return { name: null, power: spec.power, category: spec.category, type: spec.type };
+    }
+    return { error: 'move needs name, or power+category+type' };
+}
+
+// 读取数组字段（ev/iv）某一维，缺失用默认
+function arrAt(arr, idx, dflt) {
+    if (arr && arr.length > idx && arr[idx] !== undefined && arr[idx] !== null) return arr[idx];
+    return dflt;
+}
+
+// 解析性格修正：返回 {buff, debuff}（值为能力索引 1-5，0=无）
+function resolveNature(spec) {
+    var key = null;
+    if (spec.nature === undefined || spec.nature === null || spec.nature === '' || spec.nature === 0) {
+        return { buff: 0, debuff: 0 };
+    }
+    var s = String(spec.nature);
+    if (NATURES.byNum[s] !== undefined) key = s;
+    else if (NATURES.byName[s.toLowerCase()] !== undefined) key = NATURES.byName[s.toLowerCase()];
+    if (key === null) return { buff: 0, debuff: 0 };
+    return NATURES.byNum[key];
+}
+
+// 读取能力等级修正（boosts 对象，key 用小写缩写）
+function boostOf(boosts, statName) {
+    if (!boosts) return 0;
+    var v = boosts[statName];
+    if (v === undefined) return 0;
+    return parseInt(v, 10) || 0;
+}
+
+// 计算有效能力值（含性格 + 能力等级修正）；statIdx 0-5
+function effectiveStat(baseStats, level, ev, iv, nature, boosts, statIdx) {
+    var base = baseStats[statIdx];
+    var e = arrAt(ev, statIdx, 0);
+    var i = arrAt(iv, statIdx, 31);
+    var lv = level || 100;
+    var raw = (2 * base + i + Math.floor(e / 4)) * lv / 100;
+    var val;
+    if (statIdx === 0) {
+        val = Math.floor(raw + 10 + lv);
+    } else {
+        val = Math.floor(raw + 5);
+        if (nature.buff === statIdx) val = Math.floor(val * 1.1);
+        if (nature.debuff === statIdx) val = Math.floor(val * 0.9);
+        var b = boostOf(boosts, STAT_NAMES[statIdx]);
+        if (b > 0) val = Math.floor(val * (2 + b) / 2);
+        if (b < 0) val = Math.floor(val * 2 / (2 - b));
+    }
+    return val;
+}
+
+// 单组伤害计算
+function calcOneLeg(leg, idx) {
+    var atk = resolvePokemonInput(leg.attacker);
+    if (atk.error) return { index: idx, error: atk.error };
+    var def = resolvePokemonInput(leg.defender);
+    if (def.error) return { index: idx, error: def.error };
+    var mv = resolveMoveInput(leg.move);
+    if (mv.error) return { index: idx, error: mv.error };
+
+    if (mv.power === 0 || mv.category === 'Status') {
+        return { index: idx, min: 0, max: 0, percent_min: 0, percent_max: 0, detail: { category: 'Status', note: 'non-damaging move' } };
+    }
+
+    var lv = leg.attacker.level || 100;
+    var aNature = resolveNature(leg.attacker);
+    var dNature = resolveNature(leg.defender);
+    var aStat, dStat;
+    if (mv.category === 'Physical') {
+        aStat = effectiveStat(atk.baseStats, lv, leg.attacker.ev, leg.attacker.iv, aNature, leg.attacker.boosts, 1);
+        dStat = effectiveStat(def.baseStats, leg.defender.level || lv, leg.defender.ev, leg.defender.iv, dNature, leg.defender.boosts, 2);
+    } else {
+        aStat = effectiveStat(atk.baseStats, lv, leg.attacker.ev, leg.attacker.iv, aNature, leg.attacker.boosts, 3);
+        dStat = effectiveStat(def.baseStats, leg.defender.level || lv, leg.defender.ev, leg.defender.iv, dNature, leg.defender.boosts, 4);
+    }
+
+    var base = Math.floor(Math.floor(((2 * lv / 5 + 2) * mv.power * aStat) / dStat) / 50) + 2;
+
+    // STAB：攻击方属性含招式属性 -> 1.5
+    var stab = 1;
+    if (mv.type && atk.types && atk.types.indexOf(mv.type) !== -1) stab = 1.5;
+
+    // 属性克制
+    var mult = stab;
+    if (mv.type && def.types && def.types.length) {
+        var ai = typeIndex(mv.type);
+        if (ai >= 0) {
+            for (var t = 0; t < def.types.length; t++) {
+                var di = typeIndex(def.types[t]);
+                if (di >= 0) mult *= CHART[ai][di];
+            }
+        }
+    }
+
+    // extra 系数（默认 1.0）
+    var extra = (leg.extra !== undefined && leg.extra !== null) ? leg.extra : 1.0;
+    mult *= extra;
+
+    var final = Math.floor(base * mult);
+    var min = Math.floor(final * 0.85);
+    var max = Math.floor(final * 1.00);
+
+    // 防守方最大 HP（用于百分比）
+    var defHp = effectiveStat(def.baseStats, leg.defender.level || lv, leg.defender.ev, leg.defender.iv, dNature, leg.defender.boosts, 0);
+    var pctMin = defHp > 0 ? Math.floor(min * 100 / defHp) : 0;
+    var pctMax = defHp > 0 ? Math.floor(max * 100 / defHp) : 0;
+
+    return {
+        index: idx,
+        min: min,
+        max: max,
+        percent_min: pctMin,
+        percent_max: pctMax,
+        detail: {
+            attack_stat: aStat,
+            defense_stat: dStat,
+            defender_max_hp: defHp,
+            stab: stab,
+            type_mult: mult / (stab * extra),
+            extra: extra
+        }
+    };
+}
+
+// calc_damage：最多 10 组，一次算完
+function calcDamage(args) {
+    if (!args.legs || !args.legs.length) return { error: 'legs required' };
+    if (args.legs.length > 10) return { error: 'at most 10 legs allowed, got ' + args.legs.length };
+    var out = [];
+    for (var i = 0; i < args.legs.length; i++) {
+        out.push(calcOneLeg(args.legs[i], i));
+    }
+    return { legs: out };
+}
+
 // tool 执行器：根据 name 分发；ctx 含 state（供 get_battle_history 读取战报）+ notes（笔记存储）+ turn
 function runTool(name, args, ctx) {
     if (name === 'get_type_matchup') return getTypeMatchup(args);
@@ -247,6 +492,7 @@ function runTool(name, args, ctx) {
     if (name === 'get_observation') return getObservation(args, ctx);
     if (name === 'get_strategy') return getStrategy(args, ctx);
     if (name === 'submit_feedback') return submitFeedback(args, ctx);
+    if (name === 'calc_damage') return calcDamage(args);
     return { error: 'unknown tool: ' + name };
 }
 

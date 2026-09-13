@@ -27,22 +27,35 @@
 
 - `get_type_matchup(attack_type, defend_types)` —— 类型克制倍率（移植 `typechart`）
 - `calc_stat_boost(base_stat, boost)` —— 能力等级修正（移植 `calcStatWhenBoost`）
+- `calc_damage(legs)` —— 伤害计算：最多 10 组（攻击方/防守方/招式），返回 0.85x/1.0x 随机档伤害 + 防守方 HP 百分比 + detail（攻击/防御能力值、STAB、克制倍率）。基础计算器，不含道具/特性/天气/场地/烧伤/暴击等自动加成，用 `extra` 系数手动补
 - `get_battle_history(start_turn?, end_turn?)` —— 读取过往战报（按回合范围，不传则全文；数据来自 PO 侧 `state.fullHistory`）
 - `save_observation(pokemon, text)` —— 记录/覆盖对某只对手宝可梦的观察
 - `save_strategy(text)` —— 记录当前回合的战略思路
 - `get_observation(pokemon?)` —— 读观察（不传返回全部）
 - `get_strategy(turn?)` —— 读思路（不传返回全部）
+- `submit_feedback(text)` —— 反馈「想要的 tool」/ 报告伤害计算异常
 
 最后 2 回合战报显式贴进 prompt；更早的战报由 DS 按需调 `get_battle_history` 读取（省 token）。
 
+## 知识库（build-knowledge.js）
+
+运行 `node po-pokellmon-tool/build-knowledge.js` 生成 `knowledge/`（git 跟踪）：
+
+| 产物 | 来源 | 内容 |
+|---|---|---|
+| `pokemon.json` | `po-data/pokes/*.txt` + `zh-cn/db/pokes/pokemons.txt` | `num → {baseStats, types, name_en, name_zh}` + 中英文名反向索引 |
+| `natures.json` | `zh-cn/db/natures/nature.txt` + 硬编码 buff/debuff | `num → {name_en, name_zh, buff, debuff}` + 中英文名反向索引 |
+| `moves.json` | `movedata.json` + `po-data/moves/8G/type.txt` + `zh-cn/db/moves/moves.txt` | `num → {name, name_zh, power, accuracy, category, type}` |
+
+只收录基础形态（forme=0），因为当前环境为 Gen 8 单打、无 Mega/Z/极巨化。
+
 ## 下一步（未实现）
 
-**伤害计算 tool** —— 移植主脚本 `getMoveDamage`，是 tool 路线的核心价值（让 DS 决策前算伤害分布）。依赖：
+`calc_damage` 已实现（基础伤害计算器）。后续可扩展：
 
-1. **种族值数据**：`getMoveDamage` 用 `sys.pokeBaseStats(num, 8)` 读种族值，Node 侧需要一份种族值表（从 PO `db/pokes/` 导出，或用户本地 database 目录）。
-2. **主脚本 `getMoveDamage` 的纯计算部分**：伤害公式 + `calcBaseStats` + 加成（道具/特性/能力等级/天气）。运行时数据（双方 HP、能力、已露招式）从 `state` 传入。
-
-封装成 `calc_damage` tool 后，DS 就能在决策前对每个可用招式算伤害范围，代替现在"只给克制倍率"的粗糙信息。
+1. **自动加成**：道具/特性/天气/场地/烧伤/暴击等目前需 LLM 手动填 `extra` 系数，后续可逐个自动识别（读 state 里的 ability/item/weather/terrain）。
+2. **速度/先后手评估 tool**：判断先后手、提示先制招与改速度特性/状态。
+3. **换人/变化招评估 tool**：见 [TODO.md](../TODO.md) 的「评估依据 tool」清单。
 
 ## 使用方法
 
