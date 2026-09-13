@@ -123,6 +123,10 @@ body{font-family:"Segoe UI","Microsoft YaHei",sans-serif;color:var(--text);font-
       <h3>完整 Prompt</h3>
       <pre id="prompt"></pre>
     </div>
+    <div class="panel grow" id="notesPanel" style="display:none">
+      <h3>LLM 笔记汇总（对战结束）</h3>
+      <div id="notesSummary"></div>
+    </div>
   </div>
 </div>
 
@@ -260,6 +264,42 @@ function navTo(i){
 }
 function nav(delta){ navTo(cur+delta); }
 
+// 渲染对战结束时的 LLM 笔记汇总（log 末尾的 type:summary 行）
+function renderNotesSummary(){
+  var el=document.getElementById('notesPanel');
+  var box=document.getElementById('notesSummary');
+  if(!BATTLE){ el.style.display='none'; return; }
+  var summary=null;
+  for(var i=0;i<BATTLE.length;i++){
+    if(BATTLE[i] && BATTLE[i].type==='summary'){ summary=BATTLE[i]; break; }
+  }
+  if(!summary){ el.style.display='none'; return; }
+  el.style.display='';
+  var notes=summary.notes||{};
+  var pokemon=notes.pokemon||{};
+  var turns=notes.turns||{};
+  var html='<div style="color:var(--dim);font-size:12px;margin-bottom:6px">battle '+(summary.battleId!=null?summary.battleId:'?')+' · result='+(summary.result||'?')+'</div>';
+  html+='<div class="row-label">对手宝可梦观察（'+Object.keys(pokemon).length+'）</div>';
+  var pk=Object.keys(pokemon);
+  if(pk.length){
+    pk.forEach(function(name){
+      html+='<div class="toolcall"><div class="fn">'+esc(name)+'</div><div style="font-size:12px">'+esc(pokemon[name])+'</div></div>';
+    });
+  } else {
+    html+='<div style="color:var(--faint);font-size:12px">无</div>';
+  }
+  html+='<div class="row-label" style="margin-top:8px">回合思路（'+Object.keys(turns).length+'）</div>';
+  var tk=Object.keys(turns).sort(function(a,b){return parseInt(a,10)-parseInt(b,10);});
+  if(tk.length){
+    tk.forEach(function(t){
+      html+='<div class="toolcall"><div class="fn">turn '+esc(t)+'</div><div style="font-size:12px">'+esc(turns[t])+'</div></div>';
+    });
+  } else {
+    html+='<div style="color:var(--faint);font-size:12px">无</div>';
+  }
+  box.innerHTML=html;
+}
+
 function loadBattle(file){
   fetch('/api/battle?file='+encodeURIComponent(file)).then(function(r){return r.json();}).then(function(arr){
     BATTLE=arr;
@@ -268,6 +308,7 @@ function loadBattle(file){
     var hasTool=arr.some(function(d){return d.toolLog&&d.toolLog.length;});
     document.getElementById('toolTag').style.display=hasTool?'inline':'none';
     document.getElementById('modeTag').style.display=hasTool?'none':'inline';
+    renderNotesSummary();
     if(arr.length) render(arr[0]);
   });
 }
