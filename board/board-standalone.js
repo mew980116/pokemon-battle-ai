@@ -180,7 +180,7 @@ function boardCollectOppActive(){
 function boardCollectOppBench(){
     var arr = [];
     for (var i = 1; i < 6; i++) {
-        var b = { name:null, revealed:false, ko:false, hpPct:null };
+        var b = { name:null, revealed:false, ko:false, hpPct:null, status:null };
         try {
             var ep = battle.data.team(battle.opp).poke(i);
             var ko = (ep.status === 31);
@@ -189,13 +189,16 @@ function boardCollectOppBench(){
                 b.revealed = true;
                 b.name = sys.pokemon(ep.numRef);
                 if (ko) b.hpPct = 0;
-                else if (ep.totalLife > 0) b.hpPct = boardPct(ep.life, ep.totalLife);
+                else if (ep.totalLife > 0) {
+                    b.hpPct = boardPct(ep.life, ep.totalLife);
+                    b.status = boardStatusName(ep.status);
+                }
             }
         } catch(e){}
         arr.push(b);
     }
     while (arr.length > 5) arr.pop();
-    while (arr.length < 5) arr.push({name:null, revealed:false, ko:false, hpPct:null});
+    while (arr.length < 5) arr.push({name:null, revealed:false, ko:false, hpPct:null, status:null});
     return arr;
 }
 function boardCollectHazards(spot){

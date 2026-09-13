@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8091";
-var PKLM_VERSION = "0.5.6";       // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.5.7";       // 脚本版本（改动时 bump，随日志记录）
 
 // 自动开启：账号 id 转小写为 "mew's" 时自动开启 LLM 决策（其他账号手动 /llm on）
 var pklmAccount = "";             // 我方账号名
@@ -391,6 +391,29 @@ function pklmCollectMyTeam() {
     return arr;
 }
 
+// 采集对手全队 6 只的槽位情况（含场上+后备）：亮相名 / HP% / 状态 / KO / 未亮相
+// 供 server 端 prompt 展示对手 bench 详情（替代「Opponent has N pokemons left」）
+function pklmCollectOppTeam() {
+    var arr = [];
+    for (var i = 0; i < 6; i++) {
+        var o = { name: null, revealed: false, ko: false, hpPct: null, status: null };
+        try {
+            var ep = battle.data.team(battle.opp).poke(i);
+            o.ko = (ep.status === 31);
+            if (ep.numRef && ep.numRef > 0) {
+                o.revealed = true;
+                o.name = sys.pokemon(ep.numRef);
+                if (!o.ko && ep.totalLife > 0) {
+                    o.hpPct = Math.floor(ep.life / ep.totalLife * 100);
+                    o.status = pklmStatusName(ep.status);
+                }
+            }
+        } catch (e) {}
+        arr.push(o);
+    }
+    return arr;
+}
+
 // 组合完整战场状态
 function pklmCollectState() {
     var oppRemaining = 0;
@@ -430,6 +453,7 @@ function pklmCollectState() {
         messages: pklmMessages.slice(),
         oppRemaining: oppRemaining,
         opp: pklmCollectOppActive(),
+        oppTeam: pklmCollectOppTeam(),
         oppSeen: pklmOppSeen.slice(),
         me: pklmCollectMyActive(),
         myTeam: pklmCollectMyTeam(),

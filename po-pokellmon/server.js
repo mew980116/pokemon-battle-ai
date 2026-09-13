@@ -18,7 +18,7 @@ var path = require('path');
 
 var PORT = Number(process.env.POKELLMON_PORT) || 8091;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.4.10';  // 服务版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.4.11';  // 服务版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（可配置，改动后重启生效）====
 var MODEL = 'deepseek-v4-flash';        // 模型名：deepseek-v4-flash / deepseek-v4-pro
@@ -163,6 +163,27 @@ function moveInfo(m) {
     return { name: m.name || base.name || '?', type: m.type || '?', power: power, pp: m.pp, acc: acc, effect: effect };
 }
 
+// 对手 bench 槽位详情（[Name,HP%,status] / [Name,fainted] / [unknown]）
+function buildOppBench(state) {
+    var team = state.oppTeam || [];
+    var parts = [];
+    for (var i = 1; i < team.length; i++) {
+        var t = team[i];
+        if (t.ko) {
+            parts.push('[' + (t.name || 'unknown') + ',fainted]');
+        } else if (t.revealed) {
+            var s = '[' + t.name;
+            if (t.hpPct !== null && t.hpPct !== undefined) s += ',' + t.hpPct + '%';
+            if (t.status) s += ',' + t.status;
+            s += ']';
+            parts.push(s);
+        } else {
+            parts.push('[unknown]');
+        }
+    }
+    return parts.join('');
+}
+
 // 拼 prompt：数字选项方案（4 招式 + N 换人，DS 只需返回数字）
 function buildPrompt(state) {
     var p = '';
@@ -177,12 +198,13 @@ function buildPrompt(state) {
     }
 
     // 对手
-    var oppRemaining = state.oppRemaining !== undefined ? state.oppRemaining : 6;
-    p += 'Opponent has ' + oppRemaining + ' pokemons left.\n';
     if (opp.name) {
         var oppStatus = opp.status ? 'Status:' + opp.status + ',' : '';
         var oppBoosts = (opp.boosts && opp.boosts.length) ? 'Boosts:[' + opp.boosts.join(',') + '],' : '';
         p += 'Opponent current pokemon:' + opp.name + ':Type:' + oppTypes.join('&') + ',HP:' + (opp.hpPct || 0) + '%,' + oppStatus + oppBoosts + '\n';
+        // 对手后备（bench）槽位详情
+        var ob = buildOppBench(state);
+        if (ob) p += 'Opponent bench: ' + ob + '\n';
         // 对手已暴露招式（未露的写「未知」，始终补满 4 个槽位）
         var om = '';
         var oppMoves = opp.moves || [];
