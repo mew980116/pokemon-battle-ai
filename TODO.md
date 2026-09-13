@@ -294,7 +294,9 @@
     1. **先后手评估**：双方招式先制度一致时判断先后手可能情况；并提示双方先制招式、改变速度的特性/场地/状态（雨速/叶绿素/拨沙/冲浪之尾/麻痹降速/顺风等）。
     2. **场上 pm 对场上 pm 用招评估**：评估我方场上 pm 对对手场上 pm 用某招式的效果，含伤害类（伤害范围/克制/命中）和变化类（强化/状态/场地）。
     3. **场上 pm 对换上 pm 用招评估**：假定一方换人时评估，我方招式对对手换入 pm 的效果；换入方无能力等级（stats 清零），且需接受入场结算（隐形岩/地钉/毒钉等）。
-    4. **特性/道具详情查询**：`get_ability_info(name)` / `get_item_info(name)` 返回特性/道具具体效果文本（prompt 已放名字，详情按需查）。依赖 po-data 的 `ability_desc.txt` / `item_effects*.txt` 解析成 knowledge JSON（与 build 脚本同源）。
+    4. **特性/道具/招式详情查询**：`get_ability_info(name)` / `get_item_info(name)` / `get_move_info(name)` 返回特性/道具/招式具体效果文本（prompt 已放名字，详情按需查，供 LLM 判断免疫/强化/先制等机制）。依赖 po-data 的 `ability_desc.txt` / `item_effects*.txt` / `move_description.txt`（或 `move_effect.txt`）解析成 knowledge JSON（与 `po-pokellmon-tool/build-knowledge.js` 同源）。
+    5. **move 的 tag 信息（不止 description）**：招式除描述文字外还有 tag 类属性——声音类 `voice`、接触类 `touch`、铁拳 `ironFist`、鲁莽 `reckless`、强壮之颚 `strongJaw`、超级发射器 `megaLauncher`、先制 `priority` 等，已在 [movedata.json](movedata.json) 整理好。`get_move_info` 应一并暴露这些 tag（如「接触类会被鲨鱼皮/静电/火焰之躯反伤」「声音类被隔音免疫」），后续优先关注。
+    6. **特性推断（可能特性列表 + 触发/未触发提示）**：让 LLM 能读一只 PM 的**可能特性列表**（`pokes/ability1/2/3.txt` 给出每只 PM 的三个特性槽位），并重点标注「哪些特性触发后战报会有提示」（数据源 `abilities/ability_messages.txt`）。核心是**双向推断**：不仅「触发 → 确定是这个特性」，还有「未见触发 → 排除这个特性」（如对面未触发威吓→排除威吓；未触发静电→排除静电）。这比静态读特性文本更高阶，接入时让 LLM 在「已触发提示 vs 未触发提示」之间做排除式推断。
 
 **已实证**：
 
