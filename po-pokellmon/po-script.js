@@ -19,8 +19,9 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8091";
-var PKLM_VERSION = "0.5.18";       // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.5.19";       // 脚本版本（改动时 bump，随日志记录）
 var pklmLastWebFailTime = 0;       // 上次 webCall 失败时间戳（ms），用于断线时节流重发
+var pklmSilent = false;            // 静默模式：清分少女等无人值守 BOT 账号不向 PO 窗口 print 任何脚本输出
 
 // 自动开启：账号 id 转小写为 "mew's" 时自动开启 LLM 决策（其他账号手动 /llm on）
 var pklmAccount = "";             // 我方账号名
@@ -33,22 +34,32 @@ function pklmAutoEnable() {
                 useLLM = true;
                 pklmShadowMode = true;   // mew's 默认影子模式：只记 log 不执行 DS 指令；需执行时手动 /llm on
                 pklmCbLog = true;        // mew's 默认开回调探针（调试专用账号）
-                print("[POKELLMON] auto-enabled (account: mew's, shadow mode + callback log)");
+                pklmPrint("auto-enabled (account: mew's, shadow mode + callback log)");
             }
             if (!pklmLogEnabled) {
                 pklmLogEnabled = true;
-                print("[POKELLMON] logging enabled");
+                pklmPrint("logging enabled");
             }
         } else if (pklmAccount === "「木偶」析构万理的发条公主") {
             // 正式执行账号：自动 LLM 决策（非 shadow，不开探针）
             if (!useLLM) {
                 useLLM = true;
                 pklmShadowMode = false;
-                print("[POKELLMON] auto-enabled (account: 「木偶」析构万理的发条公主)");
+                pklmPrint("auto-enabled (account: 「木偶」析构万理的发条公主)");
             }
             if (!pklmLogEnabled) {
                 pklmLogEnabled = true;
-                print("[POKELLMON] logging enabled");
+                pklmPrint("logging enabled");
+            }
+        } else if (pklmAccount.toLowerCase() === "[lv0.吧服bot]清分少女") {
+            // 服务器无人值守 BOT 账号：自动 LLM 决策（非 shadow）+ 静默（PO 窗口无任何脚本输出）
+            pklmSilent = true;
+            if (!useLLM) {
+                useLLM = true;
+                pklmShadowMode = false;
+            }
+            if (!pklmLogEnabled) {
+                pklmLogEnabled = true;   // 日志仍写文件（server 端落盘），只是不 print 到 PO 窗口
             }
         }
     } catch (e) {}
@@ -261,12 +272,12 @@ function pklmTpoke(ind) {
 }
 
 function pklmPrint(m) {
-    print("[POKELLMON] " + m);
+    if (!pklmSilent) print("[POKELLMON] " + m);
 }
 
 // 回调探针：pklmCbLog 开启时打印回调原始参数（观察实际触发哪些回调）
 function pklmCb(name, args) {
-    if (pklmCbLog) print("[CB] " + name + " " + args);
+    if (pklmCbLog && !pklmSilent) print("[CB] " + name + " " + args);
 }
 
 // 采集一个宝可梦的招式列表（我方含 num/pp/slot，对手只含 name/type）
