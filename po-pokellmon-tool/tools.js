@@ -216,6 +216,51 @@ var TOOL_DEFS = [
                 required: ['code']
             }
         }
+    },
+    {
+        type: 'function',
+        function: {
+            name: 'calc_stats',
+            description: 'Compute the final stat(s) of a pokemon given its name (or explicit base stats) plus EVs, IVs, nature, and stat-stage boosts. Returns the requested stats after applying nature and boost. Use this for speed comparison or any stat estimate. Up to 10 legs in one call.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    legs: {
+                        type: 'array',
+                        description: 'List of stat calculations to perform (1 to 10).',
+                        items: {
+                            type: 'object',
+                            properties: {
+                                poke: { type: 'string', description: 'Pokemon name (English or Chinese) or Pokedex number' },
+                                base_stats: { type: 'array', items: { type: 'number' }, description: 'Explicit base stats [HP,Atk,Def,SpA,SpD,Spe] (alternative to poke)' },
+                                level: { type: 'integer', description: 'Level, default 100' },
+                                ev: { type: 'array', items: { type: 'number' }, description: 'EVs [HP,Atk,Def,SpA,SpD,Spe], default all 0' },
+                                iv: { type: 'array', items: { type: 'number' }, description: 'IVs [HP,Atk,Def,SpA,SpD,Spe], default all 31' },
+                                nature: { type: 'string', description: 'Nature name (English or Chinese) or number, default neutral' },
+                                boosts: { type: 'object', description: 'Stat stages, e.g. {"spe":1,"atk":-1}', additionalProperties: { type: 'integer' } },
+                                stats: { type: 'array', items: { type: 'string' }, description: 'Which stats to return, e.g. ["spe"] or ["atk","spa"]. Omit to return all six.' }
+                            },
+                            required: []
+                        }
+                    }
+                },
+                required: ['legs']
+            }
+        }
+    },
+    {
+        type: 'function',
+        function: {
+            name: 'get_my_stats',
+            description: 'Get the final unboosted stats (HP/Atk/Def/SpA/SpD/Spe) of MY pokemon from the actual battle data (real EVs, IVs, nature, and level). Specify a pokemon name or slot to get one, or omit to get all six of my team.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    poke: { type: 'string', description: 'Pokemon name (English) or slot number to look up; omit for all' }
+                },
+                required: []
+            }
+        }
     }
 ];
 
@@ -576,6 +621,55 @@ function runJs(args) {
     return out;
 }
 
+// ===== calc_stats：LLM 自定参数算能力值（名/种族值 + ev/iv/nature/boosts），legs≤10 =====
+// 复用 resolvePokemonInput / resolveNature / effectiveStat
+function calcStats(args) {
+    if (!args.legs || !args.legs.length) return { error: 'legs required' };
+    if (args.legs.length > 10) return { error: 'at most 10 legs allowed, got ' + args.legs.length };
+    var out = [];
+    for (var i = 0; i < args.legs.length; i++) {
+        out.push(calcOneStatLeg(args.legs[i], i));
+    }
+    return { legs: out };
+}
+
+function calcOneStatLeg(leg, idx) {
+    var p = resolvePokemonInput(leg);
+    if (p.error) return { index: idx, error: p.error };
+    var nature = resolveNature(leg);
+    var wanted = leg.stats || STAT_NAMES;
+    var stats = {};
+    for (var s = 0; s < 6; s++) {
+        var name = STAT_NAMES[s];
+        if (wanted.indexOf(name) === -1) continue;
+        stats[name] = effectiveStat(p.baseStats, leg.level || 100, leg.ev, leg.iv, nature, leg.boosts, s);
+    }
+    return { index: idx, name: p.name || leg.poke || null, level: leg.level || 100, stats: stats };
+}
+
+// ===== get_my_stats：读我方实际宝可梦的无加成六维（数据来自 state.myStats）=====
+function getMyStats(args, ctx) {
+    var state = ctx && ctx.state;
+    var myStats = state && state.myStats;
+    if (!myStats || !myStats.length) return { error: 'no myStats in state (PO script too old? update po-script.js)' };
+    var wanted = args.poke ? String(args.poke) : null;
+    var out = [];
+    for (var i = 0; i < myStats.length; i++) {
+        var m = myStats[i];
+        if (wanted && m.name !== wanted && String(m.slot) !== wanted) continue;
+        var p = POKEMON.byNum[String(m.numRef)];
+        if (!p) { out.push({ slot: m.slot, name: m.name, error: 'unknown numRef ' + m.numRef }); continue; }
+        var nat = NATURES.byNum[String(m.nature)] || { buff: 0, debuff: 0 };
+        var stats = {};
+        for (var s = 0; s < 6; s++) {
+            stats[STAT_NAMES[s]] = effectiveStat(p.baseStats, m.level, m.ev, m.iv, nat, null, s);
+        }
+        out.push({ slot: m.slot, name: m.name, level: m.level, nature: m.nature, stats: stats });
+    }
+    if (wanted && out.length === 0) return { error: 'pokemon not found: ' + wanted };
+    return { pokemon: out };
+}
+
 // tool 执行器：根据 name 分发；ctx 含 state（供 get_battle_history 读取战报）+ notes（笔记存储）+ turn
 function runTool(name, args, ctx) {
     if (name === 'get_type_matchup') return getTypeMatchup(args);
@@ -588,6 +682,8 @@ function runTool(name, args, ctx) {
     if (name === 'submit_feedback') return submitFeedback(args, ctx);
     if (name === 'calc_damage') return calcDamage(args);
     if (name === 'run_js') return runJs(args);
+    if (name === 'calc_stats') return calcStats(args);
+    if (name === 'get_my_stats') return getMyStats(args, ctx);
     return { error: 'unknown tool: ' + name };
 }
 

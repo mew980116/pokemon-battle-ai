@@ -28,6 +28,8 @@
 - `get_type_matchup(attack_type, defend_types)` —— 类型克制倍率（移植 `typechart`）
 - `calc_stat_boost(base_stat, boost)` —— 能力等级修正（移植 `calcStatWhenBoost`）
 - `calc_damage(legs)` —— 伤害计算：最多 10 组（攻击方/防守方/招式），返回 0.85x/1.0x 随机档伤害 + 防守方 HP 百分比 + detail（攻击/防御能力值、STAB、克制倍率）。基础计算器，不含道具/特性/天气/场地/烧伤/暴击等自动加成，用 `extra` 系数手动补
+- `calc_stats(legs)` —— 能力值计算：最多 10 组（名/种族值 + ev/iv/nature/boosts），返回指定项（或全六维）能力值，含性格与能力等级修正。用于速度评估/能力估算
+- `get_my_stats(poke?)` —— 读我方实际宝可梦的无加成六维（真实 ev/iv/nature/level，PO 侧采集进 state.myStats）；不传 poke 返回全队
 - `run_js(code)` —— 逃生舱：LLM 在 `vm` 沙箱跑一段同步 JS，覆盖无现成 tool 的计算（如速度对比、批量伤害、自定义评分）。沙箱暴露 `data`（pokemon/moves/natures/typechart）、`typeMul`/`effStat`/`resolvePokemon`/`resolveMove`/`calcDamage` helper、`print`/`console.log` 输出；最后表达式值作为 `result` 返回。限制：同步、无 require/process/fs、2s 超时、结果/输出各截 2000 字符
 - `get_battle_history(start_turn?, end_turn?)` —— 读取过往战报（按回合范围，不传则全文；数据来自 PO 侧 `state.fullHistory`）
 - `save_observation(pokemon, text)` —— 记录/覆盖对某只对手宝可梦的观察

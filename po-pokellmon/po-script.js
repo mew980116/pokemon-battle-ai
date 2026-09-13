@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8091";
-var PKLM_VERSION = "0.5.16";       // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.5.17";       // 脚本版本（改动时 bump，随日志记录）
 
 // 自动开启：账号 id 转小写为 "mew's" 时自动开启 LLM 决策（其他账号手动 /llm on）
 var pklmAccount = "";             // 我方账号名
@@ -396,6 +396,32 @@ function pklmCollectMyTeam() {
     return arr;
 }
 
+// 采集我方全队 6 只的种族相关原始数据（等级/努力/个体/性格），供 get_my_stats tool 算无加成六维
+// 索引：0=HP 1=Atk 2=Def 3=SpA 4=SpD 5=Spe（与主脚本 calcBaseStats 一致）
+function pklmCollectMyStats() {
+    var arr = [];
+    for (var i = 0; i < 6; i++) {
+        try {
+            var tp = pklmTpoke(i);
+            var ev = [], iv = [];
+            for (var s = 0; s < 6; s++) {
+                ev.push(tp.ev(s));
+                iv.push(tp.iv(s));
+            }
+            arr.push({
+                slot: i,
+                name: sys.pokemon(tp.numRef),
+                numRef: tp.numRef,
+                level: tp.level,
+                ev: ev,
+                iv: iv,
+                nature: tp.nature
+            });
+        } catch (e) {}
+    }
+    return arr;
+}
+
 // 采集对手全队 6 只的槽位情况（含场上+后备）：亮相名 / HP% / 状态 / KO / 未亮相
 // 供 server 端 prompt 展示对手 bench 详情（替代「Opponent has N pokemons left」）
 function pklmCollectOppTeam() {
@@ -500,6 +526,7 @@ function pklmCollectState() {
         oppSeen: pklmOppSeen.slice(),
         me: pklmCollectMyActive(),
         myTeam: pklmCollectMyTeam(),
+        myStats: pklmCollectMyStats(),
         bench: pklmCollectBench()
     };
 }
