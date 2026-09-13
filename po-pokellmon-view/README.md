@@ -1,5 +1,7 @@
 # po-pokellmon-view（LLM 对战可视化）
 
+> 端口 **8093**。注意：本目录是「LLM 对战可视化 view」，与 [board/](../board/)（8080 的「纯看板，无 AI」）是**两个独立的东西**，别混淆。
+
 读取 po-pokellmon / po-pokellmon-tool 的 JSONL 决策日志，做「对战界面 + 历史战报 + LLM 交互过程」的可视化回放。
 
 ## 用法
