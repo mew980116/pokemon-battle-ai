@@ -318,6 +318,7 @@
       - **灭亡之歌（Perish Song）倒计时到 0 的倒下先后**：是否按速度？logs 中 perish 出现 0 次，无数据，待实测。
       - **回合末结算顺序**（天气伤害/场地/状态伤害/剩饭/灭亡倒计时等）涉及双方时是否按速度——待实证。
       - **换人优先于所有技能**：换人先发生，然后技能按速度（已从威吓战报实证）。
+    - **HP 比例取整规则（待确认）**：替身消耗 1/4 已确认向下取整（floor，如 404 HP → 101 HP 替身）；待确认腹鼓（Belly Drum）消耗 1/2、树果回复（如文柚果 1/4）等 HP 比例计算的取整方向（预期都是向下取整 floor，需按官方规则/实战确认）。
     2. **场上 pm 对场上 pm 用招评估**：评估我方场上 pm 对对手场上 pm 用某招式的效果，含伤害类（伤害范围/克制/命中）和变化类（强化/状态/场地）。
     3. **场上 pm 对换上 pm 用招评估**：假定一方换人时评估，我方招式对对手换入 pm 的效果；换入方无能力等级（stats 清零），且需接受入场结算（隐形岩/地钉/毒钉等）。
     4. **特性/道具/招式详情查询**：`get_ability_info(name)` / `get_item_info(name)` / `get_move_info(name)` 返回特性/道具/招式具体效果文本（prompt 已放名字，详情按需查，供 LLM 判断免疫/强化/先制等机制）。依赖 po-data 的 `ability_desc.txt` / `item_effects*.txt` / `move_description.txt`（或 `move_effect.txt`）解析成 knowledge JSON（与 `po-pokellmon-tool/build-knowledge.js` 同源）。
