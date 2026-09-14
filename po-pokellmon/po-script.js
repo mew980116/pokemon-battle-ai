@@ -19,9 +19,11 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8092";
-var PKLM_VERSION = "0.5.23";       // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.5.24";       // 脚本版本（改动时 bump，随日志记录）
 var pklmLastWebFailTime = 0;       // 上次 webCall 失败时间戳（ms），用于断线时节流重发
 var pklmSilent = false;            // 静默模式：清分少女等无人值守 BOT 账号不向 PO 窗口 print 任何脚本输出
+var pklmFailCount = 0;             // 连续 webCall 失败次数（成功即归零）
+var pklmFirstFailTime = 0;         // 首次失败时间戳（ms），配合 15s 时间窗口判定 server 是否不可用
 
 // 自动开启：账号 id 转小写为 "mew's" 时自动开启 LLM 决策（其他账号手动 /llm on）
 var pklmAccount = "";             // 我方账号名
@@ -633,6 +635,8 @@ function pklmDecideAndAct() {
         pklmPrint("raw => " + resp);
         var d = JSON.parse(resp);
         pklmLastWebFailTime = 0;   // 成功，重置失败时间戳
+        pklmFailCount = 0;         // 成功，重置连续失败计数
+        pklmFirstFailTime = 0;
         // fallback 告警：DS 返回无法解析（重试后仍失败），PO 界面可见
         if (d.fallback) {
             pklmPrint("!! DS FALLBACK (reason=" + (d.reason || "?") + ") 决策质量告警");
@@ -663,6 +667,18 @@ function pklmDecideAndAct() {
     } catch (e) {
         pklmLastWebFailTime = new Date().getTime();   // 记录失败时间戳，供节流
         pklmPrint("decide error: " + e.message);
+        // 连续失败兜底：累计失败次数，首次失败记时间戳
+        if (pklmFailCount === 0) pklmFirstFailTime = pklmLastWebFailTime;
+        pklmFailCount++;
+        // 连续 3 次失败且跨度 > 15 秒（排除快速循环），判定 server 不可用 -> 认输（对齐主脚本 onChoiceSelection 兜底）
+        if (pklmFailCount >= 3 && (pklmLastWebFailTime - pklmFirstFailTime) > 15000) {
+            pklmPrint("连续 " + pklmFailCount + " 次失败且持续 " + Math.floor((pklmLastWebFailTime - pklmFirstFailTime) / 1000) + "s，判定 server 不可用，认输");
+            battleEnd = true;
+            sys.setTimer(function () {
+                try { battle.forfeit(); } catch (e2) {}
+            }, 30000, 0);
+            return;
+        }
         if (!pklmShadowMode) pklmFallbackAttack();   // 影子模式不兜底执行，交回用户手动
     }
 }
@@ -926,5 +942,15 @@ function pklmSpotLabel(spot) {
     onFlinch: function (spot) {
         try { pklmTurnLog += pklmSpotLabel(spot) + " flinched. "; } catch (e) {}
     },
-    onReconnect: function (player) {}
+    onReconnect: function (player) {
+        try {
+            if (player !== client.ownId()) return;   // 只有我方重连才处理
+            // 断线重连后战场状态可能损坏，停止 LLM 决策并延迟认输（对齐主脚本 onReconnect 兜底）
+            pklmPrint("onReconnect: me, forfeit in 30s");
+            battleEnd = true;
+            sys.setTimer(function () {
+                try { battle.forfeit(); } catch (e) {}
+            }, 30000, 0);
+        } catch (e) {}
+    }
 });

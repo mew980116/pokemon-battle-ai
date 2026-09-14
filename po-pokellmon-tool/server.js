@@ -20,7 +20,7 @@ var tools = require('./tools.js');
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.3.11';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.3.12';   // tool 分支版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（tool 分支：思考 + tool，强度 low）====
 var MODEL = 'deepseek-v4-flash';
@@ -324,7 +324,7 @@ function buildPrompt(state, notes) {
         var rej = [];
         for (var r1 = 0; r1 < bm.length; r1++) rej.push('move:' + bm[r1]);
         for (var r2 = 0; r2 < bs.length; r2++) rej.push('switch:' + bs[r2]);
-        p += 'CAUTION: you already tried these actions but the game (PO) rejected them, likely due to move-locking (Choice item / Taunt / Disable) or switch-blocking (Shadow Tag etc.). Do not choose them again: ' + rej.join(', ') + '\n';
+        p += 'CAUTION: you already tried these actions but the game (PO) rejected them, likely due to move-locking (Choice item / Taunt / Disable) or switch-blocking (Shadow Tag etc.). Do not choose them again: ' + rej.join(', ') + '. The system cannot judge whether the other listed choices are actually available; if one of them is also rejected, it will be added to this list next turn.\n';
     }
 
     return p;
