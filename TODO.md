@@ -71,6 +71,7 @@
 
 - [ ] 继续补中文注释，重点覆盖核心函数：`typechart` / `calcBaseStats` / `statsCalcFromBase` / `calcStatWhenBoost`
 - [ ] 梳理 `20201227.js` 内部逻辑分块的边界，为未来模块化做准备（**只标注边界，不拆文件** —— 拆分后无法在本地验证）
+- [ ] **内存泄漏排查（短期不动，待实测确认根因）**：服务久了内存爆、PO 挂掉的疑似根源——① 每个 battle window 顶层 `loadJsonData("movedata.json")`（[L1396](20201227.js#L1396)）重复 parse ~1MB 对象树，window 关闭后若 PO 不释放 QScript 引擎则每场残留一份；② 大量 `sys.setTimer` 闭包持有整个脚本作用域（`battle`/`foeInformation`/`moveDataObj`）。脚本内部无随场次无限增长的数据结构（`foeInformation.pokemon` 固定 6 槽位、`previousTurnEventRecord` 每回合 reset）。**根因判断需实测**：连打 10 场看 PO 进程内存是否回落；若根因是 PO 不释放 QScript 引擎，脚本侧优化杯水车薪，真正该做的是服务型 BOT 定期重启 PO。附带小 bug：`loadJsonData` 里 `sys.getFileContent(file)` 被调用两次（[L1380-L1382](20201227.js#L1380-L1382)），可顺手修。
 
 ### 4. 已知 bug / 疑似遗迹（本地可确认，改动需验证）
 
@@ -287,6 +288,16 @@
 **tool 模式长期 TODO**：
 
 - [ ] **允许 LLM 读写对战观察（memory）**：让 LLM 跨回合维护一份「观察笔记」——通过 tool 写入推断（对手已露招式/特性/道具/习惯、我方伤害估算、先手判断等），后续回合读回，补足「每回合决策无状态」的短板。可设计 `save_observation(text)` / `get_observations()` 两个 tool，观察内容跨回合持久化（存 server 端或随 state 传回）。
+
+- [ ] **战术思路 tool（可无限扩充的战术知识库，避免 system prompt 膨胀）**：把宝可梦对战的战术思路/打法套路做成可调用 tool，LLM 决策前按需查，而不是全塞进 system prompt（prompt 太长会稀释重点、增加 token 成本）。设计方向：一个 `get_tactic(name)` 或分类的 `list_tactics()` + `get_tactic(name)`，内容用结构化文本描述「触发条件 + 做法 + 目的 + 风险」。可塞的战术清单（持续扩充）：
+  - 多换一击杀高威胁（牺牲换人节奏，换取先手击杀对手核心威胁）
+  - 炮灰（送掉无用/低价值宝可梦，换取无伤换入王牌）
+  - 下钉逼换（撒隐形岩/地钉/毒钉施压，逼对手换人被钉子惩罚）
+  - U-Turn/Volt Switch/Flip Turn 转场（打一发 + 免费换人，保持节奏）
+  - 先读 hard read（预判对手换入/守住，打针对招）
+  - stall 消耗（通过回复/钉子/状态/属性盾慢慢磨血）
+  - setup sweep（强化后推队）等
+  - 实现要点：战术描述要写成「什么时候该用、怎么用、什么时候别用」的可操作文本，而非泛泛而谈；与评估依据 tool（伤害/速度/克制）分工——评估 tool 给「事实」，战术 tool 给「思路」，决策权仍留给 LLM。
 
 - [ ] **评估依据 tool（移植+改造主脚本的评估逻辑）**：不做「返回结论」的决策 tool（会让 LLM 变传声筒），而是做「返回理由」的评估 tool，把主脚本里「为什么加/扣分、变化招适应度理由、属性/特性免疫、状态互斥」等确定性规则知识喂给 LLM，决策权仍留给 LLM。候选方向：
   - `evaluate_move(slot)`：属性克制、是否被属性/特性免疫、能力等级修正（为什么打不打得动）
