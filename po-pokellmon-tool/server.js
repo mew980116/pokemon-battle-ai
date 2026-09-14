@@ -20,7 +20,7 @@ var tools = require('./tools.js');
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.3.15';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.3.16';   // tool 分支版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（tool 分支：思考 + tool，强度 low）====
 var MODEL = 'deepseek-v4-flash';
@@ -446,7 +446,8 @@ function handleChoice(res, state) {
     var notes = getNotes(state.battleId);
     var prompt = buildPrompt(state, notes);
     var constraint = 'Choose the best action. Output ONLY a JSON object: {"choice": <number>} where <number> is the number of the action you choose. No other text.\n';
-    var userPrompt = prompt + '\n' + constraint;
+    var switchHint = 'DO USE BATTLE TIPS TOOL FOR SWITCH TIPS: if you are considering a switch, call battle_tips with ["换人"] (or ["switch"]) to review the switch cost before deciding.\n';
+    var userPrompt = prompt + '\n' + switchHint + '\n' + constraint;
 
     console.log('[choice] turn=' + (state.turn || '?') + ' prompt_len=' + userPrompt.length);
 

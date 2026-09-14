@@ -759,7 +759,9 @@ var TIP_ALIASES = {
     '劣势局': 'disadvantage', '落后': 'disadvantage', 'disadvantage': 'disadvantage',
     '核心原则': 'principles', '原则': 'principles', '五原则': 'principles', 'principles': 'principles',
     '案例': 'cases', '实战案例': 'cases', 'cases': 'cases',
-    '记录习惯': 'record-habit', '记笔记': 'record-habit', '记录': 'record-habit'
+    '记录习惯': 'record-habit', '记笔记': 'record-habit', '记录': 'record-habit',
+    '换人': 'switch-basics', '切换': 'switch-basics', 'switch': 'switch-basics', 'switch basics': 'switch-basics',
+    '属性免疫': 'status-immunity', '免疫': 'status-immunity', '烧伤': 'status-immunity', '灼伤': 'status-immunity', '中毒': 'status-immunity', 'immunity': 'status-immunity'
 };
 
 // 构建 tip 索引：id -> { title, text }
@@ -779,7 +781,8 @@ function buildTipIndex() {
         'choice_items': 'choice-items', 'setup_sweeper': 'setup-sweeper', 'stall_handling': 'stall-handling',
         'hazards': 'hazards', 'tera': 'tera', 'sacrifice': 'sacrifice', 'endgame': 'endgame',
         'factory': 'factory', 'turn_checklist': 'turn-checklist', 'advantage': 'advantage',
-        'disadvantage': 'disadvantage', 'principles': 'principles', 'cases': 'cases', 'record_habit': 'record-habit'
+        'disadvantage': 'disadvantage', 'principles': 'principles', 'cases': 'cases', 'record_habit': 'record-habit',
+        'switch_basics': 'switch-basics', 'status_immunity': 'status-immunity'
     };
     for (var pk in pbKeys) {
         var v = rb[pk];
