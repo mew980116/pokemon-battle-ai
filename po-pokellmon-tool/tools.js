@@ -734,7 +734,8 @@ var TIP_ALIASES = {
     // 组队战术
     '撒钉': 'hazard-stack', '撒菱': 'hazard-stack', '隐形岩': 'hazard-stack', '钉子': 'hazard-stack', '阻止除钉': 'hazard-stack', 'hazard': 'hazard-stack', 'hazard stack': 'hazard-stack', 'spikes': 'hazard-stack',
     '双墙': 'screens-ho', '光墙': 'screens-ho', '反射壁': 'screens-ho', '极光幕': 'screens-ho', 'screens': 'screens-ho', 'ho': 'screens-ho', 'hyper offense': 'screens-ho',
-    '天气': 'weather', '雨天': 'weather', '晴天': 'weather', '沙暴': 'weather', '雪天': 'weather', 'rain': 'weather', 'sun': 'weather', 'weather': 'weather',
+    '天气': 'weather', '天气队': 'weather', '天气进攻': 'weather', 'weather': 'weather', 'weather offense': 'weather',
+    '雨天': 'weather-mechanics', '晴天': 'weather-mechanics', '沙暴': 'weather-mechanics', '冰雹': 'weather-mechanics', '雪天': 'weather-mechanics', 'rain': 'weather-mechanics', 'sun': 'weather-mechanics', 'sand': 'weather-mechanics', 'sandstorm': 'weather-mechanics', 'hail': 'weather-mechanics', 'snow': 'weather-mechanics',
     '场地种子': 'terrain-seed', '电气种子': 'terrain-seed', '青草种子': 'terrain-seed', '精神种子': 'terrain-seed', '轻装': 'terrain-seed', 'unburden': 'terrain-seed', 'seed': 'terrain-seed',
     '预知未来': 'future-sight', 'future sight': 'future-sight', 'futuresight': 'future-sight',
     '中转': 'pivot', '伏特替换': 'pivot', '急速折返': 'pivot', '快速折返': 'pivot', 'volt switch': 'pivot', 'u-turn': 'pivot', 'flip turn': 'pivot', 'pivot': 'pivot',
@@ -782,7 +783,7 @@ function buildTipIndex() {
         'hazards': 'hazards', 'tera': 'tera', 'sacrifice': 'sacrifice', 'endgame': 'endgame',
         'factory': 'factory', 'turn_checklist': 'turn-checklist', 'advantage': 'advantage',
         'disadvantage': 'disadvantage', 'principles': 'principles', 'cases': 'cases', 'record_habit': 'record-habit',
-        'switch_basics': 'switch-basics', 'status_immunity': 'status-immunity'
+        'switch_basics': 'switch-basics', 'status_immunity': 'status-immunity', 'weather_mechanics': 'weather-mechanics'
     };
     for (var pk in pbKeys) {
         var v = rb[pk];
