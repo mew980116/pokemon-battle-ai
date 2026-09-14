@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8092";
-var PKLM_VERSION = "0.5.20";       // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.5.21";       // 脚本版本（改动时 bump，随日志记录）
 var pklmLastWebFailTime = 0;       // 上次 webCall 失败时间戳（ms），用于断线时节流重发
 var pklmSilent = false;            // 静默模式：清分少女等无人值守 BOT 账号不向 PO 窗口 print 任何脚本输出
 
@@ -52,11 +52,14 @@ function pklmAutoEnable() {
                 pklmPrint("logging enabled");
             }
         } else if (pklmAccount.toLowerCase() === "[lv0.吧服bot]清分少女") {
-            // 服务器无人值守 BOT 账号：自动 LLM 决策（非 shadow）+ 静默（无输出、不写日志）
+            // 服务器无人值守 BOT 账号：自动 LLM 决策（非 shadow）+ 静默（无 print 输出，日志仍写文件）
             pklmSilent = true;
             if (!useLLM) {
                 useLLM = true;
                 pklmShadowMode = false;
+            }
+            if (!pklmLogEnabled) {
+                pklmLogEnabled = true;
             }
         }
     } catch (e) {}
@@ -72,6 +75,8 @@ var pklmTurnLog = "";
 var pklmCurrentTurn = 0;
 var pklmOppMoves = {};           // 对手每只宝可梦（按 numRef 区分）已暴露招式 { numRef: [{name,type}] }
 var pklmOppSeen = [];             // 对手已暴露的后备宝可梦名列表（含场上）
+var pklmMyRevealed = [];          // 我方已出场过的宝可梦 numRef 列表（非 team preview 时用于标记对方未知的宝可梦）
+var pklmTeamPreview = null;       // null=未检测, true=有 team preview, false=无（首次决策时检测并缓存）
 var pklmLastAttackSlot = -1;      // 上一回合使用的攻击槽位（-1 表示未攻击）
 var pklmLockedSlot = -1;          // 当前被锁定的招式槽位（Choice 道具锁招）
 var pklmBannedSlots = [];         // 本轮被 PO 拒绝的招式槽位（拒绝后 ban 掉重新决策）
@@ -369,6 +374,8 @@ function pklmCollectBench() {
             var o = {
                 slot: i,
                 name: sys.pokemon(tp.numRef),
+                numRef: tp.numRef,
+                unrevealed: (pklmMyRevealed.indexOf(tp.numRef) === -1),  // 非 team preview 时对方还不知道这只
                 types: [],
                 hpPct: (tp.totalLife > 0) ? Math.floor(tp.life / tp.totalLife * 100) : 0,
                 status: pklmStatusName(tp.status),
@@ -489,7 +496,22 @@ function pklmCollectHazards(spot) {
     return parts;
 }
 
+// 检测是否 team preview（首次决策时缓存）。
+// 判定：对战开始时对手已亮相（numRef>0）的宝可梦数量 >1 则是 team preview；只有 1 只（当前场上）则不是。
+function pklmDetectTeamPreview() {
+    if (pklmTeamPreview !== null) return;
+    var revealed = 0;
+    try {
+        for (var i = 0; i < 6; i++) {
+            var ep = battle.data.team(battle.opp).poke(i);
+            if (ep.numRef && ep.numRef > 0) revealed++;
+        }
+    } catch (e) {}
+    pklmTeamPreview = (revealed > 1);
+}
+
 function pklmCollectState() {
+    pklmDetectTeamPreview();
     var oppRemaining = 0;
     try {
         for (var i = 0; i < 6; i++) {
@@ -522,6 +544,7 @@ function pklmCollectState() {
         scriptVersion: PKLM_VERSION,
         turn: pklmCurrentTurn,
         shadow: pklmShadowMode,
+        teamPreview: pklmTeamPreview,
         history: hist,
         fullHistory: fullHist,
         messages: pklmMessages.slice(),
@@ -727,6 +750,12 @@ function pklmSpotLabel(spot) {
                     if (pklmOppSeen[i] === nm) { seen = true; break; }
                 }
                 if (!seen) pklmOppSeen.push(nm);
+            } else {
+                // 记录我方已出场宝可梦 numRef（非 team preview 时用于标记对方未知的后备）
+                var myNum = pklmFpoke(spot).pokemon.numRef;
+                if (myNum > 0 && pklmMyRevealed.indexOf(myNum) === -1) {
+                    pklmMyRevealed.push(myNum);
+                }
             }
         } catch (e) {}
     },

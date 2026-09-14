@@ -141,6 +141,7 @@ po-pokellmon/
 | 0.3.8 (tool) | system prompt 显式要求：每回合决策前回顾上一回合战报，推断速度观察（谁先手/强化降速/麻痹/顺风/围巾线索）并 save_observation 记笔记，保持速度线最新 |
 | 0.5.19 (script) | 新增无人值守 BOT 账号「[Lv0.吧服BOT]清分少女」：自动开启 LLM 决策（非 shadow）+ 静默模式（PO 窗口无任何脚本输出，日志仍写文件）；pklmPrint/pklmCb 加 pklmSilent 开关 |
 | 0.5.20 (script) | ① 清分少女改为不写日志（pklmLogEnabled 不开启）② 战斗结束 7 秒后自动 battle.close()（对齐主脚本无人值守逻辑）③ PKLM_URL 从 8091（主 server）改指 8092（tool server，正式部署路线） |
+| 0.5.21 (script) / 0.3.9 (tool) | ① 清分少女恢复写日志 ② team preview 检测：首次决策时统计对手已亮相（numRef>0）数量，>1 判定有 team preview 并缓存 ③ 非 team preview 时记录我方已出场宝可梦（onSendOut 记 numRef），bench 换人选项对未出场宝可梦加 tag `[opponent has not seen this pokemon]` 提示 LLM 对方尚不知这只 |
 | 0.3.0 (tool) | 新增 `calc_damage` tool：标准宝可梦伤害公式（最多 10 组 leg，返回 0.85x/1.0x 随机档伤害 + 防守方 HP 百分比 + detail）。新增 `po-pokellmon-tool/build-knowledge.js` 生成 `pokemon.json`（种族值/属性/中英文名索引）、`natures.json`（性格 buff/debuff）、`moves.json`（含招式 type + 中文名）。system prompt 引导 LLM 算伤后与战报实际伤害对比、异常（≈2x 差）提交 submit_feedback |
 | 0.3.1 (tool) | 新增 `run_js` 逃生舱 tool：LLM 可在 `vm` 沙箱跑一段同步 JS 覆盖无现成 tool 的计算（暴露 data/typeMul/effStat/resolvePokemon/resolveMove/calcDamage + print/console.log）。限制：同步、无 require/process/fs、2s 超时、结果/输出截 2000 字符 |
 | 0.3.2 (tool) | 修复 run_js 沙箱 2 个 bug：① `effStat` 签名从 7 参数简化为 `effStat(baseStat, boost?, level?)`（LLM 原 7 参数签名用错得 NaN，被迫手写公式）② `print`/`console.log` 改 `arguments` 全量拼接（原只收单参数丢输出）。新增 [test-tools.js](../po-pokellmon-tool/test-tools.js) 回归测试（验证 LLM 调用 get_type_matchup/calc_damage/run_js）。调参：`MAX_TOOL_ROUNDS` 10→15、`TIMEOUT_MS` 180s→240s |
