@@ -152,6 +152,7 @@ po-pokellmon/
 | 0.3.17 (tool) | switch_basics tip 加 see_also：建议 LLM 判断「何时主动炮灰」时再查 battle_tips 的「牺牲/炮灰」(sacrifice) tip |
 | 0.3.18 (tool) | switch_basics 客观化：去掉「白吃两下/不要换」等主观措辞，改为客观陈述（换人当回合对手仍行动、换入后下回合双方各行动一次拼速度、入场陷阱发动）；see_also 措辞中性化 |
 | 0.3.19 (tool) | battle_tips 新增天气机制 section（weather_mechanics）：rain/sun/sandstorm/hail/snow(Gen9)/extreme 六条客观机制；具体天气名别名（雨天/晴天/沙暴/冰雹/雪天/rain/sun/sandstorm/hail/snow）改指向机制，「天气/天气队/weather」仍指向天气进攻组队战术 |
+| 0.3.20 (tool) | 拆分客观机制为独立 get_knowledge tool：① 新增 knowledge/mechanics.json（换人/属性免疫/天气/场地/grounded 五个客观机制条目）② tools.js 新增 get_knowledge（复用 lookupEntries，别名表支持中英文）③ battle_tips 移除客观机制（换人/属性免疫/天气机制），保留组队战术+决策方法论 ④ server.js system prompt 加 get_knowledge 引导，switchHint 改指向 get_knowledge |
 | 0.3.0 (tool) | 新增 `calc_damage` tool：标准宝可梦伤害公式（最多 10 组 leg，返回 0.85x/1.0x 随机档伤害 + 防守方 HP 百分比 + detail）。新增 `po-pokellmon-tool/build-knowledge.js` 生成 `pokemon.json`（种族值/属性/中英文名索引）、`natures.json`（性格 buff/debuff）、`moves.json`（含招式 type + 中文名）。system prompt 引导 LLM 算伤后与战报实际伤害对比、异常（≈2x 差）提交 submit_feedback |
 | 0.3.1 (tool) | 新增 `run_js` 逃生舱 tool：LLM 可在 `vm` 沙箱跑一段同步 JS 覆盖无现成 tool 的计算（暴露 data/typeMul/effStat/resolvePokemon/resolveMove/calcDamage + print/console.log）。限制：同步、无 require/process/fs、2s 超时、结果/输出截 2000 字符 |
 | 0.3.2 (tool) | 修复 run_js 沙箱 2 个 bug：① `effStat` 签名从 7 参数简化为 `effStat(baseStat, boost?, level?)`（LLM 原 7 参数签名用错得 NaN，被迫手写公式）② `print`/`console.log` 改 `arguments` 全量拼接（原只收单参数丢输出）。新增 [test-tools.js](../po-pokellmon-tool/test-tools.js) 回归测试（验证 LLM 调用 get_type_matchup/calc_damage/run_js）。调参：`MAX_TOOL_ROUNDS` 10→15、`TIMEOUT_MS` 180s→240s |

@@ -12,6 +12,7 @@ var POKEMON = require('./knowledge/pokemon.json');
 var NATURES = require('./knowledge/natures.json');
 var MOVES = require('./knowledge/moves.json');
 var TACTICS = require('./knowledge/tactics.json');
+var MECHANICS = require('./knowledge/mechanics.json');
 
 var TYPE_NAMES = TYPECHART.types;   // 18 个属性名，与主脚本 sys.type 顺序对齐
 var CHART = TYPECHART.chart;        // 18x18 克制矩阵
@@ -274,6 +275,20 @@ var TOOL_DEFS = [
                     tips: { type: 'array', items: { type: 'string' }, description: 'Tip names to look up (up to 10). E.g. ["优势局", "预知未来", "残局"]' }
                 },
                 required: ['tips']
+            }
+        }
+    },
+    {
+        type: 'function',
+        function: {
+            name: 'get_knowledge',
+            description: 'Read objective battle mechanics and rules (switch cost, type/status immunities, weather effects, terrain effects, what "grounded"/接触地面 means). Use this for factual rules; use battle_tips for strategic advice.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    topics: { type: 'array', items: { type: 'string' }, description: 'Knowledge topic names (up to 10). E.g. ["换人"], ["天气"], ["场地"], ["地面"]; Chinese or English.' }
+                },
+                required: ['topics']
             }
         }
     }
@@ -735,7 +750,6 @@ var TIP_ALIASES = {
     '撒钉': 'hazard-stack', '撒菱': 'hazard-stack', '隐形岩': 'hazard-stack', '钉子': 'hazard-stack', '阻止除钉': 'hazard-stack', 'hazard': 'hazard-stack', 'hazard stack': 'hazard-stack', 'spikes': 'hazard-stack',
     '双墙': 'screens-ho', '光墙': 'screens-ho', '反射壁': 'screens-ho', '极光幕': 'screens-ho', 'screens': 'screens-ho', 'ho': 'screens-ho', 'hyper offense': 'screens-ho',
     '天气': 'weather', '天气队': 'weather', '天气进攻': 'weather', 'weather': 'weather', 'weather offense': 'weather',
-    '雨天': 'weather-mechanics', '晴天': 'weather-mechanics', '沙暴': 'weather-mechanics', '冰雹': 'weather-mechanics', '雪天': 'weather-mechanics', 'rain': 'weather-mechanics', 'sun': 'weather-mechanics', 'sand': 'weather-mechanics', 'sandstorm': 'weather-mechanics', 'hail': 'weather-mechanics', 'snow': 'weather-mechanics',
     '场地种子': 'terrain-seed', '电气种子': 'terrain-seed', '青草种子': 'terrain-seed', '精神种子': 'terrain-seed', '轻装': 'terrain-seed', 'unburden': 'terrain-seed', 'seed': 'terrain-seed',
     '预知未来': 'future-sight', 'future sight': 'future-sight', 'futuresight': 'future-sight',
     '中转': 'pivot', '伏特替换': 'pivot', '急速折返': 'pivot', '快速折返': 'pivot', 'volt switch': 'pivot', 'u-turn': 'pivot', 'flip turn': 'pivot', 'pivot': 'pivot',
@@ -760,9 +774,7 @@ var TIP_ALIASES = {
     '劣势局': 'disadvantage', '落后': 'disadvantage', 'disadvantage': 'disadvantage',
     '核心原则': 'principles', '原则': 'principles', '五原则': 'principles', 'principles': 'principles',
     '案例': 'cases', '实战案例': 'cases', 'cases': 'cases',
-    '记录习惯': 'record-habit', '记笔记': 'record-habit', '记录': 'record-habit',
-    '换人': 'switch-basics', '切换': 'switch-basics', 'switch': 'switch-basics', 'switch basics': 'switch-basics',
-    '属性免疫': 'status-immunity', '免疫': 'status-immunity', '烧伤': 'status-immunity', '灼伤': 'status-immunity', '中毒': 'status-immunity', 'immunity': 'status-immunity'
+    '记录习惯': 'record-habit', '记笔记': 'record-habit', '记录': 'record-habit'
 };
 
 // 构建 tip 索引：id -> { title, text }
@@ -782,8 +794,7 @@ function buildTipIndex() {
         'choice_items': 'choice-items', 'setup_sweeper': 'setup-sweeper', 'stall_handling': 'stall-handling',
         'hazards': 'hazards', 'tera': 'tera', 'sacrifice': 'sacrifice', 'endgame': 'endgame',
         'factory': 'factory', 'turn_checklist': 'turn-checklist', 'advantage': 'advantage',
-        'disadvantage': 'disadvantage', 'principles': 'principles', 'cases': 'cases', 'record_habit': 'record-habit',
-        'switch_basics': 'switch-basics', 'status_immunity': 'status-immunity', 'weather_mechanics': 'weather-mechanics'
+        'disadvantage': 'disadvantage', 'principles': 'principles', 'cases': 'cases', 'record_habit': 'record-habit'
     };
     for (var pk in pbKeys) {
         var v = rb[pk];
@@ -796,34 +807,61 @@ function buildTipIndex() {
     return map;
 }
 
-function battleTips(args) {
-    var tips = args.tips || [];
-    if (!Array.isArray(tips)) return { error: 'tips must be an array of names' };
-    if (tips.length > 10) tips = tips.slice(0, 10);
+// 通用 lookup：按别名在 map 中查找一组名称，返回 found/missing
+function lookupEntries(map, aliases, names, max) {
+    if (!Array.isArray(names)) return { error: 'expect an array of names' };
+    var list = names.slice(0, max);
     var found = [];
     var missing = [];
-    for (var i = 0; i < tips.length; i++) {
-        var name = String(tips[i]).trim();
-        var key = TIP_ALIASES[name.toLowerCase()] || null;
-        // 直接匹配 id / 中文名 / 英文名
+    for (var i = 0; i < list.length; i++) {
+        var name = String(list[i]).trim();
+        var lname = name.toLowerCase();
+        var key = aliases[lname] || null;
         if (!key) {
-            var lname = name.toLowerCase();
-            if (TIPS[name]) key = name;
-            else if (TIPS[lname]) key = lname;
+            if (map[name]) key = name;
+            else if (map[lname]) key = lname;
             else {
-                // 模糊：别名表 key 或 tips 标题包含该词
-                for (var ak in TIP_ALIASES) {
-                    if (ak.toLowerCase() === lname) { key = TIP_ALIASES[ak]; break; }
+                for (var ak in aliases) {
+                    if (ak.toLowerCase() === lname) { key = aliases[ak]; break; }
                 }
             }
         }
-        if (key && TIPS[key]) {
-            found.push({ name: name, title: TIPS[key].title, tip: TIPS[key].text });
+        if (key && map[key]) {
+            found.push({ name: name, title: map[key].title, tip: map[key].text });
         } else {
             missing.push(name);
         }
     }
     return { found: found, missing: missing };
+}
+
+function battleTips(args) {
+    return lookupEntries(TIPS, TIP_ALIASES, args.tips || [], 10);
+}
+
+// ===== get_knowledge：查客观机制/规则（数据来自 knowledge/mechanics.json）=====
+var KNOWLEDGE_ALIASES = {
+    '换人': 'switch', '切换': 'switch', 'switch': 'switch', 'switch basics': 'switch',
+    '属性免疫': 'status_immunity', '免疫': 'status_immunity', '烧伤': 'status_immunity', '灼伤': 'status_immunity', '中毒': 'status_immunity', 'immunity': 'status_immunity', 'status': 'status_immunity',
+    '天气': 'weather', '雨天': 'weather', '晴天': 'weather', '沙暴': 'weather', '冰雹': 'weather', '雪天': 'weather', 'rain': 'weather', 'sun': 'weather', 'sand': 'weather', 'sandstorm': 'weather', 'hail': 'weather', 'snow': 'weather', 'weather': 'weather',
+    '场地': 'terrain', '电气场地': 'terrain', '青草场地': 'terrain', '薄雾场地': 'terrain', '精神场地': 'terrain', 'terrain': 'terrain', 'electric terrain': 'terrain', 'grassy terrain': 'terrain', 'misty terrain': 'terrain', 'psychic terrain': 'terrain',
+    '地面': 'grounded', '接触地面': 'grounded', 'grounded': 'grounded', '地面上的宝可梦': 'grounded', '飞行': 'grounded', '浮游': 'grounded', 'levitate': 'grounded', 'ground': 'grounded'
+};
+
+var KNOWLEDGE = buildKnowledgeIndex();
+
+function buildKnowledgeIndex() {
+    var map = {};
+    for (var id in MECHANICS) {
+        if (id === 'meta') continue;
+        var v = MECHANICS[id];
+        map[id] = { title: v.name || id, text: flattenTip(v, '') };
+    }
+    return map;
+}
+
+function getKnowledge(args) {
+    return lookupEntries(KNOWLEDGE, KNOWLEDGE_ALIASES, args.topics || [], 10);
 }
 
 // tool 执行器：根据 name 分发；ctx 含 state（供 get_battle_history 读取战报）+ notes（笔记存储）+ turn
@@ -841,6 +879,7 @@ function runTool(name, args, ctx) {
     if (name === 'calc_stats') return calcStats(args);
     if (name === 'get_my_stats') return getMyStats(args, ctx);
     if (name === 'battle_tips') return battleTips(args);
+    if (name === 'get_knowledge') return getKnowledge(args);
     return { error: 'unknown tool: ' + name };
 }
 
