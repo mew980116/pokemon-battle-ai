@@ -20,7 +20,7 @@ var tools = require('./tools.js');
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.3.10';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.3.11';   // tool 分支版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（tool 分支：思考 + tool，强度 low）====
 var MODEL = 'deepseek-v4-flash';
@@ -282,8 +282,6 @@ function buildPrompt(state, notes) {
     }
 
     p += '\nAvailable actions (choose one number):\n';
-    p += 'NOTE: The list above does not know whether an action is blocked by move-locking (Choice item / Taunt / Disable) or switch-blocking (Shadow Tag etc.). ' +
-        'If you choose an action and it gets rejected by the game, the rejected action you already tried will be listed on your next turn, so pick a different one.\n';
     var idx = 0;
     if (me.moves && me.moves.length) {
         for (var m = 0; m < me.moves.length; m++) {
@@ -319,14 +317,14 @@ function buildPrompt(state, notes) {
         }
     }
 
-    // 列出已尝试但被 PO 拒绝的项（锁招/挑衅/倒下/踩影禁换人等），提示 LLM 换别的
+    // 已尝试但被 PO 拒绝的项（锁招/禁换人），提示 LLM 换别的
     var bm = state.bannedMoves || [];
     var bs = state.bannedSwitches || [];
     if (bm.length || bs.length) {
         var rej = [];
         for (var r1 = 0; r1 < bm.length; r1++) rej.push('move:' + bm[r1]);
         for (var r2 = 0; r2 < bs.length; r2++) rej.push('switch:' + bs[r2]);
-        p += 'You have already tried these but they were rejected by the game (do not choose them again): ' + rej.join(', ') + '\n';
+        p += 'CAUTION: you already tried these actions but the game (PO) rejected them, likely due to move-locking (Choice item / Taunt / Disable) or switch-blocking (Shadow Tag etc.). Do not choose them again: ' + rej.join(', ') + '\n';
     }
 
     return p;

@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8092";
-var PKLM_VERSION = "0.5.22";       // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.5.23";       // 脚本版本（改动时 bump，随日志记录）
 var pklmLastWebFailTime = 0;       // 上次 webCall 失败时间戳（ms），用于断线时节流重发
 var pklmSilent = false;            // 静默模式：清分少女等无人值守 BOT 账号不向 PO 窗口 print 任何脚本输出
 
@@ -609,6 +609,23 @@ function pklmDecideAndAct() {
     }
 
     var state = pklmCollectState();
+
+    // 可选动作只剩 1 个时（招式/换人已全部被锁或 ban），直接执行，不再路由 LLM
+    var movesCount = (state.me && state.me.moves) ? state.me.moves.length : 0;
+    var benchCount = (state.bench) ? state.bench.length : 0;
+    if (movesCount + benchCount === 1) {
+        if (movesCount === 1) {
+            pklmSendCommand({ slot: battle.me, type: "attack", attackSlot: state.me.moves[0].slot });
+            pklmLastAttackSlot = state.me.moves[0].slot;
+            pklmLastSwitchSlot = -1;
+        } else {
+            pklmSendCommand({ slot: battle.me, type: "switch", pokeSlot: state.bench[0].slot });
+            pklmLastAttackSlot = -1;
+            pklmLastSwitchSlot = state.bench[0].slot;
+        }
+        return;
+    }
+
     var u = PKLM_URL + "/choice?state=" + encodeURIComponent(JSON.stringify(state));
     try {
         var resp = sys.synchronousWebCall(u);

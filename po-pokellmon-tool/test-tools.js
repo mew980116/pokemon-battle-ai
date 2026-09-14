@@ -22,7 +22,9 @@ const MOCK_STATE = {
     myStats: [
         { slot: 0, name: 'Garchomp', numRef: 445, level: 100, ev: [0, 252, 0, 0, 0, 252], iv: [31, 31, 31, 31, 31, 31], nature: 3 },
         { slot: 1, name: 'Blissey', numRef: 242, level: 100, ev: [252, 0, 252, 0, 0, 0], iv: [31, 31, 31, 31, 31, 31], nature: 5 }
-    ]
+    ],
+    bannedMoves: ['Swords Dance'],
+    bannedSwitches: ['Togekiss']
 };
 
 function getApiKey() {
@@ -41,16 +43,18 @@ const SYSTEM_PROMPT = require('../po-pokellmon/prompts.js').BATTLE_TIPS +
     ' You have tools available. Use them to compute type matchups, damage ranges, stats, or run small JS snippets before deciding.';
 
 const USER_PROMPT =
-    'Your current pokemon: Garchomp (Ground/Dragon), HP 100%. ' +
-    'Opponent current pokemon: Dragonite (Dragon/Flying), HP 100%.\n\n' +
-    'The opponent Dragonite is known to run Dragon Dance (boosts Attack and Speed by +1 each). ' +
-    'Its typical spread is 252 Attack / 252 Speed with an Adamant nature.\n\n' +
-    'Before deciding, analyze the speed relationship carefully:\n' +
-    '1. Call get_my_stats with poke "Garchomp" to read your actual Garchomp stats.\n' +
-    '2. Call calc_stats to compute Dragonite current Speed (level 100, 252 Spe EVs, 31 IV, Adamant nature, no boosts, return only "spe").\n' +
-    '3. Call calc_stats to compute Dragonite Speed AFTER one Dragon Dance (same spread but boosts {"spe":1}, return only "spe").\n\n' +
-    'Then determine: do you outspeed it NOW? Will it outspeed you after one Dragon Dance? ' +
-    'Output your final decision as a JSON object: {"choice": 1} (1=Earthquake).';
+    'Your current pokemon: Garchomp (Ground/Dragon), HP 100%.\n' +
+    'Opponent current pokemon: Gothitelle (Psychic), HP 100%.\n\n' +
+    'Available actions (choose one number):\n' +
+    '1. Earthquake:Type:Ground,Power:100,Acc:100%,vs opponent 1x\n' +
+    '2. Outrage:Type:Dragon,Power:120,Acc:100%,vs opponent 1x\n' +
+    '3. Swords Dance:Type:Normal,Power:0,Acc:100%,Effect:Boosts attack sharply\n' +
+    '4. switch to Togekiss:Type:Fairy&Flying,HP:100%,Moves:[Air Slash,Flying|Dazzling Gleam,Fairy]\n' +
+    'CAUTION: you already tried these actions but the game (PO) rejected them, likely due to move-locking (Choice item / Taunt / Disable) or switch-blocking (Shadow Tag etc.). Do not choose them again: move:Swords Dance, switch:Togekiss\n\n' +
+    'Based ONLY on the CAUTION above, answer two questions:\n' +
+    '1. Which of your own move(s) is blocked, and what is the most likely reason (Choice lock / Taunt / Disable)?\n' +
+    '2. What is the opponent Gothitelle most likely ability, given that switching was rejected?\n' +
+    'Then choose a valid action number (1-4) that avoids the rejected ones, and output it as JSON: {"choice": N}.';
 
 function callDeepSeek(messages) {
     return new Promise((resolve, reject) => {
