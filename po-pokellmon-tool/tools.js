@@ -842,7 +842,10 @@ function battleTips(args) {
 // ===== get_knowledge：查客观机制/规则（数据来自 knowledge/mechanics.json）=====
 var KNOWLEDGE_ALIASES = {
     '换人': 'switch', '切换': 'switch', 'switch': 'switch', 'switch basics': 'switch',
-    '属性免疫': 'status_immunity', '免疫': 'status_immunity', '烧伤': 'status_immunity', '灼伤': 'status_immunity', '中毒': 'status_immunity', 'immunity': 'status_immunity', 'status': 'status_immunity',
+    '异常状态': 'status', '状态': 'status', 'status': 'status', '属性免疫': 'status', '免疫': 'status', 'immunity': 'status',
+    '睡眠': 'status', 'sleep': 'status', '中毒': 'status', '剧毒': 'status', 'poison': 'status', 'toxic': 'status',
+    '烧伤': 'status', '灼伤': 'status', 'burn': 'status', '麻痹': 'status', 'paralysis': 'status',
+    '冰冻': 'status', 'freeze': 'status', '混乱': 'status', 'confusion': 'status',
     '天气': 'weather', '雨天': 'weather', '晴天': 'weather', '沙暴': 'weather', '冰雹': 'weather', '雪天': 'weather', 'rain': 'weather', 'sun': 'weather', 'sand': 'weather', 'sandstorm': 'weather', 'hail': 'weather', 'snow': 'weather', 'weather': 'weather',
     '场地': 'terrain', '电气场地': 'terrain', '青草场地': 'terrain', '薄雾场地': 'terrain', '精神场地': 'terrain', 'terrain': 'terrain', 'electric terrain': 'terrain', 'grassy terrain': 'terrain', 'misty terrain': 'terrain', 'psychic terrain': 'terrain',
     '地面': 'grounded', '接触地面': 'grounded', 'grounded': 'grounded', '地面上的宝可梦': 'grounded', '飞行': 'grounded', '浮游': 'grounded', 'levitate': 'grounded', 'ground': 'grounded'
