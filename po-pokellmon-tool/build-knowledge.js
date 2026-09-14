@@ -143,8 +143,10 @@ function buildNatures() {
     return { byNum, byName };
 }
 
-// 构建 moves.json（num -> {name, name_zh, power, accuracy, category, type}）
-// 数据源：movedata.json（name/power/accurcy/category）+ po-data/moves/8G/type.txt（type）+ zh-cn/db/moves/moves.txt（中文名）
+// 构建 moves.json（num -> {name, name_zh, power, accuracy, category, type, priority, tags}）
+// 数据源：movedata.json（name/power/accurcy/category/priority/voice/ironFist/reckless/strongJaw/megaLauncher）
+//        + po-data/moves/8G/type.txt（type）+ zh-cn/db/moves/moves.txt（中文名）
+//        + po-data/moves/8G/flags.txt（位掩码 bit0=contact，补 touch——movedata.json 的 touch 字段大量为 null）
 function buildMoves() {
     const movedata = JSON.parse(readText(MOVEDATA));
 
@@ -171,16 +173,36 @@ function buildMoves() {
         if (name) zhMap[num] = name;
     }
 
+    // 接触类：8G/flags.txt 位掩码 bit0=contact
+    const touchMap = {};
+    const flagLines = readText(path.join(DATA, 'moves', '8G', 'flags.txt')).split('\n');
+    for (const line of flagLines) {
+        const t = line.trim();
+        if (!t) continue;
+        const parts = t.split(/\s+/);
+        if ((parseInt(parts[1], 10) & 1) === 1) touchMap[parseInt(parts[0], 10)] = true;
+    }
+
+    // movedata.json 里已解析好的 5 个 tag 字段 -> tag 名
+    const TAG_FIELDS = [['voice', 'voice'], ['ironFist', 'ironFist'], ['reckless', 'reckless'], ['strongJaw', 'strongJaw'], ['megaLauncher', 'megaLauncher']];
+
     const result = {};
     for (const m of movedata) {
         const tn = (typeMap[m.num] !== undefined) ? typeMap[m.num] : 0;
+        const tags = [];
+        for (let i = 0; i < TAG_FIELDS.length; i++) {
+            if (m[TAG_FIELDS[i][0]]) tags.push(TAG_FIELDS[i][1]);
+        }
+        if (touchMap[m.num]) tags.push('touch');
         result[m.num] = {
             name: m.name,
             name_zh: zhMap[m.num] || '',
             power: m.power || 0,
             accuracy: m.accurcy || 0,
             category: CATEGORY[m.category] || 'Status',
-            type: (tn === 18) ? null : (TYPE_NAMES[tn] || 'Normal')
+            type: (tn === 18) ? null : (TYPE_NAMES[tn] || 'Normal'),
+            priority: m.priority || 0,
+            tags: tags
         };
     }
     return result;

@@ -20,7 +20,7 @@ var tools = require('./tools.js');
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.3.21';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.3.22';   // tool 分支版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（tool 分支：思考 + tool，强度 low）====
 var MODEL = 'deepseek-v4-flash';
@@ -39,7 +39,8 @@ var SYSTEM_PROMPT = require('../po-pokellmon/prompts.js').BATTLE_TIPS +
     'Record the speed matchup via save_observation using this consistent format so you can recall it later without recomputing: "Speed:<current>(<spread>)|<boostMove>+<stage>:<boosted>|<reference>:<speed>", e.g. "Speed:259(252Spe Adamant)|DragonDance+1:388|Garchomp:303". ' +
     'Each turn, before deciding, review the previous turn(s) battle log and infer any speed observation from it (who moved first, any speed boost like Dragon Dance/Agility, speed drop, paralysis, Tailwind, or Choice Scarf clues), then record it via save_observation so your speed-line notes stay up to date. ' +
     'For strategic guidance (how to play in a given situation), call battle_tips with the relevant tip names, e.g. ["优势局"] when you are ahead, ["劣势局"] when behind, ["残局"] in the endgame, ["太晶"] before terastallizing, ["牺牲"] when deciding a sacrifice, ["预知未来"]/["撒钉"]/["强化手"] etc. You may pass up to 10 tip names at once. ' +
-    'For objective battle rules and mechanics (switch cost, type/status immunities, weather/terrain effects, what "grounded"/接触地面 means), call get_knowledge with the topic names, e.g. ["换人"] before switching, ["天气"]/["场地"] when they are up, ["地面"] to check grounded, ["属性免疫"] for status immunities. You may pass up to 10 topic names at once. ' +
+    'For objective battle rules and mechanics (switch cost, type/status conditions, weather/terrain effects, what "grounded"/接触地面 means), call get_knowledge with the topic names, e.g. ["换人"] before switching, ["天气"]/["场地"] when they are up, ["地面"] to check grounded, ["异常状态"] for status conditions. You may pass up to 10 topic names at once. ' +
+    'To check a move mechanics (contact recoil, sound immunity, punch/bite/pulse/recoil tags, priority), call get_move_info with the move name, e.g. ["地震"] or ["Earthquake"]. ' +
     'After using calc_damage, compare its result with the actual damage shown in the battle log (via get_battle_history). If the calculated damage differs from the observed damage by a large factor (roughly 2x or more) and no obvious modifier explains it, call submit_feedback to report the discrepancy (state which attacker/move/defender and the expected vs actual damage). ' +
     'If no built-in tool covers a computation you need (e.g. speed comparison, batch damage, custom scoring), you may write a small synchronous JS snippet and run it via run_js; it exposes data/typeMul/effStat/resolvePokemon/resolveMove/calcDamage and print/console.log. Prefer the built-in tools first and use run_js only as a fallback. ' +
     'If you need battle information or computation that no available tool provides, call submit_feedback to tell us what tool you wish you had.';

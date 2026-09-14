@@ -291,6 +291,20 @@ var TOOL_DEFS = [
                 required: ['topics']
             }
         }
+    },
+    {
+        type: 'function',
+        function: {
+            name: 'get_move_info',
+            description: 'Look up a move details: power, accuracy, category (Physical/Special/Status), type, priority, and tags (contact/sound/punch/bite/pulse/recoil) with their meanings. Use to check move mechanics like contact recoil, sound immunity, or ability-boosted tags.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    move: { type: 'string', description: 'Move name (English or Chinese) or move number. E.g. "Earthquake", "地震", or "89".' }
+                },
+                required: ['move']
+            }
+        }
     }
 ];
 
@@ -867,6 +881,52 @@ function getKnowledge(args) {
     return lookupEntries(KNOWLEDGE, KNOWLEDGE_ALIASES, args.topics || [], 10);
 }
 
+// ===== get_move_info：查招式详情 + tag（数据来自 knowledge/moves.json）=====
+var MOVE_TAGS = {
+    touch: '接触类：会触发对手的接触类特性（鲨鱼皮/静电/火焰之躯/孢子/毒刺/木乃伊/铁刺/黏滑等），也会被凸凸头盔反伤。',
+    voice: '声音类：被隔音（Soundproof）特性免疫；Gen6+ 可穿过替身。',
+    ironFist: '拳类：受铁拳（Iron Fist）特性加成，威力×1.2。',
+    reckless: '反伤类：受舍身（Reckless）特性加成，威力×1.2。',
+    strongJaw: '咬类：受强壮之颚（Strong Jaw）特性加成，威力×1.5。',
+    megaLauncher: '波导类：受超级发射器（Mega Launcher）特性加成，威力×1.5。'
+};
+
+function findMove(name) {
+    var lname = String(name).trim().toLowerCase();
+    if (/^\d+$/.test(lname) && MOVES[lname]) return { num: lname, move: MOVES[lname] };
+    for (var num in MOVES) {
+        var mv = MOVES[num];
+        if (mv.name.toLowerCase() === lname) return { num: num, move: mv };
+        if (mv.name_zh === name) return { num: num, move: mv };
+    }
+    return null;
+}
+
+function getMoveInfo(args) {
+    var name = args.move || args.name;
+    if (!name) return { error: 'missing move name' };
+    var found = findMove(name);
+    if (!found) return { error: 'unknown move: ' + name };
+    var mv = found.move;
+    var tagMeanings = {};
+    for (var i = 0; i < mv.tags.length; i++) {
+        var t = mv.tags[i];
+        if (MOVE_TAGS[t]) tagMeanings[t] = MOVE_TAGS[t];
+    }
+    return {
+        num: found.num,
+        name: mv.name,
+        name_zh: mv.name_zh,
+        power: mv.power,
+        accuracy: mv.accuracy,
+        category: mv.category,
+        type: mv.type,
+        priority: mv.priority,
+        tags: mv.tags,
+        tag_meanings: tagMeanings
+    };
+}
+
 // tool 执行器：根据 name 分发；ctx 含 state（供 get_battle_history 读取战报）+ notes（笔记存储）+ turn
 function runTool(name, args, ctx) {
     if (name === 'get_type_matchup') return getTypeMatchup(args);
@@ -883,6 +943,7 @@ function runTool(name, args, ctx) {
     if (name === 'get_my_stats') return getMyStats(args, ctx);
     if (name === 'battle_tips') return battleTips(args);
     if (name === 'get_knowledge') return getKnowledge(args);
+    if (name === 'get_move_info') return getMoveInfo(args);
     return { error: 'unknown tool: ' + name };
 }
 
