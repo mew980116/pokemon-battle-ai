@@ -14,8 +14,9 @@ var BATTLE_TIPS = 'You are a pokemon battler that targets to win the pokemon bat
     'Use status-boosting moves like swordsdance, calmmind, dragondance, nastyplot strategically; the boosting resets when you switch out. ' +
     'Set traps like stickyweb, spikes, toxicspikes, stealthrock strategically. ' +
     'When the opponent is boosting or has already boosted its attack/special attack/speed, knock it out as soon as possible, even sacrificing your pokemon. ' +
-    'If you choose to switch, you forfeit your move this turn and the opponent will definitely move first; pay attention to the speed, type-resistance and defense of your switch-in so it can survive the incoming hit. ' +
-    'If your switch-in is slower than the opponent, the opponent will move twice in a row.';
+    'If you choose to switch, you forfeit your move this turn and the opponent gets a free attack; switching also resets all stat changes (boosts and drops) on your current pokemon. ' +
+    'Before switching in, always check two things: (1) can the switch-in survive the incoming hit this turn, and (2) will it outspeed the opponent next turn? If it cannot survive the hit, or is slower than the opponent, it will take two hits in a row and faint without acting. Never switch in such a pokemon unless you are deliberately sacrificing it (e.g. to safely bring in a sweeper or revenge-killer). ' +
+    'Type immunities: Fire-type pokemon cannot be burned; Poison-type and Steel-type pokemon cannot be poisoned.';
 
 module.exports = {
     BATTLE_TIPS: BATTLE_TIPS
