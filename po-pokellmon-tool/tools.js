@@ -11,6 +11,7 @@ var TYPECHART = require('../po-pokellmon/knowledge/typechart.json');
 var POKEMON = require('./knowledge/pokemon.json');
 var NATURES = require('./knowledge/natures.json');
 var MOVES = require('./knowledge/moves.json');
+var TACTICS = require('./knowledge/tactics.json');
 
 var TYPE_NAMES = TYPECHART.types;   // 18 个属性名，与主脚本 sys.type 顺序对齐
 var CHART = TYPECHART.chart;        // 18x18 克制矩阵
@@ -259,6 +260,20 @@ var TOOL_DEFS = [
                     poke: { type: 'string', description: 'Pokemon name (English) or slot number to look up; omit for all' }
                 },
                 required: []
+            }
+        }
+    },
+    {
+        type: 'function',
+        function: {
+            name: 'battle_tips',
+            description: 'Look up battle tactics / strategy tips by name, e.g. "优势局" (how to play when ahead), "劣势局" (when behind), "预知未来" (Future Sight), "撒钉", "牺牲", "残局", "太晶", "强化手" etc. Pass up to 10 tip names at once; names can be Chinese or English.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    tips: { type: 'array', items: { type: 'string' }, description: 'Tip names to look up (up to 10). E.g. ["优势局", "预知未来", "残局"]' }
+                },
+                required: ['tips']
             }
         }
     }
@@ -670,6 +685,143 @@ function getMyStats(args, ctx) {
     return { pokemon: out };
 }
 
+// ===== battle_tips：查战术/策略 tips（数据来自 knowledge/tactics.json）=====
+// 把任意 JSON 值递归压成可读文本行
+function flattenTip(v, prefix) {
+    if (v === null || v === undefined) return '';
+    if (typeof v === 'string') return v;
+    if (Array.isArray(v)) {
+        var arrLines = [];
+        for (var i = 0; i < v.length; i++) {
+            var it = v[i];
+            if (typeof it === 'string') arrLines.push((i + 1) + '. ' + it);
+            else arrLines.push((i + 1) + '. ' + flattenTip(it, ''));
+        }
+        return arrLines.join('\n');
+    }
+    if (typeof v === 'object') {
+        var lines = [];
+        for (var k in v) {
+            if (k === 'name' || k === 'en' || k === 'id' || k === 'meta' || k === 'scope') continue;
+            var s = flattenTip(v[k], '');
+            if (s) lines.push(k + ': ' + s);
+        }
+        return lines.join('\n');
+    }
+    return String(v);
+}
+
+// 组队战术条目转文本（精简：原理 + 两代用法 + 代表宝可梦，不含完整 Showdown import）
+function tacticToText(t) {
+    var lines = [];
+    lines.push('【' + t.name + '】' + (t.en ? ' (' + t.en + ')' : ''));
+    lines.push('原理: ' + t.principle);
+    if (t.gen8) {
+        lines.push('Gen8: ' + (t.gen8.summary || ''));
+        if (t.gen8.usage && t.gen8.usage.length) lines.push('Gen8 用法: ' + t.gen8.usage.join('；'));
+        if (t.gen8.representative && t.gen8.representative.length) lines.push('Gen8 代表: ' + t.gen8.representative.join(', '));
+    }
+    if (t.gen9) {
+        lines.push('Gen9: ' + (t.gen9.summary || ''));
+        if (t.gen9.usage && t.gen9.usage.length) lines.push('Gen9 用法: ' + t.gen9.usage.join('；'));
+        if (t.gen9.representative && t.gen9.representative.length) lines.push('Gen9 代表: ' + t.gen9.representative.join(', '));
+    }
+    return lines.join('\n');
+}
+
+// 别名表：把「简称/关键词」映射到标准 tip 名（组队战术 + playbook section）
+var TIP_ALIASES = {
+    // 组队战术
+    '撒钉': 'hazard-stack', '撒菱': 'hazard-stack', '隐形岩': 'hazard-stack', '钉子': 'hazard-stack', '阻止除钉': 'hazard-stack', 'hazard': 'hazard-stack', 'hazard stack': 'hazard-stack', 'spikes': 'hazard-stack',
+    '双墙': 'screens-ho', '光墙': 'screens-ho', '反射壁': 'screens-ho', '极光幕': 'screens-ho', 'screens': 'screens-ho', 'ho': 'screens-ho', 'hyper offense': 'screens-ho',
+    '天气': 'weather', '雨天': 'weather', '晴天': 'weather', '沙暴': 'weather', '雪天': 'weather', 'rain': 'weather', 'sun': 'weather', 'weather': 'weather',
+    '场地种子': 'terrain-seed', '电气种子': 'terrain-seed', '青草种子': 'terrain-seed', '精神种子': 'terrain-seed', '轻装': 'terrain-seed', 'unburden': 'terrain-seed', 'seed': 'terrain-seed',
+    '预知未来': 'future-sight', 'future sight': 'future-sight', 'futuresight': 'future-sight',
+    '中转': 'pivot', '伏特替换': 'pivot', '急速折返': 'pivot', '快速折返': 'pivot', 'volt switch': 'pivot', 'u-turn': 'pivot', 'flip turn': 'pivot', 'pivot': 'pivot',
+    '磁力': 'magnet-pull', '磁力诱捕': 'magnet-pull', '自爆磁怪': 'magnet-pull', 'magnet pull': 'magnet-pull', 'magnetpull': 'magnet-pull', '诱捕': 'magnet-pull',
+    '盐腌': 'salt-cure-block', '盐石巨灵': 'salt-cure-block', 'salt cure': 'salt-cure-block', 'saltcure': 'salt-cure-block', '困杀': 'salt-cure-block', '熔岩风暴': 'salt-cure-block',
+    '受队': 'stall', '半受': 'stall', '纯受': 'stall', 'stall': 'stall', 'semistall': 'stall', '耐久队': 'stall',
+    '太晶诱杀': 'tera-bait', '太晶': 'tera-bait', 'tera': 'tera-bait', 'tera bait': 'tera-bait', 'terabait': 'tera-bait', '太晶化': 'tera-bait',
+    // playbook 决策 section
+    '开局': 'opening-audit', '开局审计': 'opening-audit', '队伍审计': 'opening-audit', 'opening': 'opening-audit',
+    '配置范围': 'config-range', '配置推断': 'config-range', '配置': 'config-range', '信念': 'config-range', '猜测配置': 'config-range',
+    '首发对位': 'opening-matchups', '首发局面': 'opening-matchups', '对位': 'opening-matchups',
+    '讲究': 'choice-items', '围巾': 'choice-items', '头带': 'choice-items', '眼镜': 'choice-items', '戏法': 'choice-items', 'choice': 'choice-items', 'scarf': 'choice-items', '锁招': 'choice-items',
+    '强化手': 'setup-sweeper', '强化': 'setup-sweeper', '破壳': 'setup-sweeper', '腹鼓': 'setup-sweeper', '龙舞': 'setup-sweeper', '剑舞': 'setup-sweeper',
+    '耐久消耗': 'stall-handling', '回复': 'stall-handling', '再生力': 'stall-handling', 'regenerator': 'stall-handling', '保护': 'stall-handling', 'protect': 'stall-handling',
+    '钉子局': 'hazards', '除钉': 'hazards', '清钉': 'hazards', 'hazards': 'hazards',
+    '太晶局': 'tera', '太晶': 'tera', '太晶思路': 'tera', 'tera': 'tera',
+    '牺牲': 'sacrifice', '炮灰': 'sacrifice', '死出': 'sacrifice', 'sacrifice': 'sacrifice',
+    '残局': 'endgame', 'endgame': 'endgame', '收尾': 'endgame',
+    '工厂': 'factory', 'battle factory': 'factory', '工厂战': 'factory', 'factory': 'factory',
+    '回合清单': 'turn-checklist', '决策清单': 'turn-checklist', '回合决策': 'turn-checklist',
+    '优势局': 'advantage', '领先': 'advantage', 'advantage': 'advantage',
+    '劣势局': 'disadvantage', '落后': 'disadvantage', 'disadvantage': 'disadvantage',
+    '核心原则': 'principles', '原则': 'principles', '五原则': 'principles', 'principles': 'principles',
+    '案例': 'cases', '实战案例': 'cases', 'cases': 'cases',
+    '记录习惯': 'record-habit', '记笔记': 'record-habit', '记录': 'record-habit'
+};
+
+// 构建 tip 索引：id -> { title, text }
+var TIPS = buildTipIndex();
+
+function buildTipIndex() {
+    var map = {};
+    // 组队战术
+    var tactics = TACTICS.tactics || [];
+    for (var i = 0; i < tactics.length; i++) {
+        map[tactics[i].id] = { title: tactics[i].name, text: tacticToText(tactics[i]) };
+    }
+    // playbook section（用 key 做 id，加前缀避免与组队战术 id 撞名）
+    var rb = TACTICS.random_battle_playbook || {};
+    var pbKeys = {
+        'opening_audit': 'opening-audit', 'config_range': 'config-range', 'opening_matchups': 'opening-matchups',
+        'choice_items': 'choice-items', 'setup_sweeper': 'setup-sweeper', 'stall_handling': 'stall-handling',
+        'hazards': 'hazards', 'tera': 'tera', 'sacrifice': 'sacrifice', 'endgame': 'endgame',
+        'factory': 'factory', 'turn_checklist': 'turn-checklist', 'advantage': 'advantage',
+        'disadvantage': 'disadvantage', 'principles': 'principles', 'cases': 'cases', 'record_habit': 'record-habit'
+    };
+    for (var pk in pbKeys) {
+        var v = rb[pk];
+        if (!v) continue;
+        var id = pbKeys[pk];
+        var title = v.name || pk;
+        var text = flattenTip(v, '');
+        map[id] = { title: title, text: text };
+    }
+    return map;
+}
+
+function battleTips(args) {
+    var tips = args.tips || [];
+    if (!Array.isArray(tips)) return { error: 'tips must be an array of names' };
+    if (tips.length > 10) tips = tips.slice(0, 10);
+    var found = [];
+    var missing = [];
+    for (var i = 0; i < tips.length; i++) {
+        var name = String(tips[i]).trim();
+        var key = TIP_ALIASES[name.toLowerCase()] || null;
+        // 直接匹配 id / 中文名 / 英文名
+        if (!key) {
+            var lname = name.toLowerCase();
+            if (TIPS[name]) key = name;
+            else if (TIPS[lname]) key = lname;
+            else {
+                // 模糊：别名表 key 或 tips 标题包含该词
+                for (var ak in TIP_ALIASES) {
+                    if (ak.toLowerCase() === lname) { key = TIP_ALIASES[ak]; break; }
+                }
+            }
+        }
+        if (key && TIPS[key]) {
+            found.push({ name: name, title: TIPS[key].title, tip: TIPS[key].text });
+        } else {
+            missing.push(name);
+        }
+    }
+    return { found: found, missing: missing };
+}
+
 // tool 执行器：根据 name 分发；ctx 含 state（供 get_battle_history 读取战报）+ notes（笔记存储）+ turn
 function runTool(name, args, ctx) {
     if (name === 'get_type_matchup') return getTypeMatchup(args);
@@ -684,6 +836,7 @@ function runTool(name, args, ctx) {
     if (name === 'run_js') return runJs(args);
     if (name === 'calc_stats') return calcStats(args);
     if (name === 'get_my_stats') return getMyStats(args, ctx);
+    if (name === 'battle_tips') return battleTips(args);
     return { error: 'unknown tool: ' + name };
 }
 

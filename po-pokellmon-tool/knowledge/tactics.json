@@ -1,0 +1,753 @@
+{
+  "meta": {
+    "name": "Pokemon 6v6 Singles Tactics (Smogon OU)",
+    "format": "Showdown import format",
+    "gen8": "SS OU（冠之雪原最终环境）",
+    "gen9": "SV OU（朱紫 DLC2 后，以当前官方样板队反映的后期环境为准）",
+    "note": "配置展示战术骨架；具体努力值、太晶属性、补盲招式随队伍需求调整。团队风格分 HO / Offense / Bulky Offense / Balance / Stall。"
+  },
+  "tactics": [
+    {
+      "id": "hazard-stack",
+      "name": "撒钉压血与阻止除钉",
+      "en": "Hazard Stack",
+      "principle": "通过隐形岩、撒菱、毒菱反复压低对手血线，再用拍落、挑衅、旋转阻挡或幽灵属性阻止对方清场。不靠一次强化结束比赛，而是让对手每次换人都支付代价。",
+      "gen8": {
+        "viability": "成熟稳定",
+        "summary": "坚果哑铃、土地云-T、河马兽撒钉，配合多龙巴鲁托、玛狃拉、席多蓝恩等高速/高压输出手。",
+        "sets": [
+          {
+            "name": "Ferrothorn",
+            "role": "撒菱/防守支持",
+            "import": "Ferrothorn @ Leftovers\nAbility: Iron Barbs\nEVs: 252 HP / 4 Def / 252 SpD\nCareful Nature\n- Spikes\n- Knock Off\n- Leech Seed\n- Power Whip"
+          },
+          {
+            "name": "Dragapult",
+            "role": "高速输出/状态压制",
+            "import": "Dragapult @ Choice Specs\nAbility: Infiltrator\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\n- Shadow Ball\n- Draco Meteor\n- Flamethrower\n- U-turn"
+          }
+        ],
+        "usage": [
+          "用坚果哑铃对水系、电系或部分辅助宝可梦撒一到两层撒菱。",
+          "通过拍落移除厚底靴，让钉子产生实际伤害。",
+          "用多龙巴鲁托的 U-turn 保持主动权。",
+          "当对方钢系或恶系被磨损后，用暗影球连续收割。"
+        ],
+        "representative": ["Ferrothorn", "Landorus-Therian", "Dragapult", "Heatran"],
+        "samples": ["Clefable + Victini Stack", "Tapu Koko + Bisharp Hazard Stack"]
+      },
+      "gen9": {
+        "viability": "主流（闭环更明显）",
+        "summary": "赛富豪「黄金之躯」阻止除雾、自身幽灵属性压制高速旋转，让钉子队闭环更完整。",
+        "sets": [
+          {
+            "name": "Samurott-Hisui",
+            "role": "边打边撒菱",
+            "import": "Samurott-Hisui @ Assault Vest\nAbility: Sharpness\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Ceaseless Edge\n- Razor Shell\n- Knock Off\n- Aqua Jet"
+          },
+          {
+            "name": "Gholdengo",
+            "role": "阻止除钉/清场压制",
+            "import": "Gholdengo @ Air Balloon\nAbility: Good as Gold\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\n- Make It Rain\n- Shadow Ball\n- Nasty Plot\n- Recover"
+          }
+        ],
+        "usage": [
+          "对手即使正确换入盾牌接下「秘剑千重涛」，场上仍会留下撒菱。",
+          "赛富豪上场阻止除雾/高速旋转，气球暂时规避地面招式。",
+          "对手被迫反复换入大牙狸清场时，拍落和撒菱不断消耗它。"
+        ],
+        "representative": ["Samurott-Hisui", "Gholdengo", "Walking Wake", "Dragonite"],
+        "samples": ["Walking Wake + Assault Vest Samurott-H Hazard Spam", "Dragonite + Darkrai Hazard Stack", "多个 Gholdengo 进攻结构"]
+      }
+    },
+    {
+      "id": "screens-ho",
+      "name": "双墙超攻 HO",
+      "en": "Screens Hyper Offense",
+      "principle": "先用光墙/反射壁制造数回合强化窗口，再连续派出强化手。不追求长期联防，用多名强化手轮番攻击，让对手无法同时保留所有应对资源。",
+      "gen8": {
+        "viability": "成熟 HO 路线",
+        "summary": "阿罗拉九尾极光幕（雪天）开墙，快龙等多强化手轮番进攻。",
+        "sets": [
+          {
+            "name": "Ninetales-Alola",
+            "role": "开墙/雪天",
+            "import": "Ninetales-Alola @ Light Clay\nAbility: Snow Warning\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\n- Aurora Veil\n- Freeze-Dry\n- Moonblast\n- Encore"
+          },
+          {
+            "name": "Dragonite",
+            "role": "强化手",
+            "import": "Dragonite @ Heavy-Duty Boots\nAbility: Multiscale\nEVs: 252 Atk / 4 SpD / 252 Spe\nAdamant Nature\n- Dragon Dance\n- Dual Wingbeat\n- Earthquake\n- Roost"
+          }
+        ],
+        "usage": [
+          "首发九尾开雪天并布置极光幕。",
+          "对手用隐形岩/回复/强化时，用再来一次锁住。",
+          "快龙在极光幕+多重鳞片双重保护下龙舞，逼对方交物理盾或围巾手。",
+          "快龙推不了队时，为后续破壳刺甲贝或剑舞手清障碍。"
+        ],
+        "representative": ["Ninetales-Alola", "Dragonite", "Cloyster", "Dragapult"],
+        "samples": ["Cloyster + Dragon Dance Dragapult Veil Hyper Offense"]
+      },
+      "gen9": {
+        "viability": "成熟 HO 路线",
+        "summary": "长毛巨魔双墙（恶作剧之心）开墙，炭小侍（苍炎刃鬼）等强化手进攻。",
+        "sets": [
+          {
+            "name": "Grimmsnarl",
+            "role": "双墙/中转",
+            "import": "Grimmsnarl @ Light Clay\nAbility: Prankster\nEVs: 252 HP / 4 Def / 252 SpD\nCareful Nature\n- Reflect\n- Light Screen\n- Parting Shot\n- Taunt"
+          },
+          {
+            "name": "Ceruledge",
+            "role": "强化手",
+            "import": "Ceruledge @ Life Orb\nAbility: Weak Armor\nTera Type: Grass\nEVs: 252 Atk / 4 SpD / 252 Spe\nAdamant Nature\n- Swords Dance\n- Bitter Blade\n- Shadow Sneak\n- Poltergeist"
+          }
+        ],
+        "usage": [
+          "长毛巨魔开墙后抛下狠话降对手输出并送炭小侍进场。",
+          "苍炎刃鬼借墙+碎裂铠甲找剑舞机会，用悔念剑高伤并回血。",
+          "太晶草规避地面/水/粉末类干扰，是否太晶按队伍计划定。"
+        ],
+        "representative": ["Grimmsnarl", "Ceruledge", "Cresselia"],
+        "samples": ["Life Orb Ceruledge Screens", "Offensive Cresselia Screens"]
+      }
+    },
+    {
+      "id": "weather",
+      "name": "天气进攻",
+      "en": "Weather Offense",
+      "principle": "用降雨/晴天/沙暴/雪天改变伤害与速度关系。关键是：天气手能多次进场、至少一名天气速度手、有办法突破水免/草系/特殊盾/先制、天气结束后仍有战斗力。",
+      "gen8": {
+        "viability": "成熟（雨天/沙暴/冰雹均有骨架）",
+        "summary": "雨天：大嘴鸥开雨，戽斗尖梭悠游自如速度翻倍输出。",
+        "sets": [
+          {
+            "name": "Pelipper",
+            "role": "天气手",
+            "import": "Pelipper @ Damp Rock\nAbility: Drizzle\nEVs: 248 HP / 252 Def / 8 SpD\nBold Nature\n- Scald\n- Hurricane\n- U-turn\n- Roost"
+          },
+          {
+            "name": "Barraskewda",
+            "role": "雨天速度手",
+            "import": "Barraskewda @ Choice Band\nAbility: Swift Swim\nEVs: 252 Atk / 4 SpD / 252 Spe\nAdamant Nature\n- Liquidation\n- Close Combat\n- Psychic Fangs\n- Flip Turn"
+          }
+        ],
+        "usage": [
+          "大嘴鸥开雨后 U-turn 慢速送入戽斗尖梭。",
+          "雨天悠游自如速度翻倍，讲究头带+雨天水流裂破逼退大量中性目标。",
+          "遇呆壳兽/超坏星等防守核心时点快速折返，输出权交给卡璞·蝶蝶/闪电鸟/伏特替换手。"
+        ],
+        "representative": ["Pelipper", "Barraskewda", "Crawdaunt", "Seismitoad", "Zapdos", "Tapu Lele"],
+        "samples": ["Crawdaunt + Seismitoad + Zapdos Rain", "Specs Tapu Lele Rain", "以大嘴鸥+戽斗尖梭为核心的雨天进攻"]
+      },
+      "gen9": {
+        "viability": "成熟（晴天 Bulky Offense）",
+        "summary": "晴天：煤炭龟开晴，波荡水水蒸气晴天反而增强。",
+        "sets": [
+          {
+            "name": "Torkoal",
+            "role": "天气手/撒钉",
+            "import": "Torkoal @ Heat Rock\nAbility: Drought\nEVs: 248 HP / 252 Def / 8 SpD\nBold Nature\n- Stealth Rock\n- Lava Plume\n- Rapid Spin\n- Yawn"
+          },
+          {
+            "name": "Walking Wake",
+            "role": "晴天输出手",
+            "import": "Walking Wake @ Choice Specs\nAbility: Protosynthesis\nTera Type: Water\nEVs: 12 HP / 244 SpA / 252 Spe\nTimid Nature\n- Hydro Steam\n- Draco Meteor\n- Flamethrower\n- Flip Turn"
+          }
+        ],
+        "usage": [
+          "煤炭龟开晴天后，波荡水水蒸气晴天不减弱反而增强，同时压制火系/地面系/中性目标。",
+          "对方依赖草系/水免时，波荡水用流星群或快速折返维持节奏。"
+        ],
+        "representative": ["Torkoal", "Walking Wake", "Zarude"],
+        "samples": ["Zarude Sun", "以煤炭龟+波荡水+古代活性输出手构建的晴天 Bulky Offense"]
+      }
+    },
+    {
+      "id": "terrain-seed",
+      "name": "场地种子强化",
+      "en": "Terrain Seed + Unburden",
+      "principle": "场地手开青草/精神/电气场地，让携带对应种子的宝可梦获得一次防御强化，并触发「轻装」使速度翻倍。经典执行者是摔角鹰人。",
+      "gen8": {
+        "viability": "成熟 HO 路线",
+        "summary": "卡璞·鸣鸣电气场地+双墙，摔角鹰人电气种子触发轻装。",
+        "sets": [
+          {
+            "name": "Tapu Koko",
+            "role": "场地手/双墙",
+            "import": "Tapu Koko @ Light Clay\nAbility: Electric Surge\nEVs: 252 HP / 4 SpA / 252 Spe\nTimid Nature\n- Reflect\n- Light Screen\n- U-turn\n- Taunt"
+          },
+          {
+            "name": "Hawlucha",
+            "role": "清场手",
+            "import": "Hawlucha @ Electric Seed\nAbility: Unburden\nEVs: 252 Atk / 4 SpD / 252 Spe\nAdamant Nature\n- Swords Dance\n- Acrobatics\n- Close Combat\n- Taunt"
+          }
+        ],
+        "usage": [
+          "鸣鸣开电气场地+双墙，U-turn 送摔角鹰人上场。",
+          "电气种子消耗→物防提升→触发轻装速度翻倍。",
+          "道具消失后杂技威力翻倍，剑舞后清场。"
+        ],
+        "representative": ["Tapu Koko", "Hawlucha"],
+        "samples": ["Unburden Hawlucha + Screens Tapu Koko HO"]
+      },
+      "gen9": {
+        "viability": "成熟（青草场地鹰人闭环）",
+        "summary": "轰擂金刚猩青草场地，摔角鹰人青草种子触发轻装。",
+        "sets": [
+          {
+            "name": "Rillaboom",
+            "role": "场地手/破盾",
+            "import": "Rillaboom @ Terrain Extender\nAbility: Grassy Surge\nEVs: 252 Atk / 4 SpD / 252 Spe\nAdamant Nature\n- Grassy Glide\n- Wood Hammer\n- Knock Off\n- U-turn"
+          },
+          {
+            "name": "Hawlucha",
+            "role": "清场手",
+            "import": "Hawlucha @ Grassy Seed\nAbility: Unburden\nTera Type: Flying\nEVs: 252 Atk / 4 SpD / 252 Spe\nAdamant Nature\n- Swords Dance\n- Acrobatics\n- Close Combat\n- Encore"
+          }
+        ],
+        "usage": [
+          "金刚猩开青草场地，拍落削弱盔甲鸟/火焰鸟/赛富豪，U-turn 送鹰人进场。",
+          "青草种子触发后鹰人获得轻装速度+物防强化。",
+          "对手用回复/强化/变化招拖延时，用再来一次制造剑舞机会。"
+        ],
+        "representative": ["Rillaboom", "Hawlucha", "Gholdengo"],
+        "samples": ["Hawlucha + Gholdengo Grassy Terrain"]
+      }
+    },
+    {
+      "id": "future-sight",
+      "name": "预知未来压制与慢速中转",
+      "en": "Future Sight + Slow Pivot",
+      "principle": "呆壳兽/呆呆王先预知未来，再通过瞬间移动/寒冷接待等慢速中转把高压物攻手安全送进场。两回合后对手须同时承受当前攻击和预知未来，原本能挡物攻手的毒系/格斗系/物理盾失去换入能力。",
+      "gen8": {
+        "viability": "成熟逼换组合",
+        "summary": "呆壳兽预知未来+瞬间移动，配武道熊师-连击复合压制。",
+        "sets": [
+          {
+            "name": "Slowbro",
+            "role": "预知未来/慢速中转",
+            "import": "Slowbro @ Heavy-Duty Boots\nAbility: Regenerator\nEVs: 252 HP / 252 Def / 4 SpD\nBold Nature\n- Future Sight\n- Scald\n- Slack Off\n- Teleport"
+          },
+          {
+            "name": "Urshifu-Rapid-Strike",
+            "role": "高压物攻手",
+            "import": "Urshifu-Rapid-Strike @ Choice Band\nAbility: Unseen Fist\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Surging Strikes\n- Close Combat\n- Aqua Jet\n- U-turn"
+          }
+        ],
+        "usage": [
+          "呆壳兽对物攻手进场，预知未来后瞬间移动送武道熊师。",
+          "对手换超坏星接水流连打→两回合后超能伤害逼其退出；换钢系接预知未来→吃近身战。",
+          "武道熊师 U-turn 把节奏交还呆壳兽。"
+        ],
+        "representative": ["Slowbro", "Urshifu-Rapid-Strike", "Tapu Lele", "Heatran", "Tapu Koko"],
+        "samples": ["Scarf Tapu Lele + Heatran BO", "Tapu Koko + Future Sight", "呆壳兽配合进攻手结构"]
+      },
+      "gen9": {
+        "viability": "高（再生力特殊盾+状态+慢转）",
+        "summary": "伽勒尔呆呆王预知未来+寒冷接待慢速送入大剑鬼/轰擂金刚猩/厄诡椪/藏玛然特。",
+        "sets": [
+          {
+            "name": "Slowking-Galar",
+            "role": "预知未来/慢速中转/状态",
+            "import": "Slowking-Galar @ Heavy-Duty Boots\nAbility: Regenerator\nEVs: 252 HP / 16 Def / 240 SpD\nSassy Nature\nIVs: 0 Spe\n- Future Sight\n- Sludge Bomb\n- Chilly Reception\n- Thunder Wave"
+          }
+        ],
+        "usage": [
+          "面对特攻手时让伽勒尔呆呆王进场预知未来，再寒冷接待慢速送入大剑鬼/轰擂金刚猩/厄诡椪/藏玛然特。",
+          "对手须同时接当前攻击和下一回合预知未来，难靠单一盾牌反复轮转。"
+        ],
+        "representative": ["Slowking-Galar", "Samurott-Hisui", "Rillaboom", "Ogerpon", "Zamazenta"],
+        "samples": ["常见于 Bulky Offense 与 Balance 构筑"]
+      }
+    },
+    {
+      "id": "pivot",
+      "name": "伏特替换与连续中转",
+      "en": "Volt Switch / Pivot",
+      "principle": "用伏特替换/急速折返/快速折返持续保持对位优势。与单纯换人不同，中转招造成伤害后再换人，逐步磨损对手，让高输出但脆弱的宝可梦安全登场。",
+      "gen8": {
+        "viability": "成熟稳定",
+        "summary": "卡璞·鸣鸣 + 土地云-T 双中转循环，压低血线后收割。",
+        "sets": [
+          {
+            "name": "Tapu Koko",
+            "role": "中转手",
+            "import": "Tapu Koko @ Heavy-Duty Boots\nAbility: Electric Surge\nEVs: 252 SpA / 4 SpD / 252 Spe\nTimid Nature\n- Thunderbolt\n- Dazzling Gleam\n- U-turn\n- Roost"
+          },
+          {
+            "name": "Landorus-Therian",
+            "role": "撒钉/中转",
+            "import": "Landorus-Therian @ Leftovers\nAbility: Intimidate\nEVs: 252 HP / 164 Def / 92 Spe\nImpish Nature\n- Stealth Rock\n- Earthquake\n- U-turn\n- Toxic"
+          }
+        ],
+        "usage": [
+          "鸣鸣逼出地面系后 U-turn，土地云逼出飞行系/物攻手后 U-turn。",
+          "数轮循环后，对手厚底靴被拍落、关键盾牌被钉子+中转压低。",
+          "由玛狃拉/纸御剑/多龙巴鲁托收割。"
+        ],
+        "representative": ["Tapu Koko", "Landorus-Therian", "Tornadus-Therian"],
+        "samples": ["土地云-T 防守中转 S 级、鸣鸣进攻中转 A+ 级"]
+      },
+      "gen9": {
+        "viability": "成熟（快慢结合 Pivot 队）",
+        "summary": "闪焰王牌 + 厄诡椪-水井面具/土地云-T/龙卷云-T/慢速中转单位形成快慢 Pivot。",
+        "sets": [
+          {
+            "name": "Cinderace",
+            "role": "中转手/清场",
+            "import": "Cinderace @ Heavy-Duty Boots\nAbility: Libero\nEVs: 252 Atk / 4 SpD / 252 Spe\nJolly Nature\n- Pyro Ball\n- U-turn\n- Court Change\n- Will-O-Wisp"
+          }
+        ],
+        "usage": [
+          "闪焰王牌火焰球逼退钢系，U-turn 送入破盾手。",
+          "对手依赖撒钉积累优势时，用换场交换双方场地。",
+          "Gen 9 更需防范对手太晶突然改抗性反打。"
+        ],
+        "representative": ["Cinderace", "Ogerpon-Wellspring", "Landorus-Therian", "Tornadus-Therian", "Dragapult", "Kyurem", "Zamazenta"],
+        "samples": ["Dragapult + Wellspring Bulky Offense", "Cinderace + Kyurem Bulky Offense", "带多个 Pivot 的 Zamazenta Balance"]
+      }
+    },
+    {
+      "id": "magnet-pull",
+      "name": "磁力诱捕钢系",
+      "en": "Magnet Pull Trapping",
+      "principle": "用自爆磁怪的磁力特性困住钢属性宝可梦，替剑舞纸御剑/玛狃拉/卡璞·蝶蝶等清场手移除关键障碍。",
+      "gen8": {
+        "viability": "成熟稳定",
+        "summary": "自爆磁怪困住钢铠鸦/盔甲鸟，铁壁扑击处理。",
+        "sets": [
+          {
+            "name": "Magnezone",
+            "role": "诱捕钢系",
+            "import": "Magnezone @ Leftovers\nAbility: Magnet Pull\nEVs: 252 Def / 4 SpA / 252 Spe\nBold Nature\n- Iron Defense\n- Body Press\n- Thunderbolt\n- Substitute"
+          }
+        ],
+        "usage": [
+          "诱导对手用钢铠鸦/盔甲鸟挡纸御剑，换入自爆磁怪。",
+          "磁力使目标无法正常换出，铁壁强化后扑击处理。",
+          "钢系被移除后，纸御剑叶刃+圣剑贯穿全队。"
+        ],
+        "representative": ["Magnezone", "Kartana", "Weavile", "Tapu Lele", "Garchomp"],
+        "samples": ["Double Tapu + Zone Offense", "SD Garchomp + Specs Magnezone"]
+      },
+      "gen9": {
+        "viability": "针对工具（稳定性下降）",
+        "summary": "太晶可使钢系逃出磁力限制，磁力更常作为针对性工具。",
+        "usage": [
+          "帮龙系/妖精系处理钢铠鸦/盔甲鸟等目标。",
+          "必须提前判断对手是否愿交太晶脱困。"
+        ],
+        "representative": ["Magnezone"],
+        "note": "后期可用性列表仍含自爆磁怪，但整体位置低于主流中转/压制手。"
+      }
+    },
+    {
+      "id": "salt-cure-block",
+      "name": "盐腌与阻塞式消耗",
+      "en": "Salt Cure + Block-style Stall",
+      "principle": "不依赖毒状态，而是通过盐腌/寄生种子/拍落/保护/再生力/钉子逐步消耗。尤其擅长处理带厚底靴、毒免疫或有回复招式的队伍。",
+      "gen8": {
+        "viability": "对应思路（席多蓝恩困杀）",
+        "summary": "席多蓝恩熔岩风暴困杀+挑衅+剧毒。",
+        "sets": [
+          {
+            "name": "Heatran",
+            "role": "困杀/状态传播",
+            "import": "Heatran @ Leftovers\nAbility: Flash Fire\nEVs: 252 HP / 4 SpA / 252 SpD\nCalm Nature\n- Magma Storm\n- Earth Power\n- Taunt\n- Toxic"
+          }
+        ],
+        "usage": [
+          "熔岩风暴命中后限制换人，挑衅封锁回复，剧毒累积伤害。",
+          "拆解皮可西/幸福蛋/坚果哑铃等被动盾牌，为特攻手开缺口。"
+        ],
+        "representative": ["Heatran"],
+        "samples": ["席多蓝恩 SS OU 长期最高可用等级之一，特别耐久型 S-"]
+      },
+      "gen9": {
+        "viability": "可靠（平衡队/耐久队组件）",
+        "summary": "盐石巨灵盐腌（水钢受更高比例伤害）+ 保护回复。",
+        "sets": [
+          {
+            "name": "Garganacl",
+            "role": "盐腌消耗",
+            "import": "Garganacl @ Leftovers\nAbility: Purifying Salt\nTera Type: Water\nEVs: 252 HP / 4 Def / 252 SpD\nCareful Nature\n- Salt Cure\n- Recover\n- Protect\n- Stealth Rock"
+          }
+        ],
+        "usage": [
+          "对换入者盐腌，再按对方反应选保护/回复/换人。",
+          "水钢受更高盐腌伤害，很多能挡岩石系的单位不愿长期留场。",
+          "对手用强力地面/格斗招时，太晶水改弱点继续消耗。"
+        ],
+        "representative": ["Garganacl", "Iron Treads"],
+        "samples": ["Garganacl + Iron Treads Bulky Offense"]
+      }
+    },
+    {
+      "id": "stall",
+      "name": "纯受队与半受队",
+      "en": "Stall / Semistall",
+      "principle": "不是六只盾牌，而是建立完整应对链：物理盾、特殊盾、状态吸收/治愈、除钉、钉子/状态进度、防强化（Unaware/吹飞/黑雾/清除之烟）。",
+      "gen8": {
+        "viability": "完整案例丰富",
+        "summary": "超坏星物盾+黑雾，幸福蛋特盾+瞬间移动。",
+        "sets": [
+          {
+            "name": "Toxapex",
+            "role": "物盾/黑雾",
+            "import": "Toxapex @ Rocky Helmet\nAbility: Regenerator\nEVs: 252 HP / 252 Def / 4 SpD\nBold Nature\n- Scald\n- Recover\n- Haze\n- Knock Off"
+          },
+          {
+            "name": "Blissey",
+            "role": "特盾/中转",
+            "import": "Blissey @ Heavy-Duty Boots\nAbility: Natural Cure\nEVs: 252 Def / 4 SpA / 252 SpD\nCalm Nature\n- Seismic Toss\n- Soft-Boiled\n- Toxic\n- Teleport"
+          }
+        ],
+        "usage": [
+          "超坏星处理物攻手并用黑雾重置强化，幸福蛋承受特攻并瞬间移动。",
+          "盔甲鸟/钢铠鸦除钉，沼王/天然皮可西阻断强化。"
+        ],
+        "representative": ["Toxapex", "Blissey", "Corviknight", "Skarmory", "Quagsire", "Clefable", "Slowking", "Hippowdon", "Chansey"],
+        "samples": ["Tornadus-T Doomstack", "Aegislash + Suicune Semistall", "Hippo + Chansey 2Bird", "Slowking Stall"]
+      },
+      "gen9": {
+        "viability": "成熟（太晶是最大变量）",
+        "summary": "吃吼霸+土王双 Unaware 强化阻断。",
+        "sets": [
+          {
+            "name": "Dondozo",
+            "role": "物盾/强化阻断",
+            "import": "Dondozo @ Heavy-Duty Boots\nAbility: Unaware\nTera Type: Dragon\nEVs: 252 HP / 252 Def / 4 SpD\nImpish Nature\n- Wave Crash\n- Rest\n- Sleep Talk\n- Curse"
+          },
+          {
+            "name": "Clodsire",
+            "role": "特盾/撒菱/强化阻断",
+            "import": "Clodsire @ Heavy-Duty Boots\nAbility: Unaware\nTera Type: Steel\nEVs: 252 HP / 4 Def / 252 SpD\nCareful Nature\n- Toxic\n- Recover\n- Earthquake\n- Spikes"
+          }
+        ],
+        "usage": [
+          "吃吼霸 Unaware 无视剑舞/龙舞强化，土王负责特殊端+撒菱。",
+          "秃鹰丫/烈箭鹰/钢铠鸦/闪焰王牌承担清场。",
+          "太晶可临时改属性修联防缺口，但太晶过早会暴露另一侧弱点。"
+        ],
+        "representative": ["Dondozo", "Clodsire", "Gliscor", "Talonflame", "Mandibuzz", "Corviknight", "Cinderace"],
+        "samples": ["Swords Dance Gliscor Removal Stall", "Talonflame + Mandibuzz Removal Stall", "Clodsire + Fast Gliscor Stall"]
+      }
+    },
+    {
+      "id": "tera-bait",
+      "name": "太晶诱杀与反常规补盲",
+      "en": "Tera Bait / Reverse Coverage",
+      "principle": "Gen 9 独有。宝可梦表面被某属性稳定克制，但通过太晶改属性：抵抗原克制、获得额外本系、用太晶爆发或补盲反杀、制造强化机会。",
+      "gen9": {
+        "viability": "最重要战术层之一",
+        "summary": "仆刀将军太晶飞行规避地面/格斗，快龙太晶一般强化神速。",
+        "sets": [
+          {
+            "name": "Kingambit",
+            "role": "残局收割",
+            "import": "Kingambit @ Leftovers\nAbility: Supreme Overlord\nTera Type: Flying\nEVs: 252 HP / 252 Atk / 4 SpD\nAdamant Nature\n- Swords Dance\n- Kowtow Cleave\n- Sucker Punch\n- Iron Head"
+          },
+          {
+            "name": "Dragonite",
+            "role": "先制清场",
+            "import": "Dragonite @ Heavy-Duty Boots\nAbility: Multiscale\nTera Type: Normal\nEVs: 252 Atk / 4 SpD / 252 Spe\nAdamant Nature\n- Dragon Dance\n- Extreme Speed\n- Earthquake\n- Ice Spinner"
+          }
+        ],
+        "usage": [
+          "残局对方用地面/格斗处理仆刀将军→太晶飞行规避并抵抗格斗→剑舞→大将特性突袭收割。",
+          "另一思路是太晶恶把恶系输出推到最大，但防守反转弱于太晶飞行。",
+          "快龙多重鳞片吃一击后龙舞，太晶一般强化神速成高威力本系先制，减少对围巾手/轻装清场手的依赖。"
+        ],
+        "representative": ["Kingambit", "Dragonite"],
+        "samples": ["多种快龙 Offense/Hazard Stack/Anti-Offense Balance"]
+      }
+    }
+  ],
+  "gen_comparison": {
+    "gen8": [
+      "土地云-T、坚果哑铃、钢铠鸦形成稳定场地与中转基础。",
+      "预知未来+武道熊师是非常成熟的逼换组合。",
+      "磁力自爆磁怪诱捕更可靠。",
+      "雨天、冰雹、沙暴均有明确成熟骨架。",
+      "厚底靴让大量中转型宝可梦反复进场。",
+      "无太晶，伤害计算和属性联防相对可预测。",
+      "高位宝可梦集中在中转或立即压制能力者：土地云-T、多龙巴鲁托、席多蓝恩、玛狃拉、坚果哑铃、武道熊师-连击、龙卷云-T。"
+    ],
+    "gen9": [
+      "钉子更容易撒出，恶鬼獭（洗翠大剑鬼）边攻击边撒菱。",
+      "赛富豪让传统除雾和高速旋转更难执行。",
+      "太晶使清场手拥有一次反转克制关系的机会。",
+      "仆刀将军特别擅长残局收割。",
+      "队伍必须考虑对手多个潜在太晶点。",
+      "Offense/BO/Balance/Stall 都可能围绕太晶设计第二层胜利路线。"
+    ]
+  },
+  "beginner_picks": [
+    {
+      "name": "Gen 8 雨天",
+      "reason": "计划直接，容易理解天气回合、速度控制和中转。"
+    },
+    {
+      "name": "Gen 8 预知未来 + 武道熊师",
+      "reason": "训练「提前一回合规划」和复合压制。"
+    },
+    {
+      "name": "Gen 9 恶鬼獭 + 赛富豪钉子队",
+      "reason": "快速理解 Gen 9 场地控制核心。"
+    },
+    {
+      "name": "Gen 9 快龙或仆刀将军平衡队",
+      "reason": "学习保留太晶、判断残局和管理先制招式。"
+    }
+  ],
+  "teambuilding_questions": [
+    "胜利点是谁？",
+    "需要先消耗谁？",
+    "由谁负责制造安全进场机会？"
+  ],
+  "random_battle_playbook": {
+    "meta": {
+      "name": "随机队决策方法论",
+      "scope": "Pokemon Showdown Gen 8/Gen 9 Random Battle 6v6 + Gen 9 Battle Factory",
+      "core_idea": "随机对战的核心是管理未知后排；工厂的核心是根据分级和已知配置池缩小范围。",
+      "randbats_info": "宝可梦等级经平衡，配置由预设角色生成，双方后排完全隐藏。",
+      "factory_info": "随机选定 Ubers/OU/UU/RU/NU/PU，双方获得该分级实际可用配置；可用 /battlefactory 宝可梦名,分级 查询可能配置和权重；部分高度依赖天气/场地/双墙/纯受体系的角色不进工厂池。"
+    },
+    "opening_audit": {
+      "name": "开局 30 秒队伍审计（先别只看首发对位，快速找出六个角色）",
+      "roles": [
+        {
+          "role": "胜利点",
+          "examples": ["龙舞/剑舞/诡计/蝶舞强化手", "腹鼓/破壳手", "高速围巾手", "强力先制攻击手", "Gen9 强太晶终结者"],
+          "pokemon": ["快龙", "仆刀将军", "火神蛾", "刺甲贝", "苍响/故勒顿等高速直接压制"],
+          "next_question": "对方什么东西最可能阻挡它？物理强化手通常需提前处理：天然盾、威吓手、鬼火手、物理高耐久、围巾手、强力先制。"
+        },
+        {
+          "role": "唯一速度控制",
+          "check": ["讲究围巾", "高基础速度", "电磁波", "黏黏网", "先制招式", "天气/轻装加速"],
+          "rule": "全队只有一只围巾手时，不要为开局多打 30% 血随便牺牲它；对方后排可能藏着你完全无法超速的强化手。"
+        },
+        {
+          "role": "唯一物理盾 / 特殊盾",
+          "rule": "只有一只能稳定接物理攻击时，不要轻易让它被拍落厚底靴、中剧毒、被戏法换道具、或为撒一层钉损失 70% HP。随机战最常见的错误不是单回合选错招，而是把唯一职责宝可梦消耗掉。"
+        },
+        {
+          "role": "场地控制",
+          "check": ["隐形岩/撒菱/毒菱", "除雾/高速旋转", "厚底靴", "魔法镜", "Court Change", "再生力中转"],
+          "rule": "自己无除钉时对方一旦展示钉子手就要积极阻止；自己有三四只厚底靴时不必为阻止一层隐形岩冒太大风险。"
+        },
+        {
+          "role": "状态吸收者",
+          "targets": ["鬼火", "剧毒", "催眠", "电磁波", "盐腌"],
+          "tips": ["特攻手更适合吃鬼火", "自然回复适合接状态", "魔法防守无视很多间接伤害", "毒系适合吸收毒菱", "已中毒的盾有时可继续承担其他状态"]
+        },
+        {
+          "role": "必须保留的属性免疫",
+          "focus": ["地面免疫", "电免", "鬼免", "龙免", "水免", "火免", "Gen8 的一击必杀式 Choice 锁招突破点"],
+          "rule": "只有一只地面免疫时，看到对手讲究头带地面系不能轻易送掉它。"
+        }
+      ]
+    },
+    "config_range": {
+      "name": "不要猜「一个配置」，要维护「配置范围」",
+      "core_warning": "「这只一般是围巾，所以它一定是围巾」是随机战最危险的思维。正确做法是留下两到三个候选配置，用回合信息排除。",
+      "note": "随机配置并非随意生成，而是先定角色再选招式/特性/道具，同一只宝可梦不同招式间常有关联。",
+      "record_priority": ["速度", "道具", "回复方式", "强化招式", "先制招式", "太晶属性", "最后一个补盲招式"],
+      "speed": {
+        "warning": "对方先出手不一定代表围巾，还可能是：基础速度更快、等级不同、性格不同、轻装/天气加速、你被降速、携带先制之爪等。Random Battle 有等级平衡，不能只按标准 100 级种族值判断速度。"
+      },
+      "item": {
+        "signals": [
+          "无剩饭回复→可能厚底靴/讲究道具/攻击道具",
+          "被钉子打 12.5%→不是厚底靴",
+          "伤害明显偏高→考虑头带/眼镜/命玉",
+          "一直重复同一招→可能讲究锁招，但也可能只是最佳选择",
+          "受克制攻击后提升能力→考虑弱点保险",
+          "出场恢复 HP→考虑再生力而非剩饭"
+        ]
+      },
+      "config_correlation": {
+        "戏法": "优先考虑讲究围巾或讲究眼镜",
+        "替身": "通常需考虑强化、剧毒消耗或浆果配置",
+        "保护": "可能在侦察讲究锁招，也可能配合剧毒/盐腌/剩饭",
+        "拍落": "往往承担进度制造职责",
+        "高速旋转": "速度提升后要重新计算谁更快",
+        "龙舞/蝶舞": "从这一回合开始，必须按「可能直接推队」处理"
+      }
+    },
+    "opening_matchups": [
+      {
+        "id": "a",
+        "name": "首发优势但对方后排未知",
+        "example": "水系首发对火系",
+        "avoid": "不要无脑点击水系最大威力招，先考虑对方换入：水免特性、草系、龙系、再生力水盾、携带弱点保险/抗性果的诱饵",
+        "prefer": ["撒钉", "拍落", "U-turn/Volt Switch", "命中稳定、惩罚换人的中性招式"],
+        "when_attack_directly": ["对方当前宝可梦威胁很大不能让它免费行动", "招式即使被抵抗也够伤", "已看见主要换入点", "命中后进入明确收割区间"]
+      },
+      {
+        "id": "b",
+        "name": "首发劣势但不知对方有无补盲",
+        "example": "钢系对地面系、飞行系对冰系",
+        "core_question": "留场失败损失什么？换人被预读又损失什么？",
+        "rule": "当前是唯一盾牌/唯一除钉手/胜利点→倾向换人；当前价值低且换入点一旦吃补盲就崩盘→考虑留下侦察。",
+        "decision_lines": [
+          "留场最坏是死，换人最坏只掉 30%：换",
+          "留场最坏掉 40%，换人可能让核心被二倍克制击杀：考虑留",
+          "对方当前招几乎无点击成本：不要过度预读",
+          "对方刚展示讲究锁招：利用锁招主动换位"
+        ]
+      },
+      {
+        "id": "c",
+        "name": "双方都是中转手",
+        "example": "双方都有 U-turn/Volt Switch/Flip Turn",
+        "compete_on": ["谁中转速度更慢能后手安全送人", "谁更怕钉子", "谁的地面免疫/电免还健康", "谁先暴露破盾手", "谁能用拍落破坏对方中转循环"],
+        "rules": ["开局少做高风险双换", "优先拍落厚底靴", "确认对方电免后伏特替换才真正闭环", "对方明显要 U-turn 时换入头盔/铁刺/粗糙皮肤惩罚", "别让唯一电免被磨损到无法接电招"]
+      }
+    ],
+    "choice_items": {
+      "name": "遇到讲究配置怎么处理",
+      "scarf": {
+        "signals": ["超过正常应更快的宝可梦", "输出没头带/眼镜高", "持续重复一个招式", "遇抗性目标立即换出"],
+        "response": ["别立刻送唯一抗性，先想对方会不会预读", "用保护侦察", "用免疫属性卡锁招", "对方锁入变化招/低威力招时立即强化或撒钉", "记录是否还可能戏法"],
+        "case": "围巾龙系锁逆鳞：有妖精系直接换妖争免费回合；无妖精考虑钢系/物盾/先制收割；计算逆鳞持续回合；别让钢系为多打一次脱离健康线。"
+      },
+      "band_or_specs": {
+        "principle": "避免反复「确认伤害」，第一次伤害已明显超常规区间就按高火力配置处理",
+        "response": ["利用免疫而非仅抗性", "用再生力中转", "逼它锁入低收益招", "用保护耗 PP 和侦察", "必要时牺牲低价值单位送高速复仇者"]
+      },
+      "trick": {
+        "best_target": ["只有一个主要输出招的攻击手", "已完成撒钉任务的首发", "不依赖剩饭的高速手", "反而能利用围巾的慢速高攻单位"],
+        "worst_target": ["需回复+状态循环的盾牌", "强化手", "依赖四招覆盖面的残局核心", "需厚底靴反复除钉的宝可梦"]
+      }
+    },
+    "setup_sweeper": {
+      "name": "遇到强化手：先判断「必须立刻打」还是「可以侦察」",
+      "check_order": ["强化一次后是否超我全队", "我有没有天然/黑雾/吹飞/清除之烟", "有没有先制", "有没有围巾手仍能超速", "有没有满血结实/多重鳞片/气势披带", "Gen9 是否可能太晶突破反制者"],
+      "must_attack_now": ["强化一次后比全队都快", "有回复招式", "黑雾手已残血", "对方可能挑衅反强化手", "强化后可用先制击杀围巾手", "太晶后能反杀唯一克制者"],
+      "can_recon": ["有健康天然盾", "有明确相克围巾手", "对方强化也无法二击击倒你的盾", "对方严重依赖易被免疫的本系招", "对方尚未展示关键补盲"],
+      "shell_smash_case": "破壳（刺甲贝）：别只看提速，还要看防御下降；特殊先制/真空波/高威力先制往往比硬换盾有效；连续攻击破坏气势披带与替身；若有白色香草别默认防御已下降；隐形岩和少量削血可能决定能否被先制击杀。",
+      "belly_drum_case": "腹鼓手入场前应提前保持：更快先制手、天然盾、能抗其先制的宝可梦、能用再来一次锁腹鼓的高速辅助。腹鼓成功后再临时找答案通常已太迟。"
+    },
+    "stall_handling": {
+      "name": "面对耐久、回复和消耗配置",
+      "rule1": "不要平均消耗六只——最差是把对方六只都打到 70% 却一只没杀。应确定一个突破目标（唯一特盾/唯一物盾/唯一除钉手/唯一天然盾/唯一地面免疫），集中用拍落、剧毒、钉子、戏法、挑衅、预知未来、双换、PP 压力突破。",
+      "regenerator": "超坏星/呆呆王换出即回，单次打 35% 未必是有效进度。破解：先拍落厚底靴→铺钉→预判换入双换至突破手→挑衅阻止回复→戏法破坏功能→强化逼它不能只靠换出恢复→伤害集中到超过再生力回复的区间。",
+      "protect": "保护不只是拖回合，可能在侦察讲究锁招/获取剩饭/累积毒盐天气伤害/消耗天气场地光墙回合/等预知未来落下。对方明显要保护时可免费强化、撒钉、替身、换入更强破盾手、用延迟伤害、双换；但别每次都预读，对方也可能利用你贪强化直接攻击。"
+    },
+    "hazards": {
+      "name": "钉子局怎么打",
+      "have_hazards_opp_no_removal": "尽早铺，但别为第二三层撒菱牺牲关键宝可梦。收益顺序：隐形岩→第一层撒菱→第二三层撒菱→毒菱。实际看阵容：多飞行/飘浮→撒菱价值降；多厚底靴→先拍落；多毒系→毒菱价值降；四倍弱岩→隐形岩价值极高；对方魔法镜→别机械撒钉。",
+      "no_removal": "更主动：阻止对方免费铺场、少做无收益反复换人、提前规划牺牲顺序、保持厚底靴角色健康、用进攻逼对方无法补钉、别把气势披带/结实角色交给场地伤害。",
+      "opponent_gholdengo": "Gen9 别看到除雾/高速旋转就默认能清场。先确认：对方赛富豪是否已出现、你的旋转手能否击败它、能否预读赛富豪换入用地面/恶/火系招、能否拍落其气球或围巾、必要时先攻击而非立即旋转。"
+    },
+    "tera": {
+      "name": "Gen9 太晶局核心思路",
+      "high_value_uses": ["避免被复仇击杀", "反转弱点获得强化回合", "保留唯一盾牌", "阻止对方一只推队", "加强先制完成残局"],
+      "opening_tera_threshold": ["直接击杀对方最重要核心", "阻止自己立即崩盘", "获得几乎确定的多杀", "保住唯一速度控制或防守答案", "能明确建立不可逆优势"],
+      "not_worth": "仅为普通攻击多打 30%~50% 通常不值得。",
+      "dont_premature_mate": "对手未太晶时别过早宣布将死。如地面招击杀仆刀将军，但它可能太晶飞行；格斗击杀它可能太晶幽灵/飞行。正确做法：一只逼出太晶、另一只处理太晶后属性；或先用中性稳定招压血，不立刻赌唯一克制招。",
+      "role_change_after_tera": "太晶后原属性职责可能消失：飞行系太晶钢后不再免疫地面；水系太晶草后不再承担火抗；幽灵系太晶后可能失去旋转阻挡；钢系太晶后可能失去毒免外其他关键抗性。太晶前必须检查：改属性后后排有没有某个敌人突然无人可挡。"
+    },
+    "sacrifice": {
+      "name": "牺牲选择：随机战最关键技术之一",
+      "core": "劣势局不是「不能死人」，而是要死对宝可梦。",
+      "good_sacrifice": ["已完成撒钉任务的低血量首发", "已失去道具且无法再承担职责的盾牌", "对对方后排几乎无有效招式的宝可梦", "速度不足且无法承担先制/状态功能的残血单位", "与主要胜利路线无关的角色"],
+      "dont_sacrifice": ["唯一速度控制", "唯一先制手", "唯一地面/电/鬼免疫", "唯一除钉手", "满血可凭结实/多重鳞片挡一次强化的角色", "能阻止对方残局核心的天然盾", "自己唯一胜利点"],
+      "faint_vs_hard_switch": "对方高火力眼镜手在场、突破手无法安全换入时：硬换→突破手先吃 60% 后续失去清场能力；合理牺牲→让低价值残血单位倒下再无伤送入突破手。后者往往才是正确选择。"
+    },
+    "endgame": {
+      "name": "残局如何判断（三对三或二对二后简化为三问）",
+      "questions": [
+        "谁最快？（原始速度/围巾/强化后/高速旋转加速/轻装/天气/先制及优先度）",
+        "谁能承受一次攻击？（不只克制，还看当前 HP/钉子/命玉反伤/天气/剩饭/太晶改属性/对方是否可能带高威力补盲）",
+        "需要保存哪只作为残局保险？（对方还藏未知后排时：别过早锁地面招送飞行系免费回合；别把唯一先制手拿去换低威胁盾牌；别让围巾手被拍落；己方强化手能赢时优先清状态手和天然盾）"
+      ]
+    },
+    "factory": {
+      "name": "工厂模式特有对局方法",
+      "core_diff": "配置更接近实际分级环境，且可查配置池。Gen9 工厂随机进 Ubers/OU/UU/RU/NU/PU，宝可梦与配置按环境可用性加权；常见配置更值得优先假设，但低权重配置不能完全排除。",
+      "steps": [
+        "第一回合确认当前分级（分级直接改变速度线/常见盾牌/太晶属性/核心定位/围巾必要性判断）",
+        "用 /battlefactory 宝可梦名,分级 查询可能道具/招式组合/太晶属性/每套配置权重（中文界面不影响命令）",
+        "通过已展示招式定位完整配置：如查询到围巾四攻/厚底靴强化/头带破盾三套，一旦展示龙舞就排除围巾和头带，不必把所有招式都当可能",
+        "按正常分级思路找队伍结构：强物攻手出现→后排可能有特破或场地支持；钉子手→后排可能有阻止清场或高速压制；耐久中转→后排常需安全进场的攻击手；还没展示速度控制→警惕后排围巾。但别把结构推测当确定信息。"
+      ]
+    },
+    "turn_checklist": {
+      "name": "最实用的回合决策清单",
+      "steps": [
+        "对方最强的直接选择是什么？（先防最直接、收益稳定的招式，别一上来防三层预读）",
+        "它有没有能立即推队的强化选择？（有就不能只按普通攻击处理）",
+        "我的换入点被补盲命中会怎样？（只掉血可换；直接死亡并导致全队崩盘需重新考虑；两个换入点优先选职责较不关键的一个）",
+        "我当前宝可梦的长期价值是什么？（别让唯一职责角色承担不必要风险）",
+        "最坏结果是否可接受？（随机战不要求每回合最大收益，而是避免一次错误直接输掉整局）"
+      ]
+    },
+    "cases": [
+      {
+        "name": "对方残血高速手、你可先制击杀",
+        "lesson": "别立即点先制，先检查：对方能否太晶为抗性/免疫、是否可能换人、先制手是否暴露讲究锁招、击杀后对方会不会免费送上强化手。若击杀后对方仆刀将军能免费剑舞、而你先制手又锁入无效招，这个「击杀」反而可能输局。"
+      },
+      {
+        "name": "对方盾牌频繁回复",
+        "lesson": "别用同一只攻击手反复打 40% 让对方回复。按顺序：拍落剩饭/厚底靴→铺钉→回复回合强化或双换→戏法限制→集中突破而非平均消耗。"
+      },
+      {
+        "name": "对方未知后排、你有满血强化手",
+        "lesson": "别因当前对位好就立刻强化两次。更合理：先强化一次→观察对方换入什么反制→保留 HP 和太晶→判断对方是否有围巾/天然/先制→确认答案被削弱后再最终强化。"
+      },
+      {
+        "name": "自己明显阵容劣势",
+        "lesson": "随机队有时确实天然对位差，别继续打标准联防，应主动创造高方差胜机：提前强化、诱导锁招、太晶反杀、主动双换、用麻痹/催眠/混乱创造机会、必要时保留高命中方案而非依赖低命中绝招。优势局降低风险，劣势局才适当提高风险。"
+      }
+    ],
+    "advantage": {
+      "name": "优势局怎么打",
+      "en": "Advantage Position",
+      "core": "同一动作在不同胜率下价值不同。优势局应降低风险，劣势局才适当提高风险。",
+      "rules": [
+        "减少不必要预读，选择覆盖对方多种回应的稳健动作",
+        "避免低命中招式",
+        "保留太晶和速度控制",
+        "通过一换一简化局面",
+        "防止对方唯一的翻盘强化手获得机会"
+      ]
+    },
+    "disadvantage": {
+      "name": "劣势局怎么打",
+      "en": "Disadvantage Position",
+      "core": "劣势局要主动创造高方差胜机，拒绝「稳定但必输」的交换。",
+      "rules": [
+        "制造配置误判",
+        "增加双换和强化频率",
+        "寻找麻痹、催眠、要害等合理高方差路线",
+        "诱导对方锁入错误招式",
+        "用太晶制造一个对手未覆盖的分支",
+        "不要无脑点击低命中招式，仍要比较不同高方差路线的实际翻盘概率"
+      ],
+      "risk_param": "胜率>0.70→高风险厌恶；胜率<0.30→高方差寻求；中间→均衡搜索。"
+    },
+    "principles": [
+      "先识别唯一职责，再决定谁能掉血。",
+      "按配置范围行动，不要过早认定唯一配置。",
+      "未知后排存在时，优先保留速度控制、先制和属性免疫。",
+      "优势局少赌，劣势局才通过双换、强化或太晶制造高收益。",
+      "不要追求每回合最优，而要避免不可逆的输点。"
+    ],
+    "record_habit": {
+      "name": "最值得养成的记录习惯",
+      "example": [
+        "对方1：疑似围巾，已展示 U-turn / 地震",
+        "对方2：厚底靴，物理盾，有回复",
+        "对方3：强化手，太晶未知",
+        "对方太晶：未使用",
+        "我方必须保留：围巾手 + 地面免疫",
+        "我的胜利路线：拍落物理盾后，快龙龙舞"
+      ],
+      "conclusion": "做到这一点，随机对战就会从「猜拳」逐渐变成带概率的信息管理游戏。"
+    }
+  }
+}
