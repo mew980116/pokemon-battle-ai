@@ -13,6 +13,8 @@ var NATURES = require('./knowledge/natures.json');
 var MOVES = require('./knowledge/moves.json');
 var TACTICS = require('./knowledge/tactics.json');
 var MECHANICS = require('./knowledge/mechanics.json');
+var ABILITIES = require('./knowledge/abilities.json');
+var ABILITY_SIGNALS = require('./knowledge/ability_signals.json');
 
 var TYPE_NAMES = TYPECHART.types;   // 18 个属性名，与主脚本 sys.type 顺序对齐
 var CHART = TYPECHART.chart;        // 18x18 克制矩阵
@@ -303,6 +305,20 @@ var TOOL_DEFS = [
                     move: { type: 'string', description: 'Move name (English or Chinese) or move number. E.g. "Earthquake", "地震", or "89".' }
                 },
                 required: ['move']
+            }
+        }
+    },
+    {
+        type: 'function',
+        function: {
+            name: 'get_ability_info',
+            description: 'Look up an ability details: description, whether it triggers a visible message in the battle log (and when), and how to infer/exclude it from the battle log (e.g. via status/type/effect changes). Use to check ability mechanics and to infer an opponent ability from observed triggers.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    ability: { type: 'string', description: 'Ability name (English or Chinese) or PO ability number. E.g. "Intimidate", "威吓", or "22".' }
+                },
+                required: ['ability']
             }
         }
     }
@@ -928,6 +944,28 @@ function getMoveInfo(args) {
     };
 }
 
+// ===== get_ability_info：查特性详情 + 触发提示（数据来自 knowledge/abilities.json + ability_signals.json）=====
+function getAbilityInfo(args) {
+    var name = args.ability || args.name;
+    if (!name) return { error: 'missing ability name' };
+    var lname = String(name).trim().toLowerCase();
+    var num = null;
+    if (/^\d+$/.test(lname) && ABILITIES.byNum[lname]) num = lname;
+    if (!num) num = ABILITIES.byName[lname];
+    if (!num) num = ABILITIES.byName[String(name).trim()];
+    if (!num) return { error: 'unknown ability: ' + name };
+
+    var a = ABILITIES.byNum[num];
+    return {
+        num: num,
+        name: a.name,
+        name_zh: a.name_zh || '',
+        desc: a.desc_zh || a.desc_en || '',
+        merged: a.merged || null,
+        signal: ABILITY_SIGNALS[num] || null
+    };
+}
+
 // tool 执行器：根据 name 分发；ctx 含 state（供 get_battle_history 读取战报）+ notes（笔记存储）+ turn
 function runTool(name, args, ctx) {
     if (name === 'get_type_matchup') return getTypeMatchup(args);
@@ -945,6 +983,7 @@ function runTool(name, args, ctx) {
     if (name === 'battle_tips') return battleTips(args);
     if (name === 'get_knowledge') return getKnowledge(args);
     if (name === 'get_move_info') return getMoveInfo(args);
+    if (name === 'get_ability_info') return getAbilityInfo(args);
     return { error: 'unknown tool: ' + name };
 }
 

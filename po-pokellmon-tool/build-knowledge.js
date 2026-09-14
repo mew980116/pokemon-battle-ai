@@ -208,6 +208,97 @@ function buildMoves() {
     return result;
 }
 
+// 构建 abilities.json（num -> {name, name_zh, desc_zh, desc_en, has_msg, merged}）
+// 数据源：abilities.txt（英文名，含 A/B 合并）+ zh-cn abilities.txt（中文名）
+//        + ability_desc.txt（中文描述）+ ability_battledesc.txt（英文描述）
+//        + ability_messages.txt（判断是否有专门触发消息）
+function buildAbilities() {
+    const byNum = {};
+    const byName = {};
+
+    // 英文名（abilities.txt）：num name（可能含 A/B 合并标记）
+    const enLines = readText(path.join(DATA, 'abilities', 'abilities.txt')).split('\n');
+    for (const line of enLines) {
+        const t = line.trim();
+        if (!t) continue;
+        const idx = t.indexOf(' ');
+        if (idx < 0) continue;
+        const num = parseInt(t.substring(0, idx), 10);
+        const name = t.substring(idx + 1).trim();
+        byNum[num] = byNum[num] || {};
+        byNum[num].name = name;
+        if (name.indexOf('/') >= 0) {
+            byNum[num].merged = name.split('/').map(s => s.trim());
+        }
+    }
+
+    // 完全合并（英文名无斜杠，但 PO 实际并入另一个特性，仅中文名暴露斜杠）
+    const EXTRA_MERGED = { 164: ['Teravolt', 'Turboblaze'] };
+    for (const num in EXTRA_MERGED) {
+        if (byNum[num]) byNum[num].merged = EXTRA_MERGED[num];
+    }
+
+    // 中文名（zh-cn abilities.txt）：num 中文名
+    const zhLines = readText(path.join(DATA, 'zh-cn', 'db', 'abilities', 'abilities.txt')).split('\n');
+    for (const line of zhLines) {
+        const t = line.trim();
+        if (!t) continue;
+        const idx = t.indexOf(' ');
+        if (idx < 0) continue;
+        const num = parseInt(t.substring(0, idx), 10);
+        const name = t.substring(idx + 1).trim();
+        if (byNum[num]) byNum[num].name_zh = name;
+    }
+
+    // 中文描述（ability_desc.txt）：num 描述
+    const descZhLines = readText(path.join(DATA, 'abilities', 'ability_desc.txt')).split('\n');
+    for (const line of descZhLines) {
+        const t = line.trim();
+        if (!t) continue;
+        const idx = t.indexOf(' ');
+        if (idx < 0) continue;
+        const num = parseInt(t.substring(0, idx), 10);
+        const desc = t.substring(idx + 1).trim();
+        if (byNum[num]) byNum[num].desc_zh = desc;
+    }
+
+    // 英文描述（ability_battledesc.txt）：num 描述
+    const descEnLines = readText(path.join(DATA, 'abilities', 'ability_battledesc.txt')).split('\n');
+    for (const line of descEnLines) {
+        const t = line.trim();
+        if (!t) continue;
+        const idx = t.indexOf(' ');
+        if (idx < 0) continue;
+        const num = parseInt(t.substring(0, idx), 10);
+        const desc = t.substring(idx + 1).trim();
+        if (byNum[num]) byNum[num].desc_en = desc;
+    }
+
+    // 触发消息（ability_messages.txt）：特性英文名出现在消息文本里 → has_msg=true
+    const msgLower = readText(path.join(DATA, 'abilities', 'ability_messages.txt')).toLowerCase();
+    for (const num in byNum) {
+        const a = byNum[num];
+        const names = a.merged || [a.name];
+        let hasMsg = false;
+        for (const n of names) {
+            if (n && n !== '(No Ability)' && msgLower.indexOf(n.toLowerCase()) >= 0) { hasMsg = true; break; }
+        }
+        a.has_msg = hasMsg;
+        byName[a.name.toLowerCase()] = parseInt(num, 10);
+        if (a.name_zh) {
+            byName[a.name_zh] = parseInt(num, 10);
+            if (a.name_zh.indexOf('/') >= 0) {
+                for (const z of a.name_zh.split('/')) byName[z.trim()] = parseInt(num, 10);
+            }
+        }
+        if (a.merged) {
+            for (const n of a.merged) byName[n.toLowerCase()] = parseInt(num, 10);
+        }
+    }
+
+    return { byNum, byName };
+}
+
 function main() {
     fs.mkdirSync(KNOWLEDGE, { recursive: true });
 
@@ -222,9 +313,13 @@ function main() {
     const moves = buildMoves();
     fs.writeFileSync(path.join(KNOWLEDGE, 'moves.json'), JSON.stringify(moves, null, 2));
 
+    const abilities = buildAbilities();
+    fs.writeFileSync(path.join(KNOWLEDGE, 'abilities.json'), JSON.stringify(abilities, null, 2));
+
     console.log('pokemon.json: ' + pn + ' pokemon, ' + pnn + ' name index entries');
     console.log('natures.json: ' + Object.keys(natures.byNum).length + ' natures');
     console.log('moves.json: ' + Object.keys(moves).length + ' moves (with type)');
+    console.log('abilities.json: ' + Object.keys(abilities.byNum).length + ' abilities');
 }
 
 main();
