@@ -35,7 +35,7 @@
   "101": { "trigger": "主动出招", "msg": "", "note": "无消息；威力≤60的招式×1.5，看低威力招伤害偏高判断" },
   "91": { "trigger": "主动出招", "msg": "", "note": "无消息；本系加成从1.5变2.0，看本系招伤害偏高判断" },
   "175": { "trigger": "主动出招", "msg": "X's Protean changed its type（%a，属性变化）", "note": "PO合并：Protean/Libero效果相同=出招前变招式的属性；看「出招后属性变了」判断" },
-  "174": { "trigger": "主动出招(一般系)", "msg": "", "note": "无消息；一般系招式变妖精系，看克制关系变化判断（注意：一般系和妖精系对钢都是0.5x，需选对钢以外有差异的属性）" },
+  "174": { "trigger": "主动出招(一般系)", "msg": "", "note": "无消息；一般系招式变妖精系，看克制关系变化判断（如打幽灵系 0x→1x 从无效变有效，打龙/格斗/恶系 1x→2x 变克制）" },
   "3": { "trigger": "回合末", "msg": "X's Speed Boost increases its speed!", "note": "每回合末速度升1级，有消息" },
   "153": { "trigger": "击倒对手后", "msg": "X's Moxie raises its attack（%a raised）", "note": "PO合并：Moxie/Chilling Neigh效果相同=击倒后攻击升1级；看「击杀后攻击上升」判断" },
   "2": { "trigger": "入场", "msg": "X's Drizzle made it rain!", "note": "入场开雨天，有消息" },
