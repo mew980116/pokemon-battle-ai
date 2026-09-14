@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8092";
-var PKLM_VERSION = "0.5.21";       // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.5.22";       // 脚本版本（改动时 bump，随日志记录）
 var pklmLastWebFailTime = 0;       // 上次 webCall 失败时间戳（ms），用于断线时节流重发
 var pklmSilent = false;            // 静默模式：清分少女等无人值守 BOT 账号不向 PO 窗口 print 任何脚本输出
 
@@ -80,6 +80,8 @@ var pklmTeamPreview = null;       // null=未检测, true=有 team preview, fals
 var pklmLastAttackSlot = -1;      // 上一回合使用的攻击槽位（-1 表示未攻击）
 var pklmLockedSlot = -1;          // 当前被锁定的招式槽位（Choice 道具锁招）
 var pklmBannedSlots = [];         // 本轮被 PO 拒绝的招式槽位（拒绝后 ban 掉重新决策）
+var pklmLastSwitchSlot = -1;      // 上一回合尝试的换人槽位（-1 表示未换人）
+var pklmBannedSwitch = [];        // 被 PO 拒绝的换人槽位（踩影等禁换人）
 var pklmMessages = [];            // 对战中发送的 message（评论，进日志）
 var pklmFinalAttack = false;      // 保底标志：全 ban 后强制 attack，不再响应取消
 var pklmShadowMode = false;       // 影子模式：照发 DS 请求并记 log，但不执行 DS 指令，改由用户手动操作
@@ -369,6 +371,7 @@ function pklmCollectBench() {
     var arr = [];
     for (var i = 1; i < 6; i++) {
         try {
+            if (pklmBannedSwitch.indexOf(i) !== -1) continue;   // 被 PO 拒绝过的换人槽位不再提供给 LLM
             var tp = pklmTpoke(i);
             if (tp.isKoed()) continue;
             var o = {
@@ -537,6 +540,21 @@ function pklmCollectState() {
         if (pklmTurnLog.length > prefix2.length) fullHist.push(pklmTurnLog);
     }
 
+    // 被 PO 拒绝过的招式/换人（反馈给 LLM：这些已尝试但被 PO 禁止）
+    var bannedMoves = [];
+    for (var bi = 0; bi < pklmBannedSlots.length; bi++) {
+        try {
+            var bmv = pklmTpoke(0).move(pklmBannedSlots[bi]);
+            if (bmv && bmv.num > 0) bannedMoves.push(sys.move(bmv.num));
+        } catch (e) {}
+    }
+    var bannedSwitches = [];
+    for (var bj = 0; bj < pklmBannedSwitch.length; bj++) {
+        try {
+            bannedSwitches.push(sys.pokemon(pklmTpoke(pklmBannedSwitch[bj]).numRef));
+        } catch (e) {}
+    }
+
     return {
         account: pklmAccount,
         log: pklmLogEnabled,
@@ -545,6 +563,8 @@ function pklmCollectState() {
         turn: pklmCurrentTurn,
         shadow: pklmShadowMode,
         teamPreview: pklmTeamPreview,
+        bannedMoves: bannedMoves,
+        bannedSwitches: bannedSwitches,
         history: hist,
         fullHistory: fullHist,
         messages: pklmMessages.slice(),
@@ -611,6 +631,7 @@ function pklmDecideAndAct() {
             if (ps >= 1 && ps <= 5) {
                 pklmSendCommand({ slot: battle.me, type: "switch", pokeSlot: ps });
                 pklmLastAttackSlot = -1;   // 换人后重置锁招
+                pklmLastSwitchSlot = ps;   // 记录本次换人槽位（若被 PO 拒绝则 ban 掉）
             } else {
                 pklmPrint("invalid pokeSlot, fallback attack");
                 pklmFallbackAttack();
@@ -620,6 +641,7 @@ function pklmDecideAndAct() {
             if (isNaN(ms) || ms < 0 || ms > 3) ms = 0;
             pklmSendCommand({ slot: battle.me, type: "attack", attackSlot: ms });
             pklmLastAttackSlot = ms;   // 记录上一回合攻击槽位（用于下回合锁招检测）
+            pklmLastSwitchSlot = -1;
         }
     } catch (e) {
         pklmLastWebFailTime = new Date().getTime();   // 记录失败时间戳，供节流
@@ -702,6 +724,7 @@ function pklmSpotLabel(spot) {
     onBeginTurn: function (turn) {
         pklmCurrentTurn = turn;
         pklmBannedSlots = [];        // 新回合清空 ban 列表
+        pklmBannedSwitch = [];       // 新回合清空换人 ban 列表（踩影可能下回合解除）
         pklmFinalAttack = false;     // 新回合重置保底标志
         pklmPushTurn();
         pklmTurnLog = "Turn " + turn + ": ";
@@ -846,8 +869,12 @@ function pklmSpotLabel(spot) {
         if (player !== battle.me) return;
         if (battleEnd || !useLLM) return;
         if (pklmFinalAttack) return;   // 已保底过，不再响应取消
-        // 指令被 PO 拒绝：ban 掉刚发的招式槽位，重新召唤 DS 决策
-        if (pklmLastAttackSlot >= 0 && pklmBannedSlots.indexOf(pklmLastAttackSlot) === -1) {
+        // 指令被 PO 拒绝：区分「换人被拒」（踩影等）与「招式被拒」（专爱锁招/挑衅/倒下等），分别 ban 掉并重新决策
+        if (pklmLastSwitchSlot >= 1 && pklmBannedSwitch.indexOf(pklmLastSwitchSlot) === -1) {
+            pklmBannedSwitch.push(pklmLastSwitchSlot);
+            pklmPrint("switch slot " + pklmLastSwitchSlot + " rejected, banned, re-decide");
+            pklmLastSwitchSlot = -1;
+        } else if (pklmLastAttackSlot >= 0 && pklmBannedSlots.indexOf(pklmLastAttackSlot) === -1) {
             pklmBannedSlots.push(pklmLastAttackSlot);
             pklmPrint("slot " + pklmLastAttackSlot + " rejected, banned, re-decide");
         } else {
