@@ -188,7 +188,7 @@
     "26": {
       "name": "Levitate",
       "name_zh": "飘浮",
-      "desc_zh": "拥有浮游特性的怪兽不会受到地属性技能攻击。",
+      "desc_zh": "拥有浮游特性的怪兽不会受到地属性技能攻击。（提示：该特性使宝可梦被视为不接触地面 grounded=false——不吃青草场地回复、不受电气场地影响、免疫撒菱/毒菱/黏黏网）",
       "desc_en": "Makes a Pokémon with this ability immune to Ground moves, Spikes, Toxic Spikes and Sticky Web, as well as the effect of Arena Trap.",
       "has_msg": false
     },

@@ -253,6 +253,10 @@ function buildAbilities() {
     // 中文描述（ability_desc.txt）：num 描述（该文件为 UTF-16 LE 编码）
     const descZhRaw = fs.readFileSync(path.join(DATA, 'abilities', 'ability_desc.txt'), 'utf16le').replace(/^\uFEFF/, '');
     const descZhLines = descZhRaw.split('\n');
+    // 手工补充的机制 tips（PO 数据缺失的机制细节）
+    const DESC_TIPS = {
+        26: '（提示：该特性使宝可梦被视为不接触地面 grounded=false——不吃青草场地回复、不受电气场地影响、免疫撒菱/毒菱/黏黏网）'
+    };
     for (const line of descZhLines) {
         const t = line.trim();
         if (!t) continue;
@@ -260,7 +264,7 @@ function buildAbilities() {
         if (idx < 0) continue;
         const num = parseInt(t.substring(0, idx), 10);
         const desc = t.substring(idx + 1).trim();
-        if (byNum[num]) byNum[num].desc_zh = desc;
+        if (byNum[num]) byNum[num].desc_zh = desc + (DESC_TIPS[num] || '');
     }
 
     // 英文描述（ability_battledesc.txt）：num 描述
