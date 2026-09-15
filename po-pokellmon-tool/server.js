@@ -20,7 +20,7 @@ var tools = require('./tools.js');
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.3.30';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.3.31';   // tool 分支版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（tool 分支：思考 + tool，强度 low）====
 var MODEL = 'deepseek-v4-flash';
@@ -190,6 +190,7 @@ function buildOppBench(state) {
             var s = '[' + t.name;
             if (t.hpPct !== null && t.hpPct !== undefined) s += ',' + t.hpPct + '%';
             if (t.status) s += ',' + t.status;
+            if (t.abilityInferred) s += ',A:' + t.abilityInferred;
             s += ']';
             parts.push(s);
         } else {
@@ -257,7 +258,12 @@ function buildPrompt(state, notes) {
     if (opp.name) {
         var oppStatus = opp.status ? 'Status:' + opp.status + ',' : '';
         var oppBoosts = (opp.boosts && opp.boosts.length) ? 'Boosts:[' + opp.boosts.join(',') + '],' : '';
-        p += 'Opponent current pokemon:' + opp.name + ':Type:' + oppTypes.join('&') + ',HP:' + (opp.hpPct || 0) + '%,' + oppStatus + oppBoosts + '\n';
+        var oppAbi = opp.abilityInferred ? 'Ability:' + opp.abilityInferred + ',' : '';
+        var oppPossible = '';
+        if (!opp.abilityInferred && opp.possibleAbilities && opp.possibleAbilities.length) {
+            oppPossible = 'PossibleAbilities:[' + opp.possibleAbilities.join('/') + '],';
+        }
+        p += 'Opponent current pokemon:' + opp.name + ':Type:' + oppTypes.join('&') + ',HP:' + (opp.hpPct || 0) + '%,' + oppAbi + oppPossible + oppStatus + oppBoosts + '\n';
         if (opp.fainted) {
             p += 'NOTE: The opponent current pokemon has fainted and will send out a replacement this turn.\n';
         }

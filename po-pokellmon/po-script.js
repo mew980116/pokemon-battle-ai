@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8092";
-var PKLM_VERSION = "0.5.24";       // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.6.0";       // 脚本版本（改动时 bump，随日志记录）
 var pklmLastWebFailTime = 0;       // 上次 webCall 失败时间戳（ms），用于断线时节流重发
 var pklmSilent = false;            // 静默模式：清分少女等无人值守 BOT 账号不向 PO 窗口 print 任何脚本输出
 var pklmFailCount = 0;             // 连续 webCall 失败次数（成功即归零）
@@ -75,7 +75,13 @@ var pklmHistory = [];
 var pklmFullHistory = [];          // 完整战报（不限长度，供 tool 的 get_battle_history 读取）
 var pklmTurnLog = "";
 var pklmCurrentTurn = 0;
-var pklmOppMoves = {};           // 对手每只宝可梦（按 numRef 区分）已暴露招式 { numRef: [{name,type}] }
+var pklmOppMoves = [{}, {}, {}, {}, {}, {}];  // 对手每只宝可梦（按记录 slot 区分）已暴露招式 [slot]: [{name,type}]
+var pklmOppSlots = [0, 1, 2, 3, 4, 5];        // 记录 slot i 当前在哪个队伍槽位（0=场上，1-5=后备；初始 i→i）
+var pklmCurrentOppSlot = 0;                    // 当前场上对手宝可梦对应的记录 slot
+var pklmOppAbility = [-1, -1, -1, -1, -1, -1]; // 记录 slot → 已确定特性 ID（-1 未知）
+var pklmOppPossible = [[], [], [], [], [], []]; // 记录 slot → 可能特性列表（sys.pokeAbility 3 个）
+var pklmOppJustSwitched = false;               // 换入后待反向排除入场特性的标记
+var pklmOppAbilityTriggered = false;           // 换入后是否已触发过特性消息
 var pklmOppSeen = [];             // 对手已暴露的后备宝可梦名列表（含场上）
 var pklmMyRevealed = [];          // 我方已出场过的宝可梦 numRef 列表（非 team preview 时用于标记对方未知的宝可梦）
 var pklmTeamPreview = null;       // null=未检测, true=有 team preview, false=无（首次决策时检测并缓存）
@@ -90,6 +96,167 @@ var pklmShadowMode = false;       // 影子模式：照发 DS 请求并记 log�
 var pklmLastMove = {};            // { spot: 最后使用的招式名 }，供消息解码 %m 占位符
 var pklmMsgTables = { move: null, item: null, ability: null, berry: null };  // 消息表懒加载缓存
 var pklmCbLog = false;            // 回调探针：开启后 print 各回调原始参数（/llm cb 切换，调试观察用）
+
+// ===== 对手 slot 追踪 + 特性解析（按记录 slot 固定身份，解决 numRef 重复；currentIndex 追踪队伍槽位）=====
+
+// 入场必定触发消息的特性（换入后若没触发任何特性消息，可从 possible 排除这些）
+var pklmEntryAbilities = [22, 2, 70, 45, 117, 198, 219, 220, 218, 104, 164, 46, 36, 88, 150, 234, 235];
+
+// 队伍槽位 i → 记录 slot
+function pklmOppSlotOf(teamSlot) {
+    for (var i = 0; i < 6; i++) {
+        if (pklmOppSlots[i] === teamSlot) return i;
+    }
+    return teamSlot;
+}
+
+// 对手换人：prevIndex = 新宝可梦上场前所在的队伍槽位（0=首发不更新）
+function pklmOppSwap(prevIndex) {
+    if (prevIndex === 0) return;
+    var oldSlot = pklmCurrentOppSlot;
+    var newSlot = -1;
+    for (var i = 0; i < 6; i++) {
+        if (pklmOppSlots[i] === prevIndex) { newSlot = i; break; }
+    }
+    if (newSlot < 0) newSlot = prevIndex;
+    pklmOppSlots[newSlot] = 0;        // 新宝可梦到场上（槽位 0）
+    pklmOppSlots[oldSlot] = prevIndex; // 旧宝可梦到后备（槽位 prevIndex）
+    pklmCurrentOppSlot = newSlot;
+}
+
+// 加载当前场上对手宝可梦的可能特性列表（首次出场时加载）
+function pklmLoadOppPossible() {
+    var slot = pklmCurrentOppSlot;
+    if (pklmOppPossible[slot].length > 0) return;
+    try {
+        var numRef = pklmFpoke(battle.opp).pokemon.numRef;
+        if (!numRef || numRef <= 0) return;
+        var possible = [];
+        for (var i = 0; i < 3; i++) {
+            var ab = sys.pokeAbility(numRef, i, 8);
+            if (ab && ab > 0 && possible.indexOf(ab) === -1) possible.push(ab);
+        }
+        pklmOppPossible[slot] = possible;
+    } catch (e) {}
+}
+
+// 反向排除：换入后没触发任何入场特性消息，则从 possible 排除入场必触发特性
+function pklmExcludeEntryAbilities() {
+    var slot = pklmCurrentOppSlot;
+    var possible = pklmOppPossible[slot];
+    for (var i = 0; i < pklmEntryAbilities.length; i++) {
+        var idx = possible.indexOf(pklmEntryAbilities[i]);
+        if (idx !== -1) possible.splice(idx, 1);
+    }
+    pklmOppPossible[slot] = possible;
+}
+
+// 通过特性消息编号 ab 正向解析特性 ID（移植主脚本 analyseCurrentAbility）
+function pklmAnalyseAbility(ab, part, other, type) {
+    var ability = 0;
+    switch (ab) {
+        case 2: ability = 106; break;
+        case 3: ability = 83; break;
+        case 4: ability = 107; break;
+        case 9: ability = 16; break;
+        case 11: ability = 56; break;
+        case 12: ability = 39; break;
+        case 13: ability = 88; break;
+        case 14: ability = [117, 2, 45, 70][part]; break;
+        case 15: ability = 87; break;
+        case 16: ability = 27; break;
+        case 17: ability = 142; break;
+        case 18: ability = other; break;
+        case 19: ability = 18; break;
+        case 21: ability = 59; break;
+        case 22: ability = 108; break;
+        case 23: ability = 119; break;
+        case 24: ability = 19; break;
+        case 29: ability = 93; break;
+        case 30: ability = other; break;
+        case 31: ability = other; break;
+        case 32: ability = other; break;
+        case 33: ability = other; break;
+        case 34: ability = 22; break;
+        case 37: ability = 102; break;
+        case 38: ability = other; break;
+        case 40: ability = other; break;
+        case 41: ability = 78; break;
+        case 44: ability = 22; break;
+        case 45: ability = 90; break;
+        case 46: ability = 46; break;
+        case 47: ability = 152; break;
+        case 50: ability = other; break;
+        case 54: ability = 61; break;
+        case 55: ability = 112; break;
+        case 56: ability = 94; break;
+        case 57: ability = 43; break;
+        case 58: ability = 3; break;
+        case 60: ability = 80; break;
+        case 61: ability = 28; break;
+        case 66: ability = 36; break;
+        case 67: ability = 54; break;
+        case 68: ability = other; break;
+        case 70: ability = other; break;
+        case 71: ability = 25; break;
+        case 74: ability = 133; break;
+        case 77: ability = 161; break;
+        case 78: ability = 124; break;
+        case 80: ability = other; break;
+        case 81: ability = 150; break;
+        case 85: ability = 140; break;
+        case 86: ability = 144; break;
+        case 88: ability = 139; break;
+        case 89: ability = other; break;
+        case 90: ability = 147; break;
+        case 91: ability = 5; break;
+        case 93: ability = 53; break;
+        case 94: ability = 154; break;
+        case 95: ability = 141; break;
+        case 96: ability = 130; break;
+        case 97: ability = 155; break;
+        case 99: ability = 131; break;
+        case 102: ability = 127; break;
+        case 103: ability = [168, 169][type - 16]; break;
+        case 104: ability = other; break;
+        case 107: ability = 175; break;
+        case 110: ability = 177; break;
+        case 112: ability = 179; break;
+        case 115: ability = 183; break;
+        case 117: ability = 166; break;
+        case 118: ability = 185; break;
+        case 120: ability = 26; break;
+        case 122: ability = 60; break;
+        case 124: ability = 188; break;
+        case 125: ability = 167; break;
+        case 126: ability = [189, 190, 191][part]; break;
+        case 127: ability = 194; break;
+        case 128: ability = [198, 219, 220, 218][part]; break;
+        case 129: ability = 199; break;
+        case 133: ability = 205; break;
+        case 138: ability = 203; break;
+        case 139: ability = 210; break;
+        case 140: ability = 208; break;
+        case 141: ability = 215; break;
+        case 142: ability = 196; break;
+        case 143: ability = 216; break;
+        case 147: ability = 211; break;
+        case 148: ability = 195; break;
+        case 149: ability = 209; break;
+        default: ability = 0;
+    }
+    return ability;
+}
+
+// 特性 ID 数组 → 特性名数组
+function pklmAbilityNames(ids) {
+    var names = [];
+    for (var i = 0; i < ids.length; i++) {
+        var n = pklmAbilityName(ids[i]);
+        if (n) names.push(n);
+    }
+    return names;
+}
 
 // 招式是否不可用（锁招 + 被 ban）
 function pklmIsMoveDisabled(m) {
@@ -362,7 +529,11 @@ function pklmCollectOppActive() {
         o.hpPct = (t > 0) ? Math.floor(l / t * 100) : 0;
         o.status = pklmStatusName(fp.pokemon.status);
         o.fainted = (fp.pokemon.status === 31);   // 对手场上是否濒死（供 prompt 提示「会换人」）
-        o.moves = pklmOppMoves[fp.pokemon.numRef] || [];   // 只取当前场上这只已暴露的招式
+        o.moves = pklmOppMoves[pklmCurrentOppSlot] || [];   // 只取当前场上这只（记录 slot）已暴露的招式
+        // 特性解析结果（从战报正向解析 + possible 反向排除）
+        var abId = pklmOppAbility[pklmCurrentOppSlot];
+        o.abilityInferred = (abId > 0) ? pklmAbilityName(abId) : null;
+        o.possibleAbilities = pklmAbilityNames(pklmOppPossible[pklmCurrentOppSlot]);
         o.boosts = pklmCollectBoosts(battle.opp);
     } catch (e) {}
     return o;
@@ -448,7 +619,7 @@ function pklmCollectMyStats() {
 function pklmCollectOppTeam() {
     var arr = [];
     for (var i = 0; i < 6; i++) {
-        var o = { name: null, revealed: false, ko: false, hpPct: null, status: null };
+        var o = { name: null, revealed: false, ko: false, hpPct: null, status: null, abilityInferred: null, possibleAbilities: [] };
         try {
             var ep = battle.data.team(battle.opp).poke(i);
             o.ko = (ep.status === 31);
@@ -460,6 +631,11 @@ function pklmCollectOppTeam() {
                     o.status = pklmStatusName(ep.status);
                 }
             }
+            // 特性解析（按记录 slot 关联）
+            var recSlot = pklmOppSlotOf(i);
+            var abId = pklmOppAbility[recSlot];
+            o.abilityInferred = (abId > 0) ? pklmAbilityName(abId) : null;
+            o.possibleAbilities = pklmAbilityNames(pklmOppPossible[recSlot]);
         } catch (e) {}
         arr.push(o);
     }
@@ -759,6 +935,12 @@ function pklmSpotLabel(spot) {
         pklmBannedSlots = [];        // 新回合清空 ban 列表
         pklmBannedSwitch = [];       // 新回合清空换人 ban 列表（踩影可能下回合解除）
         pklmFinalAttack = false;     // 新回合重置保底标志
+        // 反向排除：上一回合换入后若没触发任何入场特性消息，排除入场必触发特性
+        if (pklmOppJustSwitched && !pklmOppAbilityTriggered) {
+            pklmExcludeEntryAbilities();
+        }
+        pklmOppJustSwitched = false;
+        pklmOppAbilityTriggered = false;
         pklmPushTurn();
         pklmTurnLog = "Turn " + turn + ": ";
     },
@@ -768,15 +950,14 @@ function pklmSpotLabel(spot) {
             pklmLastMove[spot] = sys.move(attack);   // 记录最后招式名（供 %m 占位符）
             if (spot === battle.opp) {
                 var mv = { name: sys.move(attack), type: pklmTypeName(sys.moveType(attack)) };
-                // 记到「当前场上这只」名下（按 numRef 区分），换人后招式不串
-                var num = pklmFpoke(battle.opp).pokemon.numRef;
-                var list = pklmOppMoves[num] || [];
+                // 记到「当前场上这只」名下（按记录 slot 区分），换人后招式不串
+                var list = pklmOppMoves[pklmCurrentOppSlot] || [];
                 var dup = false;
                 for (var i = 0; i < list.length; i++) {
                     if (list[i].name === mv.name) { dup = true; break; }
                 }
                 if (!dup) list.push(mv);
-                pklmOppMoves[num] = list;
+                pklmOppMoves[pklmCurrentOppSlot] = list;
             }
         } catch (e) {}
     },
@@ -801,6 +982,10 @@ function pklmSpotLabel(spot) {
             var nm = sys.pokemon(pklmFpoke(spot).pokemon.numRef);
             pklmTurnLog += pklmSpotLabel(spot) + " sent out " + nm + ". ";
             if (spot === battle.opp) {
+                pklmOppSwap(prevIndex);        // 更新当前场上记录 slot（prevIndex=上场前所在槽位）
+                pklmLoadOppPossible();         // 加载可能特性列表（首次出场）
+                pklmOppJustSwitched = true;    // 标记待反向排除入场特性
+                pklmOppAbilityTriggered = false;
                 var seen = false;
                 for (var i = 0; i < pklmOppSeen.length; i++) {
                     if (pklmOppSeen[i] === nm) { seen = true; break; }
@@ -874,11 +1059,28 @@ function pklmSpotLabel(spot) {
             pklmCb("onAbilityMessage", "ab=" + ab + " part=" + part + " type=" + type + " foe=" + foe + " other=" + other);
             var txt = pklmRenderMsg('ability', 'ability_messages.txt', ab, part, pklmMsgCtx(spot, type, other, undefined, other));
             if (txt) pklmTurnLog += txt + ". ";
+            if (spot === battle.opp) {
+                pklmOppAbilityTriggered = true;  // 本回合触发过特性消息（供反向排除）
+                var ability = pklmAnalyseAbility(ab, part, other, type);
+                if (ability > 0) {
+                    pklmOppAbility[pklmCurrentOppSlot] = ability;
+                }
+            }
         } catch (e) {}
     },
     onTierNotification: function (tier) {
         pklmAutoEnable();
         pklmCheckMsgFiles();   // 对战启动扫描消息表文件依赖，缺失则提示
+        // 重置对手记录（slot 追踪 + 特性解析）
+        pklmOppMoves = [{}, {}, {}, {}, {}, {}];
+        pklmOppSlots = [0, 1, 2, 3, 4, 5];
+        pklmCurrentOppSlot = 0;
+        pklmOppAbility = [-1, -1, -1, -1, -1, -1];
+        pklmOppPossible = [[], [], [], [], [], []];
+        pklmOppJustSwitched = false;
+        pklmOppAbilityTriggered = false;
+        pklmOppSeen = [];
+        pklmMyRevealed = [];
     },
     onClauseActivated: function (clause) {},
     onEffectiveness: function (spot, effectiveness) {
