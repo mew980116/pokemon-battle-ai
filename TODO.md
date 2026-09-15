@@ -328,6 +328,8 @@
     - **已实现（po-script 0.6.0）**：正向解析（pklmAnalyseAbility 移植主脚本 switch-case）+ 入场必触发特性反向排除（17 个：威吓/天气/场地/下载/复制/察觉/压迫感/破格/不挠之剑/不屈之盾等，换入后没触发特性消息则从 possible 排除）。
     - **后续（交 LLM 排除）**：更复杂的反向排除（被攻击/回合末/免疫类特性「该触发但没触发」）系统硬编码做不彻底，后续通过 prompt 引导 LLM 用 get_ability_info 的 signal（触发时机+判断方式）自行排除，而不是系统全做。
 
+- [ ] **招式观察对手配置的解析（打落/小偷/戏法 → 道具，烦恼种子/扮演/特性交换 → 特性）**：有些招式能主动暴露对手配置：打落（Knock Off）/小偷（Thief）/抢夺（Covet）拍落或偷取对手道具（move_message.txt `%s knocked off %f's %i`），戏法/掉包交换道具；烦恼种子（Worry Seed）/胃液（Gastro Acid）消除特性，扮演（Role Play）/特性交换（Skill Swap）复制/交换特性（走 onAbilityMessage）。价值：比被动等道具/特性自己触发更主动、确定。① 先修/确认 `%i` 道具名占位符替换方向（pklmMsgCtx 的 i 用 spot 的道具，但打落消息 %i 是目标 %f 的道具，方向可能反，需实测）② 后续做道具/特性正向解析存 state（opp.itemInferred，类似 ability 正向解析）。
+
 **已实证**：
 
 - 挣扎保底（全 ban 后 `attackButton()`）不会导致卡死，兜底有效。
