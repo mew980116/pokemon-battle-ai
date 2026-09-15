@@ -15,6 +15,7 @@ var TACTICS = require('./knowledge/tactics.json');
 var MECHANICS = require('./knowledge/mechanics.json');
 var ABILITIES = require('./knowledge/abilities.json');
 var ABILITY_SIGNALS = require('./knowledge/ability_signals.json');
+var ITEMS = require('./knowledge/items.json');
 
 var TYPE_NAMES = TYPECHART.types;   // 18 个属性名，与主脚本 sys.type 顺序对齐
 var CHART = TYPECHART.chart;        // 18x18 克制矩阵
@@ -319,6 +320,20 @@ var TOOL_DEFS = [
                     ability: { type: 'string', description: 'Ability name (English or Chinese) or PO ability number. E.g. "Intimidate", "威吓", or "22".' }
                 },
                 required: ['ability']
+            }
+        }
+    },
+    {
+        type: 'function',
+        function: {
+            name: 'get_item_info',
+            description: 'Look up an item details: description and effect. Use to check what a held item does (e.g. Choice items lock a move, Leftovers heal each turn, Focus Sash survives a hit at full HP, Rocky Helmet recoils contact moves).',
+            parameters: {
+                type: 'object',
+                properties: {
+                    item: { type: 'string', description: 'Item name (English or Chinese) or PO item number. E.g. "Choice Band", "讲究头带", or "4".' }
+                },
+                required: ['item']
             }
         }
     }
@@ -983,6 +998,27 @@ function getAbilityInfo(args) {
     };
 }
 
+// ===== get_item_info：查道具详情（数据来自 knowledge/items.json）=====
+function getItemInfo(args) {
+    var name = args.item || args.name;
+    if (!name) return { error: 'missing item name' };
+    var lname = String(name).trim().toLowerCase();
+    var num = null;
+    if (/^\d+$/.test(lname) && ITEMS.byNum[lname]) num = lname;
+    if (!num) num = ITEMS.byName[lname];
+    if (!num) num = ITEMS.byName[String(name).trim()];
+    if (!num) return { error: 'unknown item: ' + name };
+
+    var a = ITEMS.byNum[num];
+    return {
+        num: num,
+        name: a.name,
+        name_zh: a.name_zh || '',
+        desc: a.desc_zh || a.desc_en || '',
+        has_msg: a.has_msg || false
+    };
+}
+
 // tool 执行器：根据 name 分发；ctx 含 state（供 get_battle_history 读取战报）+ notes（笔记存储）+ turn
 function runTool(name, args, ctx) {
     if (name === 'get_type_matchup') return getTypeMatchup(args);
@@ -1001,6 +1037,7 @@ function runTool(name, args, ctx) {
     if (name === 'get_knowledge') return getKnowledge(args);
     if (name === 'get_move_info') return getMoveInfo(args);
     if (name === 'get_ability_info') return getAbilityInfo(args);
+    if (name === 'get_item_info') return getItemInfo(args);
     return { error: 'unknown tool: ' + name };
 }
 

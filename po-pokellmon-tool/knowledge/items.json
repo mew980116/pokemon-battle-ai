@@ -1,0 +1,4225 @@
+{
+  "byNum": {
+    "0": {
+      "name": "(No Item)",
+      "name_zh": "（无）",
+      "desc_en": "(No Item)",
+      "desc_zh": "（无）",
+      "has_msg": false
+    },
+    "1": {
+      "name": "Big Root",
+      "name_zh": "大根茎",
+      "desc_en": "Increases the healing effect of Absorb, Aqua Ring, Drain Punch, Draining Kiss, Dream Eater, Giga Drain, Horn Leech, Ingrain, Leech Life, Leech Seed, Mega Drain, Oblivion Wing, and Parabolic Charge used by the holder by 30%.",
+      "desc_zh": "携带后，吸取ＨＰ的招式可以比平时更多地回复自己的ＨＰ。",
+      "has_msg": false
+    },
+    "2": {
+      "name": "Blue Scarf",
+      "name_zh": "蓝色头巾",
+      "desc_en": "Increases the holder's Beauty stat in contests.",
+      "desc_zh": "携带它去参加华丽大赛的宝可梦会比平时看上去更加美丽。",
+      "has_msg": false
+    },
+    "3": {
+      "name": "Bright Powder",
+      "name_zh": "光粉",
+      "desc_en": "Increases the holder's evasion by 10%.",
+      "desc_zh": "闪闪发光的粉末。携带后，光芒会迷惑对手，从而使其招式变得不容易命中。",
+      "has_msg": false
+    },
+    "4": {
+      "name": "Choice Band",
+      "name_zh": "讲究头带",
+      "desc_en": "Increases the holder's Attack by 50%, but prevents it from changing moves until it switches out.",
+      "desc_zh": "有点讲究的头带。虽然携带后攻击会提高，但只能使出相同的招式。",
+      "has_msg": false
+    },
+    "5": {
+      "name": "Choice Scarf",
+      "name_zh": "讲究围巾",
+      "desc_en": "Increases the holder's Speed by 50%, but prevents it from changing moves until it switches out.",
+      "desc_zh": "有点讲究的围巾。虽然携带后速度会提高，但只能使出相同的招式。",
+      "has_msg": false
+    },
+    "6": {
+      "name": "Choice Specs",
+      "name_zh": "讲究眼镜",
+      "desc_en": "Increases the holder's Special Attack by 50%, but prevents it from changing moves until it switches out.",
+      "desc_zh": "有点讲究的眼镜。虽然携带后特攻会提高，但只能使出相同的招式。",
+      "has_msg": false
+    },
+    "7": {
+      "name": "Destiny Knot",
+      "name_zh": "红线",
+      "desc_en": "When the holder becomes infatuted with the opponent, the opponent will become infatuated with the holder.",
+      "desc_zh": "长长的鲜红色细线。携带后，在自己着迷时能让对手也着迷。",
+      "has_msg": true
+    },
+    "8": {
+      "name": "Expert Belt",
+      "name_zh": "达人带",
+      "desc_en": "Increases power of super-effective moves used by the holder by 20%.",
+      "desc_zh": "用惯了的黑色带子。携带后，效果绝佳时的招式威力就会少量提高。",
+      "has_msg": false
+    },
+    "9": {
+      "name": "Focus Band",
+      "name_zh": "气势头带",
+      "desc_en": "When an attack would knock out the holder, it has a 10% chance to resist with 1 HP instead.",
+      "desc_zh": "携带后，即便受到可能会导致濒死的招式，有时也能仅以１ＨＰ撑过去。",
+      "has_msg": true
+    },
+    "10": {
+      "name": "Focus Sash",
+      "name_zh": "气势披带",
+      "desc_en": "When an attack would knock out the holder from full health, it will always resist with 1 HP instead. Consumed after use.",
+      "desc_zh": "携带后，在ＨＰ全满时，即便受到可能会导致濒死的招式，也能仅以１ＨＰ撑过去１次。",
+      "has_msg": true
+    },
+    "11": {
+      "name": "Full Incense",
+      "name_zh": "饱腹薰香",
+      "desc_en": "Ensures that the holder will move last in its priority bracket. If held by a Snorlax when breeding, the egg will hatch into a Munchlax.",
+      "desc_zh": "有着神奇香气的薰香。携带后，宝可梦的行动会比平时更加迟缓。",
+      "has_msg": false
+    },
+    "12": {
+      "name": "Green Scarf",
+      "name_zh": "绿色头巾",
+      "desc_en": "Increases the holder's Smartness stat in contests.",
+      "desc_zh": "携带它去参加华丽大赛的宝可梦会比平时看上去更加聪明。",
+      "has_msg": false
+    },
+    "13": {
+      "name": "Lagging Tail",
+      "name_zh": "后攻之尾",
+      "desc_en": "Ensures that the holder will move last in its priority bracket.",
+      "desc_zh": "非常沉重的某种尾巴。携带后，行动会比平时更加迟缓。",
+      "has_msg": false
+    },
+    "14": {
+      "name": "Lax Incense",
+      "name_zh": "悠闲薰香",
+      "desc_en": "Increases the holder's evasion by 10%. If held by a Wobbuffet when breeding, the egg will hatch into a Wynaut.",
+      "desc_zh": "携带后，薰香的神奇香气会迷惑对手，其招式会变得不容易命中。",
+      "has_msg": false
+    },
+    "15": {
+      "name": "Leftovers",
+      "name_zh": "吃剩的东西",
+      "desc_en": "Restores the holder's HP by 6.125% of its max at the end of each turn.",
+      "desc_zh": "携带后，宝可梦的ＨＰ会在战斗期间缓缓回复。",
+      "has_msg": true
+    },
+    "16": {
+      "name": "Luck Incense",
+      "name_zh": "幸运薰香",
+      "desc_en": "When the holder participates in a trainer battle, doubles the amount of money received at the end of it. If held by a Chansey or Blissey when breeding, the egg will hatch into a Happiny.",
+      "desc_zh": "只要携带它的宝可梦在战斗时出场一次，就能获得２倍金钱。",
+      "has_msg": false
+    },
+    "17": {
+      "name": "Mental Herb",
+      "name_zh": "心灵香草",
+      "desc_en": "Automatically cures the holder of being infatuated, or being under the effect of Taunt, Encore, Torment and Disable. Consumed after use.",
+      "desc_zh": "当携带它的宝可梦无法自由使出招式时，仅会回复１次。",
+      "has_msg": true
+    },
+    "18": {
+      "name": "Metal Powder",
+      "name_zh": "金属粉",
+      "desc_en": "When held by Ditto, increases its Defense and Special Defense by 50%. If Ditto transforms, it is considered a different species so the boosts are lost.",
+      "desc_zh": "让百变怪携带后，防御就会提高的神奇粉末。非常细腻坚硬。",
+      "has_msg": false
+    },
+    "19": {
+      "name": "Muscle Band",
+      "name_zh": "力量头带",
+      "desc_en": "Increases power of physical moves used by the holder by 10%.",
+      "desc_zh": "力如泉涌的头带。携带后，物理招式的威力就会少量提高。",
+      "has_msg": false
+    },
+    "20": {
+      "name": "Odd Incense",
+      "name_zh": "奇异薰香",
+      "desc_en": "Increases power of Psychic-type moves used by the holder by 20%. If held by a Mr. Mime when breeding, the egg will hatch into a Mime Jr.",
+      "desc_zh": "有着神奇香气的薰香。携带后，超能力属性的招式威力就会提高。",
+      "has_msg": false
+    },
+    "21": {
+      "name": "Pink Scarf",
+      "name_zh": "粉红头巾",
+      "desc_en": "Increases the holder's Cuteness stat in contests.",
+      "desc_zh": "携带它去参加华丽大赛的宝可梦会比平时看上去更加可爱。",
+      "has_msg": false
+    },
+    "22": {
+      "name": "Power Herb",
+      "name_zh": "强力香草",
+      "desc_en": "Automatically lets the holder skip the charge turn of two-turn moves. Consumed after use.",
+      "desc_zh": "携带它的宝可梦仅有１次机会可以在第１回合使出需要蓄力的招式。",
+      "has_msg": true
+    },
+    "23": {
+      "name": "Pure Incense",
+      "name_zh": "洁净薰香",
+      "desc_en": "If held by the first Pokémon in the party, lowers wild encounter rate. If held by a Chimecho when breeding, the egg will hatch into a Chingling.",
+      "desc_zh": "让排在最前面的宝可梦携带后，野生宝可梦就会不容易出现。",
+      "has_msg": false
+    },
+    "24": {
+      "name": "Quick Powder",
+      "name_zh": "速度粉",
+      "desc_en": "When held by Ditto, increases its Speed by 100%. If Ditto transforms, it is considered a different species so the boost is lost.",
+      "desc_zh": "让百变怪携带后，速度就会提高的神奇粉末。非常细腻坚硬。",
+      "has_msg": false
+    },
+    "25": {
+      "name": "Reaper Cloth",
+      "name_zh": "灵界之布",
+      "desc_en": "If held by Dusclops during a trade, makes it evolve into Dusknoir.",
+      "desc_zh": "蕴含着惊人强大灵力的布。某种宝可梦很喜欢它。",
+      "has_msg": false
+    },
+    "26": {
+      "name": "Red Scarf",
+      "name_zh": "红色头巾",
+      "desc_en": "Increases the holder's Coolness stat in contests.",
+      "desc_zh": "携带它去参加华丽大赛的宝可梦会比平时看上去更加帅气。",
+      "has_msg": false
+    },
+    "27": {
+      "name": "Rock Incense",
+      "name_zh": "岩石薰香",
+      "desc_en": "Increases power of Rock-type moves used by the holder by 20%. If held by a Sudowoodo when breeding, the egg will hatch into a Bonsly.",
+      "desc_zh": "有着神奇香气的薰香。携带后，岩石属性的招式威力就会提高。",
+      "has_msg": false
+    },
+    "28": {
+      "name": "Rose Incense",
+      "name_zh": "花朵薰香",
+      "desc_en": "Increases power of Grass-type moves used by the holder by 20%. If held by a Roselia or Roserade when breeding, the egg will hatch into a Budew.",
+      "desc_zh": "有着神奇香气的薰香。携带后，草属性的招式威力就会提高。",
+      "has_msg": false
+    },
+    "29": {
+      "name": "Sea Incense",
+      "name_zh": "海潮薰香",
+      "desc_en": "Increases power of Water-type moves used by the holder by 20%. If held by a Marill or Azumarill when breeding, the egg will hatch into an Azurill.",
+      "desc_zh": "有着神奇香气的薰香。携带后，水属性的招式威力就会提高。",
+      "has_msg": false
+    },
+    "30": {
+      "name": "Shed Shell",
+      "name_zh": "美丽空壳",
+      "desc_en": "Always allows the holder to switch out, regardless of trapping effects.",
+      "desc_zh": "结实坚硬的空壳。携带它的宝可梦必定可以和后备的宝可梦进行替换。",
+      "has_msg": false
+    },
+    "31": {
+      "name": "Silk Scarf",
+      "name_zh": "丝绸围巾",
+      "desc_en": "Increases power of Normal-type moves used by the holder by 20%.",
+      "desc_zh": "手感不错的围巾。携带后，一般属性的招式威力就会提高。",
+      "has_msg": false
+    },
+    "32": {
+      "name": "Silver Powder",
+      "name_zh": "银粉",
+      "desc_en": "Increases power of Bug-type moves used by the holder by 20%.",
+      "desc_zh": "散发着银色光辉的粉末。携带后，虫属性的招式威力就会提高。",
+      "has_msg": false
+    },
+    "33": {
+      "name": "Smooth Rock",
+      "name_zh": "沙沙岩石",
+      "desc_en": "When the holder uses Sandstorm, increases its duration from 5 turns to 8 turns.",
+      "desc_zh": "携带它的宝可梦使出沙暴的话，沙暴的时间就会比平时更长。",
+      "has_msg": false
+    },
+    "34": {
+      "name": "Soft Sand",
+      "name_zh": "柔软沙子",
+      "desc_en": "Increases power of Ground-type moves used by the holder by 20%.",
+      "desc_zh": "手感细腻的沙子。携带后，地面属性的招式威力就会提高。",
+      "has_msg": false
+    },
+    "35": {
+      "name": "Soothe Bell",
+      "name_zh": "安抚之铃",
+      "desc_en": "Doubles the effectiveness of any action that raises the holder's happiness.",
+      "desc_zh": "音色悦耳的铃铛。携带它的宝可梦会受到安抚，变得容易和训练家亲密。",
+      "has_msg": false
+    },
+    "36": {
+      "name": "Wave Incense",
+      "name_zh": "涟漪薰香",
+      "desc_en": "Increases power of Water-type moves used by the holder by 20%. If held by a Mantine when breeding, the egg will hatch into a Mantyke.",
+      "desc_zh": "有着神奇香气的薰香。携带后，水属性的招式威力就会提高。",
+      "has_msg": false
+    },
+    "37": {
+      "name": "White Herb",
+      "name_zh": "白色香草",
+      "desc_en": "Automatically reverts any stat drop caused on the holder. If multiple stats were lowered by the same effect, will revert all of them. Consumed after use.",
+      "desc_zh": "当携带它的宝可梦能力降低时，仅能回到之前的状态１次。",
+      "has_msg": true
+    },
+    "38": {
+      "name": "Wide Lens",
+      "name_zh": "广角镜",
+      "desc_en": "Increases the holder's accuracy by 10%.",
+      "desc_zh": "能放大观看物体的镜片。携带后，招式的命中率就会少量提高。",
+      "has_msg": false
+    },
+    "39": {
+      "name": "Wise Glasses",
+      "name_zh": "博识眼镜",
+      "desc_en": "Increases power of special moves used by the holder by 10%.",
+      "desc_zh": "装着很厚镜片的眼镜。携带后，特殊招式的威力就会少量提高。",
+      "has_msg": false
+    },
+    "40": {
+      "name": "Yellow Scarf",
+      "name_zh": "黄色头巾",
+      "desc_en": "Increases the holder's Toughness stat in contests.",
+      "desc_zh": "携带它去参加华丽大赛的宝可梦会比平时看上去更加强壮。",
+      "has_msg": false
+    },
+    "41": {
+      "name": "Zoom Lens",
+      "name_zh": "对焦镜",
+      "desc_en": "Increases the holder's accuracy by 20% if it moves after the enemy.",
+      "desc_zh": "当携带它的宝可梦比对手行动迟缓时，招式会变得容易命中。",
+      "has_msg": false
+    },
+    "42": {
+      "name": "Amulet Coin",
+      "name_zh": "护符金币",
+      "desc_en": "When the holder participates in a trainer battle, doubles the amount of money received at the end of it.",
+      "desc_zh": "只要携带它的宝可梦在战斗时出场一次，就能获得２倍金钱。",
+      "has_msg": false
+    },
+    "43": {
+      "name": "Antidote",
+      "name_zh": "解毒药",
+      "desc_en": "Cures a Pokémon of Poison.",
+      "desc_zh": "喷雾式药水。能治愈１只宝可梦的中毒状态。",
+      "has_msg": false
+    },
+    "44": {
+      "name": "Awakening",
+      "name_zh": "解眠药",
+      "desc_en": "Cures a Pokémon of Sleep.",
+      "desc_zh": "喷雾式药水。能治愈１只宝可梦的睡眠状态。",
+      "has_msg": false
+    },
+    "45": {
+      "name": "Berry Juice",
+      "name_zh": "树果汁",
+      "desc_en": "Automatically restores 20 HP to the holder when it falls below 50% of its max HP.",
+      "desc_zh": "１００％树果果汁。能让１只宝可梦回复２０ＨＰ。",
+      "has_msg": true
+    },
+    "46": {
+      "name": "Big Pearl",
+      "name_zh": "大珍珠",
+      "desc_en": "A quite-large pearl that sparkles in a pretty silver color. It can be sold at a high price to shops.",
+      "desc_zh": "散发着美丽银辉且相当大颗的珍珠。可以在商店高价出售。",
+      "has_msg": false
+    },
+    "47": {
+      "name": "Big Mushroom",
+      "name_zh": "大蘑菇",
+      "desc_en": "A large and rare mushroom. It is sought after by collectors.",
+      "desc_zh": "珍稀的大蘑菇。在一些爱好者中有着非常高的人气。",
+      "has_msg": false
+    },
+    "48": {
+      "name": "Black Belt",
+      "name_zh": "黑带",
+      "desc_en": "Increases power of Fighting-type moves used by the holder by 20%.",
+      "desc_zh": "能振作精神的带子。携带后，格斗属性的招式威力就会提高。",
+      "has_msg": false
+    },
+    "49": {
+      "name": "Black Flute",
+      "name_zh": "黑色玻璃哨",
+      "desc_en": "A toy flute made from black glass. A maniac will buy it for a high price.",
+      "desc_zh": "以黑色玻璃制成的哨子。在使用的地方更容易遇到强大的宝可梦。",
+      "has_msg": false
+    },
+    "50": {
+      "name": "Black Sludge",
+      "name_zh": "黑色污泥",
+      "desc_en": "If held by a Poison-type Pokémon, restores 6.125% of its max HP at the end of every turn. Otherwise, damages the holder for 6.125% of its max HP at the end of every turn.",
+      "desc_zh": "携带后，毒属性的宝可梦会缓缓回复ＨＰ。其他属性的话，ＨＰ则会减少。",
+      "has_msg": true
+    },
+    "51": {
+      "name": "Black Glasses",
+      "name_zh": "黑色眼镜",
+      "desc_en": "Increases power of Dark-type moves used by the holder by 20%.",
+      "desc_zh": "看上去很奇怪的眼镜。携带后，恶属性的招式威力就会提高。",
+      "has_msg": false
+    },
+    "52": {
+      "name": "Blue Flute",
+      "name_zh": "蓝色玻璃哨",
+      "desc_en": "A toy flute made from blue glass. A maniac will buy it for a high price.",
+      "desc_zh": "以蓝色玻璃制成的哨子。可以治愈睡眠状态。",
+      "has_msg": false
+    },
+    "53": {
+      "name": "Blue Shard",
+      "name_zh": "蓝色碎片",
+      "desc_en": "A small blue shard. It appears to be from some sort of implement made long ago.",
+      "desc_zh": "蓝色的小碎片。好像是以前制作的某道具的一部分。",
+      "has_msg": false
+    },
+    "54": {
+      "name": "Burn Heal",
+      "name_zh": "灼伤药",
+      "desc_en": "Cures a Pokémon of a Burn.",
+      "desc_zh": "喷雾式药水。能治愈１只宝可梦的灼伤状态。",
+      "has_msg": false
+    },
+    "55": {
+      "name": "Calcium",
+      "name_zh": "特攻增强剂",
+      "desc_en": "Increases a Pokémon's Special Attack EVs by 10, but won't raise them above 100.",
+      "desc_zh": "宝可梦的营养饮料。能提高１只宝可梦的特攻的基础点数。",
+      "has_msg": false
+    },
+    "56": {
+      "name": "Carbos",
+      "name_zh": "速度增强剂",
+      "desc_en": "Increases a Pokémon's Speed EVs by 10, but won't raise them above 100.",
+      "desc_zh": "宝可梦的营养饮料。能提高１只宝可梦的速度的基础点数。",
+      "has_msg": false
+    },
+    "57": {
+      "name": "Charcoal",
+      "name_zh": "木炭",
+      "desc_en": "Increases power of Fire-type moves used by the holder by 20%.",
+      "desc_zh": "焚烧用的燃料。携带后，火属性的招式威力就会提高。",
+      "has_msg": false
+    },
+    "58": {
+      "name": "Cleanse Tag",
+      "name_zh": "洁净之符",
+      "desc_en": "If held by the first Pokémon in the party, lowers wild encounter rate.",
+      "desc_zh": "让排在最前面的宝可梦携带后，野生宝可梦就会不容易出现。",
+      "has_msg": false
+    },
+    "59": {
+      "name": "Damp Mulch",
+      "name_zh": "湿湿肥",
+      "desc_en": "Increases Berry growth time by 25%, but makes soil dry slower. A maniac will buy it for a high price.",
+      "desc_zh": "培育树果时的肥料。但完全不适合丰缘地区的土壤，所以没什么效果。",
+      "has_msg": false
+    },
+    "60": {
+      "name": "Deep Sea Scale",
+      "name_zh": "深海鳞片",
+      "desc_en": "When held by Clamperl, increases its Special Defense by 100%. If held by Clamperl during a trade, makes it evolve into Gorebyss.",
+      "desc_zh": "让珍珠贝携带后，特防就会提高的鳞片。散发着淡淡的粉红色光芒。",
+      "has_msg": false
+    },
+    "61": {
+      "name": "Dire Hit",
+      "name_zh": "要害攻击",
+      "desc_en": "Increases a Pokémon's critical hit ratio by 1 stage and increases its happiness.",
+      "desc_zh": "击中要害的几率会大幅提高。只能使用１次。离场后，效果便会消失。",
+      "has_msg": false
+    },
+    "62": {
+      "name": "Dragon Scale",
+      "name_zh": "龙之鳞片",
+      "desc_en": "Increases power of Dragon-type moves used by the holder by 20%.",
+      "desc_zh": "又硬又坚固的鳞片。龙属性宝可梦有时会携带它。",
+      "has_msg": false
+    },
+    "63": {
+      "name": "Elixir",
+      "name_zh": "ＰＰ多项小补剂",
+      "desc_en": "Restores 10 PP to all of a Pokémon's moves.",
+      "desc_zh": "能让宝可梦学会的４个招式各回复１０ＰＰ。",
+      "has_msg": false
+    },
+    "64": {
+      "name": "Energy Root",
+      "name_zh": "元气根",
+      "desc_en": "Restores 200 HP to a Pokémon, but lowers its happiness.",
+      "desc_zh": "非常苦的根。能让１只宝可梦回复１２０ＨＰ。",
+      "has_msg": false
+    },
+    "65": {
+      "name": "Energy Powder",
+      "name_zh": "元气粉",
+      "desc_en": "Restores 50 HP to a Pokémon, but lowers its happiness.",
+      "desc_zh": "非常苦的药粉。能让１只宝可梦回复６０ＨＰ。",
+      "has_msg": false
+    },
+    "66": {
+      "name": "Escape Rope",
+      "name_zh": "离洞绳",
+      "desc_en": "When used in a cave or a dungeon, teleports the user to the entrance they used to enter it.",
+      "desc_zh": "结实的长绳。可以从洞窟或迷宫中脱身。",
+      "has_msg": false
+    },
+    "67": {
+      "name": "Ether",
+      "name_zh": "ＰＰ单项小补剂",
+      "desc_en": "Restores 10 PP to one of a Pokémon's moves.",
+      "desc_zh": "能让宝可梦学会的其中１个招式回复１０ＰＰ。",
+      "has_msg": false
+    },
+    "68": {
+      "name": "Everstone",
+      "name_zh": "不变之石",
+      "desc_en": "Prevents the holder from evolving by level up. When held by a female Pokémon in the Day Care Center, it has a 50% chance of passing the holder's nature to the baby.",
+      "desc_zh": "携带后，宝可梦在此期间不会进化的神奇石头。",
+      "has_msg": false
+    },
+    "69": {
+      "name": "Exp. Share",
+      "name_zh": "学习装置",
+      "desc_en": "Lets the user gain half of the experience points it wouldn't have gained every time experience points are awarded.",
+      "desc_zh": "携带的宝可梦就算没有参与对战也能分享到经验值的便利装置。",
+      "has_msg": false
+    },
+    "70": {
+      "name": "Fire Stone",
+      "name_zh": "火之石",
+      "desc_en": "Evolves Vulpix into Ninetales, Growlithe into Arcanine, Eevee into Flareon and Pansear into Simisear.",
+      "desc_zh": "能让某些特定宝可梦进化的神奇石头。看上去是橙黄色的。",
+      "has_msg": false
+    },
+    "71": {
+      "name": "Flame Orb",
+      "name_zh": "火焰宝珠",
+      "desc_en": "Unless the holder cannot be burned, inflicts the holder with a Burn at the end of a turn.",
+      "desc_zh": "触碰后会放出热量的神奇宝珠。携带后，在战斗时会变成灼伤状态。",
+      "has_msg": true
+    },
+    "72": {
+      "name": "Fluffy Tail",
+      "name_zh": "向尾喵的尾巴",
+      "desc_en": "Guarantees escape from wild battles when used.",
+      "desc_zh": "能吸引宝可梦注意的道具。在和野生宝可梦的战斗中绝对可以逃走。",
+      "has_msg": false
+    },
+    "73": {
+      "name": "Fresh Water",
+      "name_zh": "美味之水",
+      "desc_en": "Restores 50 HP to a Pokémon.",
+      "desc_zh": "富含矿物质的水。能让１只宝可梦回复３０ＨＰ。",
+      "has_msg": false
+    },
+    "74": {
+      "name": "Full Heal",
+      "name_zh": "万灵药",
+      "desc_en": "Cures a Pokémon of any major status condition.",
+      "desc_zh": "喷雾式药水。能治愈１只宝可梦的所有异常状态。",
+      "has_msg": false
+    },
+    "75": {
+      "name": "Full Restore",
+      "name_zh": "全复药",
+      "desc_en": "Cures a Pokémon of any major status condition, and restores all of its HP.",
+      "desc_zh": "能回复１只宝可梦的所有ＨＰ并治愈所有异常状态。",
+      "has_msg": false
+    },
+    "76": {
+      "name": "Gooey Mulch",
+      "name_zh": "粘粘肥",
+      "desc_en": "Increases the number of times withered plants will grow again. A maniac will buy it for a high price.",
+      "desc_zh": "培育树果时的肥料。但完全不适合丰缘地区的土壤，所以没什么效果。",
+      "has_msg": false
+    },
+    "77": {
+      "name": "Green Shard",
+      "name_zh": "绿色碎片",
+      "desc_en": "A small green shard. It appears to be from some sort of implement made long ago.",
+      "desc_zh": "绿色的小碎片。好像是以前制作的某道具的一部分。",
+      "has_msg": false
+    },
+    "78": {
+      "name": "Growth Mulch",
+      "name_zh": "速速肥",
+      "desc_en": "Decreases Berry growth time by 25%, but makes soil dry quicker. A maniac will buy it for a high price.",
+      "desc_zh": "培育树果时的肥料。但完全不适合丰缘地区的土壤，所以没什么效果。",
+      "has_msg": false
+    },
+    "79": {
+      "name": "Guard Spec.",
+      "name_zh": "能力防守",
+      "desc_en": "Prevents stat reductions for the Trainer's party for 5 turns when used.",
+      "desc_zh": "在战斗中，５回合内不让我方能力降低的道具。",
+      "has_msg": false
+    },
+    "80": {
+      "name": "Heal Powder",
+      "name_zh": "万能粉",
+      "desc_en": "Cures a Pokémon of any major status condition, but lowers its happiness.",
+      "desc_zh": "非常苦的药粉。能治愈１只宝可梦的所有异常状态。",
+      "has_msg": false
+    },
+    "81": {
+      "name": "Heart Scale",
+      "name_zh": "心之鳞片",
+      "desc_en": "A pretty, heart-shaped scale that is extremely rare. It glows faintly in the colors of the rainbow.",
+      "desc_zh": "有着美丽心形外形且非常珍稀的鳞片。有些人收到会很高兴。",
+      "has_msg": false
+    },
+    "82": {
+      "name": "Honey",
+      "name_zh": "甜甜蜜",
+      "desc_en": "When used, immediately attracts a wild Pokémon.",
+      "desc_zh": "在草丛或洞窟等地方使用后，被甜甜香气吸引的野生宝可梦就会出现。",
+      "has_msg": false
+    },
+    "83": {
+      "name": "HP Up",
+      "name_zh": "ＨＰ增强剂",
+      "desc_en": "Increases a Pokémon's HP EVs by 10, but won't raise them above 100.",
+      "desc_zh": "宝可梦的营养饮料。能提高１只宝可梦的ＨＰ的基础点数。",
+      "has_msg": false
+    },
+    "84": {
+      "name": "Hyper Potion",
+      "name_zh": "厉害伤药",
+      "desc_en": "Restores 200 HP to a Pokémon.",
+      "desc_zh": "喷雾式伤药。能让１只宝可梦回复１２０ＨＰ。",
+      "has_msg": false
+    },
+    "85": {
+      "name": "Ice Heal",
+      "name_zh": "解冻药",
+      "desc_en": "Cures a Pokémon of being Frozen.",
+      "desc_zh": "喷雾式药水。能治愈１只宝可梦的冰冻状态。",
+      "has_msg": false
+    },
+    "86": {
+      "name": "Iron",
+      "name_zh": "防御增强剂",
+      "desc_en": "Increases a Pokémon's Defense EVs by 10, but won't raise them above 100.",
+      "desc_zh": "宝可梦的营养饮料。能提高１只宝可梦的防御的基础点数。",
+      "has_msg": false
+    },
+    "87": {
+      "name": "King's Rock",
+      "name_zh": "王者之证",
+      "desc_en": "Adds a 10% chance to flinch the target to all of the holder's moves that cannot already cause flinching. Affected by Serene Grace. If held by Poliwhirl during a trade, makes it evolve into Poliwrath. If held by Slowpoke during a trade, makes it evolve into Slowking.",
+      "desc_zh": "携带后进行攻击，在造成伤害时，有时会让对手畏缩。",
+      "has_msg": false
+    },
+    "88": {
+      "name": "Lava Cookie",
+      "name_zh": "釜炎仙贝",
+      "desc_en": "Cures a Pokémon of any major status condition.",
+      "desc_zh": "釜炎特产的仙贝。能治愈１只宝可梦的所有异常状态。",
+      "has_msg": false
+    },
+    "89": {
+      "name": "Leaf Stone",
+      "name_zh": "叶之石",
+      "desc_en": "Evolves Gloom into Vileplume, Weepinbell into Victreebel, Exeggcute into Exeggutor, Nuzleaf into Shiftry and Pansage into Simisage.",
+      "desc_zh": "能让某些特定宝可梦进化的神奇石头。有着叶子般的花纹。",
+      "has_msg": false
+    },
+    "90": {
+      "name": "Lemonade",
+      "name_zh": "果汁牛奶",
+      "desc_en": "Restores 80 HP to a Pokémon.",
+      "desc_zh": "非常香甜的牛奶。能让１只宝可梦回复７０ＨＰ。",
+      "has_msg": false
+    },
+    "91": {
+      "name": "Life Orb",
+      "name_zh": "生命宝珠",
+      "desc_en": "Boosts the power of all moves used by the holder by 30%, but damages it for 10% its max HP every time it attacks. The self-damage doesn't happen if the holder has Sheer Force and uses a move boosted by it.",
+      "desc_zh": "携带后，虽然每次攻击时ＨＰ少量减少，但招式的威力会提高。",
+      "has_msg": true
+    },
+    "92": {
+      "name": "Light Ball",
+      "name_zh": "电气球",
+      "desc_en": "When held by Pikachu, increases its Attack and Special Attack by 100%. If held by Pikachu or Raichu when breeding, the baby Pichu will know Volt Tackle.",
+      "desc_zh": "让皮卡丘携带后，攻击和特攻的威力就会提高的神奇之球。",
+      "has_msg": false
+    },
+    "93": {
+      "name": "Light Clay",
+      "name_zh": "光之黏土",
+      "desc_en": "When the holder uses Reflect or Light Screen, increases its duration from 5 turns to 8 turns.",
+      "desc_zh": "当携带它的宝可梦使出光墙或反射壁时，效果会比平时持续得更长。",
+      "has_msg": false
+    },
+    "94": {
+      "name": "Lucky Egg",
+      "name_zh": "幸运蛋",
+      "desc_en": "Increases experience gained by the holder by 50%.",
+      "desc_zh": "满载着幸福的蛋。携带它的宝可梦获得的经验值会少量增加。",
+      "has_msg": false
+    },
+    "95": {
+      "name": "Magnet",
+      "name_zh": "磁铁",
+      "desc_en": "Increases power of Electric-type moves used by the holder by 20%.",
+      "desc_zh": "强力的磁铁。携带后，电属性的招式威力就会提高。",
+      "has_msg": false
+    },
+    "96": {
+      "name": "Max Elixir",
+      "name_zh": "ＰＰ多项全补剂",
+      "desc_en": "Restores all PP to all of a Pokémon's moves.",
+      "desc_zh": "能让宝可梦学会的４个招式回复所有ＰＰ。",
+      "has_msg": false
+    },
+    "97": {
+      "name": "Max Ether",
+      "name_zh": "ＰＰ单项全补剂",
+      "desc_en": "Restores all PP to one of a Pokémon's moves.",
+      "desc_zh": "能让宝可梦学会的其中１个招式回复所有ＰＰ。",
+      "has_msg": false
+    },
+    "98": {
+      "name": "Max Potion",
+      "name_zh": "全满药",
+      "desc_en": "Restores all HP to a Pokémon.",
+      "desc_zh": "喷雾式伤药。能让１只宝可梦回复所有ＨＰ。",
+      "has_msg": false
+    },
+    "99": {
+      "name": "Max Repel",
+      "name_zh": "黄金喷雾",
+      "desc_en": "When used, prevents wild encounters for 250 steps.",
+      "desc_zh": "弱小的野生宝可梦将完全不会出现。效果比白银喷雾更持久。",
+      "has_msg": false
+    },
+    "100": {
+      "name": "Max Revive",
+      "name_zh": "活力块",
+      "desc_en": "Revives a fainted Pokémon with all of its HP.",
+      "desc_zh": "能让１只陷入濒死的宝可梦重获生机，并回复所有ＨＰ。",
+      "has_msg": false
+    },
+    "101": {
+      "name": "Metal Coat",
+      "name_zh": "金属膜",
+      "desc_en": "Increases power of Steel-type moves used by the holder by 20%. If held by Onix during a trade, makes it evolve into Steelix. If held by Scyther during a trade, makes it evolve into Scizor.",
+      "desc_zh": "特殊的金属膜。携带后，钢属性的招式威力就会提高。",
+      "has_msg": false
+    },
+    "102": {
+      "name": "Metronome",
+      "name_zh": "节拍器",
+      "desc_en": "For each time the holder uses the same move in a row, that move's power is increased by 20%, up to a maximum of 100%. (For Generations 4 and under, the boost is 10% per usage).",
+      "desc_zh": "携带后，连续使出相同招式时，威力就会提高。不再使出相同招式时，威力就会复原。",
+      "has_msg": false
+    },
+    "103": {
+      "name": "Miracle Seed",
+      "name_zh": "奇迹种子",
+      "desc_en": "Increases power of Grass-type moves used by the holder by 20%.",
+      "desc_zh": "孕育生命的种子。携带后，草属性的招式威力就会提高。",
+      "has_msg": false
+    },
+    "104": {
+      "name": "Moomoo Milk",
+      "name_zh": "哞哞鲜奶",
+      "desc_en": "Restores 100 HP to a Pokémon.",
+      "desc_zh": "营养百分百的牛奶。能让１只宝可梦回复１００ＨＰ。",
+      "has_msg": false
+    },
+    "105": {
+      "name": "Moon Stone",
+      "name_zh": "月之石",
+      "desc_en": "Evolves Nidorina into Nidoqueen, Nidorino into Nidoking, Clefairy into Clefable, Jigglypuff into Wigglytuff, Skitty into Delcatty and Munna into Musharna.",
+      "desc_zh": "能让某些特定宝可梦进化的神奇石头。像夜空一样乌黑。",
+      "has_msg": false
+    },
+    "106": {
+      "name": "Mystic Water",
+      "name_zh": "神秘水滴",
+      "desc_en": "Increases power of Water-type moves used by the holder by 20%.",
+      "desc_zh": "水滴形状的宝石。携带后，水属性的招式威力就会提高。",
+      "has_msg": false
+    },
+    "107": {
+      "name": "Never-Melt Ice",
+      "name_zh": "不融冰",
+      "desc_en": "Increases power of Ice-type moves used by the holder by 20%.",
+      "desc_zh": "能隔绝热量的冰。携带后，冰属性的招式威力就会提高。",
+      "has_msg": false
+    },
+    "108": {
+      "name": "Nugget",
+      "name_zh": "金珠",
+      "desc_en": "A nugget of pure gold that gives off a lustrous gleam. It can be sold at a high price to shops.",
+      "desc_zh": "闪着金光，以纯金制成的珠子。可以在商店高价出售。",
+      "has_msg": false
+    },
+    "109": {
+      "name": "Old Gateau",
+      "name_zh": "森之羊羹",
+      "desc_en": "Cures a Pokémon of any major status condition.",
+      "desc_zh": "百代不为人知的特产。能治愈１只宝可梦的所有异常状态。",
+      "has_msg": false
+    },
+    "110": {
+      "name": "Paralyze Heal",
+      "name_zh": "解麻药",
+      "desc_en": "Cures a Pokémon of Paralysis.",
+      "desc_zh": "喷雾式药水。能治愈１只宝可梦的麻痹状态。",
+      "has_msg": false
+    },
+    "111": {
+      "name": "Pearl",
+      "name_zh": "珍珠",
+      "desc_en": "A somewhat-small pearl that sparkles in a pretty silver color. It can be sold cheaply to shops.",
+      "desc_zh": "散发着美丽银辉且有点小的珍珠。可以在商店低价出售。",
+      "has_msg": false
+    },
+    "112": {
+      "name": "Poké Doll",
+      "name_zh": "皮皮玩偶",
+      "desc_en": "Guarantees escape from wild battles when used.",
+      "desc_zh": "能吸引宝可梦注意的道具。在和野生宝可梦的战斗中绝对可以逃走。",
+      "has_msg": false
+    },
+    "113": {
+      "name": "Potion",
+      "name_zh": "伤药",
+      "desc_en": "Restores 20 HP to a Pokémon.",
+      "desc_zh": "喷雾式伤药。能让１只宝可梦回复２０ＨＰ。",
+      "has_msg": false
+    },
+    "114": {
+      "name": "PP Max",
+      "name_zh": "ＰＰ极限提升剂",
+      "desc_en": "Increases a move's max PP to 8/5 of its original max.",
+      "desc_zh": "能将宝可梦学会的其中１个招式的ＰＰ最大值提至最高。",
+      "has_msg": false
+    },
+    "115": {
+      "name": "PP Up",
+      "name_zh": "ＰＰ提升剂",
+      "desc_en": "Increases a move's max PP by 1/5 of its original max, up to a total of 8/5.",
+      "desc_zh": "能让宝可梦学会的其中１个招式的ＰＰ最大值少量提高。",
+      "has_msg": false
+    },
+    "116": {
+      "name": "Protein",
+      "name_zh": "攻击增强剂",
+      "desc_en": "Increases a Pokémon's Attack EVs by 10, but won't raise them above 100.",
+      "desc_zh": "宝可梦的营养饮料。能提高１只宝可梦的攻击的基础点数。",
+      "has_msg": false
+    },
+    "117": {
+      "name": "Rare Candy",
+      "name_zh": "神奇糖果",
+      "desc_en": "Increases a Pokémon's level by 1.",
+      "desc_zh": "充满能量的糖果。将它交给宝可梦后，１只宝可梦的等级仅会提高１。",
+      "has_msg": false
+    },
+    "118": {
+      "name": "Razor Fang",
+      "name_zh": "锐利之牙",
+      "desc_en": "Adds a 10% chance to flinch the target to all of the holder's moves that cannot already cause flinching. Affected by Serene Grace. If held by Gligar at night while it levels up, makes it evolve into Gliscor.",
+      "desc_zh": "尖锐的牙齿。携带后，在给予伤害时，有时会让对手畏缩。",
+      "has_msg": false
+    },
+    "119": {
+      "name": "Red Flute",
+      "name_zh": "红色玻璃哨",
+      "desc_en": "A toy flute made from red glass. A maniac will buy it for a high price.",
+      "desc_zh": "以红色玻璃制成的哨子。可以治愈着迷状态。",
+      "has_msg": false
+    },
+    "120": {
+      "name": "Red Shard",
+      "name_zh": "红色碎片",
+      "desc_en": "A small red shard. It appears to be from some sort of implement made long ago.",
+      "desc_zh": "红色的小碎片。好像是以前制作的某道具的一部分。",
+      "has_msg": false
+    },
+    "121": {
+      "name": "Repel",
+      "name_zh": "除虫喷雾",
+      "desc_en": "When used, prevents wild encounters for 100 steps.",
+      "desc_zh": "使用后，在较短的一段时间内，弱小的野生宝可梦将完全不会出现。",
+      "has_msg": false
+    },
+    "122": {
+      "name": "Revival Herb",
+      "name_zh": "复活草",
+      "desc_en": "Revives a fainted Pokémon with all of its HP, but lowers its friendship.",
+      "desc_zh": "非常苦的药草。能让１只濒死的宝可梦回复所有ＨＰ。",
+      "has_msg": false
+    },
+    "123": {
+      "name": "Revive",
+      "name_zh": "活力碎片",
+      "desc_en": "Revives a fainted Pokémon with 50% of its HP.",
+      "desc_zh": "能让１只陷入濒死的宝可梦重获生机，并回复一半ＨＰ。",
+      "has_msg": false
+    },
+    "124": {
+      "name": "Sacred Ash",
+      "name_zh": "圣灰",
+      "desc_en": "Revives all fainted Pokémon with all of their HP.",
+      "desc_zh": "能让陷入濒死的全部宝可梦回复所有ＨＰ。",
+      "has_msg": false
+    },
+    "125": {
+      "name": "Scope Lens",
+      "name_zh": "焦点镜",
+      "desc_en": "Increases the holder's critical hit ratio by 1 stage.",
+      "desc_zh": "能看见弱点的镜片。携带它的宝可梦的招式会变得容易击中要害。",
+      "has_msg": false
+    },
+    "126": {
+      "name": "Shell Bell",
+      "name_zh": "贝壳之铃",
+      "desc_en": "Every time the holder attacks, restores its HP by 12.5% of the damage dealt to the opponent.",
+      "desc_zh": "当携带它的宝可梦攻击对手并造成伤害时，能回复少量ＨＰ。",
+      "has_msg": true
+    },
+    "127": {
+      "name": "Shoal Salt",
+      "name_zh": "浅滩海盐",
+      "desc_en": "Pure salt that can be discovered deep inside the Shoal Cave. A maniac will buy it for a high price.",
+      "desc_zh": "在浅滩洞穴这地方找到的海盐。",
+      "has_msg": false
+    },
+    "128": {
+      "name": "Shoal Shell",
+      "name_zh": "浅滩贝壳",
+      "desc_en": "A pretty seashell that can be found deep inside the Shoal Cave. A maniac will buy it for a high price.",
+      "desc_zh": "在浅滩洞穴这地方找到的贝壳。",
+      "has_msg": false
+    },
+    "129": {
+      "name": "Smoke Ball",
+      "name_zh": "烟雾球",
+      "desc_en": "Guarantees that the holder can always escape from wild Pokémon.",
+      "desc_zh": "携带它的宝可梦在和野生宝可梦的战斗中绝对可以逃走。",
+      "has_msg": false
+    },
+    "130": {
+      "name": "Soda Pop",
+      "name_zh": "劲爽汽水",
+      "desc_en": "Restores 60 HP to a Pokémon.",
+      "desc_zh": "翻腾着气泡的汽水。能让１只宝可梦回复５０ＨＰ。",
+      "has_msg": false
+    },
+    "131": {
+      "name": "Soul Dew",
+      "name_zh": "心之水滴",
+      "desc_en": "When held by Latias or Latios, increases the power of Dragon-type and Psychic-type moves by 20%.",
+      "desc_zh": "让拉帝欧斯或拉帝亚斯携带后，超能力和龙属性的招式威力就会提高的神奇珠子。",
+      "has_msg": false
+    },
+    "132": {
+      "name": "Spell Tag",
+      "name_zh": "诅咒之符",
+      "desc_en": "Increases power of Ghost-type moves used by the holder by 20%.",
+      "desc_zh": "古怪可怕的咒符。携带后，幽灵属性的招式威力就会提高。",
+      "has_msg": false
+    },
+    "133": {
+      "name": "Stable Mulch",
+      "name_zh": "久久肥",
+      "desc_en": "Increases the time Berries will remain on a plant before withering. A maniac will buy it for a high price.",
+      "desc_zh": "培育树果时的肥料。但完全不适合丰缘地区的土壤，所以没什么效果。",
+      "has_msg": false
+    },
+    "134": {
+      "name": "Star Piece",
+      "name_zh": "星星碎片",
+      "desc_en": "A shard of a pretty gem that sparkles in a red color. It can be sold at a high price to shops.",
+      "desc_zh": "闪着红光且十分美丽的宝石碎片。可以在商店高价出售。",
+      "has_msg": false
+    },
+    "135": {
+      "name": "Stardust",
+      "name_zh": "星星沙子",
+      "desc_en": "Lovely, red-colored sand with a loose, silky feel. It can be sold at a high price to shops.",
+      "desc_zh": "手感细腻且十分美丽的红色沙子。可以在商店低价出售。",
+      "has_msg": false
+    },
+    "136": {
+      "name": "Sun Stone",
+      "name_zh": "日之石",
+      "desc_en": "Evolves Gloom into Bellossom, Sunkern into Sunflora, Cottonee into Whimsicott and Petilil into Lilligant.",
+      "desc_zh": "能让某些特定宝可梦进化的神奇石头。像太阳一样赤红。",
+      "has_msg": false
+    },
+    "137": {
+      "name": "Super Potion",
+      "name_zh": "好伤药",
+      "desc_en": "Restores 50 HP to a Pokémon.",
+      "desc_zh": "喷雾式伤药。能让１只宝可梦回复６０ＨＰ。",
+      "has_msg": false
+    },
+    "138": {
+      "name": "Super Repel",
+      "name_zh": "白银喷雾",
+      "desc_en": "When used, prevents wild encounters for 100 steps.",
+      "desc_zh": "弱小的野生宝可梦将完全不会出现。效果比除虫喷雾更持久。",
+      "has_msg": false
+    },
+    "139": {
+      "name": "Thunder Stone",
+      "name_zh": "雷之石",
+      "desc_en": "Evolves Pikachu into Raichu, Eevee into Jolteon and Eelektrik into Eelektross.",
+      "desc_zh": "能让某些特定宝可梦进化的神奇石头。有着闪电般的花纹。",
+      "has_msg": false
+    },
+    "140": {
+      "name": "Tiny Mushroom",
+      "name_zh": "小蘑菇",
+      "desc_en": "A small and rare mushroom. It is sought after by collectors.",
+      "desc_zh": "珍稀的小蘑菇。在一些爱好者中有着相当高的人气。",
+      "has_msg": false
+    },
+    "141": {
+      "name": "Toxic Orb",
+      "name_zh": "剧毒宝珠",
+      "desc_en": "Unless the holder cannot be poisoned, inflicts the holder with Toxic Poison at the end of a turn.",
+      "desc_zh": "触碰后会放出毒的神奇宝珠。携带后，在战斗时会变成剧毒状态。",
+      "has_msg": true
+    },
+    "142": {
+      "name": "Twisted Spoon",
+      "name_zh": "弯曲的汤匙",
+      "desc_en": "Increases power of Psychic-type moves used by the holder by 20%.",
+      "desc_zh": "注入了念力的汤匙。携带后，超能力属性的招式威力就会提高。",
+      "has_msg": false
+    },
+    "143": {
+      "name": "Up-Grade",
+      "name_zh": "升级数据",
+      "desc_en": "If held by Porygon during a trade, makes it evolve into Porygon2.",
+      "desc_zh": "内部储存了各种信息的透明机器。西尔佛公司制造。",
+      "has_msg": false
+    },
+    "144": {
+      "name": "Water Stone",
+      "name_zh": "水之石",
+      "desc_en": "Evolves Poliwhirl into Poliwrath, Shellder into Cloyster, Staryu into Starmie, Eevee into Vaporeon, Lombre into Ludicolo and Panpour into Simipour.",
+      "desc_zh": "能让某些特定宝可梦进化的神奇石头。看上去是澄蓝色的。",
+      "has_msg": false
+    },
+    "145": {
+      "name": "White Flute",
+      "name_zh": "白色玻璃哨",
+      "desc_en": "A toy flute made from white glass. A maniac will buy it for a high price.",
+      "desc_zh": "以白色玻璃制成的哨子。在使用的地方更容易遇到弱小的宝可梦。",
+      "has_msg": false
+    },
+    "146": {
+      "name": "X Accuracy",
+      "name_zh": "命中强化",
+      "desc_en": "Increases a Pokémon's accuracy by 1 stage.",
+      "desc_zh": "大幅提高战斗中宝可梦命中的道具。离场后，效果便会消失。",
+      "has_msg": false
+    },
+    "147": {
+      "name": "X Attack",
+      "name_zh": "力量强化",
+      "desc_en": "Increases a Pokémon's Attack by 1 stage.",
+      "desc_zh": "大幅提高战斗中宝可梦攻击的道具。离场后，效果便会消失。",
+      "has_msg": false
+    },
+    "148": {
+      "name": "X Defend",
+      "name_zh": "防御强化",
+      "desc_en": "Increases a Pokémon's Defense by 1 stage.",
+      "desc_zh": "大幅提高战斗中宝可梦防御的道具。离场后，效果便会消失。",
+      "has_msg": false
+    },
+    "149": {
+      "name": "X Special",
+      "name_zh": "特攻强化",
+      "desc_en": "Increases a Pokémon's Special Attack by 1 stage.",
+      "desc_zh": "大幅提高战斗中宝可梦特攻的道具。离场后，效果便会消失。",
+      "has_msg": false
+    },
+    "150": {
+      "name": "X Sp. Def",
+      "name_zh": "特防强化",
+      "desc_en": "Increases a Pokémon's Special Defense by 1 stage.",
+      "desc_zh": "大幅提高战斗中宝可梦特防的道具。离场后，效果便会消失。",
+      "has_msg": false
+    },
+    "151": {
+      "name": "X Speed",
+      "name_zh": "速度强化",
+      "desc_en": "Increases a Pokémon's Speed by 1 stage.",
+      "desc_zh": "大幅提高战斗中宝可梦速度的道具。离场后，效果便会消失。",
+      "has_msg": false
+    },
+    "152": {
+      "name": "Yellow Flute",
+      "name_zh": "黄色玻璃哨",
+      "desc_en": "A toy flute made from yellow glass. A maniac will buy it for a high price.",
+      "desc_zh": "以黄色玻璃制成的哨子。可以治愈混乱状态。",
+      "has_msg": false
+    },
+    "153": {
+      "name": "Yellow Shard",
+      "name_zh": "黄色碎片",
+      "desc_en": "A small yellow shard. It appears to be from some sort of implement made long ago.",
+      "desc_zh": "黄色的小碎片。好像是以前制作的某道具的一部分。",
+      "has_msg": false
+    },
+    "154": {
+      "name": "Zinc",
+      "name_zh": "特防增强剂",
+      "desc_en": "Increases a Pokémon's Special Defense EVs by 10, but won't raise them above 100.",
+      "desc_zh": "宝可梦的营养饮料。能提高１只宝可梦的特防的基础点数。",
+      "has_msg": false
+    },
+    "155": {
+      "name": "Icy Rock",
+      "name_zh": "冰冷岩石",
+      "desc_en": "When the holder uses Hail, increases its duration from 5 turns to 8 turns.",
+      "desc_zh": "携带它的宝可梦使出冰雹的话，冰雹的时间就会比平时更长。",
+      "has_msg": false
+    },
+    "156": {
+      "name": "Lucky Punch",
+      "name_zh": "吉利拳",
+      "desc_en": "When held by Chansey, raises its critical hit ratio by 2 stages.",
+      "desc_zh": "能带来幸运的拳套。让吉利蛋携带后，招式会变得容易击中要害。",
+      "has_msg": false
+    },
+    "157": {
+      "name": "Dubious Disc",
+      "name_zh": "可疑补丁",
+      "desc_en": "If held by Porygon2 during a trade, makes it evolve into Porygon-Z.",
+      "desc_zh": "内部储存了奇怪信息的透明机器。制造者不明。",
+      "has_msg": false
+    },
+    "158": {
+      "name": "Sharp Beak",
+      "name_zh": "锐利鸟嘴",
+      "desc_en": "Increases power of Flying-type moves used by the holder by 20%.",
+      "desc_zh": "又长又尖的鸟嘴。携带后，飞行属性的招式威力就会提高。",
+      "has_msg": false
+    },
+    "159": {
+      "name": "Adamant Orb",
+      "name_zh": "金刚宝珠",
+      "desc_en": "When held by Dialga, increases the power of its Dragon-type and Steel-type moves by 20%.",
+      "desc_zh": "让帝牙卢卡携带的话，龙和钢属性的招式威力就会提高。散发着光辉的宝珠。",
+      "has_msg": false
+    },
+    "160": {
+      "name": "Damp Rock",
+      "name_zh": "潮湿岩石",
+      "desc_en": "When the holder uses Rain Dance, increases its duration from 5 turns to 8 turns.",
+      "desc_zh": "携带它的宝可梦使出求雨的话，下雨的时间就会比平时更长。",
+      "has_msg": false
+    },
+    "161": {
+      "name": "Heat Rock",
+      "name_zh": "炽热岩石",
+      "desc_en": "When the holder uses Sunny Day, increases its duration from 5 turns to 8 turns.",
+      "desc_zh": "携带它的宝可梦使出大晴天的话，晴天的时间就会比平时更长。",
+      "has_msg": false
+    },
+    "162": {
+      "name": "Lustrous Orb",
+      "name_zh": "白玉宝珠",
+      "desc_en": "When held by Palkia, increases the power of its Dragon-type and Water-type moves by 20%.",
+      "desc_zh": "让帕路奇亚携带的话，龙和水属性的招式威力就会提高。散发着美丽光辉的宝珠。",
+      "has_msg": false
+    },
+    "163": {
+      "name": "Macho Brace",
+      "name_zh": "强制锻炼器",
+      "desc_en": "Halves the holder's Speed, but doubles the EVs it gains from battles.",
+      "desc_zh": "又硬又重的锻炼器。虽然携带后速度会降低，但会比平时更容易茁壮成长。",
+      "has_msg": false
+    },
+    "164": {
+      "name": "Stick",
+      "name_zh": "大葱",
+      "desc_en": "When held by Farfetch'd, increases its critical hit ratio by 2 stages.",
+      "desc_zh": "非常长且坚硬的茎。让大葱鸭携带后，招式会变得容易击中要害。",
+      "has_msg": true
+    },
+    "165": {
+      "name": "Dragon Fang",
+      "name_zh": "龙之牙",
+      "desc_en": "Increases power of Dragon-type moves used by the holder by 20%.",
+      "desc_zh": "坚硬锐利的牙齿。携带后，龙属性的招式威力就会提高。",
+      "has_msg": false
+    },
+    "166": {
+      "name": "Poison Barb",
+      "name_zh": "毒针",
+      "desc_en": "Increases power of Poison-type moves used by the holder by 20%.",
+      "desc_zh": "有毒的小针。携带后，毒属性的招式威力就会提高。",
+      "has_msg": false
+    },
+    "167": {
+      "name": "Power Anklet",
+      "name_zh": "力量护踝",
+      "desc_en": "Halves the holder's Speed, but makes the holder gain 4 Speed EVs from any battle in addition to the normal amount.",
+      "desc_zh": "虽然携带后速度会降低，但宝可梦的速度会比平时成长得更高。",
+      "has_msg": false
+    },
+    "168": {
+      "name": "Power Band",
+      "name_zh": "力量束带",
+      "desc_en": "Halves the holder's Speed, but makes the holder gain 4 Special Attack EVs from any battle in addition to the normal amount.",
+      "desc_zh": "虽然携带后速度会降低，但宝可梦的特防会比平时成长得更高。",
+      "has_msg": false
+    },
+    "169": {
+      "name": "Power Belt",
+      "name_zh": "力量腰带",
+      "desc_en": "Halves the holder's Speed, but makes the holder gain 4 Defense EVs from any battle in addition to the normal amount.",
+      "desc_zh": "虽然携带后速度会降低，但宝可梦的防御会比平时成长得更高。",
+      "has_msg": false
+    },
+    "170": {
+      "name": "Power Bracer",
+      "name_zh": "力量护腕",
+      "desc_en": "Halves the holder's Speed, but makes the holder gain 4 Attack EVs from any battle in addition to the normal amount.",
+      "desc_zh": "虽然携带后速度会降低，但宝可梦的攻击会比平时成长得更高。",
+      "has_msg": false
+    },
+    "171": {
+      "name": "Power Lens",
+      "name_zh": "力量镜",
+      "desc_en": "Halves the holder's Speed, but makes the holder gain 4 Special Defense EVs from any battle in addition to the normal amount.",
+      "desc_zh": "虽然携带后速度会降低，但宝可梦的特攻会比平时成长得更高。",
+      "has_msg": false
+    },
+    "172": {
+      "name": "Power Weight",
+      "name_zh": "力量负重",
+      "desc_en": "Halves the holder's Speed, but makes the holder gain 4 HP EVs from any battle in addition to the normal amount.",
+      "desc_zh": "虽然携带后速度会降低，但宝可梦的ＨＰ会比平时成长得更高。",
+      "has_msg": false
+    },
+    "173": {
+      "name": "Dawn Stone",
+      "name_zh": "觉醒之石",
+      "desc_en": "Evolves male Kirlia into Gallade and female Snorunt into Froslass.",
+      "desc_zh": "能让某些特定宝可梦进化的神奇石头。像眼眸一般光彩动人。",
+      "has_msg": false
+    },
+    "174": {
+      "name": "Dusk Stone",
+      "name_zh": "暗之石",
+      "desc_en": "Evolves Murkrow into Honchkrow, Misdreavus into Mismagius and Lampent into Chandelure.",
+      "desc_zh": "能让某些特定宝可梦进化的神奇石头。像黑夜一般漆黑。",
+      "has_msg": false
+    },
+    "175": {
+      "name": "Electirizer",
+      "name_zh": "电力增幅器",
+      "desc_en": "If held by Electabuzz during a trade, makes it evolve into Electivire.",
+      "desc_zh": "积蓄着庞大电气力量的箱子。某种宝可梦很喜欢它。",
+      "has_msg": false
+    },
+    "176": {
+      "name": "Magmarizer",
+      "name_zh": "熔岩增幅器",
+      "desc_en": "If held by Magmar during a trade, makes it evolve into Magmortar.",
+      "desc_zh": "积蓄着庞大熔岩能量的箱子。某种宝可梦很喜欢它。",
+      "has_msg": false
+    },
+    "177": {
+      "name": "Odd Keystone",
+      "name_zh": "楔石",
+      "desc_en": "A vital item that is needed to keep a stone tower from collapsing. Voices can be heard from it occasionally.",
+      "desc_zh": "没有它，石之塔就会崩塌的重要石头。有时能从石头里听到声音。",
+      "has_msg": false
+    },
+    "178": {
+      "name": "Oval Stone",
+      "name_zh": "浑圆之石",
+      "desc_en": "If held by Happiny during the day while it levels up, makes it evolve into Chansey",
+      "desc_zh": "能让某些特定宝可梦进化的神奇石头。像珠子一般圆润。",
+      "has_msg": false
+    },
+    "179": {
+      "name": "Protector",
+      "name_zh": "护具",
+      "desc_en": "If held by Rhydon during a trade, makes it evolve into Rhyperior.",
+      "desc_zh": "某种护具。非常坚硬而且沉重。某种宝可梦很喜欢它。",
+      "has_msg": false
+    },
+    "180": {
+      "name": "Quick Claw",
+      "name_zh": "先制之爪",
+      "desc_en": "Has a 20% chance to make the holder move first in its priority bracket.",
+      "desc_zh": "又轻又尖锐的爪子。携带后，有时能比对手先一步行动。",
+      "has_msg": true
+    },
+    "181": {
+      "name": "Razor Claw",
+      "name_zh": "锐利之爪",
+      "desc_en": "Increases the holder's critical hit ratio by 1 stage. If held by Sneasel during the night while it levels up, makes it evolve into Weavile.",
+      "desc_zh": "尖锐的爪子。携带后，招式会变得容易击中要害。",
+      "has_msg": false
+    },
+    "182": {
+      "name": "Shiny Stone",
+      "name_zh": "光之石",
+      "desc_en": "Makes Togetic evolve into Togekiss, Roselia into Roserade and Minccino into Cinccino.",
+      "desc_zh": "能让某些特定宝可梦进化的神奇石头。像光芒一样耀眼。",
+      "has_msg": false
+    },
+    "183": {
+      "name": "Sticky Barb",
+      "name_zh": "附着针",
+      "desc_en": "Damages the holder for 12.5% of its max HP at the end of each turn. If another Pokémon hits the holder with a contact move and is not holding an item, this item will transfer to that Pokémon.",
+      "desc_zh": "携带后，每回合都会受到伤害。有时也会附着到碰到自己的对手身上。",
+      "has_msg": true
+    },
+    "184": {
+      "name": "Deep Sea Tooth",
+      "name_zh": "深海之牙",
+      "desc_en": "When held by Clamperl, increases its Special Attack by 100%. If held by Clamperl during a trade, makes it evolve into Huntail.",
+      "desc_zh": "让珍珠贝携带后，特攻就会提高的牙齿。散发着闪亮的银光。",
+      "has_msg": false
+    },
+    "185": {
+      "name": "Draco Plate",
+      "name_zh": "龙之石板",
+      "desc_en": "Increases power of Dragon-type moves used by the holder by 20%. Changes Judgment and Arceus with Multitype to the Dragon type.",
+      "desc_zh": "龙属性的石板。携带后，龙属性的招式威力就会增强。",
+      "has_msg": false
+    },
+    "186": {
+      "name": "Dread Plate",
+      "name_zh": "恶颜石板",
+      "desc_en": "Increases power of Dark-type moves used by the holder by 20%. Changes Judgment and Arceus with Multitype to the Dark type.",
+      "desc_zh": "恶属性的石板。携带后，恶属性的招式威力就会增强。",
+      "has_msg": false
+    },
+    "187": {
+      "name": "Earth Plate",
+      "name_zh": "大地石板",
+      "desc_en": "Increases power of Ground-type moves used by the holder by 20%. Changes Judgment and Arceus with Multitype to the Ground type.",
+      "desc_zh": "地面属性的石板。携带后，地面属性的招式威力就会增强。",
+      "has_msg": false
+    },
+    "188": {
+      "name": "Fist Plate",
+      "name_zh": "拳头石板",
+      "desc_en": "Increases power of Fighting-type moves used by the holder by 20%. Changes Judgment and Arceus with Multitype to the Fighting type.",
+      "desc_zh": "格斗属性的石板。携带后，格斗属性的招式威力就会增强。",
+      "has_msg": false
+    },
+    "189": {
+      "name": "Flame Plate",
+      "name_zh": "火球石板",
+      "desc_en": "Increases power of Fire-type moves used by the holder by 20%. Changes Judgment and Arceus with Multitype to the Fire type.",
+      "desc_zh": "火属性的石板。携带后，火属性的招式威力就会增强。",
+      "has_msg": false
+    },
+    "190": {
+      "name": "Grip Claw",
+      "name_zh": "紧缠钩爪",
+      "desc_en": "Ensures that partially trapping moves will always have their effect last for 5 turns.",
+      "desc_zh": "携带后，绑紧以及紧束等会持续造成伤害的招式的回合数会增加。",
+      "has_msg": false
+    },
+    "191": {
+      "name": "Icicle Plate",
+      "name_zh": "冰柱石板",
+      "desc_en": "Increases power of Ice-type moves used by the holder by 20%. Changes Judgment and Arceus with Multitype to the Ice type.",
+      "desc_zh": "冰属性的石板。携带后，冰属性的招式威力就会增强。",
+      "has_msg": false
+    },
+    "192": {
+      "name": "Insect Plate",
+      "name_zh": "玉虫石板",
+      "desc_en": "Increases power of Bug-type moves used by the holder by 20%. Changes Judgment and Arceus with Multitype to the Bug type.",
+      "desc_zh": "虫属性的石板。携带后，虫属性的招式威力就会增强。",
+      "has_msg": false
+    },
+    "193": {
+      "name": "Iron Plate",
+      "name_zh": "钢铁石板",
+      "desc_en": "Increases power of Steel-type moves used by the holder by 20%. Changes Judgment and Arceus with Multitype to the Steel type.",
+      "desc_zh": "钢属性的石板。携带后，钢属性的招式威力就会增强。",
+      "has_msg": false
+    },
+    "194": {
+      "name": "Meadow Plate",
+      "name_zh": "碧绿石板",
+      "desc_en": "Increases power of Grass-type moves used by the holder by 20%. Changes Judgment and Arceus with Multitype to the Grass type.",
+      "desc_zh": "草属性的石板。携带后，草属性的招式威力就会增强。",
+      "has_msg": false
+    },
+    "195": {
+      "name": "Mind Plate",
+      "name_zh": "神奇石板",
+      "desc_en": "Increases power of Psychic-type moves used by the holder by 20%. Changes Judgment and Arceus with Multitype to the Psychic type.",
+      "desc_zh": "超能力属性的石板。携带后，超能力属性的招式威力就会增强。",
+      "has_msg": false
+    },
+    "196": {
+      "name": "Sky Plate",
+      "name_zh": "蓝天石板",
+      "desc_en": "Increases power of Flying-type moves used by the holder by 20%. Changes Judgment and Arceus with Multitype to the Flying type.",
+      "desc_zh": "飞行属性的石板。携带后，飞行属性的招式威力就会增强。",
+      "has_msg": false
+    },
+    "197": {
+      "name": "Splash Plate",
+      "name_zh": "水滴石板",
+      "desc_en": "Increases power of Water-type moves used by the holder by 20%. Changes Judgment and Arceus with Multitype to the Water type.",
+      "desc_zh": "水属性的石板。携带后，水属性的招式威力就会增强。",
+      "has_msg": false
+    },
+    "198": {
+      "name": "Spooky Plate",
+      "name_zh": "妖怪石板",
+      "desc_en": "Increases power of Ghost-type moves used by the holder by 20%. Changes Judgment and Arceus with Multitype to the Ghost type.",
+      "desc_zh": "幽灵属性的石板。携带后，幽灵属性的招式威力就会增强。",
+      "has_msg": false
+    },
+    "199": {
+      "name": "Stone Plate",
+      "name_zh": "岩石石板",
+      "desc_en": "Increases power of Rock-type moves used by the holder by 20%. Changes Judgment and Arceus with Multitype to the Rock type.",
+      "desc_zh": "岩石属性的石板。携带后，岩石属性的招式威力就会增强。",
+      "has_msg": false
+    },
+    "200": {
+      "name": "Thick Club",
+      "name_zh": "粗骨头",
+      "desc_en": "When held by Cubone or Marowak, increases their Attack by 100%.",
+      "desc_zh": "某种坚硬的骨头。让卡拉卡拉或嘎啦嘎啦携带后，攻击就会提高。",
+      "has_msg": false
+    },
+    "201": {
+      "name": "Toxic Plate",
+      "name_zh": "剧毒石板",
+      "desc_en": "Increases power of Poison-type moves used by the holder by 20%. Changes Judgment and Arceus with Multitype to the Poison type.",
+      "desc_zh": "毒属性的石板。携带后，毒属性的招式威力就会增强。",
+      "has_msg": false
+    },
+    "202": {
+      "name": "Zap Plate",
+      "name_zh": "雷电石板",
+      "desc_en": "Increases power of Electric-type moves used by the holder by 20%. Changes Judgment and Arceus with Multitype to the Electric type.",
+      "desc_zh": "电属性的石板。携带后，电属性的招式威力就会增强。",
+      "has_msg": false
+    },
+    "203": {
+      "name": "Armor Fossil",
+      "name_zh": "盾甲化石",
+      "desc_en": "A fossil from a prehistoric Pokémon that lived on the land. It appears to be part of a collar.",
+      "desc_zh": "很久以前生活在地上的古代宝可梦的化石。好像是领饰的一部分。",
+      "has_msg": false
+    },
+    "204": {
+      "name": "Claw Fossil",
+      "name_zh": "爪子化石",
+      "desc_en": "A fossil of an ancient Pokémon that lived in the sea. It appears to be part of a claw.",
+      "desc_zh": "很久以前栖息在海里的古代宝可梦的化石。好像是爪子的一部分。",
+      "has_msg": false
+    },
+    "205": {
+      "name": "Dome Fossil",
+      "name_zh": "甲壳化石",
+      "desc_en": "A fossil of an ancient Pokémon that lived in the sea. It appears to be part of a shell.",
+      "desc_zh": "很久以前栖息在海里的古代宝可梦的化石。好像是甲壳的一部分。",
+      "has_msg": false
+    },
+    "206": {
+      "name": "Hard Stone",
+      "name_zh": "硬石头",
+      "desc_en": "Increases power of Rock-type moves used by the holder by 20%.",
+      "desc_zh": "绝对不会裂开的石头。携带后，岩石属性的招式威力就会提高。",
+      "has_msg": false
+    },
+    "207": {
+      "name": "Helix Fossil",
+      "name_zh": "贝壳化石",
+      "desc_en": "A fossil of an ancient Pokémon that lived in the sea. It appears to be part of a seashell.",
+      "desc_zh": "很久以前栖息在海里的古代宝可梦的化石。好像是贝壳的一部分。",
+      "has_msg": false
+    },
+    "208": {
+      "name": "Old Amber",
+      "name_zh": "秘密琥珀",
+      "desc_en": "A piece of amber that contains the genetic material of an ancient Pokémon. It is clear with a reddish tint.",
+      "desc_zh": "封存着古代宝可梦遗传基因的琥珀，透着点红色。",
+      "has_msg": false
+    },
+    "209": {
+      "name": "Rare Bone",
+      "name_zh": "贵重骨头",
+      "desc_en": "A bone that is extremely valuable for Pokémon archeology. It can be sold for a high price to shops.",
+      "desc_zh": "在宝可梦考古学上非常贵重的骨头。可以在商店高价出售。",
+      "has_msg": false
+    },
+    "210": {
+      "name": "Root Fossil",
+      "name_zh": "根状化石",
+      "desc_en": "A fossil of an ancient Pokémon that lived in the sea. It appears to be part of a plant root.",
+      "desc_zh": "很久以前栖息在海里的古代宝可梦的化石。好像是根的一部分。",
+      "has_msg": false
+    },
+    "211": {
+      "name": "Skull Fossil",
+      "name_zh": "头盖化石",
+      "desc_en": "A fossil from a prehistoric Pokémon that lived on the land. It appears to be part of a head.",
+      "desc_zh": "很久以前生活在地上的古代宝可梦的化石。好像是头部的一部分。",
+      "has_msg": false
+    },
+    "212": {
+      "name": "Iron Ball",
+      "name_zh": "黑色铁球",
+      "desc_en": "Halves the holder's Speed and makes it susceptible to Ground-type moves, Arena Trap, Spikes and Toxic Spikes if it is a Flying-type Pokémon or has Levitate.",
+      "desc_zh": "携带后，速度会降低。飞行属性以及飘浮宝可梦会被地面招式击中。",
+      "has_msg": false
+    },
+    "213": {
+      "name": "Griseous Orb",
+      "name_zh": "白金宝珠",
+      "desc_en": "When held by Giratina, increases the power of its Dragon-type and Ghost-type moves by 20%, and changes it to Origin forme.",
+      "desc_zh": "让骑拉帝纳携带的话，龙和幽灵属性的招式威力就会提高。散发着光辉的宝珠。",
+      "has_msg": false
+    },
+    "214": {
+      "name": "Air Mail",
+      "name_zh": "天空邮件",
+      "desc_en": "Stationery featuring a print of colorful letter sets. Let a Pokémon hold it for delivery.",
+      "desc_zh": "天空邮件",
+      "has_msg": false
+    },
+    "215": {
+      "name": "Bloom Mail",
+      "name_zh": "绽放邮件",
+      "desc_en": "Stationery featuring a print of pretty floral patterns. Let a Pokémon hold it for delivery.",
+      "desc_zh": "鲜花邮件",
+      "has_msg": false
+    },
+    "216": {
+      "name": "Brick Mail",
+      "name_zh": "砖块邮件",
+      "desc_en": "Stationery featuring a print of a tough-looking brick pattern. Let a Pokémon hold it for delivery.",
+      "desc_zh": "瓦片邮件",
+      "has_msg": false
+    },
+    "217": {
+      "name": "Bubble Mail",
+      "name_zh": "水蓝邮件",
+      "desc_en": "Stationery featuring a print of a blue world underwater. Let a Pokémon hold it for delivery.",
+      "desc_zh": "蓝色邮件",
+      "has_msg": false
+    },
+    "218": {
+      "name": "Flame Mail",
+      "name_zh": "火焰邮件",
+      "desc_en": "Stationery featuring a print of flames in blazing red. Let a Pokémon hold it for delivery.",
+      "desc_zh": "火焰邮件",
+      "has_msg": false
+    },
+    "219": {
+      "name": "Grass Mail",
+      "name_zh": "青草邮件",
+      "desc_en": "Stationery featuring a print of a refreshingly green field. Let a Pokémon hold it for delivery.",
+      "desc_zh": "绿草邮件",
+      "has_msg": false
+    },
+    "220": {
+      "name": "Harbor Mail",
+      "name_zh": "港口邮件",
+      "desc_en": "A piece of Mail featuring a cute Wingull print. It is to be held by a Pokémon.",
+      "desc_zh": "港湾邮件",
+      "has_msg": false
+    },
+    "221": {
+      "name": "Heart Mail",
+      "name_zh": "甜蜜邮件",
+      "desc_en": "Stationery featuring a print of giant heart patterns. Let a Pokémon hold it for delivery.",
+      "desc_zh": "爱情邮件",
+      "has_msg": false
+    },
+    "222": {
+      "name": "Mosaic Mail",
+      "name_zh": "彩嵌邮件",
+      "desc_en": "Stationery featuring a print of a vivid rainbow pattern. Let a Pokémon hold it for delivery.",
+      "desc_zh": "马赛克邮件",
+      "has_msg": false
+    },
+    "223": {
+      "name": "Snow Mail",
+      "name_zh": "暴雪邮件",
+      "desc_en": "Stationery featuring a print of a chilly, snow-covered world. Let a Pokémon hold it for delivery.",
+      "desc_zh": "暴雪邮件",
+      "has_msg": false
+    },
+    "224": {
+      "name": "Space Mail",
+      "name_zh": "空间邮件",
+      "desc_en": "Stationery featuring a print depicting the huge expanse of space. Let a Pokémon hold it for delivery.",
+      "desc_zh": "太空邮件",
+      "has_msg": false
+    },
+    "225": {
+      "name": "Steel Mail",
+      "name_zh": "钢铁邮件",
+      "desc_en": "Stationery featuring a print of cool mechanical designs. Let a Pokémon hold it for delivery.",
+      "desc_zh": "钢铁邮件",
+      "has_msg": false
+    },
+    "226": {
+      "name": "Tunnel Mail",
+      "name_zh": "隧道邮件",
+      "desc_en": "Stationery featuring a print of dimly lit coal mine. Let a Pokémon hold it for delivery.",
+      "desc_zh": "隧道邮件",
+      "has_msg": false
+    },
+    "227": {
+      "name": "Douse Drive",
+      "name_zh": "水流卡带",
+      "desc_en": "Changes Techno Blast to the Water type when held.",
+      "desc_zh": "这是让盖诺赛克特携带的卡带。携带后，高科技光炮这招式就会变为水属性。",
+      "has_msg": false
+    },
+    "228": {
+      "name": "Shock Drive",
+      "name_zh": "闪电卡带",
+      "desc_en": "Changes Techno Blast to the Electric type when held.",
+      "desc_zh": "这是让盖诺赛克特携带的卡带。携带后，高科技光炮这招式就会变为电属性。",
+      "has_msg": false
+    },
+    "229": {
+      "name": "Burn Drive",
+      "name_zh": "火焰卡带",
+      "desc_en": "Changes Techno Blast to the Fire type when held.",
+      "desc_zh": "这是让盖诺赛克特携带的卡带。携带后，高科技光炮这招式就会变为火属性。",
+      "has_msg": false
+    },
+    "230": {
+      "name": "Chill Drive",
+      "name_zh": "冰冻卡带",
+      "desc_en": "Changes Techno Blast to the Ice type when held.",
+      "desc_zh": "这是让盖诺赛克特携带的卡带。携带后，高科技光炮这招式就会变为冰属性。",
+      "has_msg": false
+    },
+    "231": {
+      "name": "Sweet Heart",
+      "name_zh": "心形甜点",
+      "desc_en": "Restores 20 HP to a Pokémon.",
+      "desc_zh": "非常甜腻的巧克力。能让１只宝可梦回复２０ＨＰ。",
+      "has_msg": false
+    },
+    "232": {
+      "name": "Prism Scale",
+      "name_zh": "美丽鳞片",
+      "desc_en": "If held by Feebas during a trade, makes it evolve into Milotic.",
+      "desc_zh": "能让某些特定宝可梦进化的神奇鳞片。散发着虹色光辉。",
+      "has_msg": false
+    },
+    "233": {
+      "name": "Eviolite",
+      "name_zh": "进化奇石",
+      "desc_en": "If held by a Pokémon that can still evolve, boosts its Defense and Special Defense by 50%.",
+      "desc_zh": "进化的神奇石块。携带后，还能进化的宝可梦的防御和特防就会提高。",
+      "has_msg": false
+    },
+    "234": {
+      "name": "Float Stone",
+      "name_zh": "轻石",
+      "desc_en": "Halves the holder's weight.",
+      "desc_zh": "非常轻的石头。携带后，宝可梦的体重会变轻。",
+      "has_msg": false
+    },
+    "235": {
+      "name": "Rocky Helmet",
+      "name_zh": "凸凸头盔",
+      "desc_en": "When the holder is hit by a contact move, damages the opponent by 16.6% of its max HP.",
+      "desc_zh": "让宝可梦携带后，在受到打击招式攻击时，能给予对手伤害。",
+      "has_msg": true
+    },
+    "236": {
+      "name": "Air Balloon",
+      "name_zh": "气球",
+      "desc_en": "Makes the holder immune to Ground-type moves, Arena Trap, Spikes and Toxic Spikes. This item is lost if the holder is hit by any damaging move.",
+      "desc_zh": "让宝可梦携带后，宝可梦会浮在空中。受到攻击就会破裂。",
+      "has_msg": true
+    },
+    "237": {
+      "name": "Red Card",
+      "name_zh": "红牌",
+      "desc_en": "When the holder is hit by the opponent, forces the opponent to switch out. Consumed after use.",
+      "desc_zh": "有着神奇力量的卡片。携带后，能让使用了招式的对手退场。",
+      "has_msg": true
+    },
+    "238": {
+      "name": "Ring Target",
+      "name_zh": "标靶",
+      "desc_en": "Makes the holder susceptible to attacks it would normally be immune to.",
+      "desc_zh": "原本因宝可梦的属性相克关系而无效的招式现在会变得能够击中自己。",
+      "has_msg": false
+    },
+    "239": {
+      "name": "Binding Band",
+      "name_zh": "紧绑束带",
+      "desc_en": "Makes partially trapping moves used by the holder deal 12.5% of the opponent's max HP per turn with their effect instead of 6.125%.",
+      "desc_zh": "能增强绑紧招式的束带。携带后，绑紧招式的威力会变强。",
+      "has_msg": false
+    },
+    "240": {
+      "name": "Absorb Bulb",
+      "name_zh": "球根",
+      "desc_en": "Increases the holder's Special Attack by 1 stage when it is hit by a Water-type move. Consumed after use.",
+      "desc_zh": "一次性使用的球根。携带它的宝可梦如果受到水属性招式的攻击，特攻就会提高。",
+      "has_msg": false
+    },
+    "241": {
+      "name": "Cell Battery",
+      "name_zh": "充电电池",
+      "desc_en": "Increases the holder's Attack by 1 stage when it is hit by an Electric-type move. Consumed after use.",
+      "desc_zh": "一次性使用的充电电池。携带它的宝可梦如果受到电属性招式的攻击，攻击就会提高。",
+      "has_msg": false
+    },
+    "242": {
+      "name": "Eject Button",
+      "name_zh": "逃脱按键",
+      "desc_en": "When the holder is hit by the opponent, forces the holder to switch out. Consumed after use.",
+      "desc_zh": "携带它的宝可梦如果受到招式攻击，就能逃脱战斗，并和同行的其他宝可梦进行替换。",
+      "has_msg": true
+    },
+    "243": {
+      "name": "Fire Gem",
+      "name_zh": "火之宝石",
+      "desc_en": "Increases power of Fire-type moves used by the holder by 30%. Consumed after use.",
+      "desc_zh": "火属性的宝石。携带后，火属性的招式威力仅会增强１次。",
+      "has_msg": false
+    },
+    "244": {
+      "name": "Water Gem",
+      "name_zh": "水之宝石",
+      "desc_en": "Increases power of Water-type moves used by the holder by 30%. Consumed after use.",
+      "desc_zh": "水属性的宝石。携带后，水属性的招式威力仅会增强１次。",
+      "has_msg": false
+    },
+    "245": {
+      "name": "Electric Gem",
+      "name_zh": "电之宝石",
+      "desc_en": "Increases power of Electric-type moves used by the holder by 30%. Consumed after use.",
+      "desc_zh": "电属性的宝石。携带后，电属性的招式威力仅会增强１次。",
+      "has_msg": false
+    },
+    "246": {
+      "name": "Grass Gem",
+      "name_zh": "草之宝石",
+      "desc_en": "Increases power of Grass-type moves used by the holder by 30%. Consumed after use.",
+      "desc_zh": "草属性的宝石。携带后，草属性的招式威力仅会增强１次。",
+      "has_msg": false
+    },
+    "247": {
+      "name": "Ice Gem",
+      "name_zh": "冰之宝石",
+      "desc_en": "Increases power of Ice-type moves used by the holder by 30%. Consumed after use.",
+      "desc_zh": "冰属性的宝石。携带后，冰属性的招式威力仅会增强１次。",
+      "has_msg": false
+    },
+    "248": {
+      "name": "Fighting Gem",
+      "name_zh": "格斗宝石",
+      "desc_en": "Increases power of Fighting-type moves used by the holder by 30%. Consumed after use.",
+      "desc_zh": "格斗属性的宝石。携带后，格斗属性的招式威力仅会增强１次。",
+      "has_msg": false
+    },
+    "249": {
+      "name": "Poison Gem",
+      "name_zh": "毒之宝石",
+      "desc_en": "Increases power of Poison-type moves used by the holder by 30%. Consumed after use.",
+      "desc_zh": "毒属性的宝石。携带后，毒属性的招式威力仅会增强１次。",
+      "has_msg": false
+    },
+    "250": {
+      "name": "Ground Gem",
+      "name_zh": "地面宝石",
+      "desc_en": "Increases power of Ground-type moves used by the holder by 30%. Consumed after use.",
+      "desc_zh": "地面属性的宝石。携带后，地面属性的招式威力仅会增强１次。",
+      "has_msg": false
+    },
+    "251": {
+      "name": "Flying Gem",
+      "name_zh": "飞行宝石",
+      "desc_en": "Increases power of Flying-type moves used by the holder by 30%. Consumed after use.",
+      "desc_zh": "飞行属性的宝石。携带后，飞行属性的招式威力仅会增强１次。",
+      "has_msg": false
+    },
+    "252": {
+      "name": "Psychic Gem",
+      "name_zh": "超能力宝石",
+      "desc_en": "Increases power of Psychic-type moves used by the holder by 30%. Consumed after use.",
+      "desc_zh": "超能力属性的宝石。携带后，超能力属性的招式威力仅会增强１次。",
+      "has_msg": false
+    },
+    "253": {
+      "name": "Bug Gem",
+      "name_zh": "虫之宝石",
+      "desc_en": "Increases power of Bug-type moves used by the holder by 30%. Consumed after use.",
+      "desc_zh": "虫属性的宝石。携带后，虫属性的招式威力仅会增强１次。",
+      "has_msg": false
+    },
+    "254": {
+      "name": "Rock Gem",
+      "name_zh": "岩石宝石",
+      "desc_en": "Increases power of Rock-type moves used by the holder by 30%. Consumed after use.",
+      "desc_zh": "岩石属性的宝石。携带后，岩石属性的招式威力仅会增强１次。",
+      "has_msg": false
+    },
+    "255": {
+      "name": "Ghost Gem",
+      "name_zh": "幽灵宝石",
+      "desc_en": "Increases power of Ghost-type moves used by the holder by 30%. Consumed after use.",
+      "desc_zh": "幽灵属性的宝石。携带后，幽灵属性的招式威力仅会增强１次。",
+      "has_msg": false
+    },
+    "256": {
+      "name": "Dragon Gem",
+      "name_zh": "龙之宝石",
+      "desc_en": "Increases power of Dragon-type moves used by the holder by 30%. Consumed after use.",
+      "desc_zh": "龙属性的宝石。携带后，龙属性的招式威力仅会增强１次。",
+      "has_msg": false
+    },
+    "257": {
+      "name": "Dark Gem",
+      "name_zh": "恶之宝石",
+      "desc_en": "Increases power of Dark-type moves used by the holder by 30%. Consumed after use.",
+      "desc_zh": "恶属性的宝石。携带后，恶属性的招式威力仅会增强１次。",
+      "has_msg": false
+    },
+    "258": {
+      "name": "Steel Gem",
+      "name_zh": "钢之宝石",
+      "desc_en": "Increases power of Steel-type moves used by the holder by 30%. Consumed after use.",
+      "desc_zh": "钢属性的宝石。携带后，钢属性的招式威力仅会增强１次。",
+      "has_msg": false
+    },
+    "259": {
+      "name": "Normal Gem",
+      "name_zh": "一般宝石",
+      "desc_en": "Increases power of Normal-type moves used by the holder by 30%. Consumed after use.",
+      "desc_zh": "一般属性的宝石。携带后，一般属性的招式威力仅会增强１次。",
+      "has_msg": false
+    },
+    "260": {
+      "name": "Health Wing",
+      "name_zh": "体力之羽",
+      "desc_en": "Increases a Pokémon's HP EVs by 1, and increases its happiness.",
+      "desc_zh": "用于宝可梦的道具。能稍微提高１只宝可梦的ＨＰ的基础点数。",
+      "has_msg": false
+    },
+    "261": {
+      "name": "Muscle Wing",
+      "name_zh": "肌力之羽",
+      "desc_en": "Increases a Pokémon's Attack EVs by 1, and increases its happiness.",
+      "desc_zh": "用于宝可梦的道具。能稍微提高１只宝可梦的攻击的基础点数。",
+      "has_msg": false
+    },
+    "262": {
+      "name": "Resist Wing",
+      "name_zh": "抵抗之羽",
+      "desc_en": "Increases a Pokémon's Defense EVs by 1, and increases its happiness.",
+      "desc_zh": "用于宝可梦的道具。能稍微提高１只宝可梦的防御的基础点数。",
+      "has_msg": false
+    },
+    "263": {
+      "name": "Genius Wing",
+      "name_zh": "智力之羽",
+      "desc_en": "Increases a Pokémon's Special Attack EVs by 1, and increases its happiness.",
+      "desc_zh": "用于宝可梦的道具。能稍微提高１只宝可梦的特攻的基础点数。",
+      "has_msg": false
+    },
+    "264": {
+      "name": "Clever Wing",
+      "name_zh": "精神之羽",
+      "desc_en": "Increases a Pokémon's Special Defense EVs by 1, and increases its happiness.",
+      "desc_zh": "用于宝可梦的道具。能稍微提高１只宝可梦的特防的基础点数。",
+      "has_msg": false
+    },
+    "265": {
+      "name": "Swift Wing",
+      "name_zh": "瞬发之羽",
+      "desc_en": "Increases a Pokémon's Speed EVs by 1, and increases its happiness.",
+      "desc_zh": "用于宝可梦的道具。能稍微提高１只宝可梦的速度的基础点数。",
+      "has_msg": false
+    },
+    "266": {
+      "name": "Pretty Wing",
+      "name_zh": "美丽之羽",
+      "desc_en": "Though this feather is beautiful, it's just a regular feather and has no effect on Pokémon.",
+      "desc_zh": "仅仅只是漂亮，没有任何效果，极其普通的羽毛。",
+      "has_msg": false
+    },
+    "267": {
+      "name": "Dream Ball",
+      "name_zh": "梦境球",
+      "desc_en": "Has a 100% capture rate. Only for use in Entree Forest.",
+      "desc_zh": "在连入之森中，不知何时出现在包包里的梦中球。能捉到任何宝可梦。",
+      "has_msg": false
+    },
+    "268": {
+      "name": "Balm Mushroom",
+      "name_zh": "芳香蘑菇",
+      "desc_en": "A rare mushroom which gives off a nice fragrance. A maniac will buy it for a high price.",
+      "desc_zh": "能让附近一带芳香四溢的珍稀蘑菇。可以在商店高价出售。",
+      "has_msg": false
+    },
+    "269": {
+      "name": "Big Nugget",
+      "name_zh": "巨大金珠",
+      "desc_en": "A big nugget of pure gold that gives off a lustrous gleam. A maniac will buy it for a high price.",
+      "desc_zh": "以纯金制成，闪着金光的大珠子。可以在商店高价出售。",
+      "has_msg": false
+    },
+    "270": {
+      "name": "Pearl String",
+      "name_zh": "丸子珍珠",
+      "desc_en": "Very large pearls that sparkle in a pretty silver color. A maniac will buy them for a high price.",
+      "desc_zh": "散发着美丽银辉且非常大颗的珍珠。可以在商店高价出售。",
+      "has_msg": false
+    },
+    "271": {
+      "name": "Comet Shard",
+      "name_zh": "彗星碎片",
+      "desc_en": "A shard which fell to the ground when a comet approached. A maniac will buy it for a high price.",
+      "desc_zh": "彗星临近时，掉落到地表上的碎片。可以在商店高价出售。",
+      "has_msg": false
+    },
+    "272": {
+      "name": "Relic Copper",
+      "name_zh": "古代铜币",
+      "desc_en": "A copper coin used in a civilization about 3,000 years ago. A maniac will buy it for a high price.",
+      "desc_zh": "约３０００年前的文明使用的铜币。",
+      "has_msg": false
+    },
+    "273": {
+      "name": "Relic Silver",
+      "name_zh": "古代银币",
+      "desc_en": "A silver coin used in a civilization about 3,000 years ago. A maniac will buy it for a high price.",
+      "desc_zh": "约３０００年前的文明使用的银币。",
+      "has_msg": false
+    },
+    "274": {
+      "name": "Relic Gold",
+      "name_zh": "古代金币",
+      "desc_en": "A gold coin used in a civilization about 3,000 years ago. A maniac will buy it for a high price.",
+      "desc_zh": "约３０００年前的文明使用的金币。",
+      "has_msg": false
+    },
+    "275": {
+      "name": "Relic Vase",
+      "name_zh": "古代之壶",
+      "desc_en": "A vase made in a civilization about 3,000 years ago. A maniac will buy it for a high price.",
+      "desc_zh": "约３０００年前的文明制造的壶。",
+      "has_msg": false
+    },
+    "276": {
+      "name": "Relic Band",
+      "name_zh": "古代手镯",
+      "desc_en": "A bracelet made in a civilization about 3,000 years ago. A maniac will buy it for a high price.",
+      "desc_zh": "约３０００年前的文明制造的手镯。",
+      "has_msg": false
+    },
+    "277": {
+      "name": "Relic Statue",
+      "name_zh": "古代石像",
+      "desc_en": "A stone figure made in a civilization about 3,000 years ago. A maniac will buy it for a high price.",
+      "desc_zh": "约３０００年前的文明制造的石像。",
+      "has_msg": false
+    },
+    "278": {
+      "name": "Relic Crown",
+      "name_zh": "古代王冠",
+      "desc_en": "A crown made in a civilization about 3,000 years ago. A maniac will buy it for a high price.",
+      "desc_zh": "约３０００年前的文明制造的王冠。",
+      "has_msg": false
+    },
+    "279": {
+      "name": "Casteliacone",
+      "name_zh": "飞云冰淇淋",
+      "desc_en": "Cures a Pokémon of any major status condition.",
+      "desc_zh": "飞云市特产的冰淇淋。能治愈１只宝可梦的所有异常状态。",
+      "has_msg": false
+    },
+    "280": {
+      "name": "Dire Hit 2",
+      "name_zh": "要害攻击２",
+      "desc_en": "Wonder Launcher item. Increases a Pokémon's critical hit ratio by 2 stages.",
+      "has_msg": false
+    },
+    "281": {
+      "name": "X Speed 2",
+      "name_zh": "速度强化２",
+      "desc_en": "Wonder Launcher item. Increases a Pokémon's Speed by 2 stages.",
+      "has_msg": false
+    },
+    "282": {
+      "name": "X Special 2",
+      "name_zh": "特攻强化２",
+      "desc_en": "Wonder Launcher item. Increases a Pokémon's Special Attack by 2 stages.",
+      "has_msg": false
+    },
+    "283": {
+      "name": "X Sp. Def 2",
+      "name_zh": "特防强化２",
+      "desc_en": "Wonder Launcher item. Increases a Pokémon's Special Defense by 2 stages.",
+      "has_msg": false
+    },
+    "284": {
+      "name": "X Defend 2",
+      "name_zh": "防御强化２",
+      "desc_en": "Wonder Launcher item. Increases a Pokémon's Defense by 2 stages.",
+      "has_msg": false
+    },
+    "285": {
+      "name": "X Attack 2",
+      "name_zh": "力量强化２",
+      "desc_en": "Wonder Launcher item. Increases a Pokémon's Attack by 2 stages.",
+      "has_msg": false
+    },
+    "286": {
+      "name": "X Accuracy 2",
+      "name_zh": "命中强化２",
+      "desc_en": "Wonder Launcher item. Increases a Pokémon's Accuracy by 2 stages.",
+      "has_msg": false
+    },
+    "287": {
+      "name": "X Speed 3",
+      "name_zh": "速度强化３",
+      "desc_en": "Wonder Launcher item. Increases a Pokémon's Speed by 3 stages.",
+      "has_msg": false
+    },
+    "288": {
+      "name": "X Special 3",
+      "name_zh": "特攻强化３",
+      "desc_en": "Wonder Launcher item. Increases a Pokémon's Special Attack by 3 stages.",
+      "has_msg": false
+    },
+    "289": {
+      "name": "X Sp. Def 3",
+      "name_zh": "特防强化３",
+      "desc_en": "Wonder Launcher item. Increases a Pokémon's Special Defense by 3 stages.",
+      "has_msg": false
+    },
+    "290": {
+      "name": "X Defend 3",
+      "name_zh": "防御强化３",
+      "desc_en": "Wonder Launcher item. Increases a Pokémon's Defense by 3 stages.",
+      "has_msg": false
+    },
+    "291": {
+      "name": "X Attack 3",
+      "name_zh": "力量强化３",
+      "desc_en": "Wonder Launcher item. Increases a Pokémon's Attack by 3 stages.",
+      "has_msg": false
+    },
+    "292": {
+      "name": "X Accuracy 3",
+      "name_zh": "命中强化３",
+      "desc_en": "Wonder Launcher item. Increases a Pokémon's Accuracy by 3 stages.",
+      "has_msg": false
+    },
+    "293": {
+      "name": "X Speed 6",
+      "name_zh": "速度强化６",
+      "desc_en": "Wonder Launcher item. Increases a Pokémon's Speed by 6 stages.",
+      "has_msg": false
+    },
+    "294": {
+      "name": "X Special 6",
+      "name_zh": "特攻强化６",
+      "desc_en": "Wonder Launcher item. Increases a Pokémon's Special Attack by 6 stages.",
+      "has_msg": false
+    },
+    "295": {
+      "name": "X Sp. Def 6",
+      "name_zh": "特防强化６",
+      "desc_en": "Wonder Launcher item. Increases a Pokémon's Special Defense by 6 stages.",
+      "has_msg": false
+    },
+    "296": {
+      "name": "X Defend 6",
+      "name_zh": "防御强化６",
+      "desc_en": "Wonder Launcher item. Increases a Pokémon's Defense by 6 stages.",
+      "has_msg": false
+    },
+    "297": {
+      "name": "X Attack 6",
+      "name_zh": "力量强化６",
+      "desc_en": "Wonder Launcher item. Increases a Pokémon's Attack by 6 stages.",
+      "has_msg": false
+    },
+    "298": {
+      "name": "X Accuracy 6",
+      "name_zh": "命中强化６",
+      "desc_en": "Wonder Launcher item. Increases a Pokémon's Accuracy by 6 stages.",
+      "has_msg": false
+    },
+    "299": {
+      "name": "Ability Urge",
+      "name_zh": "特效召唤",
+      "desc_en": "Wonder Launcher item. Reactivates a Pokémon's Ability if it is Anticipation, Download, Drizzle, Drought, Forewarn, Frisk, Intimidate, Sand Stream, Slow Start, Snow Warning or Trace.",
+      "has_msg": false
+    },
+    "300": {
+      "name": "Item Drop",
+      "name_zh": "道具击落",
+      "desc_en": "Wonder Launcher item. Causes the target of a Pokémon's attack to lose its item.",
+      "has_msg": false
+    },
+    "301": {
+      "name": "Item Urge",
+      "name_zh": "道具召唤",
+      "desc_en": "Wonder Launcher item. Causes consumable items to activate immediately.",
+      "has_msg": false
+    },
+    "302": {
+      "name": "Reset Urge",
+      "name_zh": "回复召唤",
+      "desc_en": "Wonder Launcher item. Resets a Pokémon's stat changes back to normal.",
+      "has_msg": false
+    },
+    "303": {
+      "name": "Dire Hit 3",
+      "name_zh": "要害攻击３",
+      "desc_en": "Wonder Launcher item. Increases a Pokémon's critical hit ratio by 3 stages.",
+      "has_msg": false
+    },
+    "304": {
+      "name": "Berserk Gene",
+      "name_zh": "破坏基因",
+      "desc_en": "Raises the holder's Attack by 1 stage, but confuses it. Consumed after use.",
+      "has_msg": true
+    },
+    "305": {
+      "name": "Poké Ball",
+      "name_zh": "精灵球",
+      "desc_en": "Has a capture rate of 1.",
+      "desc_zh": "用于投向野生宝可梦并将其捕捉的球。它是胶囊样式的。",
+      "has_msg": false
+    },
+    "306": {
+      "name": "Great Ball",
+      "name_zh": "超级球",
+      "desc_en": "Has a capture rate of 1.5.",
+      "desc_zh": "比起精灵球来更容易捉到宝可梦的，性能还算不错的球。",
+      "has_msg": false
+    },
+    "307": {
+      "name": "Ultra Ball",
+      "name_zh": "高级球",
+      "desc_en": "Has a capture rate of 2.",
+      "desc_zh": "比起超级球来更容易捉到宝可梦的，性能非常不错的球。",
+      "has_msg": false
+    },
+    "308": {
+      "name": "Master Ball",
+      "name_zh": "大师球",
+      "desc_en": "Has a 100% capture rate.",
+      "desc_zh": "必定能捉到野生宝可梦的，性能最好的球。",
+      "has_msg": false
+    },
+    "309": {
+      "name": "Safari Ball",
+      "name_zh": "狩猎球",
+      "desc_en": "Has a capture rate of 1.5. Only for use in the Safari Zone.",
+      "desc_zh": "仅能在大湿地中使用的特殊的球。上面有迷彩花纹。",
+      "has_msg": false
+    },
+    "310": {
+      "name": "Level Ball",
+      "name_zh": "等级球",
+      "desc_en": "If the Trainer's Pokémon's level is the same or lower as the target, has a capture rate of 1. If the Trainer's Pokémon's level is greater than the target's, but lower than 2x the target's, has a capture rate of 2. If the Trainer's Pokémon's level is greater than 2x the target's, but lower than 4x the target's, has a capture rate of 4. If the Trainer's Pokémon's level is greater than 4x the target's, has a capture rate of 8.",
+      "desc_zh": "有点与众不同的球。要捕捉的宝可梦比自己宝可梦的等级越低，就会越容易捕捉。",
+      "has_msg": false
+    },
+    "311": {
+      "name": "Lure Ball",
+      "name_zh": "诱饵球",
+      "desc_en": "If the target was hooked with a fishing rod, has a capture rate of 3. Otherwise, has a capture rate of 1.",
+      "desc_zh": "有点与众不同的球。能很容易地捕捉用钓竿钓上来的宝可梦。",
+      "has_msg": false
+    },
+    "312": {
+      "name": "Moon Ball",
+      "name_zh": "月亮球",
+      "desc_en": "If the target belongs to the evolutionary line of a Pokémon that can evolve via Moon stone, has a capture rate of 4. Otherwise, has a capture rate of 1.",
+      "desc_zh": "有点与众不同的球。能很容易地捕捉使用月之石进化的宝可梦。",
+      "has_msg": false
+    },
+    "313": {
+      "name": "Friend Ball",
+      "name_zh": "友友球",
+      "desc_en": "Has a capture rate of 1. Pokémon captured with this Poke Ball have their happiness immediately set to 200.",
+      "desc_zh": "有点与众不同的球。捉到的野生宝可梦会立刻变得和训练家亲密起来。",
+      "has_msg": false
+    },
+    "314": {
+      "name": "Love Ball",
+      "name_zh": "甜蜜球",
+      "desc_en": "If the target is the same species as the Trainer's Pokémon but opposite gender, has a capture rate of 8. Otherwise, has a capture rate of 1.",
+      "desc_zh": "有点与众不同的球。能很容易地捕捉和自己宝可梦性别不同的宝可梦。",
+      "has_msg": false
+    },
+    "315": {
+      "name": "Heavy Ball",
+      "name_zh": "沉重球",
+      "desc_en": "Has a 1 capture rate. Adds -20 to the capture chance if target weighs less than, or exactly 204.8 kg. Adds 20 to the capture chance if target weighs more than 204.8 kg but less than, or exactly 307.2 kg. Adds 30 to the capture chance if target weighs more than 307.2 kg but less than, or exactly 409.6 kg. Adds 40 to the capture rate if target weighs more than 409.6 kg.",
+      "desc_zh": "有点与众不同的球。能很容易地捕捉身体沉重的宝可梦。",
+      "has_msg": false
+    },
+    "316": {
+      "name": "Fast Ball",
+      "name_zh": "速度球",
+      "desc_en": "If the target's base Speed is 100 or more, has a 4x capture rate. Otherwise, has a 1 capture rate.",
+      "desc_zh": "有点与众不同的球。能很容易地捕捉逃跑速度很快的宝可梦。",
+      "has_msg": false
+    },
+    "317": {
+      "name": "Sport Ball",
+      "name_zh": "竞赛球",
+      "desc_en": "Has a 1.5 capture rate. Only for use during the Bug-Catching Contest.",
+      "desc_zh": "在捕虫大赛上使用的特殊的球。",
+      "has_msg": false
+    },
+    "318": {
+      "name": "Premier Ball",
+      "name_zh": "纪念球",
+      "desc_en": "Has a 1 capture rate.",
+      "desc_zh": "有点珍贵的球。特制出来的某种纪念品。",
+      "has_msg": false
+    },
+    "319": {
+      "name": "Repeat Ball",
+      "name_zh": "重复球",
+      "desc_en": "If the target was captured before, has a 3 capture rate. Otherwise, has a 1 capture rate.",
+      "desc_zh": "有点与众不同的球。能很容易地捕捉以前曾捉到过的宝可梦。",
+      "has_msg": false
+    },
+    "320": {
+      "name": "Timer Ball",
+      "name_zh": "计时球",
+      "desc_en": "Has a capture rate of 1 + (turns passed in battle x 3 / 10), with a maximum of 4.",
+      "desc_zh": "有点与众不同的球。回合数花费得越多，宝可梦就会越容易捕捉。",
+      "has_msg": false
+    },
+    "321": {
+      "name": "Nest Ball",
+      "name_zh": "巢穴球",
+      "desc_en": "Has a capture rate of (41 - target's level) / 10, with a minimum of 1.",
+      "desc_zh": "有点与众不同的球。捕捉的野生宝可梦越弱，就会越容易捕捉。",
+      "has_msg": false
+    },
+    "322": {
+      "name": "Net Ball",
+      "name_zh": "捕网球",
+      "desc_en": "If the target is a Water-type or Bug-type Pokémon, has a capture rate of 3. Otherwise, has a capture rate of 1.",
+      "desc_zh": "有点与众不同的球。能很容易地捕捉水属性和虫属性的宝可梦。",
+      "has_msg": false
+    },
+    "323": {
+      "name": "Dive Ball",
+      "name_zh": "潜水球",
+      "desc_en": "If the target was encountered while using Surf or was hooked on a fishing rod, has a capture rate of 3.5. Otherwise, has a capture rate of 1.",
+      "desc_zh": "有点与众不同的球。能很容易地捕捉生活在水世界里的宝可梦。",
+      "has_msg": false
+    },
+    "324": {
+      "name": "Luxury Ball",
+      "name_zh": "豪华球",
+      "desc_en": "Has a capture rate of 1. Doubles the effectiveness of any action that raises the captured Pokémon's happiness.",
+      "desc_zh": "住着十分惬意的球。捉到的野生宝可梦会变得容易和训练家亲密。",
+      "has_msg": false
+    },
+    "325": {
+      "name": "Heal Ball",
+      "name_zh": "治愈球",
+      "desc_en": "Has a capture rate of 1. When the target is captured, instantly restores all of its HP, PP and cures its status.",
+      "desc_zh": "有点温柔的球。能回复捉到的宝可梦的ＨＰ并治愈异常状态。",
+      "has_msg": false
+    },
+    "326": {
+      "name": "Quick Ball",
+      "name_zh": "先机球",
+      "desc_en": "If used on the first turn of a battle, has a capture rate of 5 in the 5th Gen and a capture rate of 4 in the 4th Gen. Otherwise, has a capture rate of 1.",
+      "desc_zh": "有点与众不同的球。如果战斗开始后立刻使用，就能很容易地捉到宝可梦。",
+      "has_msg": false
+    },
+    "327": {
+      "name": "Dusk Ball",
+      "name_zh": "黑暗球",
+      "desc_en": "If used in a cave or at night, has a capture rate of 3.5. Otherwise, has a capture rate of 1.",
+      "desc_zh": "有点与众不同的球。能很容易地在夜晚或洞窟等阴暗的地方捕捉宝可梦。",
+      "has_msg": false
+    },
+    "328": {
+      "name": "Cherish Ball",
+      "name_zh": "贵重球",
+      "desc_en": "Has a capture rate of 1. Used to hold Pokémon distributed at events.",
+      "desc_zh": "相当珍贵的球。特制出来的某种纪念品。",
+      "has_msg": false
+    },
+    "329": {
+      "name": "Park Ball",
+      "name_zh": "公园球",
+      "desc_en": "Has a 100% capture rate. Only for use in the Pal Park.",
+      "desc_zh": "在伙伴公园里使用的特殊的球。",
+      "has_msg": false
+    },
+    "330": {
+      "name": "Pixie Plate",
+      "name_zh": "妖精石板",
+      "desc_en": "Increases power of Fairy-type moves used by the holder by 20%. Changes Judgment and Arceus with Multitype to the Fairy type.",
+      "desc_zh": "妖精属性的石板。携带后，妖精属性的招式威力就会增强。",
+      "has_msg": false
+    },
+    "331": {
+      "name": "Assault Vest",
+      "name_zh": "突击背心",
+      "desc_en": "Increases the holder's Special Defense by 50%, but prevents it from using non offensive moves.",
+      "desc_zh": "会变得富有攻击性的背心。虽然携带后特防会提高，但会无法使出变化招式。",
+      "has_msg": false
+    },
+    "332": {
+      "name": "Safety Goggles",
+      "name_zh": "防尘护目镜",
+      "desc_en": "Makes the holder immune to damage from weather conditions, as well as to Cotton Spore, Poison Powder, Powder, Rage Powder, Sleep Powder, Spore, and Stun Spore.",
+      "desc_zh": "不单是天气造成的伤害，就连粉末类招式的效果也能防御的护目镜。",
+      "has_msg": true
+    },
+    "333": {
+      "name": "Weakness Policy",
+      "name_zh": "弱点保险",
+      "desc_en": "Increases the holder's Attack and Special Attack by 2 stages when it is hit by a super effective move. Consumed after use.",
+      "desc_zh": "被针对弱点时，攻击和特攻就会大幅提高。",
+      "has_msg": true
+    },
+    "334": {
+      "name": "Snowball",
+      "name_zh": "雪球",
+      "desc_en": "Increases the holder's Attack by 1 stage when it is hit by an Ice-type move. Consumed after use.",
+      "desc_zh": "一次性使用的雪球。携带它的宝可梦如果受到冰属性招式攻击，攻击就会提高。",
+      "has_msg": false
+    },
+    "335": {
+      "name": "Luminous Moss",
+      "name_zh": "光苔",
+      "desc_en": "Increases the holder's Special Defense by 1 stage when it is hit by a Water-type move. Consumed after use.",
+      "desc_zh": "一次性使用的光苔。携带它的宝可梦如果受到水属性招式攻击，特防就会提高。",
+      "has_msg": false
+    },
+    "336": {
+      "name": "Ability Capsule",
+      "name_zh": "特性胶囊",
+      "desc_en": "Changes the ability of a Pokémon to the other standard ability it can have.",
+      "desc_zh": "如果用于有着２种特性的宝可梦，就能令其现有特性变为另一种的胶囊。",
+      "has_msg": false
+    },
+    "337": {
+      "name": "Jaw Fossil",
+      "name_zh": "颚之化石",
+      "desc_en": "A fossil of an ancient Pokémon. It appears to be part of a jaw.",
+      "desc_zh": "很久以前生活在地上的古代宝可梦的化石。好像是很大的颚的一部分。",
+      "has_msg": false
+    },
+    "338": {
+      "name": "Sail Fossil",
+      "name_zh": "鳍之化石",
+      "desc_en": "A fossil of an ancient Pokémon. It appears to be part of a sail.",
+      "desc_zh": "很久以前生活在地上的古代宝可梦的化石。好像是头鳍的一部分。",
+      "has_msg": false
+    },
+    "339": {
+      "name": "Lumiose Galette",
+      "name_zh": "密阿雷格雷派饼",
+      "desc_en": "Cures a Pokémon of any major status condition.",
+      "desc_zh": "在密阿雷市很受欢迎的点心。能治愈１只宝可梦的所有异常状态。",
+      "has_msg": false
+    },
+    "340": {
+      "name": "Sachet",
+      "name_zh": "香袋",
+      "desc_en": "If held by Spritzee during a trade, makes it evolve into Aromatisse.",
+      "desc_zh": "装着散发微浓香气的香料的袋子。某种宝可梦很喜欢它。",
+      "has_msg": false
+    },
+    "341": {
+      "name": "Whipped Dream",
+      "name_zh": "泡沫奶油",
+      "desc_en": "If held by Swirlix during a trade, makes it evolve into Slurpuff.",
+      "desc_zh": "松松软软起着泡的，稍微有点甜的奶油。某种宝可梦很喜欢它。",
+      "has_msg": false
+    },
+    "342": {
+      "name": "Red Orb",
+      "name_zh": "朱红色宝珠",
+      "desc_en": "Causes Groudon to undergo Primal Reversion during battle.",
+      "desc_zh": "散发着红色光辉的宝珠。据说和丰缘地区的传说渊源颇深。",
+      "has_msg": false
+    },
+    "343": {
+      "name": "Blue Orb",
+      "name_zh": "靛蓝色宝珠",
+      "desc_en": "Causes Kyogre to undergo Primal Reversion during battle.",
+      "desc_zh": "散发着蓝色光辉的宝珠。据说和丰缘地区的传说渊源颇深。",
+      "has_msg": false
+    },
+    "344": {
+      "name": "Fighting Memory",
+      "name_zh": "战斗存储碟",
+      "desc_en": "Changes Multi-Attack and Silvally with RKS System to the Fighting type.",
+      "desc_zh": "装有格斗属性数据的存储碟。特定宝可梦携带后，属性就会发生变化。",
+      "has_msg": false
+    },
+    "345": {
+      "name": "Flying Memory",
+      "name_zh": "飞翔存储碟",
+      "desc_en": "Changes Multi-Attack and Silvally with RKS System to the Flying type.",
+      "desc_zh": "装有飞行属性数据的存储碟。特定宝可梦携带后，属性就会发生变化。",
+      "has_msg": false
+    },
+    "346": {
+      "name": "Poison Memory",
+      "name_zh": "毒存储碟",
+      "desc_en": "Changes Multi-Attack and Silvally with RKS System to the Poison type.",
+      "desc_zh": "装有毒属性数据的存储碟。特定宝可梦携带后，属性就会发生变化。",
+      "has_msg": false
+    },
+    "347": {
+      "name": "Ground Memory",
+      "name_zh": "大地存储碟",
+      "desc_en": "Changes Multi-Attack and Silvally with RKS System to the Ground type.",
+      "desc_zh": "装有地面属性数据的存储碟。特定宝可梦携带后，属性就会发生变化。",
+      "has_msg": false
+    },
+    "348": {
+      "name": "Rock Memory",
+      "name_zh": "岩石存储碟",
+      "desc_en": "Changes Multi-Attack and Silvally with RKS System to the Rock type.",
+      "desc_zh": "装有岩石属性数据的存储碟。特定宝可梦携带后，属性就会发生变化。",
+      "has_msg": false
+    },
+    "349": {
+      "name": "Bug Memory",
+      "name_zh": "虫子存储碟",
+      "desc_en": "Changes Multi-Attack and Silvally with RKS System to the Bug type.",
+      "desc_zh": "装有虫属性数据的存储碟。特定宝可梦携带后，属性就会发生变化。",
+      "has_msg": false
+    },
+    "350": {
+      "name": "Ghost Memory",
+      "name_zh": "幽灵存储碟",
+      "desc_en": "Changes Multi-Attack and Silvally with RKS System to the Ghost type.",
+      "desc_zh": "装有幽灵属性数据的存储碟。特定宝可梦携带后，属性就会发生变化。",
+      "has_msg": false
+    },
+    "351": {
+      "name": "Steel Memory",
+      "name_zh": "钢铁存储碟",
+      "desc_en": "Changes Multi-Attack and Silvally with RKS System to the Steel type.",
+      "desc_zh": "装有钢属性数据的存储碟。特定宝可梦携带后，属性就会发生变化。",
+      "has_msg": false
+    },
+    "352": {
+      "name": "Fire Memory",
+      "name_zh": "火焰存储碟",
+      "desc_en": "Changes Multi-Attack and Silvally with RKS System to the Fire type.",
+      "desc_zh": "装有火属性数据的存储碟。特定宝可梦携带后，属性就会发生变化。",
+      "has_msg": false
+    },
+    "353": {
+      "name": "Water Memory",
+      "name_zh": "清水存储碟",
+      "desc_en": "Changes Multi-Attack and Silvally with RKS System to the Water type.",
+      "desc_zh": "装有水属性数据的存储碟。特定宝可梦携带后，属性就会发生变化。",
+      "has_msg": false
+    },
+    "354": {
+      "name": "Grass Memory",
+      "name_zh": "青草存储碟",
+      "desc_en": "Changes Multi-Attack and Silvally with RKS System to the Grass type.",
+      "desc_zh": "装有草属性数据的存储碟。特定宝可梦携带后，属性就会发生变化。",
+      "has_msg": false
+    },
+    "355": {
+      "name": "Electric Memory",
+      "name_zh": "电子存储碟",
+      "desc_en": "Changes Multi-Attack and Silvally with RKS System to the Electric type.",
+      "desc_zh": "装有电属性数据的存储碟。特定宝可梦携带后，属性就会发生变化。",
+      "has_msg": false
+    },
+    "356": {
+      "name": "Psychic Memory",
+      "name_zh": "精神存储碟",
+      "desc_en": "Changes Multi-Attack and Silvally with RKS System to the Psychic type.",
+      "desc_zh": "装有超能力属性数据的存储碟。特定宝可梦携带后，属性就会发生变化。",
+      "has_msg": false
+    },
+    "357": {
+      "name": "Ice Memory",
+      "name_zh": "冰雪存储碟",
+      "desc_en": "Changes Multi-Attack and Silvally with RKS System to the Ice type.",
+      "desc_zh": "装有冰属性数据的存储碟。特定宝可梦携带后，属性就会发生变化。",
+      "has_msg": false
+    },
+    "358": {
+      "name": "Dragon Memory",
+      "name_zh": "龙存储碟",
+      "desc_en": "Changes Multi-Attack and Silvally with RKS System to the Dragon type.",
+      "desc_zh": "装有龙属性数据的存储碟。特定宝可梦携带后，属性就会发生变化。",
+      "has_msg": false
+    },
+    "359": {
+      "name": "Dark Memory",
+      "name_zh": "黑暗存储碟",
+      "desc_en": "Changes Multi-Attack and Silvally with RKS System to the Dark type.",
+      "desc_zh": "装有恶属性数据的存储碟。特定宝可梦携带后，属性就会发生变化。",
+      "has_msg": false
+    },
+    "360": {
+      "name": "Fairy Memory",
+      "name_zh": "妖精存储碟",
+      "desc_en": "Changes Multi-Attack and Silvally with RKS System to the Fairy type.",
+      "desc_zh": "装有妖精属性数据的存储碟。特定宝可梦携带后，属性就会发生变化。",
+      "has_msg": false
+    },
+    "361": {
+      "name": "Adrenaline Orb",
+      "name_zh": "胆怯球",
+      "desc_en": "Increases the holder's Speed by 1 stage when Intimidated. Consumed after use.",
+      "desc_zh": "使用后会容易呼唤伙伴，但使用后会消失。携带后，在受到威吓时速度会提高。",
+      "has_msg": true
+    },
+    "362": {
+      "name": "Terrain Extender",
+      "name_zh": "大地膜",
+      "desc_en": "When the holder uses Electric Terrain, Psychic Terrain, Misty Terrain, or Grassy Terrain, increases its duration from 5 turns to 8 turns.",
+      "desc_zh": "当携带它的宝可梦利用招式或特性展开场地时，场地的持续时间会比平时更长。",
+      "has_msg": false
+    },
+    "363": {
+      "name": "Protective Pads",
+      "name_zh": "部位护具",
+      "desc_en": "Protects the holder from side effects caused by using a Contact move against an opponent.",
+      "desc_zh": "不会受到触碰攻击对手时本应受到的效果。",
+      "has_msg": true
+    },
+    "364": {
+      "name": "Electric Seed",
+      "name_zh": "电气种子",
+      "desc_en": "Increases the holder's Defense by 1 stage while on Electric Terrain. Consumed after use.",
+      "desc_zh": "让宝可梦携带后，在电气场地上使用，防御就会提高。",
+      "has_msg": false
+    },
+    "365": {
+      "name": "Psychic Seed",
+      "name_zh": "精神种子",
+      "desc_en": "Increases the holder's Special Defense by 1 stage while on Psychic Terrain. Consumed after use.",
+      "desc_zh": "让宝可梦携带后，在精神场地上使用，特防就会提高。",
+      "has_msg": false
+    },
+    "366": {
+      "name": "Misty Seed",
+      "name_zh": "薄雾种子",
+      "desc_en": "Increases the holder's Special Defense by 1 stage while on Misty Terrain. Consumed after use.",
+      "desc_zh": "让宝可梦携带后，在薄雾场地上使用，特防就会提高。",
+      "has_msg": false
+    },
+    "367": {
+      "name": "Grassy Seed",
+      "name_zh": "青草种子",
+      "desc_en": "Increases the holder's Defense by 1 stage while on Grassy Terrain. Consumed after use.",
+      "desc_zh": "让宝可梦携带后，在青草场地上使用，防御就会提高。",
+      "has_msg": false
+    },
+    "368": {
+      "name": "Beast Ball",
+      "name_zh": "究极球",
+      "desc_en": "Has an increased capture rate against Ultra Beasts.",
+      "desc_zh": "为捕捉究极异兽而制作的特殊精灵球。很难捕捉究极异兽之外的宝可梦。",
+      "has_msg": false
+    },
+    "369": {
+      "name": "Big Malasada",
+      "name_zh": "大马拉萨达",
+      "desc_en": "Cures a Pokémon of any major status condition.",
+      "desc_zh": "阿罗拉特产的油炸面包。能治愈１只宝可梦的所有异常状态。",
+      "has_msg": false
+    },
+    "370": {
+      "name": "Common Stone",
+      "name_zh": "常见石",
+      "desc_en": "A perfectly normal stone that might appear to be valuable to some. It’s all in the eye of the beholder.",
+      "desc_zh": "在有些人看来可能会觉得它十分贵重。但其实是块普通的石头。",
+      "has_msg": false
+    },
+    "371": {
+      "name": "Bottle Cap",
+      "name_zh": "银色王冠",
+      "desc_en": "A beautiful bottle cap that gives off a silver gleam. Some people are happy to receive one.",
+      "desc_zh": "银色的美丽王冠。有些人收到它会很高兴。",
+      "has_msg": false
+    },
+    "372": {
+      "name": "Gold Bottle Cap",
+      "name_zh": "金色王冠",
+      "desc_en": "A beautiful bottle cap that gives off a golden gleam. Some people are happy to receive one.",
+      "desc_zh": "金色的美丽王冠。比银色王冠珍贵。有些人收到它会很高兴。",
+      "has_msg": false
+    },
+    "373": {
+      "name": "Ice Stone",
+      "name_zh": "冰之石",
+      "desc_en": "Evolves Alolan Vulpix into Alolan Ninetales and Alolan Sandshrew into Alolan Sandslash.",
+      "desc_zh": "能让某些特定宝可梦进化的神奇石头。有着雪花般的花纹。",
+      "has_msg": false
+    },
+    "374": {
+      "name": "Shalour Sable",
+      "name_zh": "娑罗沙布蕾",
+      "desc_en": "Cures a Pokémon of any major status condition.",
+      "desc_zh": "娑罗市特产的沙布蕾。能治愈１只宝可梦的所有异常状态。",
+      "has_msg": false
+    },
+    "375": {
+      "name": "Pink Nectar",
+      "name_zh": "桃粉色花蜜",
+      "desc_en": "Changes the form of Oricorio to Oricorio-Pa'u.",
+      "desc_zh": "在皇家大道的花园里获得的花蜜。可以改变特定宝可梦的样子。",
+      "has_msg": false
+    },
+    "376": {
+      "name": "Yellow Nectar",
+      "name_zh": "金黄色花蜜",
+      "desc_en": "Changes the form of Oricorio to Oricorio-Pom Pom.",
+      "desc_zh": "在美乐美乐花园里获得的花蜜。可以改变特定宝可梦的样子。",
+      "has_msg": false
+    },
+    "377": {
+      "name": "Red Nectar",
+      "name_zh": "朱红色花蜜",
+      "desc_en": "Changes the form of Oricorio to Oricorio-Baile.",
+      "desc_zh": "在乌拉乌拉花园里获得的花蜜。可以改变特定宝可梦的样子。",
+      "has_msg": false
+    },
+    "378": {
+      "name": "Purple Nectar",
+      "name_zh": "兰紫色花蜜",
+      "desc_en": "Changes the form of Oricorio to Oricorio-Sensu.",
+      "desc_zh": "在波尼花园里获得的花蜜。可以改变特定宝可梦的样子。",
+      "has_msg": false
+    },
+    "379": {
+      "name": "Rusted Sword",
+      "name_zh": "腐朽的剑",
+      "desc_en": "Changes a Zacian holding this item into its Crowned Sword form. In-battle, it also changes Zacian's Iron Head into Behemoth Blade.",
+      "desc_zh": "据说很久以前，英雄就是拿着这把剑驱走了灾厄。而现在早已变得锈迹斑斑。",
+      "has_msg": false
+    },
+    "380": {
+      "name": "Rusted Shield",
+      "name_zh": "腐朽的盾",
+      "desc_en": "Changes a Zamazenta holding this item into its Crowned Shield form. In-battle, it also changes Zamazenta's Iron Head into Behemoth Bash.",
+      "desc_zh": "据说很久以前，英雄就是拿着这面盾驱走了灾厄。而现在早已变得锈迹斑斑。",
+      "has_msg": false
+    },
+    "381": {
+      "name": "Throat Spray",
+      "name_zh": "爽喉喷雾",
+      "desc_en": "After the Pokémon holding Throat Spray uses a sound-based move, it consumes the item and its Special Attack is raised by one stage. Throat Spray is not used if the move fails, or finishes the battle.",
+      "desc_zh": "使用声音相关的招式时，特攻会提高。",
+      "has_msg": true
+    },
+    "382": {
+      "name": "Eject Pack",
+      "name_zh": "避难背包",
+      "desc_en": "If any of the holder's stats is lowered, the Eject Pack is consumed and the holder automatically switches out.",
+      "desc_zh": "当携带它的宝可梦能力下降时，同行宝可梦就会自动替换上场。",
+      "has_msg": true
+    },
+    "383": {
+      "name": "Heavy-Duty Boots",
+      "name_zh": "厚底靴",
+      "desc_en": "The holder is unaffected by the effects of entry hazards.If a grounded Poison-type Pokémon enters the field while holding this item, it will still cause Toxic Spikes to be removed.",
+      "desc_zh": "不受脚下陷阱等的影响。",
+      "has_msg": false
+    },
+    "384": {
+      "name": "Blunder Policy",
+      "name_zh": "打空保险",
+      "desc_en": "If one of the holder's moves misses one of its targets because of an accuracy or evasion check, the Blunder Policy is consumed and the holder's Speed is increased by two stages.",
+      "desc_zh": "招式因命中率影响而落空时，速度会大幅提高。",
+      "has_msg": true
+    },
+    "385": {
+      "name": "Room Service",
+      "name_zh": "客房服务",
+      "desc_en": "When Trick Room is used, the Room Service is consumed and the holder's Speed is lowered by one stage.",
+      "desc_zh": "让宝可梦携带后，在戏法空间使用时，速度会下降。",
+      "has_msg": true
+    },
+    "386": {
+      "name": "Utility Umbrella",
+      "name_zh": "万能伞",
+      "desc_en": "The Pokémon holding Utility Umbrella is unaffected by effects of weather.",
+      "desc_zh": "携带它的宝可梦将不受各种天气的影响。",
+      "has_msg": true
+    },
+    "387": {
+      "name": "Big Stick",
+      "name_zh": "巨大葱",
+      "desc_en": "When held by Sirfetchd, increases its critical hit ratio by 2 stages.",
+      "desc_zh": "葱游兵持有时提升会心率",
+      "has_msg": false
+    },
+    "1000": {
+      "name": "Pink Bow",
+      "desc_en": "Increases power of Normal-type moves used by the holder by 10%.",
+      "desc_zh": "增加10%普通系技能威力。",
+      "has_msg": false
+    },
+    "1001": {
+      "name": "Polkadot Bow",
+      "desc_en": "Increases power of Normal-type moves used by the holder by 10%.",
+      "desc_zh": "增加10%普通系技能威力。",
+      "has_msg": false
+    },
+    "2001": {
+      "name": "Venusaurite",
+      "name_zh": "M 妙蛙花进化石",
+      "desc_en": "Enables Venusaur to Mega Evolve during battle.",
+      "desc_zh": "让妙蛙花携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2002": {
+      "name": "Charizardite X",
+      "name_zh": "M 喷火龙进化石Ｘ",
+      "desc_en": "Enables Charizard to Mega Evolve during battle.",
+      "desc_zh": "让喷火龙携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2003": {
+      "name": "Charizardite Y",
+      "name_zh": "M 喷火龙进化石Ｙ",
+      "desc_en": "Enables Charizard to Mega Evolve during battle.",
+      "desc_zh": "让喷火龙携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2004": {
+      "name": "Blastoisinite",
+      "name_zh": "M 水箭龟进化石",
+      "desc_en": "Enables Blastoise to Mega Evolve during battle.",
+      "desc_zh": "让水箭龟携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2005": {
+      "name": "Alakazite",
+      "name_zh": "M 胡地进化石",
+      "desc_en": "Enables Alakazam to Mega Evolve during battle.",
+      "desc_zh": "让胡地携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2006": {
+      "name": "Gengarite",
+      "name_zh": "M 耿鬼进化石",
+      "desc_en": "Enables Gengar to Mega Evolve during battle.",
+      "desc_zh": "让耿鬼携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2007": {
+      "name": "Kangaskhanite",
+      "name_zh": "M 袋兽进化石",
+      "desc_en": "Enables Kangaskhan to Mega Evolve during battle.",
+      "desc_zh": "让袋兽携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2008": {
+      "name": "Pinsirite",
+      "name_zh": "M 凯罗斯进化石",
+      "desc_en": "Enables Pinsir to Mega Evolve during battle.",
+      "desc_zh": "让凯罗斯携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2009": {
+      "name": "Gyaradosite",
+      "name_zh": "M 暴鲤龙进化石",
+      "desc_en": "Enables Gyarados to Mega Evolve during battle.",
+      "desc_zh": "让暴鲤龙携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2010": {
+      "name": "Aerodactylite",
+      "name_zh": "M 化石翼龙进化石",
+      "desc_en": "Enables Aerodactyl to Mega Evolve during battle.",
+      "desc_zh": "让化石翼龙携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2011": {
+      "name": "Mewtwonite X",
+      "name_zh": "M 超梦进化石Ｘ",
+      "desc_en": "Enables Mewtwo to Mega Evolve during battle.",
+      "desc_zh": "让超梦携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2012": {
+      "name": "Mewtwonite Y",
+      "name_zh": "M 超梦进化石Ｙ",
+      "desc_en": "Enables Mewtwo to Mega Evolve during battle.",
+      "desc_zh": "让超梦携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2013": {
+      "name": "Ampharosite",
+      "name_zh": "M 电龙进化石",
+      "desc_en": "Enables Ampharos to Mega Evolve during battle.",
+      "desc_zh": "让电龙带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2014": {
+      "name": "Scizorite",
+      "name_zh": "M 巨钳螳螂进化石",
+      "desc_en": "Enables Scizor to Mega Evolve during battle.",
+      "desc_zh": "让巨钳螳螂携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2015": {
+      "name": "Heracronite",
+      "name_zh": "M 赫拉克罗斯进化石",
+      "desc_en": "Enables Heracross to Mega Evolve during battle.",
+      "desc_zh": "让赫拉克罗斯携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2016": {
+      "name": "Houndoominite",
+      "name_zh": "M 黑鲁加进化石",
+      "desc_en": "Enables Houndoom to Mega Evolve during battle.",
+      "desc_zh": "让黑鲁加携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2017": {
+      "name": "Tyranitarite",
+      "name_zh": "M 班基拉斯进化石",
+      "desc_en": "Enables Tyranitar to Mega Evolve during battle.",
+      "desc_zh": "让班基拉斯携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2018": {
+      "name": "Blazikenite",
+      "name_zh": "M 火焰鸡进化石",
+      "desc_en": "Enables Blaziken to Mega Evolve during battle.",
+      "desc_zh": "让火焰鸡携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2019": {
+      "name": "Gardevoirite",
+      "name_zh": "M 沙奈朵进化石",
+      "desc_en": "Enables Gardevoir to Mega Evolve during battle.",
+      "desc_zh": "让沙奈朵携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2020": {
+      "name": "Mawilite",
+      "name_zh": "M 大嘴娃进化石",
+      "desc_en": "Enables Mawile to Mega Evolve during battle.",
+      "desc_zh": "让大嘴娃携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2021": {
+      "name": "Aggronite",
+      "name_zh": "M 波士可多拉进化石",
+      "desc_en": "Enables Aggron to Mega Evolve during battle.",
+      "desc_zh": "让波士可多拉携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2022": {
+      "name": "Medichamite",
+      "name_zh": "M 恰雷姆进化石",
+      "desc_en": "Enables Medicham to Mega Evolve during battle.",
+      "desc_zh": "让恰雷姆携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2023": {
+      "name": "Manectite",
+      "name_zh": "M 雷电兽进化石",
+      "desc_en": "Enables Manectric to Mega Evolve during battle.",
+      "desc_zh": "让雷电兽携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2024": {
+      "name": "Banettite",
+      "name_zh": "M 诅咒娃娃进化石",
+      "desc_en": "Enables Banette to Mega Evolve during battle.",
+      "desc_zh": "让诅咒娃娃携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2025": {
+      "name": "Absolite",
+      "name_zh": "M 阿勃梭鲁进化石",
+      "desc_en": "Enables Absol to Mega Evolve during battle.",
+      "desc_zh": "让阿勃梭鲁携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2026": {
+      "name": "Garchompite",
+      "name_zh": "M 烈咬陆鲨进化石",
+      "desc_en": "Enables Garchomp to Mega Evolve during battle.",
+      "desc_zh": "让烈咬陆鲨携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2027": {
+      "name": "Lucarionite",
+      "name_zh": "M 路卡利欧进化石",
+      "desc_en": "Enables Lucario to Mega Evolve during battle.",
+      "desc_zh": "让路卡利欧携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2028": {
+      "name": "Abomasite",
+      "name_zh": "M 暴雪王进化石",
+      "desc_en": "Enables Abomasnow to Mega Evolve during battle.",
+      "desc_zh": "让暴雪王携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2029": {
+      "name": "Sceptilite",
+      "name_zh": "M 蜥蜴王进化石",
+      "desc_en": "Enables Sceptile to Mega Evolve during battle.",
+      "desc_zh": "让蜥蜴王携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2030": {
+      "name": "Swampertite",
+      "name_zh": "M 巨沼怪进化石",
+      "desc_en": "Enables Swampert to Mega Evolve during battle.",
+      "desc_zh": "让巨沼怪携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2031": {
+      "name": "Beedrillite",
+      "name_zh": "M 大针蜂进化石",
+      "desc_en": "Enables Beedrill to Mega Evolve during battle.",
+      "desc_zh": "大针蜂携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2032": {
+      "name": "Pidgeotite",
+      "name_zh": "M 大比鸟进化石",
+      "desc_en": "Enables Pidgeot to Mega Evolve during battle.",
+      "desc_zh": "让大比鸟携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2033": {
+      "name": "Slowbronite",
+      "name_zh": "M 呆壳兽进化石",
+      "desc_en": "Enables Slowbro to Mega Evolve during battle.",
+      "desc_zh": "让呆壳兽携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2034": {
+      "name": "Steelixite",
+      "name_zh": "M 大钢蛇进化石",
+      "desc_en": "Enables Steelix to Mega Evolve during battle.",
+      "desc_zh": "让大钢蛇携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2035": {
+      "name": "Sablenite",
+      "name_zh": "M 勾魂眼进化石",
+      "desc_en": "Enables Sableye to Mega Evolve during battle.",
+      "desc_zh": "让勾魂眼携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2036": {
+      "name": "Sharpedonite",
+      "name_zh": "M 巨牙鲨进化石",
+      "desc_en": "Enables Sharpedo to Mega Evolve during battle.",
+      "desc_zh": "让巨牙鲨携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2037": {
+      "name": "Cameruptite",
+      "name_zh": "M 喷火驼进化石",
+      "desc_en": "Enables Camerupt to Mega Evolve during battle.",
+      "desc_zh": "喷火驼携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2038": {
+      "name": "Altarianite",
+      "name_zh": "M 七夕青鸟进化石",
+      "desc_en": "Enables Altaria to Mega Evolve during battle.",
+      "desc_zh": "让七夕青鸟携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2039": {
+      "name": "Glalitite",
+      "name_zh": "M 冰鬼护进化石",
+      "desc_en": "Enables Glalie to Mega Evolve during battle.",
+      "desc_zh": "让冰鬼护携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2040": {
+      "name": "Salamencite",
+      "name_zh": "M 暴飞龙进化石",
+      "desc_en": "Enables Salamence to Mega Evolve during battle.",
+      "desc_zh": "暴飞龙携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2041": {
+      "name": "Metagrossite",
+      "name_zh": "M 巨金怪进化石",
+      "desc_en": "Enables Metagross to Mega Evolve during battle.",
+      "desc_zh": "让巨金怪携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2042": {
+      "name": "Lopunnite",
+      "name_zh": "M 长耳兔进化石",
+      "desc_en": "Enables Lopunny to Mega Evolve during battle.",
+      "desc_zh": "长耳兔携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2043": {
+      "name": "Galladite",
+      "name_zh": "M 艾路雷朵进化石",
+      "desc_en": "Enables Gallade to Mega Evolve during battle.",
+      "desc_zh": "让艾路雷朵携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2044": {
+      "name": "Audinite",
+      "name_zh": "M 差不多娃娃进化石",
+      "desc_en": "Enables Audino to Mega Evolve during battle.",
+      "desc_zh": "让差不多娃娃携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2045": {
+      "name": "Diancite",
+      "name_zh": "M 蒂安希进化石",
+      "desc_en": "Enables Diancie to Mega Evolve during battle.",
+      "desc_zh": "让蒂安希携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2046": {
+      "name": "Latiasite",
+      "name_zh": "M 拉帝亚斯进化石",
+      "desc_en": "Enables Latias to Mega Evolve during battle.",
+      "desc_zh": "让拉帝亚斯携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "2047": {
+      "name": "Latiosite",
+      "name_zh": "M 拉帝欧斯进化石",
+      "desc_en": "Enables Latios to Mega Evolve during battle.",
+      "desc_zh": "让拉帝欧斯携带后，在战斗时就能进行超级进化的一种神奇超级石。",
+      "has_msg": false
+    },
+    "3000": {
+      "name": "Normalium Z",
+      "name_zh": "Z 一般Z",
+      "desc_en": "Enables a Pokémon to upgrade Normal-type moves to the Z Move: Breakneck Blitz",
+      "desc_zh": "Ｚ力量的结晶。会将一般属性的招式升级成Ｚ招式。",
+      "has_msg": false
+    },
+    "3001": {
+      "name": "Fightinium Z",
+      "name_zh": "Z 格斗Z",
+      "desc_en": "Enables a Pokémon to upgrade Fighting-type moves to the Z Move: All-Out Pummelling",
+      "desc_zh": "Ｚ力量的结晶。会将格斗属性的招式升级成Ｚ招式。",
+      "has_msg": false
+    },
+    "3002": {
+      "name": "Flyinium Z",
+      "name_zh": "Z 飞行Z",
+      "desc_en": "Enables a Pokémon to upgrade Flying-type moves to the Z Move: Supersonic Skystrike",
+      "desc_zh": "Ｚ力量的结晶。会将飞行属性的招式升级成Ｚ招式。",
+      "has_msg": false
+    },
+    "3003": {
+      "name": "Poisonium Z",
+      "name_zh": "Z 毒Z",
+      "desc_en": "Enables a Pokémon to upgrade Poison-type moves to the Z Move: Acid Downpour",
+      "desc_zh": "Ｚ力量的结晶。会将毒属性的招式升级成Ｚ招式。",
+      "has_msg": false
+    },
+    "3004": {
+      "name": "Groundium Z",
+      "name_zh": "Z 地面Z",
+      "desc_en": "Enables a Pokémon to upgrade Ground-type moves to the Z Move: Tectonic Rage",
+      "desc_zh": "Ｚ力量的结晶。会将地面属性的招式升级成Ｚ招式。",
+      "has_msg": false
+    },
+    "3005": {
+      "name": "Rockium Z",
+      "name_zh": "Z 岩石Z",
+      "desc_en": "Enables a Pokémon to upgrade Rock-type moves to the Z Move: Continental Crush",
+      "desc_zh": "Ｚ力量的结晶。会将岩石属性的招式升级成Ｚ招式。",
+      "has_msg": false
+    },
+    "3006": {
+      "name": "Buginium Z",
+      "name_zh": "Z 虫Z",
+      "desc_en": "Enables a Pokémon to upgrade Bug-type moves to the Z Move: Savage Spinout",
+      "desc_zh": "Ｚ力量的结晶。会将虫属性的招式升级成Ｚ招式。",
+      "has_msg": false
+    },
+    "3007": {
+      "name": "Ghostium Z",
+      "name_zh": "Z 幽灵Z",
+      "desc_en": "Enables a Pokémon to upgrade Ghost-type moves to the Z Move: Never-Ending Nightmare",
+      "desc_zh": "Ｚ力量的结晶。会将幽灵属性的招式升级成Ｚ招式。",
+      "has_msg": false
+    },
+    "3008": {
+      "name": "Steelium Z",
+      "name_zh": "Z 钢Z",
+      "desc_en": "Enables a Pokémon to upgrade Steel-type moves to the Z Move: Corkscrew Crash",
+      "desc_zh": "Ｚ力量的结晶。会将钢属性的招式升级成Ｚ招式。",
+      "has_msg": false
+    },
+    "3009": {
+      "name": "Firium Z",
+      "name_zh": "Z 火Z",
+      "desc_en": "Enables a Pokémon to upgrade Fire-type moves to the Z Move: Inferno Overdrive",
+      "desc_zh": "Ｚ力量的结晶。会将火属性的招式升级成Ｚ招式。",
+      "has_msg": false
+    },
+    "3010": {
+      "name": "Waterium Z",
+      "name_zh": "Z 水Z",
+      "desc_en": "Enables a Pokémon to upgrade Water-type moves to the Z Move: Hydro Vortex",
+      "desc_zh": "Ｚ力量的结晶。会将水属性的招式升级成Ｚ招式。",
+      "has_msg": false
+    },
+    "3011": {
+      "name": "Grassium Z",
+      "name_zh": "Z 草Z",
+      "desc_en": "Enables a Pokémon to upgrade Grass-type moves to the Z Move: Bloom Doom",
+      "desc_zh": "Ｚ力量的结晶。会将草属性的招式升级成Ｚ招式。",
+      "has_msg": false
+    },
+    "3012": {
+      "name": "Electrium Z",
+      "name_zh": "Z 电Z",
+      "desc_en": "Enables a Pokémon to upgrade Electric-type moves to the Z Move: Gigavolt Havoc",
+      "desc_zh": "Ｚ力量的结晶。会将电属性的招式升级成Ｚ招式。",
+      "has_msg": false
+    },
+    "3013": {
+      "name": "Psychium Z",
+      "name_zh": "Z 超能力Z",
+      "desc_en": "Enables a Pokémon to upgrade Psychic-type moves to the Z Move: Shattered Psyche",
+      "desc_zh": "Ｚ力量的结晶。会将超能力属性的招式升级成Ｚ招式。",
+      "has_msg": false
+    },
+    "3014": {
+      "name": "Icium Z",
+      "name_zh": "Z 冰Z",
+      "desc_en": "Enables a Pokémon to upgrade Ice-type moves to the Z Move: Subzero Slammer",
+      "desc_zh": "Ｚ力量的结晶。会将冰属性的招式升级成Ｚ招式。",
+      "has_msg": false
+    },
+    "3015": {
+      "name": "Dragonium Z",
+      "name_zh": "Z 龙Z",
+      "desc_en": "Enables a Pokémon to upgrade Dragon-type moves to the Z Move: Devastating Drake",
+      "desc_zh": "Ｚ力量的结晶。会将龙属性的招式升级成Ｚ招式。",
+      "has_msg": false
+    },
+    "3016": {
+      "name": "Darkinium Z",
+      "name_zh": "Z 恶Z",
+      "desc_en": "Enables a Pokémon to upgrade Dark-type moves to the Z Move: Black Hole Eclipse",
+      "desc_zh": "Ｚ力量的结晶。会将恶属性的招式升级成Ｚ招式。",
+      "has_msg": false
+    },
+    "3017": {
+      "name": "Fairium Z",
+      "name_zh": "Z 妖精Z",
+      "desc_en": "Enables a Pokémon to upgrade Fairy-type moves to the Z Move: Twinkle Tackle",
+      "desc_zh": "Ｚ力量的结晶。会将妖精属性的招式升级成Ｚ招式。",
+      "has_msg": false
+    },
+    "3018": {
+      "name": "Pikanium Z",
+      "name_zh": "Z 皮卡丘Z",
+      "desc_en": "Enables Pikachu to upgrade Volt Tackle into the special Z Move: Catastropika",
+      "desc_zh": "Ｚ力量的结晶。会将皮卡丘的伏特攻击升级成Ｚ招式。",
+      "has_msg": false
+    },
+    "3019": {
+      "name": "Aloraichium Z",
+      "name_zh": "Z 阿罗雷Z",
+      "desc_en": "Enables Alolan Raichu to upgrade Thunderbolt into the special Z Move: Stoked SparkSurfer",
+      "desc_zh": "Ｚ力量的结晶。会将阿罗拉地区雷丘的十万伏特升级成Ｚ招式。",
+      "has_msg": false
+    },
+    "3020": {
+      "name": "Eevium Z",
+      "name_zh": "Z 伊布Z",
+      "desc_en": "Enables Eevee to upgrade Last Resort into the special Z Move: Extreme Evoboost",
+      "desc_zh": "Ｚ力量的结晶。会将伊布的珍藏升级成Ｚ招式。",
+      "has_msg": false
+    },
+    "3021": {
+      "name": "Snorlium Z",
+      "name_zh": "Z 卡比兽Z",
+      "desc_en": "Enables Snorlax to upgrade Giga Impact into the special Z Move: Pulversing Pancake",
+      "desc_zh": "Ｚ力量的结晶。会将卡比兽的终极冲击升级成Ｚ招式。",
+      "has_msg": false
+    },
+    "3022": {
+      "name": "Mewnium Z",
+      "name_zh": "Z 梦幻Z",
+      "desc_en": "Enables Mew to upgrade Psychic into the special Z Move: Genesis Supernova",
+      "desc_zh": "Ｚ力量的结晶。会将梦幻的精神强念升级成Ｚ招式。",
+      "has_msg": false
+    },
+    "3023": {
+      "name": "Tapunium Z",
+      "name_zh": "Z 卡璞Z",
+      "desc_en": "Enables Tapu Koko, Tapu Lele, Tapu Bulu, and Tapu Fini to upgrade Nature's Madness into the special Z Move: Guardian of Alola",
+      "desc_zh": "Ｚ力量的结晶。会将卡璞们的自然之怒升级成Ｚ招式。",
+      "has_msg": false
+    },
+    "3024": {
+      "name": "Decidium Z",
+      "name_zh": "Z 狙射树枭Z",
+      "desc_en": "Enables Decidueye to upgrade Spirit Shackle into the special Z Move: Sinister Arrow Raid",
+      "desc_zh": "Ｚ力量的结晶。会将狙射树枭的缝影升级成Ｚ招式。",
+      "has_msg": false
+    },
+    "3025": {
+      "name": "Incinium Z",
+      "name_zh": "Z 炽焰咆哮虎Z",
+      "desc_en": "Enables Incineroar to upgrade Darkest Lariat into the special Z Move: Malicious Moonsault",
+      "desc_zh": "Ｚ力量的结晶。会将炽焰咆哮虎的ＤＤ金勾臂升级成Ｚ招式。",
+      "has_msg": false
+    },
+    "3026": {
+      "name": "Primarium Z",
+      "name_zh": "Z 西狮海壬Z",
+      "desc_en": "Enables Primarina to upgrade Sparkling Aria into the special Z Move: Oceanic Operetta",
+      "desc_zh": "Ｚ力量的结晶。会将西狮海壬的泡影的咏叹调升级成Ｚ招式。",
+      "has_msg": false
+    },
+    "3027": {
+      "name": "Marshadium Z",
+      "name_zh": "Z 玛夏多Z",
+      "desc_en": "Enables Marshadow to upgrade Spectral Thief into the special Z Move: Soul-Stealing 7-Star Strike",
+      "desc_zh": "Ｚ力量的结晶。会将玛夏多的暗影偷盗升级成Ｚ招式。",
+      "has_msg": false
+    },
+    "3028": {
+      "name": "Pikashunium Z",
+      "name_zh": "Z 智皮卡Z",
+      "desc_en": "Enables Pikachu in Cap to upgrade Thunderbolt into the special Z Move: 10,000,000 Volt Thunderbolt",
+      "desc_zh": "Ｚ力量的结晶。会将戴着帽子的皮卡丘的十万伏特升级成Ｚ招式。",
+      "has_msg": false
+    },
+    "3029": {
+      "name": "Kommonium Z",
+      "name_zh": "Z 杖尾鳞甲龙Z",
+      "desc_en": "Enables Kommo-o to upgrade Clanging Scales into the special Z Move: Clangorous Soulblaze",
+      "desc_zh": "Ｚ力量的结晶。会将杖尾鳞甲龙的鳞片噪音升级成Ｚ招式。",
+      "has_msg": false
+    },
+    "3030": {
+      "name": "Lycanium Z",
+      "name_zh": "Z 鬃岩狼人Z",
+      "desc_en": "Enables Lycanroc to upgrade Stone Edge into the special Z Move: Splintered Stormshards",
+      "desc_zh": "Ｚ力量的结晶。会将鬃岩狼人的尖石攻击升级成Ｚ招式。",
+      "has_msg": false
+    },
+    "3031": {
+      "name": "Mimikium Z",
+      "name_zh": "Z 谜拟QZ",
+      "desc_en": "Enables Mimikyu to upgrade Play Rough to a special Z-Move: Let’s Snuggle Forever",
+      "desc_zh": "Ｚ力量的结晶。会将谜拟Ｑ的嬉闹升级成Ｚ招式。",
+      "has_msg": false
+    },
+    "3032": {
+      "name": "Solganium Z",
+      "name_zh": "Z 索尔迦雷欧Z",
+      "desc_en": "Enables Solgaleo or Dusk Mane Necrozma to upgrade Sunsteel Strike to a special Z-Move: Searing Sunraze Smash",
+      "desc_zh": "Ｚ力量的结晶。会将索尔迦雷欧的流星闪冲升级成Ｚ招式。",
+      "has_msg": false
+    },
+    "3033": {
+      "name": "Lunalium Z",
+      "name_zh": "Z 露奈雅拉Z",
+      "desc_en": "Enables Lunala or Dawn Wings Necrozma to upgrade Moongeist Beam to a special Z-Move: Menacing Moonraze Maelstrom",
+      "desc_zh": "Ｚ力量的结晶。会将露奈雅拉的暗影之光升级成Ｚ招式。",
+      "has_msg": false
+    },
+    "3034": {
+      "name": "Ultranecrozium Z",
+      "name_zh": "Z 究极奈克洛Z",
+      "desc_en": "A crystal that turns Dusk Mane Necrozma or Dawn Wings Necrozma into Ultra Necrozma, and upgrade Ultra Necrozma’s Photon Geyser to a special Z-Move: Light That Burns the Sky",
+      "desc_zh": "Ｚ力量的结晶。会将奈克洛兹玛的光子喷涌升级成Ｚ招式。",
+      "has_msg": false
+    }
+  },
+  "byName": {
+    "(no item)": 0,
+    "（无）": 0,
+    "big root": 1,
+    "大根茎": 1,
+    "blue scarf": 2,
+    "蓝色头巾": 2,
+    "bright powder": 3,
+    "光粉": 3,
+    "choice band": 4,
+    "讲究头带": 4,
+    "choice scarf": 5,
+    "讲究围巾": 5,
+    "choice specs": 6,
+    "讲究眼镜": 6,
+    "destiny knot": 7,
+    "红线": 7,
+    "expert belt": 8,
+    "达人带": 8,
+    "focus band": 9,
+    "气势头带": 9,
+    "focus sash": 10,
+    "气势披带": 10,
+    "full incense": 11,
+    "饱腹薰香": 11,
+    "green scarf": 12,
+    "绿色头巾": 12,
+    "lagging tail": 13,
+    "后攻之尾": 13,
+    "lax incense": 14,
+    "悠闲薰香": 14,
+    "leftovers": 15,
+    "吃剩的东西": 15,
+    "luck incense": 16,
+    "幸运薰香": 16,
+    "mental herb": 17,
+    "心灵香草": 17,
+    "metal powder": 18,
+    "金属粉": 18,
+    "muscle band": 19,
+    "力量头带": 19,
+    "odd incense": 20,
+    "奇异薰香": 20,
+    "pink scarf": 21,
+    "粉红头巾": 21,
+    "power herb": 22,
+    "强力香草": 22,
+    "pure incense": 23,
+    "洁净薰香": 23,
+    "quick powder": 24,
+    "速度粉": 24,
+    "reaper cloth": 25,
+    "灵界之布": 25,
+    "red scarf": 26,
+    "红色头巾": 26,
+    "rock incense": 27,
+    "岩石薰香": 27,
+    "rose incense": 28,
+    "花朵薰香": 28,
+    "sea incense": 29,
+    "海潮薰香": 29,
+    "shed shell": 30,
+    "美丽空壳": 30,
+    "silk scarf": 31,
+    "丝绸围巾": 31,
+    "silver powder": 32,
+    "银粉": 32,
+    "smooth rock": 33,
+    "沙沙岩石": 33,
+    "soft sand": 34,
+    "柔软沙子": 34,
+    "soothe bell": 35,
+    "安抚之铃": 35,
+    "wave incense": 36,
+    "涟漪薰香": 36,
+    "white herb": 37,
+    "白色香草": 37,
+    "wide lens": 38,
+    "广角镜": 38,
+    "wise glasses": 39,
+    "博识眼镜": 39,
+    "yellow scarf": 40,
+    "黄色头巾": 40,
+    "zoom lens": 41,
+    "对焦镜": 41,
+    "amulet coin": 42,
+    "护符金币": 42,
+    "antidote": 43,
+    "解毒药": 43,
+    "awakening": 44,
+    "解眠药": 44,
+    "berry juice": 45,
+    "树果汁": 45,
+    "big pearl": 46,
+    "大珍珠": 46,
+    "big mushroom": 47,
+    "大蘑菇": 47,
+    "black belt": 48,
+    "黑带": 48,
+    "black flute": 49,
+    "黑色玻璃哨": 49,
+    "black sludge": 50,
+    "黑色污泥": 50,
+    "black glasses": 51,
+    "黑色眼镜": 51,
+    "blue flute": 52,
+    "蓝色玻璃哨": 52,
+    "blue shard": 53,
+    "蓝色碎片": 53,
+    "burn heal": 54,
+    "灼伤药": 54,
+    "calcium": 55,
+    "特攻增强剂": 55,
+    "carbos": 56,
+    "速度增强剂": 56,
+    "charcoal": 57,
+    "木炭": 57,
+    "cleanse tag": 58,
+    "洁净之符": 58,
+    "damp mulch": 59,
+    "湿湿肥": 59,
+    "deep sea scale": 60,
+    "深海鳞片": 60,
+    "dire hit": 61,
+    "要害攻击": 61,
+    "dragon scale": 62,
+    "龙之鳞片": 62,
+    "elixir": 63,
+    "ＰＰ多项小补剂": 63,
+    "energy root": 64,
+    "元气根": 64,
+    "energy powder": 65,
+    "元气粉": 65,
+    "escape rope": 66,
+    "离洞绳": 66,
+    "ether": 67,
+    "ＰＰ单项小补剂": 67,
+    "everstone": 68,
+    "不变之石": 68,
+    "exp. share": 69,
+    "学习装置": 69,
+    "fire stone": 70,
+    "火之石": 70,
+    "flame orb": 71,
+    "火焰宝珠": 71,
+    "fluffy tail": 72,
+    "向尾喵的尾巴": 72,
+    "fresh water": 73,
+    "美味之水": 73,
+    "full heal": 74,
+    "万灵药": 74,
+    "full restore": 75,
+    "全复药": 75,
+    "gooey mulch": 76,
+    "粘粘肥": 76,
+    "green shard": 77,
+    "绿色碎片": 77,
+    "growth mulch": 78,
+    "速速肥": 78,
+    "guard spec.": 79,
+    "能力防守": 79,
+    "heal powder": 80,
+    "万能粉": 80,
+    "heart scale": 81,
+    "心之鳞片": 81,
+    "honey": 82,
+    "甜甜蜜": 82,
+    "hp up": 83,
+    "ＨＰ增强剂": 83,
+    "hyper potion": 84,
+    "厉害伤药": 84,
+    "ice heal": 85,
+    "解冻药": 85,
+    "iron": 86,
+    "防御增强剂": 86,
+    "king's rock": 87,
+    "王者之证": 87,
+    "lava cookie": 88,
+    "釜炎仙贝": 88,
+    "leaf stone": 89,
+    "叶之石": 89,
+    "lemonade": 90,
+    "果汁牛奶": 90,
+    "life orb": 91,
+    "生命宝珠": 91,
+    "light ball": 92,
+    "电气球": 92,
+    "light clay": 93,
+    "光之黏土": 93,
+    "lucky egg": 94,
+    "幸运蛋": 94,
+    "magnet": 95,
+    "磁铁": 95,
+    "max elixir": 96,
+    "ＰＰ多项全补剂": 96,
+    "max ether": 97,
+    "ＰＰ单项全补剂": 97,
+    "max potion": 98,
+    "全满药": 98,
+    "max repel": 99,
+    "黄金喷雾": 99,
+    "max revive": 100,
+    "活力块": 100,
+    "metal coat": 101,
+    "金属膜": 101,
+    "metronome": 102,
+    "节拍器": 102,
+    "miracle seed": 103,
+    "奇迹种子": 103,
+    "moomoo milk": 104,
+    "哞哞鲜奶": 104,
+    "moon stone": 105,
+    "月之石": 105,
+    "mystic water": 106,
+    "神秘水滴": 106,
+    "never-melt ice": 107,
+    "不融冰": 107,
+    "nugget": 108,
+    "金珠": 108,
+    "old gateau": 109,
+    "森之羊羹": 109,
+    "paralyze heal": 110,
+    "解麻药": 110,
+    "pearl": 111,
+    "珍珠": 111,
+    "poké doll": 112,
+    "皮皮玩偶": 112,
+    "potion": 113,
+    "伤药": 113,
+    "pp max": 114,
+    "ＰＰ极限提升剂": 114,
+    "pp up": 115,
+    "ＰＰ提升剂": 115,
+    "protein": 116,
+    "攻击增强剂": 116,
+    "rare candy": 117,
+    "神奇糖果": 117,
+    "razor fang": 118,
+    "锐利之牙": 118,
+    "red flute": 119,
+    "红色玻璃哨": 119,
+    "red shard": 120,
+    "红色碎片": 120,
+    "repel": 121,
+    "除虫喷雾": 121,
+    "revival herb": 122,
+    "复活草": 122,
+    "revive": 123,
+    "活力碎片": 123,
+    "sacred ash": 124,
+    "圣灰": 124,
+    "scope lens": 125,
+    "焦点镜": 125,
+    "shell bell": 126,
+    "贝壳之铃": 126,
+    "shoal salt": 127,
+    "浅滩海盐": 127,
+    "shoal shell": 128,
+    "浅滩贝壳": 128,
+    "smoke ball": 129,
+    "烟雾球": 129,
+    "soda pop": 130,
+    "劲爽汽水": 130,
+    "soul dew": 131,
+    "心之水滴": 131,
+    "spell tag": 132,
+    "诅咒之符": 132,
+    "stable mulch": 133,
+    "久久肥": 133,
+    "star piece": 134,
+    "星星碎片": 134,
+    "stardust": 135,
+    "星星沙子": 135,
+    "sun stone": 136,
+    "日之石": 136,
+    "super potion": 137,
+    "好伤药": 137,
+    "super repel": 138,
+    "白银喷雾": 138,
+    "thunder stone": 139,
+    "雷之石": 139,
+    "tiny mushroom": 140,
+    "小蘑菇": 140,
+    "toxic orb": 141,
+    "剧毒宝珠": 141,
+    "twisted spoon": 142,
+    "弯曲的汤匙": 142,
+    "up-grade": 143,
+    "升级数据": 143,
+    "water stone": 144,
+    "水之石": 144,
+    "white flute": 145,
+    "白色玻璃哨": 145,
+    "x accuracy": 146,
+    "命中强化": 146,
+    "x attack": 147,
+    "力量强化": 147,
+    "x defend": 148,
+    "防御强化": 148,
+    "x special": 149,
+    "特攻强化": 149,
+    "x sp. def": 150,
+    "特防强化": 150,
+    "x speed": 151,
+    "速度强化": 151,
+    "yellow flute": 152,
+    "黄色玻璃哨": 152,
+    "yellow shard": 153,
+    "黄色碎片": 153,
+    "zinc": 154,
+    "特防增强剂": 154,
+    "icy rock": 155,
+    "冰冷岩石": 155,
+    "lucky punch": 156,
+    "吉利拳": 156,
+    "dubious disc": 157,
+    "可疑补丁": 157,
+    "sharp beak": 158,
+    "锐利鸟嘴": 158,
+    "adamant orb": 159,
+    "金刚宝珠": 159,
+    "damp rock": 160,
+    "潮湿岩石": 160,
+    "heat rock": 161,
+    "炽热岩石": 161,
+    "lustrous orb": 162,
+    "白玉宝珠": 162,
+    "macho brace": 163,
+    "强制锻炼器": 163,
+    "stick": 164,
+    "大葱": 164,
+    "dragon fang": 165,
+    "龙之牙": 165,
+    "poison barb": 166,
+    "毒针": 166,
+    "power anklet": 167,
+    "力量护踝": 167,
+    "power band": 168,
+    "力量束带": 168,
+    "power belt": 169,
+    "力量腰带": 169,
+    "power bracer": 170,
+    "力量护腕": 170,
+    "power lens": 171,
+    "力量镜": 171,
+    "power weight": 172,
+    "力量负重": 172,
+    "dawn stone": 173,
+    "觉醒之石": 173,
+    "dusk stone": 174,
+    "暗之石": 174,
+    "electirizer": 175,
+    "电力增幅器": 175,
+    "magmarizer": 176,
+    "熔岩增幅器": 176,
+    "odd keystone": 177,
+    "楔石": 177,
+    "oval stone": 178,
+    "浑圆之石": 178,
+    "protector": 179,
+    "护具": 179,
+    "quick claw": 180,
+    "先制之爪": 180,
+    "razor claw": 181,
+    "锐利之爪": 181,
+    "shiny stone": 182,
+    "光之石": 182,
+    "sticky barb": 183,
+    "附着针": 183,
+    "deep sea tooth": 184,
+    "深海之牙": 184,
+    "draco plate": 185,
+    "龙之石板": 185,
+    "dread plate": 186,
+    "恶颜石板": 186,
+    "earth plate": 187,
+    "大地石板": 187,
+    "fist plate": 188,
+    "拳头石板": 188,
+    "flame plate": 189,
+    "火球石板": 189,
+    "grip claw": 190,
+    "紧缠钩爪": 190,
+    "icicle plate": 191,
+    "冰柱石板": 191,
+    "insect plate": 192,
+    "玉虫石板": 192,
+    "iron plate": 193,
+    "钢铁石板": 193,
+    "meadow plate": 194,
+    "碧绿石板": 194,
+    "mind plate": 195,
+    "神奇石板": 195,
+    "sky plate": 196,
+    "蓝天石板": 196,
+    "splash plate": 197,
+    "水滴石板": 197,
+    "spooky plate": 198,
+    "妖怪石板": 198,
+    "stone plate": 199,
+    "岩石石板": 199,
+    "thick club": 200,
+    "粗骨头": 200,
+    "toxic plate": 201,
+    "剧毒石板": 201,
+    "zap plate": 202,
+    "雷电石板": 202,
+    "armor fossil": 203,
+    "盾甲化石": 203,
+    "claw fossil": 204,
+    "爪子化石": 204,
+    "dome fossil": 205,
+    "甲壳化石": 205,
+    "hard stone": 206,
+    "硬石头": 206,
+    "helix fossil": 207,
+    "贝壳化石": 207,
+    "old amber": 208,
+    "秘密琥珀": 208,
+    "rare bone": 209,
+    "贵重骨头": 209,
+    "root fossil": 210,
+    "根状化石": 210,
+    "skull fossil": 211,
+    "头盖化石": 211,
+    "iron ball": 212,
+    "黑色铁球": 212,
+    "griseous orb": 213,
+    "白金宝珠": 213,
+    "air mail": 214,
+    "天空邮件": 214,
+    "bloom mail": 215,
+    "绽放邮件": 215,
+    "brick mail": 216,
+    "砖块邮件": 216,
+    "bubble mail": 217,
+    "水蓝邮件": 217,
+    "flame mail": 218,
+    "火焰邮件": 218,
+    "grass mail": 219,
+    "青草邮件": 219,
+    "harbor mail": 220,
+    "港口邮件": 220,
+    "heart mail": 221,
+    "甜蜜邮件": 221,
+    "mosaic mail": 222,
+    "彩嵌邮件": 222,
+    "snow mail": 223,
+    "暴雪邮件": 223,
+    "space mail": 224,
+    "空间邮件": 224,
+    "steel mail": 225,
+    "钢铁邮件": 225,
+    "tunnel mail": 226,
+    "隧道邮件": 226,
+    "douse drive": 227,
+    "水流卡带": 227,
+    "shock drive": 228,
+    "闪电卡带": 228,
+    "burn drive": 229,
+    "火焰卡带": 229,
+    "chill drive": 230,
+    "冰冻卡带": 230,
+    "sweet heart": 231,
+    "心形甜点": 231,
+    "prism scale": 232,
+    "美丽鳞片": 232,
+    "eviolite": 233,
+    "进化奇石": 233,
+    "float stone": 234,
+    "轻石": 234,
+    "rocky helmet": 235,
+    "凸凸头盔": 235,
+    "air balloon": 236,
+    "气球": 236,
+    "red card": 237,
+    "红牌": 237,
+    "ring target": 238,
+    "标靶": 238,
+    "binding band": 239,
+    "紧绑束带": 239,
+    "absorb bulb": 240,
+    "球根": 240,
+    "cell battery": 241,
+    "充电电池": 241,
+    "eject button": 242,
+    "逃脱按键": 242,
+    "fire gem": 243,
+    "火之宝石": 243,
+    "water gem": 244,
+    "水之宝石": 244,
+    "electric gem": 245,
+    "电之宝石": 245,
+    "grass gem": 246,
+    "草之宝石": 246,
+    "ice gem": 247,
+    "冰之宝石": 247,
+    "fighting gem": 248,
+    "格斗宝石": 248,
+    "poison gem": 249,
+    "毒之宝石": 249,
+    "ground gem": 250,
+    "地面宝石": 250,
+    "flying gem": 251,
+    "飞行宝石": 251,
+    "psychic gem": 252,
+    "超能力宝石": 252,
+    "bug gem": 253,
+    "虫之宝石": 253,
+    "rock gem": 254,
+    "岩石宝石": 254,
+    "ghost gem": 255,
+    "幽灵宝石": 255,
+    "dragon gem": 256,
+    "龙之宝石": 256,
+    "dark gem": 257,
+    "恶之宝石": 257,
+    "steel gem": 258,
+    "钢之宝石": 258,
+    "normal gem": 259,
+    "一般宝石": 259,
+    "health wing": 260,
+    "体力之羽": 260,
+    "muscle wing": 261,
+    "肌力之羽": 261,
+    "resist wing": 262,
+    "抵抗之羽": 262,
+    "genius wing": 263,
+    "智力之羽": 263,
+    "clever wing": 264,
+    "精神之羽": 264,
+    "swift wing": 265,
+    "瞬发之羽": 265,
+    "pretty wing": 266,
+    "美丽之羽": 266,
+    "dream ball": 267,
+    "梦境球": 267,
+    "balm mushroom": 268,
+    "芳香蘑菇": 268,
+    "big nugget": 269,
+    "巨大金珠": 269,
+    "pearl string": 270,
+    "丸子珍珠": 270,
+    "comet shard": 271,
+    "彗星碎片": 271,
+    "relic copper": 272,
+    "古代铜币": 272,
+    "relic silver": 273,
+    "古代银币": 273,
+    "relic gold": 274,
+    "古代金币": 274,
+    "relic vase": 275,
+    "古代之壶": 275,
+    "relic band": 276,
+    "古代手镯": 276,
+    "relic statue": 277,
+    "古代石像": 277,
+    "relic crown": 278,
+    "古代王冠": 278,
+    "casteliacone": 279,
+    "飞云冰淇淋": 279,
+    "dire hit 2": 280,
+    "要害攻击２": 280,
+    "x speed 2": 281,
+    "速度强化２": 281,
+    "x special 2": 282,
+    "特攻强化２": 282,
+    "x sp. def 2": 283,
+    "特防强化２": 283,
+    "x defend 2": 284,
+    "防御强化２": 284,
+    "x attack 2": 285,
+    "力量强化２": 285,
+    "x accuracy 2": 286,
+    "命中强化２": 286,
+    "x speed 3": 287,
+    "速度强化３": 287,
+    "x special 3": 288,
+    "特攻强化３": 288,
+    "x sp. def 3": 289,
+    "特防强化３": 289,
+    "x defend 3": 290,
+    "防御强化３": 290,
+    "x attack 3": 291,
+    "力量强化３": 291,
+    "x accuracy 3": 292,
+    "命中强化３": 292,
+    "x speed 6": 293,
+    "速度强化６": 293,
+    "x special 6": 294,
+    "特攻强化６": 294,
+    "x sp. def 6": 295,
+    "特防强化６": 295,
+    "x defend 6": 296,
+    "防御强化６": 296,
+    "x attack 6": 297,
+    "力量强化６": 297,
+    "x accuracy 6": 298,
+    "命中强化６": 298,
+    "ability urge": 299,
+    "特效召唤": 299,
+    "item drop": 300,
+    "道具击落": 300,
+    "item urge": 301,
+    "道具召唤": 301,
+    "reset urge": 302,
+    "回复召唤": 302,
+    "dire hit 3": 303,
+    "要害攻击３": 303,
+    "berserk gene": 304,
+    "破坏基因": 304,
+    "poké ball": 305,
+    "精灵球": 305,
+    "great ball": 306,
+    "超级球": 306,
+    "ultra ball": 307,
+    "高级球": 307,
+    "master ball": 308,
+    "大师球": 308,
+    "safari ball": 309,
+    "狩猎球": 309,
+    "level ball": 310,
+    "等级球": 310,
+    "lure ball": 311,
+    "诱饵球": 311,
+    "moon ball": 312,
+    "月亮球": 312,
+    "friend ball": 313,
+    "友友球": 313,
+    "love ball": 314,
+    "甜蜜球": 314,
+    "heavy ball": 315,
+    "沉重球": 315,
+    "fast ball": 316,
+    "速度球": 316,
+    "sport ball": 317,
+    "竞赛球": 317,
+    "premier ball": 318,
+    "纪念球": 318,
+    "repeat ball": 319,
+    "重复球": 319,
+    "timer ball": 320,
+    "计时球": 320,
+    "nest ball": 321,
+    "巢穴球": 321,
+    "net ball": 322,
+    "捕网球": 322,
+    "dive ball": 323,
+    "潜水球": 323,
+    "luxury ball": 324,
+    "豪华球": 324,
+    "heal ball": 325,
+    "治愈球": 325,
+    "quick ball": 326,
+    "先机球": 326,
+    "dusk ball": 327,
+    "黑暗球": 327,
+    "cherish ball": 328,
+    "贵重球": 328,
+    "park ball": 329,
+    "公园球": 329,
+    "pixie plate": 330,
+    "妖精石板": 330,
+    "assault vest": 331,
+    "突击背心": 331,
+    "safety goggles": 332,
+    "防尘护目镜": 332,
+    "weakness policy": 333,
+    "弱点保险": 333,
+    "snowball": 334,
+    "雪球": 334,
+    "luminous moss": 335,
+    "光苔": 335,
+    "ability capsule": 336,
+    "特性胶囊": 336,
+    "jaw fossil": 337,
+    "颚之化石": 337,
+    "sail fossil": 338,
+    "鳍之化石": 338,
+    "lumiose galette": 339,
+    "密阿雷格雷派饼": 339,
+    "sachet": 340,
+    "香袋": 340,
+    "whipped dream": 341,
+    "泡沫奶油": 341,
+    "red orb": 342,
+    "朱红色宝珠": 342,
+    "blue orb": 343,
+    "靛蓝色宝珠": 343,
+    "fighting memory": 344,
+    "战斗存储碟": 344,
+    "flying memory": 345,
+    "飞翔存储碟": 345,
+    "poison memory": 346,
+    "毒存储碟": 346,
+    "ground memory": 347,
+    "大地存储碟": 347,
+    "rock memory": 348,
+    "岩石存储碟": 348,
+    "bug memory": 349,
+    "虫子存储碟": 349,
+    "ghost memory": 350,
+    "幽灵存储碟": 350,
+    "steel memory": 351,
+    "钢铁存储碟": 351,
+    "fire memory": 352,
+    "火焰存储碟": 352,
+    "water memory": 353,
+    "清水存储碟": 353,
+    "grass memory": 354,
+    "青草存储碟": 354,
+    "electric memory": 355,
+    "电子存储碟": 355,
+    "psychic memory": 356,
+    "精神存储碟": 356,
+    "ice memory": 357,
+    "冰雪存储碟": 357,
+    "dragon memory": 358,
+    "龙存储碟": 358,
+    "dark memory": 359,
+    "黑暗存储碟": 359,
+    "fairy memory": 360,
+    "妖精存储碟": 360,
+    "adrenaline orb": 361,
+    "胆怯球": 361,
+    "terrain extender": 362,
+    "大地膜": 362,
+    "protective pads": 363,
+    "部位护具": 363,
+    "electric seed": 364,
+    "电气种子": 364,
+    "psychic seed": 365,
+    "精神种子": 365,
+    "misty seed": 366,
+    "薄雾种子": 366,
+    "grassy seed": 367,
+    "青草种子": 367,
+    "beast ball": 368,
+    "究极球": 368,
+    "big malasada": 369,
+    "大马拉萨达": 369,
+    "common stone": 370,
+    "常见石": 370,
+    "bottle cap": 371,
+    "银色王冠": 371,
+    "gold bottle cap": 372,
+    "金色王冠": 372,
+    "ice stone": 373,
+    "冰之石": 373,
+    "shalour sable": 374,
+    "娑罗沙布蕾": 374,
+    "pink nectar": 375,
+    "桃粉色花蜜": 375,
+    "yellow nectar": 376,
+    "金黄色花蜜": 376,
+    "red nectar": 377,
+    "朱红色花蜜": 377,
+    "purple nectar": 378,
+    "兰紫色花蜜": 378,
+    "rusted sword": 379,
+    "腐朽的剑": 379,
+    "rusted shield": 380,
+    "腐朽的盾": 380,
+    "throat spray": 381,
+    "爽喉喷雾": 381,
+    "eject pack": 382,
+    "避难背包": 382,
+    "heavy-duty boots": 383,
+    "厚底靴": 383,
+    "blunder policy": 384,
+    "打空保险": 384,
+    "room service": 385,
+    "客房服务": 385,
+    "utility umbrella": 386,
+    "万能伞": 386,
+    "big stick": 387,
+    "巨大葱": 387,
+    "pink bow": 1000,
+    "polkadot bow": 1001,
+    "venusaurite": 2001,
+    "M 妙蛙花进化石": 2001,
+    "charizardite x": 2002,
+    "M 喷火龙进化石Ｘ": 2002,
+    "charizardite y": 2003,
+    "M 喷火龙进化石Ｙ": 2003,
+    "blastoisinite": 2004,
+    "M 水箭龟进化石": 2004,
+    "alakazite": 2005,
+    "M 胡地进化石": 2005,
+    "gengarite": 2006,
+    "M 耿鬼进化石": 2006,
+    "kangaskhanite": 2007,
+    "M 袋兽进化石": 2007,
+    "pinsirite": 2008,
+    "M 凯罗斯进化石": 2008,
+    "gyaradosite": 2009,
+    "M 暴鲤龙进化石": 2009,
+    "aerodactylite": 2010,
+    "M 化石翼龙进化石": 2010,
+    "mewtwonite x": 2011,
+    "M 超梦进化石Ｘ": 2011,
+    "mewtwonite y": 2012,
+    "M 超梦进化石Ｙ": 2012,
+    "ampharosite": 2013,
+    "M 电龙进化石": 2013,
+    "scizorite": 2014,
+    "M 巨钳螳螂进化石": 2014,
+    "heracronite": 2015,
+    "M 赫拉克罗斯进化石": 2015,
+    "houndoominite": 2016,
+    "M 黑鲁加进化石": 2016,
+    "tyranitarite": 2017,
+    "M 班基拉斯进化石": 2017,
+    "blazikenite": 2018,
+    "M 火焰鸡进化石": 2018,
+    "gardevoirite": 2019,
+    "M 沙奈朵进化石": 2019,
+    "mawilite": 2020,
+    "M 大嘴娃进化石": 2020,
+    "aggronite": 2021,
+    "M 波士可多拉进化石": 2021,
+    "medichamite": 2022,
+    "M 恰雷姆进化石": 2022,
+    "manectite": 2023,
+    "M 雷电兽进化石": 2023,
+    "banettite": 2024,
+    "M 诅咒娃娃进化石": 2024,
+    "absolite": 2025,
+    "M 阿勃梭鲁进化石": 2025,
+    "garchompite": 2026,
+    "M 烈咬陆鲨进化石": 2026,
+    "lucarionite": 2027,
+    "M 路卡利欧进化石": 2027,
+    "abomasite": 2028,
+    "M 暴雪王进化石": 2028,
+    "sceptilite": 2029,
+    "M 蜥蜴王进化石": 2029,
+    "swampertite": 2030,
+    "M 巨沼怪进化石": 2030,
+    "beedrillite": 2031,
+    "M 大针蜂进化石": 2031,
+    "pidgeotite": 2032,
+    "M 大比鸟进化石": 2032,
+    "slowbronite": 2033,
+    "M 呆壳兽进化石": 2033,
+    "steelixite": 2034,
+    "M 大钢蛇进化石": 2034,
+    "sablenite": 2035,
+    "M 勾魂眼进化石": 2035,
+    "sharpedonite": 2036,
+    "M 巨牙鲨进化石": 2036,
+    "cameruptite": 2037,
+    "M 喷火驼进化石": 2037,
+    "altarianite": 2038,
+    "M 七夕青鸟进化石": 2038,
+    "glalitite": 2039,
+    "M 冰鬼护进化石": 2039,
+    "salamencite": 2040,
+    "M 暴飞龙进化石": 2040,
+    "metagrossite": 2041,
+    "M 巨金怪进化石": 2041,
+    "lopunnite": 2042,
+    "M 长耳兔进化石": 2042,
+    "galladite": 2043,
+    "M 艾路雷朵进化石": 2043,
+    "audinite": 2044,
+    "M 差不多娃娃进化石": 2044,
+    "diancite": 2045,
+    "M 蒂安希进化石": 2045,
+    "latiasite": 2046,
+    "M 拉帝亚斯进化石": 2046,
+    "latiosite": 2047,
+    "M 拉帝欧斯进化石": 2047,
+    "normalium z": 3000,
+    "Z 一般Z": 3000,
+    "fightinium z": 3001,
+    "Z 格斗Z": 3001,
+    "flyinium z": 3002,
+    "Z 飞行Z": 3002,
+    "poisonium z": 3003,
+    "Z 毒Z": 3003,
+    "groundium z": 3004,
+    "Z 地面Z": 3004,
+    "rockium z": 3005,
+    "Z 岩石Z": 3005,
+    "buginium z": 3006,
+    "Z 虫Z": 3006,
+    "ghostium z": 3007,
+    "Z 幽灵Z": 3007,
+    "steelium z": 3008,
+    "Z 钢Z": 3008,
+    "firium z": 3009,
+    "Z 火Z": 3009,
+    "waterium z": 3010,
+    "Z 水Z": 3010,
+    "grassium z": 3011,
+    "Z 草Z": 3011,
+    "electrium z": 3012,
+    "Z 电Z": 3012,
+    "psychium z": 3013,
+    "Z 超能力Z": 3013,
+    "icium z": 3014,
+    "Z 冰Z": 3014,
+    "dragonium z": 3015,
+    "Z 龙Z": 3015,
+    "darkinium z": 3016,
+    "Z 恶Z": 3016,
+    "fairium z": 3017,
+    "Z 妖精Z": 3017,
+    "pikanium z": 3018,
+    "Z 皮卡丘Z": 3018,
+    "aloraichium z": 3019,
+    "Z 阿罗雷Z": 3019,
+    "eevium z": 3020,
+    "Z 伊布Z": 3020,
+    "snorlium z": 3021,
+    "Z 卡比兽Z": 3021,
+    "mewnium z": 3022,
+    "Z 梦幻Z": 3022,
+    "tapunium z": 3023,
+    "Z 卡璞Z": 3023,
+    "decidium z": 3024,
+    "Z 狙射树枭Z": 3024,
+    "incinium z": 3025,
+    "Z 炽焰咆哮虎Z": 3025,
+    "primarium z": 3026,
+    "Z 西狮海壬Z": 3026,
+    "marshadium z": 3027,
+    "Z 玛夏多Z": 3027,
+    "pikashunium z": 3028,
+    "Z 智皮卡Z": 3028,
+    "kommonium z": 3029,
+    "Z 杖尾鳞甲龙Z": 3029,
+    "lycanium z": 3030,
+    "Z 鬃岩狼人Z": 3030,
+    "mimikium z": 3031,
+    "Z 谜拟QZ": 3031,
+    "solganium z": 3032,
+    "Z 索尔迦雷欧Z": 3032,
+    "lunalium z": 3033,
+    "Z 露奈雅拉Z": 3033,
+    "ultranecrozium z": 3034,
+    "Z 究极奈克洛Z": 3034
+  }
+}

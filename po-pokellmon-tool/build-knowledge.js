@@ -322,6 +322,75 @@ function buildAbilities() {
     return { byNum, byName, deleted: DELETED };
 }
 
+// 构建 items.json（num -> {name, name_zh, desc_zh, desc_en, has_msg}）
+// 数据源：items.txt（英文名）+ zh-cn items.txt（中文名）
+//        + items_description.txt（英文描述）+ zh-cn items_description.txt（中文描述）
+//        + item_messages.txt（判断是否有触发消息）
+function buildItems() {
+    const byNum = {};
+    const byName = {};
+
+    // 英文名（items.txt）：num name
+    const enLines = readText(path.join(DATA, 'items', 'items.txt')).split('\n');
+    for (const line of enLines) {
+        const t = line.trim();
+        if (!t) continue;
+        const idx = t.indexOf(' ');
+        if (idx < 0) continue;
+        const num = parseInt(t.substring(0, idx), 10);
+        const name = t.substring(idx + 1).trim();
+        byNum[num] = byNum[num] || {};
+        byNum[num].name = name;
+    }
+
+    // 中文名（zh-cn items.txt）：num 中文名
+    const zhLines = readText(path.join(DATA, 'zh-cn', 'db', 'items', 'items.txt')).split('\n');
+    for (const line of zhLines) {
+        const t = line.trim();
+        if (!t) continue;
+        const idx = t.indexOf(' ');
+        if (idx < 0) continue;
+        const num = parseInt(t.substring(0, idx), 10);
+        const name = t.substring(idx + 1).trim();
+        if (byNum[num]) byNum[num].name_zh = name;
+    }
+
+    // 英文描述（items_description.txt）：num 描述
+    const descEnLines = readText(path.join(DATA, 'items', 'items_description.txt')).split('\n');
+    for (const line of descEnLines) {
+        const t = line.trim();
+        if (!t) continue;
+        const idx = t.indexOf(' ');
+        if (idx < 0) continue;
+        const num = parseInt(t.substring(0, idx), 10);
+        const desc = t.substring(idx + 1).trim();
+        if (byNum[num]) byNum[num].desc_en = desc;
+    }
+
+    // 中文描述（zh-cn items_description.txt）：num 描述
+    const descZhLines = readText(path.join(DATA, 'zh-cn', 'db', 'items', 'items_description.txt')).split('\n');
+    for (const line of descZhLines) {
+        const t = line.trim();
+        if (!t) continue;
+        const idx = t.indexOf(' ');
+        if (idx < 0) continue;
+        const num = parseInt(t.substring(0, idx), 10);
+        const desc = t.substring(idx + 1).trim();
+        if (byNum[num]) byNum[num].desc_zh = desc;
+    }
+
+    // 触发消息（item_messages.txt）：道具英文名出现在消息文本里 → has_msg=true
+    const msgLower = readText(path.join(DATA, 'items', 'item_messages.txt')).toLowerCase();
+    for (const num in byNum) {
+        const a = byNum[num];
+        a.has_msg = (a.name && a.name !== '(No Item)' && msgLower.indexOf(a.name.toLowerCase()) >= 0);
+        byName[a.name.toLowerCase()] = parseInt(num, 10);
+        if (a.name_zh) byName[a.name_zh] = parseInt(num, 10);
+    }
+
+    return { byNum, byName };
+}
+
 function main() {
     fs.mkdirSync(KNOWLEDGE, { recursive: true });
 
@@ -339,10 +408,14 @@ function main() {
     const abilities = buildAbilities();
     fs.writeFileSync(path.join(KNOWLEDGE, 'abilities.json'), JSON.stringify(abilities, null, 2));
 
+    const items = buildItems();
+    fs.writeFileSync(path.join(KNOWLEDGE, 'items.json'), JSON.stringify(items, null, 2));
+
     console.log('pokemon.json: ' + pn + ' pokemon, ' + pnn + ' name index entries');
     console.log('natures.json: ' + Object.keys(natures.byNum).length + ' natures');
     console.log('moves.json: ' + Object.keys(moves).length + ' moves (with type)');
     console.log('abilities.json: ' + Object.keys(abilities.byNum).length + ' abilities');
+    console.log('items.json: ' + Object.keys(items.byNum).length + ' items');
 }
 
 main();
