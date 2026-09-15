@@ -289,7 +289,7 @@
 
 - [x] **允许 LLM 读写对战观察（memory）**：已完成 —— `save_observation` / `get_observation` / `save_strategy` / `get_strategy` 四个 tool 已实现并运行。后续持续完善：看 LLM 还可以观察什么、记什么（如对手操作倾向/习惯、常见先读模式等），按需扩展笔记字段或新增观察维度。
 
-- [ ] **战术思路 tool（可无限扩充的战术知识库，避免 system prompt 膨胀）**：把宝可梦对战的战术思路/打法套路做成可调用 tool，LLM 决策前按需查，而不是全塞进 system prompt（prompt 太长会稀释重点、增加 token 成本）。设计方向：一个 `get_tactic(name)` 或分类的 `list_tactics()` + `get_tactic(name)`，内容用结构化文本描述「触发条件 + 做法 + 目的 + 风险」。可塞的战术清单（持续扩充）：
+- [x] **战术思路 tool（可无限扩充的战术知识库，避免 system prompt 膨胀）**（已做 battle_tips 基础：10 组队战术 + random_battle_playbook，可继续扩充条目）：把宝可梦对战的战术思路/打法套路做成可调用 tool，LLM 决策前按需查，而不是全塞进 system prompt（prompt 太长会稀释重点、增加 token 成本）。设计方向：一个 `get_tactic(name)` 或分类的 `list_tactics()` + `get_tactic(name)`，内容用结构化文本描述「触发条件 + 做法 + 目的 + 风险」。可塞的战术清单（持续扩充）：
   - 多换一击杀高威胁（牺牲换人节奏，换取先手击杀对手核心威胁）
   - 炮灰（送掉无用/低价值宝可梦，换取无伤换入王牌）
   - 下钉逼换（撒隐形岩/地钉/毒钉施压，逼对手换人被钉子惩罚）
@@ -321,10 +321,10 @@
     - **HP 比例取整规则（待确认）**：替身消耗 1/4 已确认向下取整（floor，如 404 HP → 101 HP 替身）；待确认腹鼓（Belly Drum）消耗 1/2、树果回复（如文柚果 1/4）等 HP 比例计算的取整方向（预期都是向下取整 floor，需按官方规则/实战确认）。
     2. **场上 pm 对场上 pm 用招评估**：评估我方场上 pm 对对手场上 pm 用某招式的效果，含伤害类（伤害范围/克制/命中）和变化类（强化/状态/场地）。
     3. **场上 pm 对换上 pm 用招评估**：假定一方换人时评估，我方招式对对手换入 pm 的效果；换入方无能力等级（stats 清零），且需接受入场结算（隐形岩/地钉/毒钉等）。
-    4. **特性/道具/招式详情查询**：`get_ability_info(name)` / `get_item_info(name)` / `get_move_info(name)` 返回特性/道具/招式具体效果文本（prompt 已放名字，详情按需查，供 LLM 判断免疫/强化/先制等机制）。依赖 po-data 的 `ability_desc.txt` / `item_effects*.txt` / `move_description.txt`（或 `move_effect.txt`）解析成 knowledge JSON（与 `po-pokellmon-tool/build-knowledge.js` 同源）。
+    4. ✅ **特性/道具/招式详情查询**（已做 get_ability_info/get_item_info/get_move_info）：`get_ability_info(name)` / `get_item_info(name)` / `get_move_info(name)` 返回特性/道具/招式具体效果文本（prompt 已放名字，详情按需查，供 LLM 判断免疫/强化/先制等机制）。依赖 po-data 的 `ability_desc.txt` / `item_effects*.txt` / `move_description.txt`（或 `move_effect.txt`）解析成 knowledge JSON（与 `po-pokellmon-tool/build-knowledge.js` 同源）。
     - **特性知识库按官方规则（PS），读取按 PO**：PO 会把效果相近的特性合并（实测 `17 Immunity/Pastel Veil`、`164 Teravolt`（Turboblaze 被并入，无独立编号）等），但官方规则里它们是不同特性。`get_ability_info` 的**描述/效果文本按官方规则（PS）写、区分合并的特性**；**特性读取/编号仍按 PO**（对接 PO 的 `state.ability` 编号）。
-    5. **move 的 tag 信息（不止 description）**：招式除描述文字外还有 tag 类属性——声音类 `voice`、接触类 `touch`、铁拳 `ironFist`、鲁莽 `reckless`、强壮之颚 `strongJaw`、超级发射器 `megaLauncher`、先制 `priority` 等，已在 [movedata.json](movedata.json) 整理好。`get_move_info` 应一并暴露这些 tag（如「接触类会被鲨鱼皮/静电/火焰之躯反伤」「声音类被隔音免疫」），后续优先关注。
-    6. **特性推断（可能特性列表 + 触发/未触发提示）**：让 LLM 能读一只 PM 的**可能特性列表**（`pokes/ability1/2/3.txt` 给出每只 PM 的三个特性槽位），并重点标注「哪些特性触发后战报会有提示」（数据源 `abilities/ability_messages.txt`）。核心是**双向推断**：不仅「触发 → 确定是这个特性」，还有「未见触发 → 排除这个特性」（如对面未触发威吓→排除威吓；未触发静电→排除静电）。这比静态读特性文本更高阶，接入时让 LLM 在「已触发提示 vs 未触发提示」之间做排除式推断。
+    5. ✅ **move 的 tag 信息（不止 description）**（已做 get_move_info 暴露 tag）：招式除描述文字外还有 tag 类属性——声音类 `voice`、接触类 `touch`、铁拳 `ironFist`、鲁莽 `reckless`、强壮之颚 `strongJaw`、超级发射器 `megaLauncher`、先制 `priority` 等，已在 [movedata.json](movedata.json) 整理好。`get_move_info` 应一并暴露这些 tag（如「接触类会被鲨鱼皮/静电/火焰之躯反伤」「声音类被隔音免疫」），后续优先关注。
+    6. 🟡 **特性推断（可能特性列表 + 触发/未触发提示）**（正向解析+入场反向排除已做，交 LLM 排除待做）：让 LLM 能读一只 PM 的**可能特性列表**（`pokes/ability1/2/3.txt` 给出每只 PM 的三个特性槽位），并重点标注「哪些特性触发后战报会有提示」（数据源 `abilities/ability_messages.txt`）。核心是**双向推断**：不仅「触发 → 确定是这个特性」，还有「未见触发 → 排除这个特性」（如对面未触发威吓→排除威吓；未触发静电→排除静电）。这比静态读特性文本更高阶，接入时让 LLM 在「已触发提示 vs 未触发提示」之间做排除式推断。
     - **已实现（po-script 0.6.0）**：正向解析（pklmAnalyseAbility 移植主脚本 switch-case）+ 入场必触发特性反向排除（17 个：威吓/天气/场地/下载/复制/察觉/压迫感/破格/不挠之剑/不屈之盾等，换入后没触发特性消息则从 possible 排除）。
     - **后续（交 LLM 排除）**：更复杂的反向排除（被攻击/回合末/免疫类特性「该触发但没触发」）系统硬编码做不彻底，后续通过 prompt 引导 LLM 用 get_ability_info 的 signal（触发时机+判断方式）自行排除，而不是系统全做。
 
