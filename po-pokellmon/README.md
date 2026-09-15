@@ -160,6 +160,7 @@ po-pokellmon/
 | 0.3.25 (tool) | 新增 get_ability_info tool：查特性详情（描述 + 触发提示 signal）+ 合并特性提示；build-knowledge.js 新增 buildAbilities 生成 abilities.json（256 特性，识别 4 斜杠合并 + Teravolt/Turboblaze 完全合并）；新增 ability_signals.json（第一批 54 个高频特性的触发时机 + 战报判断方式）；system prompt 加 get_ability_info 引导 |
 | 0.3.26 (tool) | 修正 ability_signals 第一批勘误：净体/柔软/不眠/免疫 标待定（阻止负面效果可能有提示）；结实补「一击必杀无效」；奇异守护标待定（非克制可能直接 no effect）；再生力改无消息（下场回血无提示）；雨盘改有消息（雨天回 1/16 有提示）；妖精皮肤修正钢系克制例子（一般系/妖精系对钢都是 0.5x）；破格/兆级电压/涡轮火焰改入场有提示 |
 | 0.3.27 (tool) | 妖精皮肤 note 改用真实克制差异举例（打幽灵 0x→1x、打龙/格斗/恶 1x→2x），去掉钢系无差异的废话 |
+| 0.3.28 (tool) | 修复 ability_desc.txt 为 UTF-16 LE 编码导致 desc_zh 全缺失的 bug（build-knowledge.js buildAbilities 改用 utf16le 读取） |
 | 0.3.0 (tool) | 新增 `calc_damage` tool：标准宝可梦伤害公式（最多 10 组 leg，返回 0.85x/1.0x 随机档伤害 + 防守方 HP 百分比 + detail）。新增 `po-pokellmon-tool/build-knowledge.js` 生成 `pokemon.json`（种族值/属性/中英文名索引）、`natures.json`（性格 buff/debuff）、`moves.json`（含招式 type + 中文名）。system prompt 引导 LLM 算伤后与战报实际伤害对比、异常（≈2x 差）提交 submit_feedback |
 | 0.3.1 (tool) | 新增 `run_js` 逃生舱 tool：LLM 可在 `vm` 沙箱跑一段同步 JS 覆盖无现成 tool 的计算（暴露 data/typeMul/effStat/resolvePokemon/resolveMove/calcDamage + print/console.log）。限制：同步、无 require/process/fs、2s 超时、结果/输出截 2000 字符 |
 | 0.3.2 (tool) | 修复 run_js 沙箱 2 个 bug：① `effStat` 签名从 7 参数简化为 `effStat(baseStat, boost?, level?)`（LLM 原 7 参数签名用错得 NaN，被迫手写公式）② `print`/`console.log` 改 `arguments` 全量拼接（原只收单参数丢输出）。新增 [test-tools.js](../po-pokellmon-tool/test-tools.js) 回归测试（验证 LLM 调用 get_type_matchup/calc_damage/run_js）。调参：`MAX_TOOL_ROUNDS` 10→15、`TIMEOUT_MS` 180s→240s |

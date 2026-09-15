@@ -3,101 +3,118 @@
     "0": {
       "name": "(No Ability)",
       "name_zh": "(无特性)",
+      "desc_zh": "(无描述)",
       "has_msg": false
     },
     "1": {
       "name": "Stench",
       "name_zh": "恶臭",
+      "desc_zh": "恶臭特性的怪兽攻击时，有10%几率令目标害怕。",
       "desc_en": "Adds a 10% chance to flinch the opponent Pokémon to all of the moves used by a Pokémon with this ability that cannot already cause flinching. If a Pokémon with this ability is the first in your belt, decreases the chance of a wild encounter.",
       "has_msg": false
     },
     "2": {
       "name": "Drizzle",
       "name_zh": "降雨",
+      "desc_zh": "出场或获得该特性时，天气变为雨天。",
       "desc_en": "Summons Rain Dance for 5 turns when a Pokémon with this ability enters the field.",
       "has_msg": true
     },
     "3": {
       "name": "Speed Boost",
       "name_zh": "加速",
+      "desc_zh": "每回合结束时，速度上升1级。",
       "desc_en": "Raises the Speed of a Pokémon with this ability by one stage every turn.",
       "has_msg": true
     },
     "4": {
       "name": "Battle Armor",
       "name_zh": "战斗盔甲",
+      "desc_zh": "拥有战斗盔甲的怪兽不会受到会心一击。",
       "desc_en": "Prevents moves from being a critical hit when targetting a Pokémon with this ability.",
       "has_msg": false
     },
     "5": {
       "name": "Sturdy",
       "name_zh": "结实",
+      "desc_zh": "一击必杀技对坚硬特性的怪兽无效。第五世代开始，坚硬怪兽满HP时，受到致命的伤害后必定会留下1HP。",
       "desc_en": "Prevents One-hit KO moves from hitting a Pokémon with this ability. Ensures that a Pokémon with this ability will survive with at least 1 HP if hit at full health.",
       "has_msg": true
     },
     "6": {
       "name": "Damp",
       "name_zh": "湿气",
+      "desc_zh": "使双方场上大爆炸、自爆、引爆无效。",
       "desc_en": "Prevents the use of Self-Destruct or Explosion, and the effect of Aftermath, as long as a Pokémon with this ability is on the field.",
       "has_msg": false
     },
     "7": {
       "name": "Limber",
       "name_zh": "柔软",
+      "desc_zh": "拥有柔软特性的怪兽不会处于麻痹状态。",
       "desc_en": "Prevents a Pokémon with this ability from becoming Paralyzed.",
       "has_msg": false
     },
     "8": {
       "name": "Sand Veil",
       "name_zh": "沙隐",
+      "desc_zh": "场上天气为沙暴时，拥有沙隐特性的怪兽回避率增加20%，且不会受到沙暴伤害。",
       "desc_en": "Raises Evasion of Pokémon with this ability by 20% during Sandstorm.",
       "has_msg": false
     },
     "9": {
       "name": "Static",
       "name_zh": "静电",
+      "desc_zh": "对拥有静电特性的怪兽进行近身攻击有30%的几率被麻痹。",
       "desc_en": "Has a 30% chance to Paralyze a Pokémon every time they use a contact move on a Pokémon with this ability.",
       "has_msg": false
     },
     "10": {
       "name": "Volt Absorb",
       "name_zh": "蓄电",
+      "desc_zh": "拥有蓄电特性的怪兽受到电属性技能攻击时不会受伤，并回复25%最大HP。",
       "desc_en": "Heals a Pokémon with this ability for 1/4 of its max HP when hit by an Electric move and nullifies its effect.",
       "has_msg": false
     },
     "11": {
       "name": "Water Absorb",
       "name_zh": "储水",
+      "desc_zh": "拥有贮水特性的怪兽受到水属性技能攻击时不会受伤，并回复25%最大HP。",
       "desc_en": "Heals a Pokémon with this ability for 1/4 of its max HP when hit by a Water move and nullifies its effect.",
       "has_msg": false
     },
     "12": {
       "name": "Oblivious",
       "name_zh": "迟钝",
+      "desc_zh": "拥有钝感特性的怪兽不会处于着迷状态。",
       "desc_en": "Prevents a Pokémon with this ability from being Attracted or affected by Captivate or Taunt.",
       "has_msg": false
     },
     "13": {
       "name": "Cloud Nine",
       "name_zh": "无关天气",
+      "desc_zh": "拥有无天气特性的怪兽在场时，其它怪兽不会受到天气的影响。",
       "desc_en": "Prevents weather from having any effect as long as a Pokémon with this ability is on the field.",
       "has_msg": false
     },
     "14": {
       "name": "Compound Eyes",
       "name_zh": "复眼",
+      "desc_zh": "拥有复眼特性的怪兽命中率增加30%。",
       "desc_en": "Raises the accuracy of moves used by a Pokémon with this ability by 30% of their original value.",
       "has_msg": false
     },
     "15": {
       "name": "Insomnia",
       "name_zh": "不眠",
+      "desc_zh": "拥有不眠特性的怪兽不会处于睡眠状态。",
       "desc_en": "Prevents a Pokémon with this ability from falling Asleep.",
       "has_msg": false
     },
     "16": {
       "name": "Color Change",
       "name_zh": "变色",
+      "desc_zh": "拥有变色特性的怪兽受到攻击时，怪兽属性会变为与攻击技能一样。",
       "desc_en": "Changes the type of a Pokémon with this ability to that of the last damaging move that hit it.",
       "has_msg": true
     },
@@ -108,816 +125,952 @@
         "Pastel Veil"
       ],
       "name_zh": "免疫",
+      "desc_zh": "拥有免疫特性的怪兽不会处于中毒状态。",
       "desc_en": "Prevents a Pokémon with this ability from becoming Poisoned.",
       "has_msg": false
     },
     "18": {
       "name": "Flash Fire",
       "name_zh": "引火",
+      "desc_zh": "拥有引火特性的怪兽受到火属性技能攻击时不会受伤，同时提高火属性技能伤害。",
       "desc_en": "Makes a Pokémon with this ability immune to Fire moves, and raises the damage of its Fire moves by 50% until it leaves the field when hit by one.",
       "has_msg": true
     },
     "19": {
       "name": "Shield Dust",
       "name_zh": "鳞粉",
+      "desc_zh": "拥有鳞粉特性的怪兽受到攻击时不会受到技能的追加效果。",
       "desc_en": "Makes a Pokémon with this ability immune to added effects from the opponent Pokémon's attacking moves.",
       "has_msg": true
     },
     "20": {
       "name": "Own Tempo",
       "name_zh": "我行我素",
+      "desc_zh": "拥有自我中心特性的怪兽不会处于混乱状态。",
       "desc_en": "Prevents a Pokémon with this ability from becoming Confused.",
       "has_msg": true
     },
     "21": {
       "name": "Suction Cups",
       "name_zh": "吸盘",
+      "desc_zh": "拥有吸盘特性的怪兽不会被强制交换。",
       "desc_en": "Prevents the opponent from forcing a Pokémon with this ability to switch out.",
       "has_msg": false
     },
     "22": {
       "name": "Intimidate",
       "name_zh": "威吓",
+      "desc_zh": "拥有威吓特性的怪兽出场时，令对方所有怪兽攻击力降低1级。",
       "desc_en": "Lowers the opponent Pokémon's Attack one stage when a Pokémon with this ability switches in.",
       "has_msg": true
     },
     "23": {
       "name": "Shadow Tag",
       "name_zh": "踩影",
+      "desc_zh": "拥有踩影特性的怪兽在场时，对方所有怪兽不能交换（在野生战斗中则是不能逃跑）。",
       "desc_en": "Prevents opponent Pokémon, except for Ghost Pokémon and Pokémon with Shadow Tag themselves, from switching out or running away as long as a Pokémon with this ability is on the field.",
       "has_msg": false
     },
     "24": {
       "name": "Rough Skin",
       "name_zh": "粗糙皮肤",
+      "desc_zh": "拥有鲨鱼皮特性的怪兽受到近身攻击时，攻击方将受到伤害。",
       "desc_en": "Damages Pokémon for 1/8 their max HP every time they use a contact move on a Pokémon with this ability.",
       "has_msg": false
     },
     "25": {
       "name": "Wonder Guard",
       "name_zh": "神奇守护",
+      "desc_zh": "除非属性相克（2倍或以上），否则拥有奇异守护特性的怪兽不会受到技能伤害。",
       "desc_en": "Makes a Pokémon with this ability only vulnerable to super-effective attacks.",
       "has_msg": true
     },
     "26": {
       "name": "Levitate",
       "name_zh": "飘浮",
+      "desc_zh": "拥有浮游特性的怪兽不会受到地属性技能攻击。",
       "desc_en": "Makes a Pokémon with this ability immune to Ground moves, Spikes, Toxic Spikes and Sticky Web, as well as the effect of Arena Trap.",
       "has_msg": false
     },
     "27": {
       "name": "Effect Spore",
       "name_zh": "孢子",
+      "desc_zh": "拥有孢子特性的怪兽受到近身攻击时，攻击方有10%的几率处于中毒、麻痹或睡眠状态。",
       "desc_en": "Has a 30% chance to make a Pokémon either Paralyzed, Poisoned, or Asleep every time they use a contact move on a Pokémon with this ability.",
       "has_msg": true
     },
     "28": {
       "name": "Synchronize",
       "name_zh": "同步",
+      "desc_zh": "对拥有同步率特性的怪兽施加中毒、麻痹、烧伤状态时，攻击方将处于相同状态。",
       "desc_en": "When a Pokémon with this ability becomes Burned, Paralyzed, Poisoned, or Badly Poisoned by the opponent, inflicts the same status to the opponent Pokémon.",
       "has_msg": true
     },
     "29": {
       "name": "Clear Body",
       "name_zh": "恒净之躯",
+      "desc_zh": "拥有净体特性的怪兽的能力等级不会被其它怪兽弱化。",
       "desc_en": "Prevents the stats of a Pokémon with this ability from being lowered by the opponent.",
       "has_msg": false
     },
     "30": {
       "name": "Natural Cure",
       "name_zh": "自然回复",
+      "desc_zh": "拥有自然回复特性的怪兽被交换下场时，异常状态恢复。",
       "desc_en": "Heals all status conditions of a Pokémon with this ability when it leaves the field.",
       "has_msg": false
     },
     "31": {
       "name": "Lightning Rod",
       "name_zh": "避雷针",
+      "desc_zh": "拥有避雷针特性的怪兽在场时，其它怪兽使用单体电属性技能时，攻击目标会自动变为避雷针怪兽。",
       "desc_en": "Makes a Pokémon with this ability draw to itself and be immune to all Electric moves, and raises its Special Attack by one stage every time it is hit by one.",
       "has_msg": false
     },
     "32": {
       "name": "Serene Grace",
       "name_zh": "天恩",
+      "desc_zh": "拥有天之恩惠特性的怪兽使用几率性追加特效的技能时，特效发动率翻倍。",
       "desc_en": "Doubles the chance of an attacking move's added effect occurring when used by a Pokémon with this ability.",
       "has_msg": false
     },
     "33": {
       "name": "Swift Swim",
       "name_zh": "悠游自如",
+      "desc_zh": "在天气为雨天时，拥有轻快特性的怪兽速度翻倍。",
       "desc_en": "Doubles the Speed of a Pokémon with this ability in the Rain.",
       "has_msg": false
     },
     "34": {
       "name": "Chlorophyll",
       "name_zh": "叶绿素",
+      "desc_zh": "在天气为晴天时，拥有叶绿素特性的怪兽速度翻倍。",
       "desc_en": "Doubles the Speed of a Pokémon with this ability in the Sun.",
       "has_msg": false
     },
     "35": {
       "name": "Quick Draw",
       "name_zh": "速击",
+      "desc_zh": "将拥有发光特性的怪兽排在队伍首位时，遇敌率翻倍。",
       "desc_en": "If a Pokémon with this ability is the first in your belt, doubles the chance of a wild encounter.",
       "has_msg": false
     },
     "36": {
       "name": "Trace",
       "name_zh": "复制",
+      "desc_zh": "拥有复制特性的怪兽出场时，特性随机变为与对方场上一只怪兽一样。",
       "desc_en": "Makes a Pokémon with this ability copy the ability of the opponent when it enters the field.",
       "has_msg": true
     },
     "37": {
       "name": "Huge Power",
       "name_zh": "大力士",
+      "desc_zh": "拥有大力士特性的怪兽攻击力翻倍。",
       "desc_en": "Doubles the Attack of a Pokémon with this ability.",
       "has_msg": false
     },
     "38": {
       "name": "Poison Point",
       "name_zh": "毒刺",
+      "desc_zh": "拥有毒刺特性的怪兽受到近身攻击时，攻击方有30%的几率中毒。",
       "desc_en": "Has a 30% chance to Poison a Pokémon every time they use a contact move on a Pokémon with this ability.",
       "has_msg": false
     },
     "39": {
       "name": "Inner Focus",
       "name_zh": "精神力",
+      "desc_zh": "拥有精神力特性的怪兽不会被施加害怕。",
       "desc_en": "Prevents a Pokémon with this ability from flinching.",
       "has_msg": true
     },
     "40": {
       "name": "Magma Armor",
       "name_zh": "熔岩铠甲",
+      "desc_zh": "拥有熔岩铠甲特性的怪兽不会处于冰冻状态。",
       "desc_en": "Prevents a Pokémon with this ability from becoming Frozen.",
       "has_msg": false
     },
     "41": {
       "name": "Water Veil",
       "name_zh": "水幕",
+      "desc_zh": "拥有水之掩护特性的怪兽不会处于烧伤状态。",
       "desc_en": "Prevents a Pokémon with this ability from becoming Burned.",
       "has_msg": false
     },
     "42": {
       "name": "Magnet Pull",
       "name_zh": "磁力",
+      "desc_zh": "拥有磁力特性的怪兽在场时，对方钢属性怪兽不能交换。",
       "desc_en": "Prevents Steel-type opponents, that are not also Ghost-type, from switching out or running away as long as a Pokémon with this ability is on the field.",
       "has_msg": false
     },
     "43": {
       "name": "Soundproof",
       "name_zh": "隔音",
+      "desc_zh": "免疫声音类技能。",
       "desc_en": "Makes a Pokémon with this ability immune to Boomburst, Bug Buzz, Chatter, Confide, Disarming Voice, Echoed Voice, Grass Whistle, Growl, Hyper Voice, Metal Sound, Noble Roar, Parting Shot, Perish Song, Relic Song, Roar, Round, Screech, Sing, Snarl, Snore, Supersonic, and Uproar.",
       "has_msg": true
     },
     "44": {
       "name": "Rain Dish",
       "name_zh": "雨盘",
+      "desc_zh": "场上天气为雨天时，拥有接雨盘特性的怪兽每回合结束时回复HP最大值的1/16。",
       "desc_en": "Makes a Pokémon with this ability regain 1/16 its max HP every turn during Rain Dance.",
       "has_msg": false
     },
     "45": {
       "name": "Sand Stream",
       "name_zh": "扬沙",
+      "desc_zh": "出场或获得该特性时，天气变为沙暴。",
       "desc_en": "Summons Sandstorm for 5 turns when a Pokémon with this ability enters the field.",
       "has_msg": true
     },
     "46": {
       "name": "Pressure",
       "name_zh": "压迫感",
+      "desc_zh": "拥有压力特性的怪兽受到攻击时，攻击方使用的技能多损失1点PP。",
       "desc_en": "Makes opponent Pokémon use 2 PP instead of 1 when they target a Pokémon with this ability.",
       "has_msg": true
     },
     "47": {
       "name": "Thick Fat",
       "name_zh": "厚脂肪",
+      "desc_zh": "拥有厚脂肪特性的怪兽受到火或冰属性技能攻击时，在伤害计算中，攻击方技能威力减半。",
       "desc_en": "Halves the damage a Pokémon with this ability receives from Fire and Ice moves.",
       "has_msg": false
     },
     "48": {
       "name": "Early Bird",
       "name_zh": "早起",
+      "desc_zh": "拥有早起特性的怪兽睡眠回合数减半。",
       "desc_en": "Halves the turns that a Pokémon with this ability spends Asleep, rounded down, including from Rest.",
       "has_msg": false
     },
     "49": {
       "name": "Flame Body",
       "name_zh": "火焰之躯",
+      "desc_zh": "拥有火焰之躯特性的怪兽受到近身攻击时，攻击方有30%的几率烧伤。",
       "desc_en": "Has a 30% chance of Burning a Pokémon every time they use a contact move on a Pokémon with this ability.",
       "has_msg": false
     },
     "50": {
       "name": "Unseen Fist",
       "name_zh": "无形拳",
+      "desc_zh": "在野生战斗中，拥有逃足特性的怪兽必定能逃跑。",
       "desc_en": "Allows a Pokémon with this ability to always run from wild battles.",
       "has_msg": false
     },
     "51": {
       "name": "Keen Eye",
       "name_zh": "锐利目光",
+      "desc_zh": "拥有锐利目光特性的怪兽的命中等级不会被弱化。",
       "desc_en": "Prevents a Pokémon with this ability from having its Accuracy lowered by the opponent, and ignores the opponent's evasion boosts.",
       "has_msg": false
     },
     "52": {
       "name": "Hyper Cutter",
       "name_zh": "怪力钳",
+      "desc_zh": "拥有怪力钳特性的怪兽的攻击等级不会被弱化。",
       "desc_en": "Prevents a Pokémon with this ability from having its Attack lowered by the opponent.",
       "has_msg": false
     },
     "53": {
       "name": "Pickup",
       "name_zh": "捡拾",
+      "desc_zh": "第五世代起，在战斗中，自己没有携带道具时，每回合末100%几率获得当回合对手与队友使用掉的道具。",
       "desc_en": "If a Pokémon other than the one with this Ability consumes a held item, lets this Pokémon obtain that item. After battle, a Pokémon with this ability will have a 10% chance to be find an item if it was not already.",
       "has_msg": false
     },
     "54": {
       "name": "Truant",
       "name_zh": "懒惰",
+      "desc_zh": "拥有懒惰特性的怪兽每次使用技能后都要休息一回合。",
       "desc_en": "Forces a Pokémon with this ability to do nothing every other turn it spends in battle, starting with the second.",
       "has_msg": false
     },
     "55": {
       "name": "Hustle",
       "name_zh": "活力",
+      "desc_zh": "拥有紧张特性的怪兽攻击力提高50%，同时物理技能的命中率降低20%。",
       "desc_en": "Raises Attack of a Pokémon with this ability by 50%, but makes its physical moves have 80% of their usual accuracy. If a Pokémon with this ability is first on your belt, the chance of a wild encounter with higher level Pokémon increases.",
       "has_msg": false
     },
     "56": {
       "name": "Cute Charm",
       "name_zh": "迷人之躯",
+      "desc_zh": "拥有魅惑身躯特性的怪兽受到近身攻击时，如果攻击方是异性，有30%的几率被着迷。",
       "desc_en": "Has a 30% chance to make a Pokémon Attracted every time they use a contact move on a Pokémon with this ability.",
       "has_msg": true
     },
     "57": {
       "name": "Plus",
       "name_zh": "正电",
+      "desc_zh": "己方场上存在正极或负极特性的怪兽时，正极怪兽的特攻提高50%。",
       "desc_en": "Raises the Special Attack of a Pokémon with this ability by 50% when it is partnered by a Pokémon with Minus.",
       "has_msg": false
     },
     "58": {
       "name": "Minus",
       "name_zh": "负电",
+      "desc_zh": "己方场上存在正极或负极特性的怪兽时，负极怪兽的特攻提高50%。",
       "desc_en": "Raises the Special Attack of a Pokémon with this ability by 50% when it is partnered by a Pokémon with Plus.",
       "has_msg": false
     },
     "59": {
       "name": "Forecast",
       "name_zh": "阴晴不定",
+      "desc_zh": "随天气改变漂浮泡泡的外观与属性。",
       "desc_en": "Makes the type of a Pokémon with this ability change to match the weather: Rain Dance, Sunny Day, or Hail.",
       "has_msg": false
     },
     "60": {
       "name": "Sticky Hold",
       "name_zh": "黏着",
+      "desc_zh": "拥有黏着特性的怪兽的道具不会被抢夺。",
       "desc_en": "Prevents the item of a Pokémon with this ability from being removed by the opponent. If a Pokémon with this ability is first on your belt, fishing is made easier.",
       "has_msg": true
     },
     "61": {
       "name": "Shed Skin",
       "name_zh": "蜕皮",
+      "desc_zh": "回合结束时，拥有蜕皮特性的怪兽有30%几率解除自身异常状态。",
       "desc_en": "Each turn, has a 1/3 chance of healing all status conditions of a Pokémon with this ability.",
       "has_msg": true
     },
     "62": {
       "name": "Guts",
       "name_zh": "毅力",
+      "desc_zh": "拥有根性特性的怪兽处于异常状态时，攻击力提高50%。",
       "desc_en": "When a Pokémon with this ability has a major status condition, raises its Attack by 50%. Ignores the Attack loss from being Burned.",
       "has_msg": false
     },
     "63": {
       "name": "Marvel Scale",
       "name_zh": "神奇鳞片",
+      "desc_zh": "拥有神秘鳞片特性的怪兽处于异常状态时，防御力提高50%。",
       "desc_en": "When a Pokémon with this ability has a major status condition, raises its Defense by 50%.",
       "has_msg": false
     },
     "64": {
       "name": "Liquid Ooze",
       "name_zh": "污泥浆",
+      "desc_zh": "对拥有毒液特性的怪兽使用HP吸取技时，会损失原本该回复的HP。",
       "desc_en": "When the opponent uses absorption moves on Pokémon with this ability, causes it to lose HP instead of gaining.",
       "has_msg": false
     },
     "65": {
       "name": "Overgrow",
       "name_zh": "茂盛",
+      "desc_zh": "拥有深绿特性的怪兽HP低于1/3时，使用草属性技能的威力提高50%。",
       "desc_en": "When the HP of a Pokémon with this ability is 1/3 its max or lower, boosts the power of its Grass moves by 50%.",
       "has_msg": false
     },
     "66": {
       "name": "Blaze",
       "name_zh": "猛火",
+      "desc_zh": "拥有猛火特性的怪兽HP低于1/3时，使用火属性技能的威力提高50%。",
       "desc_en": "When the HP of a Pokémon with this ability is 1/3 its max or lower, boosts the power of its Fire moves by 50%.",
       "has_msg": false
     },
     "67": {
       "name": "Torrent",
       "name_zh": "激流",
+      "desc_zh": "拥有激流特性的怪兽HP低于1/3时，使用水属性技能的威力提高50%。",
       "desc_en": "When the HP of a Pokémon with this ability is 1/3 its max or lower, boosts the power of its Water moves by 50%.",
       "has_msg": false
     },
     "68": {
       "name": "Swarm",
       "name_zh": "虫之预感",
+      "desc_zh": "拥有虫之预感特性的怪兽HP低于1/3时，使用虫属性技能的威力提高50%。",
       "desc_en": "When the HP of a Pokémon with this ability is 1/3 its max or lower, boosts the power of its Bug moves by 50%.",
       "has_msg": false
     },
     "69": {
       "name": "Rock Head",
       "name_zh": "坚硬脑袋",
+      "desc_zh": "拥有石脑特性的怪兽不会受到技能的反弹伤害。",
       "desc_en": "Prevents a Pokémon with this ability from taking recoil damage from its own attacks.",
       "has_msg": false
     },
     "70": {
       "name": "Drought",
       "name_zh": "日照",
+      "desc_zh": "出场或获得该特性时，天气变为晴天。",
       "desc_en": "Summons Sunny Day for 5 turns when a Pokémon with this ability enters the field.",
       "has_msg": true
     },
     "71": {
       "name": "Arena Trap",
       "name_zh": "沙穴",
+      "desc_zh": "拥有蚁地狱特性的怪兽在场时，对方非飞属性与非浮游特性的怪兽不能交换。",
       "desc_en": "Prevents opponent Pokémon, except for Flying-type Pokémon, Ghost-type Pokémon, and Pokémon with Levitate, from running or being switched out as long as a Pokémon with this ability is on the field.",
       "has_msg": false
     },
     "72": {
       "name": "Vital Spirit",
       "name_zh": "干劲",
+      "desc_zh": "拥有干劲特性的怪兽不会处于睡眠状态。",
       "desc_en": "Prevents a Pokémon with this ability from becoming Asleep.",
       "has_msg": false
     },
     "73": {
       "name": "White Smoke",
       "name_zh": "白色烟雾",
+      "desc_zh": "拥有白烟特性的怪兽的能力等级不会被弱化。",
       "desc_en": "Prevents the stats of a Pokémon with this ability from being lowered by the opponent.",
       "has_msg": false
     },
     "74": {
       "name": "Pure Power",
       "name_zh": "瑜伽之力",
+      "desc_zh": "拥有瑜珈之力特性的怪兽的攻击力翻倍。",
       "desc_en": "Doubles the Attack of a Pokémon with this ability.",
       "has_msg": false
     },
     "75": {
       "name": "Shell Armor",
       "name_zh": "硬壳盔甲",
+      "desc_zh": "拥有贝壳盔甲特性的怪兽不会受到会心一击。",
       "desc_en": "Prevents moves from being a critical hit when targetting a Pokémon with this ability.",
       "has_msg": false
     },
     "76": {
       "name": "Air Lock",
       "name_zh": "气闸",
+      "desc_zh": "拥有天气锁特性的怪兽在场时，其它怪兽不会受到天气的影响。",
       "desc_en": "Prevents weather from having any effect as long as a Pokémon with this ability is on the field.",
       "has_msg": false
     },
     "77": {
       "name": "Tangled Feet",
       "name_zh": "蹒跚",
+      "desc_zh": "拥有蹒跚特性的怪兽处于混乱状态时，回避率提高20%。",
       "desc_en": "Raises Evasion of a Pokémon with this ability by 50% when it is Confused.",
       "has_msg": false
     },
     "78": {
       "name": "Motor Drive",
       "name_zh": "电气引擎",
+      "desc_zh": "拥有电引擎特性的怪兽受到电属性技能攻击时，不会受伤，并且速度提升1级。",
       "desc_en": "Raises Speed of a Pokémon with this ability by one stage when it is hit by an Electric move, and nullifies the effect of that move.",
       "has_msg": true
     },
     "79": {
       "name": "Rivalry",
       "name_zh": "斗争心",
+      "desc_zh": "如果对方场上存在同性怪兽，拥有斗争心特性的怪兽使用技能的威力增加25%。",
       "desc_en": "Raises the power of moves used by a Pokémon with this ability by 25% when fighting an opponent of the same gender, but lowers them by 25% when fighting an opponent of the opposite gender.",
       "has_msg": false
     },
     "80": {
       "name": "Steadfast",
       "name_zh": "不屈之心",
+      "desc_zh": "拥有不屈之心特性的怪兽受到害怕状态时，速度提升1级。",
       "desc_en": "Raises Speed of a Pokémon with this ability by one stage every time it flinches.",
       "has_msg": true
     },
     "81": {
       "name": "Snow Cloak",
       "name_zh": "雪隐",
+      "desc_zh": "场上天气为冰雹时，拥有雪隐特性的怪兽回避率增加20%。",
       "desc_en": "Raises Evasion of a Pokémon with this ability by 20% during Hail.",
       "has_msg": false
     },
     "82": {
       "name": "Gluttony",
       "name_zh": "贪吃鬼",
+      "desc_zh": "拥有贪吃特性的怪兽携带树果时，发动条件从HP低于1/4变为HP低于1/2。",
       "desc_en": "Makes a Pokémon with this ability eat held berries triggered by low HP at 1/2 its max HP rather than 1/4.",
       "has_msg": false
     },
     "83": {
       "name": "Anger Point",
       "name_zh": "愤怒穴位",
+      "desc_zh": "拥有怒穴特性的怪兽受到会心一击时，攻击力提升至最大。",
       "desc_en": "Raises the Attack of a Pokémon with this ability to its maximum stage when it is hit with a critical hit.",
       "has_msg": false
     },
     "84": {
       "name": "Unburden",
       "name_zh": "轻装",
+      "desc_zh": "拥有轻技特性的怪兽失去道具时，速度翻倍。",
       "desc_en": "Doubles the Speed of a Pokémon with this ability when it consumes its held item until it switches out.",
       "has_msg": false
     },
     "85": {
       "name": "Heatproof",
       "name_zh": "耐热",
+      "desc_zh": "拥有耐热特性的怪兽受到火属性技能攻击时，攻击方技能威力减半。",
       "desc_en": "Halves the damage a Pokémon with this ability takes from Fire moves, and from a Burn.",
       "has_msg": false
     },
     "86": {
       "name": "Simple",
       "name_zh": "单纯",
+      "desc_zh": "第五世代起，拥有单纯特性的怪兽在自身能力等级提升或降低时，提升或降低量翻倍。",
       "desc_en": "Doubles the effectiveness of stat changes on a Pokémon with this ability, although the maximum of six is unchanged.",
       "has_msg": false
     },
     "87": {
       "name": "Dry Skin",
       "name_zh": "干燥皮肤",
+      "desc_zh": "拥有干燥肌肤特性的怪兽受到水属性技能攻击时不会受伤，并回复HP最大值的1/4。",
       "desc_en": "Damages a Pokémon with this ability for 1/8 its max HP per turn during Sunny Day, and heals it by 1/8 its max HP per turn during Rain Dance. Makes a Pokémon with this ability take 25% more damage from Fire attacks, but also makes Water attacks heal it for 1/4 its max HP.",
       "has_msg": true
     },
     "88": {
       "name": "Download",
       "name_zh": "下载",
+      "desc_zh": "拥有下载特性的怪兽出场时，若对方怪兽防御＜特防，下载怪兽攻击提升1级；若对方防御≧特防，下载怪兽特攻提升1级。",
       "desc_en": "When a Pokémon with this ability enters the field, raises one stage in the Attack stat corresponding to its opponent's weaker Defense stat.",
       "has_msg": true
     },
     "89": {
       "name": "Iron Fist",
       "name_zh": "铁拳",
+      "desc_zh": "拥有铁拳特性的怪兽使用拳击类技能时，技能威力提高20%。",
       "desc_en": "Boosts the power of Bullet Punch, Comet Punch, Dizzy Punch, Drain Punch, Dynamic Punch, Fire Punch, Focus Punch, Hammer Arm, Ice Punch, Mach Punch, Mega Punch, Meteor Mash, Shadow Punch, Sky Uppercut, and Thunder Punch by 20% when used by a Pokémon with this ability.",
       "has_msg": false
     },
     "90": {
       "name": "Poison Heal",
       "name_zh": "毒疗",
+      "desc_zh": "拥有毒疗特性的怪兽处于中毒状态下不会损失HP，同时每回合回复HP最大值的1/8。",
       "desc_en": "Heals a Pokémon with this ability by 1/8 its max HP each turn when it is Poisoned or Badly Poisoned.",
       "has_msg": true
     },
     "91": {
       "name": "Adaptability",
       "name_zh": "适应力",
+      "desc_zh": "拥有适应力特性的怪兽使用与自身属性相同的技能攻击时，属性加成倍数变为2倍。",
       "desc_en": "Changes the Same Type Attack Bonus for a Pokémon with this ability from 1.5x to 2x.",
       "has_msg": false
     },
     "92": {
       "name": "Skill Link",
       "name_zh": "连续攻击",
+      "desc_zh": "拥有技能连锁特性的怪兽使用2～5次连续攻击技时，攻击次数固定为最大值。",
       "desc_en": "Ensures that a Pokémon with this ability will always hit five times with 2-to-5-hit moves.",
       "has_msg": false
     },
     "93": {
       "name": "Hydration",
       "name_zh": "湿润之躯",
+      "desc_zh": "场上天气为雨天时，回合结束时拥有湿润身躯特性的怪兽的异常状态回复。",
       "desc_en": "Cures a Pokémon with this ability of any major status condition during Rain Dance.",
       "has_msg": true
     },
     "94": {
       "name": "Solar Power",
       "name_zh": "太阳之力",
+      "desc_zh": "场上天气为晴天时，拥有太阳力量特性的怪兽特攻提高50%，同时每回合结束时损失HP最大值的1/8。",
       "desc_en": "Damages a Pokémon with this ability for 1/8 its max HP per turn but raises its Special Attack by 50% during Sunny Day.",
       "has_msg": true
     },
     "95": {
       "name": "Quick Feet",
       "name_zh": "飞毛腿",
+      "desc_zh": "拥有早足特性的怪兽处于异常状态时，速度提高50%。",
       "desc_en": "When a Pokémon with this ability has a major status condition, raises its Speed by 50%. Ignored the Speed loss from being Paralyzed.",
       "has_msg": false
     },
     "96": {
       "name": "Normalize",
       "name_zh": "一般皮肤",
+      "desc_zh": "拥有普通皮肤特性的怪兽使用的技能全部变为普通属性。",
       "desc_en": "Changes all moves of a Pokémon with this ability to be Normal-type.",
       "has_msg": false
     },
     "97": {
       "name": "Sniper",
       "name_zh": "狙击手",
+      "desc_zh": "拥有狙击手特性的怪兽作出会心一击时，伤害为普通会心一击时的1.5倍。",
       "desc_en": "Boosts the power of critical hits used by a Pokémon with this ability by 50%.",
       "has_msg": false
     },
     "98": {
       "name": "Magic Guard",
       "name_zh": "魔法防守",
+      "desc_zh": "拥有魔法守护特性的怪兽不会受到除直接攻击以外的伤害。",
       "desc_en": "Renders a Pokémon with this ability immune to damage not caused directly by an attack.",
       "has_msg": false
     },
     "99": {
       "name": "No Guard",
       "name_zh": "无防守",
+      "desc_zh": "拥有无防御特性的怪兽使用的技能无视命中率，必定命中。",
       "desc_en": "Ensures that all moves used by and on a Pokémon with this ability will hit.",
       "has_msg": false
     },
     "100": {
       "name": "Stall",
       "name_zh": "慢出",
+      "desc_zh": "拥有后出特性的怪兽使用的技能必定后出。",
       "desc_en": "Ensures that a Pokémon with this ability will move last in its priority bracket.",
       "has_msg": false
     },
     "101": {
       "name": "Technician",
       "name_zh": "技术高手",
+      "desc_zh": "拥有技师特性的怪兽使用小于等于60威力的技能时，技能威力提高50%。",
       "desc_en": "Boosts the power of moves with 60 Base Power or less used by a Pokémon with this ability by 50%.",
       "has_msg": false
     },
     "102": {
       "name": "Leaf Guard",
       "name_zh": "叶子防守",
+      "desc_zh": "场上天气为晴天时，拥有绿叶守护特性的怪兽不会处于异常状态。",
       "desc_en": "Renders a Pokémon with this ability immune to major status conditions during Sunny Day.",
       "has_msg": true
     },
     "103": {
       "name": "Klutz",
       "name_zh": "笨拙",
+      "desc_zh": "拥有不器用特性的怪兽携带的道具无效。",
       "desc_en": "Makes a Pokémon with this ability unable to receive the effects of its held item.",
       "has_msg": false
     },
     "104": {
       "name": "Mold Breaker",
       "name_zh": "破格",
+      "desc_zh": "拥有破格特性的怪兽使用技能时，无视防御方的特性。",
       "desc_en": "Prevents opponent abilities from hindering moves used by a Pokémon with this ability.",
       "has_msg": false
     },
     "105": {
       "name": "Super Luck",
       "name_zh": "超幸运",
+      "desc_zh": "拥有强运特性的怪兽会心率提高1级。",
       "desc_en": "Raises the critical hit rate of a Pokémon with this ability by one stage.",
       "has_msg": false
     },
     "106": {
       "name": "Aftermath",
       "name_zh": "引爆",
+      "desc_zh": "拥有引爆特性的怪兽被近身攻击击倒时，攻击方损失HP最大值的1/4。",
       "desc_en": "When a Pokémon with this ability is fainted by a contact move, damages the attacker for 1/4 its max HP.",
       "has_msg": true
     },
     "107": {
       "name": "Anticipation",
       "name_zh": "危险预知",
+      "desc_zh": "拥有危险预知特性的怪兽出场时，能预知对方是否拥有对自身有威胁的技能。",
       "desc_en": "When a Pokémon with this ability switches in, causes it to shudder if the opponent has any moves that are super-effective on it, or One-hit KO moves.",
       "has_msg": true
     },
     "108": {
       "name": "Forewarn",
       "name_zh": "预知梦",
+      "desc_zh": "拥有预知梦特性的怪兽出场时，随机读取对方威力最高的技能之一。",
       "desc_en": "When a Pokémon with this ability switches in, gives a message warning it of the opponent's attack with the highest Base Power.",
       "has_msg": true
     },
     "109": {
       "name": "Unaware",
       "name_zh": "纯朴",
+      "desc_zh": "拥有天然特性的怪兽攻击或受到攻击时，无视对方的能力等级升降，不无视自己的能力等级升降。",
       "desc_en": "Causes a Pokémon with this ability to ignore all of the opponent's stat changes except for Speed.",
       "has_msg": false
     },
     "110": {
       "name": "Tinted Lens",
       "name_zh": "有色眼镜",
+      "desc_zh": "拥有有色眼镜特性的怪兽使用的技能遇到减半或四分之一属性抗性时，伤害翻倍。",
       "desc_en": "Doubles the power of not very effective attacks used by a Pokémon with this ability.",
       "has_msg": false
     },
     "111": {
       "name": "Filter",
       "name_zh": "过滤",
+      "desc_zh": "拥有过滤器特性的怪兽受到属性相克技能攻击时，所受伤害减少25%。",
       "desc_en": "Lowers the damage a Pokémon with this ability takes from super-effective attacks by 25%.",
       "has_msg": false
     },
     "112": {
       "name": "Slow Start",
       "name_zh": "慢启动",
+      "desc_zh": "拥有缓慢启动特性的怪兽出场时，物攻与速度减半。",
       "desc_en": "Halves the Attack and Speed of a Pokémon with this ability for the first five turns it is in battle.",
       "has_msg": true
     },
     "113": {
       "name": "Scrappy",
       "name_zh": "胆量",
+      "desc_zh": "拥有胆气特性的怪兽使用的普通或格斗属性技能对幽灵属性的伤害倍率变为1。",
       "desc_en": "Allows a Pokémon with this ability to hit Ghost-type Pokémon with Normal and Fighting moves.",
       "has_msg": false
     },
     "114": {
       "name": "Storm Drain",
       "name_zh": "引水",
+      "desc_zh": "拥有引水特性的怪兽在场时，其它怪兽使用单体水属性技能时，攻击目标会自动变为引水怪兽。",
       "desc_en": "Makes a Pokémon with this ability draw in and be immune to all Water moves, and raises its Special Attack by one stage every time it is hit by one.",
       "has_msg": false
     },
     "115": {
       "name": "Ice Body",
       "name_zh": "冰冻之躯",
+      "desc_zh": "场上天气为冰雹时，拥有寒冰身躯特性的怪兽每回合结束时回复HP最大值的1/16。",
       "desc_en": "Heals a Pokémon with this ability for 1/16 its max HP each turn during Hail.",
       "has_msg": false
     },
     "116": {
       "name": "Solid Rock",
       "name_zh": "坚硬岩石",
+      "desc_zh": "拥有坚岩特性的怪兽受到属性相克技能攻击时，所受伤害减少25%。",
       "desc_en": "Lowers the damage a Pokémon with this ability takes from super-effective attacks by 25%.",
       "has_msg": false
     },
     "117": {
       "name": "Snow Warning",
       "name_zh": "降雪",
+      "desc_zh": "出场或获得该特性时，天气变为冰雹。",
       "desc_en": "Summons Hail for 5 turns when a Pokémon with this ability enters the field.",
       "has_msg": true
     },
     "118": {
       "name": "Curious Medicine",
       "name_zh": "无效特性",
+      "desc_zh": "战斗结束后，拥有集蜜特性的怪兽有几率拾取甜蜜。",
       "desc_en": "Causes a Pokémon with this ability to have a chance to collect Honey after a battle.",
       "has_msg": false
     },
     "119": {
       "name": "Frisk",
       "name_zh": "察觉",
+      "desc_zh": "拥有洞察特性的怪兽出场时，可以预知对方携带的道具。",
       "desc_en": "When a Pokémon with this ability switches in, lets it see what item its opponent is holding.",
       "has_msg": true
     },
     "120": {
       "name": "Reckless",
       "name_zh": "舍身",
+      "desc_zh": "拥有舍身特性的怪兽使用反弹技能时威力提高20%。",
       "desc_en": "Boosts the power of Brave Bird, Double-Edge, Flare Blitz, Head Charge, Head Smash, Hi Jump Kick, Jump Kick, Submission, Take Down, Volt Tackle, Wild Charge and Wood Hammer by 20% when used by a Pokémon with this ability.",
       "has_msg": false
     },
     "121": {
       "name": "Multitype",
       "name_zh": "多属性",
+      "desc_zh": "随携带的石板改变阿尔宙斯的颜色与属性。",
       "desc_en": "Changes the type of a Pokémon with this ability to match the Plate or Z-Crystal it holds.",
       "has_msg": false
     },
     "122": {
       "name": "Flower Gift",
       "name_zh": "花之礼",
+      "desc_zh": "天气为晴天且拥有花之礼物特性的怪兽在场时，自身与队友的攻击与特防提高50%。",
       "desc_en": "During Sunny Day, raises Attack and Special Defense of a Pokémon with this ability and its partners by 50%.",
       "has_msg": false
     },
     "123": {
       "name": "Bad Dreams",
       "name_zh": "梦魇",
+      "desc_zh": "拥有梦魇特性的怪兽在场时，对方所有处于睡眠状态的怪兽每回合结束时损失HP最大值的1/8。",
       "desc_en": "Causes the opponent Pokémon to lose 1/8 its max HP every turn it is Sleeping as long as a Pokémon with this ability is on the field.",
       "has_msg": true
     },
     "124": {
       "name": "Pickpocket",
       "name_zh": "顺手牵羊",
+      "desc_zh": "受到近身攻击时，获得攻击方道具。",
       "desc_en": "When a Pokémon with this ability is hit by a contact move, lets it steal the opponent's held item if it's not holding one already.",
       "has_msg": false
     },
     "125": {
       "name": "Sheer Force",
       "name_zh": "强行",
+      "desc_zh": "以不发动技能追加效果为代价，提高技能30%伤害。",
       "desc_en": "Boosts the power of moves with secondary effects by 30% in exchange for the secondary effect itself, if used by a Pokémon with this ability.",
       "has_msg": false
     },
     "126": {
       "name": "Contrary",
       "name_zh": "唱反调",
+      "desc_zh": "上升的能力变为下降，下降的能力变为上升。",
       "desc_en": "Reverses all stat changes that take effect on a Pokémon with this ability.",
       "has_msg": false
     },
     "127": {
       "name": "Unnerve",
       "name_zh": "紧张感",
+      "desc_zh": "紧张感特性的怪兽在场上时对方不能发动树果。",
       "desc_en": "Prevents the opponent from consuming held Berries as long as a Pokémon with this ability is on the field.",
       "has_msg": false
     },
     "128": {
       "name": "Defiant",
       "name_zh": "不服输",
+      "desc_zh": "能力被对方的怪兽降低时攻击上升2级。",
       "desc_en": "Raises the Attack of a Pokémon with this ability by 2 stages every time the opponent lowers any of its stats.",
       "has_msg": false
     },
     "129": {
       "name": "Defeatist",
       "name_zh": "软弱",
+      "desc_zh": "HP低于1/2时，攻击与特攻降低50%。",
       "desc_en": "Lowers Attack and Special Attack of a Pokémon with this ability by 50% while it has 1/2 its max HP or lower.",
       "has_msg": false
     },
     "130": {
       "name": "Cursed Body",
       "name_zh": "诅咒之躯",
+      "desc_zh": "受到攻击时30%几率（暂）使攻击方处于残废状态。",
       "desc_en": "Has a 30% chance to Disable any attacking move used on a Pokémon with this ability.",
       "has_msg": true
     },
     "131": {
       "name": "Transistor",
       "name_zh": "电晶体",
+      "desc_zh": "回合结束时30%几率解除一个队友的异常状态。",
       "desc_en": "Each turn, has a 30% chance to heal any major status condition from partners adjacent to a Pokémon with this ability.",
       "has_msg": false
     },
     "132": {
       "name": "Dragon's Maw",
       "name_zh": "龙颚",
+      "desc_zh": "队友受到的伤害减少1/4。",
       "desc_en": "Reduces by 25% damage that partners of a Pokémon with this ability receive.",
       "has_msg": false
     },
     "133": {
       "name": "Weak Armor",
       "name_zh": "碎裂铠甲",
+      "desc_zh": "受到物理技能攻击时，防御降低1级，速度提高1级。",
       "desc_en": "Lowers Defense of a Pokémon with this ability by one stage and raises its Speed by two stages when it is hit by a physical attack.",
       "has_msg": false
     },
     "134": {
       "name": "Heavy Metal",
       "name_zh": "重金属",
+      "desc_zh": "自身体重翻倍。",
       "desc_en": "Doubles the weight of a Pokémon with this ability.",
       "has_msg": false
     },
     "135": {
       "name": "Light Metal",
       "name_zh": "轻金属",
+      "desc_zh": "自身体重减半。",
       "desc_en": "Halves the weight of a Pokémon with this ability.",
       "has_msg": false
     },
     "136": {
       "name": "Multiscale",
       "name_zh": "多重鳞片",
+      "desc_zh": "满HP时受到的伤害减少1/2。",
       "desc_en": "Halves the damage taken from an attack by a Pokémon with this ability if it has max HP.",
       "has_msg": false
     },
     "137": {
       "name": "Toxic Boost",
       "name_zh": "中毒激升",
+      "desc_zh": "中毒时物理技能威力提高50%。",
       "desc_en": "Raises Attack of a Pokémon with this ability by 50% while it is Poisoned.",
       "has_msg": false
     },
     "138": {
       "name": "Flare Boost",
       "name_zh": "受热激升",
+      "desc_zh": "烧伤时特殊技能威力提高50%。",
       "desc_en": "Raises Special Attack of a Pokémon with this ability by 50% while it is Burned.",
       "has_msg": false
     },
     "139": {
       "name": "Harvest",
       "name_zh": "收获",
+      "desc_zh": "回合结束时50%的几率重新获得使用过的树果。",
       "desc_en": "Each turn, has a 50% chance to regenerate the Berry consumed by a Pokémon with this ability. Chance is 100% during Sunny Day.",
       "has_msg": true
     },
     "140": {
       "name": "Grim Neigh",
       "name_zh": "漆黑嘶鸣",
+      "desc_zh": "不会受到队友的技能伤害。",
       "desc_en": "Makes a Pokémon with this ability immune to damage from its partners.",
       "has_msg": false
     },
     "141": {
       "name": "Moody",
       "name_zh": "心情不定",
+      "desc_zh": "回合结束时攻击、防御、速度、特攻、特防、命中、回避之中随机一项能力提升2级，另一项降低1级。",
       "desc_en": "Each turn, raises one random stat of a Pokémon with this ability by two stages, and lowers a different random stat by one stage, including Evasion and Accuracy.",
       "has_msg": true
     },
     "142": {
       "name": "Overcoat",
       "name_zh": "防尘",
+      "desc_zh": "防尘特性的怪兽不会受到天气伤害。",
       "desc_en": "Prevents a Pokémon with this ability from taking damage from weather effects, and from being affected by Cotton Spore, Poison Powder, Powder, Rage Powder, Sleep Powder, Spore, Stun Spore, and Effect Spore.",
       "has_msg": true
     },
     "143": {
       "name": "Poison Touch",
       "name_zh": "毒手",
+      "desc_zh": "毒手特性的怪兽使用近身攻击技能时，有30%的几率令目标中毒。",
       "desc_en": "Has a 20% chance to Poison the target of a contact move used by a Pokémon with this ability.",
       "has_msg": false
     },
     "144": {
       "name": "Regenerator",
       "name_zh": "再生力",
+      "desc_zh": "被交换下场时回复1/3HP。",
       "desc_en": "Recovers up to 1/3 max HP of a Pokémon with this ability when it leaves the field.",
       "has_msg": true
     },
     "145": {
       "name": "Big Pecks",
       "name_zh": "健壮胸肌",
+      "desc_zh": "胸甲特性的怪兽防御能力等级不会被弱化。。",
       "desc_en": "Prevents a Pokémon with this ability from having its Defense lowered by the opponent.",
       "has_msg": false
     },
     "146": {
       "name": "Sand Rush",
       "name_zh": "拨沙",
+      "desc_zh": "不会受到沙暴伤害。沙暴天气中速度翻倍。",
       "desc_en": "Doubles the Speed of a Pokémon with this ability during Sandstorm.",
       "has_msg": false
     },
     "147": {
       "name": "Wonder Skin",
       "name_zh": "奇迹皮肤",
+      "desc_zh": "对奇迹皮肤特性的怪兽使用变化类技能时，命中率减半。",
       "desc_en": "Lowers the accuracy of any non-attacking move targetting a Pokémon with this ability to 50 if it is higher.",
       "has_msg": true
     },
     "148": {
       "name": "Analytic",
       "name_zh": "分析",
+      "desc_zh": "分析特性的怪兽在全场最后一个行动时，伤害提高30%。",
       "desc_en": "Boosts the power of all moves used by a Pokémon with this ability by 30% if it attacks after the opponent.",
       "has_msg": false
     },
     "149": {
       "name": "Illusion",
       "name_zh": "幻觉",
+      "desc_zh": "每次出场时，以队伍中最后一只不处于濒死状态的怪兽的外形出场、包括怪兽的样子、性别、怪兽球与名字。如果被复制外形的怪兽上场时能扬起尘土，幻影特性的怪兽上场后同样能扬起尘土。",
       "desc_en": "Makes a Pokémon with this ability copy the appearance of the last non-fainted Pokémon in its trainer's party. The effect fades away after the Pokémon is hit by a damaging move.",
       "has_msg": false
     },
     "150": {
       "name": "Imposter",
       "name_zh": "变身者",
+      "desc_zh": "上场后立即变成眼前的怪兽。",
       "desc_en": "Makes a Pokémon with this ability transform into the opponent as soon as it enters the field.",
       "has_msg": false
     },
     "151": {
       "name": "Infiltrator",
       "name_zh": "穿透",
+      "desc_zh": "攻击无视光之墙与反射盾。",
       "desc_en": "Allows a Pokémon with this ability to ignore the effects of the opponent's Reflect, Light Screen, Safeguard, Mist and Substitute when using a move.",
       "has_msg": false
     },
     "152": {
       "name": "Mummy",
       "name_zh": "木乃伊",
+      "desc_zh": "受到近身攻击时攻击方特性变为木乃伊。",
       "desc_en": "Changes the Ability of any Pokémon attacking with a contact move a Pokémon with this ability to Mummy until it leaves the field.",
       "has_msg": true
     },
@@ -928,66 +1081,77 @@
         "Chilling Neigh"
       ],
       "name_zh": "自信过度/苍白嘶鸣",
+      "desc_zh": "每击倒一只怪兽，攻击提升1级。",
       "desc_en": "Raises the Attack of a Pokémon with this ability by one stage every time it knocks out a Pokémon.",
       "has_msg": false
     },
     "154": {
       "name": "Justified",
       "name_zh": "正义之心",
+      "desc_zh": "受到恶系攻击后攻击提升1级。",
       "desc_en": "Raises the Attack of a Pokémon with this ability by one stage every time it is hit by a Dark attack.",
       "has_msg": true
     },
     "155": {
       "name": "Rattled",
       "name_zh": "胆怯",
+      "desc_zh": "颤抖特性的怪兽受到恶、鬼或虫系技能攻击时，速度提升1级。",
       "desc_en": "Raises the Speed of a Pokémon with this ability by one stage every time it is hit by a Bug, Ghost or Dark attack.",
       "has_msg": false
     },
     "156": {
       "name": "Magic Bounce",
       "name_zh": "魔法镜",
+      "desc_zh": "随时处于魔装反射状态。",
       "desc_en": "If an opponent targets a Pokémon with this ability with a status, stat altering, immunity removing, or hazard move, Defog, Roar, Whirlwind, or Spite, nullifies that move and instead makes the target use it on the original user.",
       "has_msg": false
     },
     "157": {
       "name": "Sap Sipper",
       "name_zh": "食草",
+      "desc_zh": "对食草特性的怪兽使用草系技能时，食草怪兽不会损失HP，同时攻击力提升1级。",
       "desc_en": "Grants a Pokémon with this ability immunity to all Grass moves and raises its Attack by one stage when hit by one.",
       "has_msg": false
     },
     "158": {
       "name": "Prankster",
       "name_zh": "恶作剧之心",
+      "desc_zh": "使用变化类技能的优先度+1。",
       "desc_en": "Raises priority of all non-attacking moves used by a Pokémon with this ability by 1, however, Dark-type Pokémon are now immune to opposing Pokémon's moves that gain priority due to this ability.",
       "has_msg": false
     },
     "159": {
       "name": "Sand Force",
       "name_zh": "沙之力",
+      "desc_zh": "不会受到沙暴伤害。沙暴天气中岩钢地属性技能伤害增加30%。",
       "desc_en": "Boosts the power of all Ground, Rock and Steel type attacks used by a Pokémon with this ability during Sandstorm.",
       "has_msg": false
     },
     "160": {
       "name": "Iron Barbs",
       "name_zh": "铁刺",
+      "desc_zh": "受到近身攻击时，攻击方损失HP最大值的1/8。",
       "desc_en": "Damages the opponent for 1/8 its max HP every time it uses a contact move on a Pokémon with this ability.",
       "has_msg": false
     },
     "161": {
       "name": "Zen Mode",
       "name_zh": "达摩模式",
+      "desc_zh": "回合结束时，若达摩狒狒的HP<=1/2，变为不倒翁模式；HP>1/2，变为普通模式。",
       "desc_en": "Changes Darmanitan into Zen Mode when it falls under 1/2 max HP.",
       "has_msg": true
     },
     "162": {
       "name": "Victory Star",
       "name_zh": "胜利之星",
+      "desc_zh": "己方场上所有怪兽的命中率提高10%。",
       "desc_en": "Raises accuracy of all moves used by a Pokémon with this ability and its partners by 10%.",
       "has_msg": false
     },
     "163": {
       "name": "AsOne",
       "name_zh": "人马一体",
+      "desc_zh": "拥有涡轮火花特性的怪兽使用技能时，无视防御方的特性。",
       "desc_en": "Prevents opponent abilities from hindering moves used by a Pokémon with this ability.",
       "has_msg": false
     },
@@ -998,66 +1162,77 @@
         "Turboblaze"
       ],
       "name_zh": "兆级电压/涡轮火焰",
+      "desc_zh": "拥有垓级电压特性的怪兽使用技能时，无视防御方的特性。",
       "desc_en": "Prevents opponent abilities from hindering moves used by a Pokémon with this ability.",
       "has_msg": false
     },
     "165": {
       "name": "Aerilate",
       "name_zh": "飞行皮肤",
+      "desc_zh": "使用普通技能变为飞行系，且技能威力提升30%。",
       "desc_en": "Changes all Normal-type moves used by a Pokémon with this Ability to Flying-type, and boosts their power by 20%.",
       "has_msg": false
     },
     "166": {
       "name": "Aura Break",
       "name_zh": "气场破坏",
+      "desc_zh": "使光环特性的效果反转。",
       "desc_en": "Makes Dark Aura and Fairy Aura reduce by 1/4 the power of their respective type as long as a Pokémon with this ability is on the field.",
       "has_msg": false
     },
     "167": {
       "name": "Cheek Pouch",
       "name_zh": "颊囊",
+      "desc_zh": "对战中食用树果会额外回复HP。",
       "desc_en": "Restores the HP of a Pokémon with this ability by 1/3 when it eats a Berry.",
       "has_msg": true
     },
     "168": {
       "name": "Dark Aura",
       "name_zh": "暗黑气场",
+      "desc_zh": "场上所有精灵的恶系技能威力提高。",
       "desc_en": "Boosts the power of all Dark-type moves used by any Pokémon on the field by 1/3.",
       "has_msg": false
     },
     "169": {
       "name": "Fairy Aura",
       "name_zh": "妖精气场",
+      "desc_zh": "场上所有精灵的妖精系技能威力提高。",
       "desc_en": "Boosts the power of all Fairy-type moves used by any Pokémon on the field by 1/3.",
       "has_msg": false
     },
     "170": {
       "name": "Flower Veil",
       "name_zh": "花幕",
+      "desc_zh": "己方场上草系精灵不会受到能力弱化。",
       "desc_en": "Prevents the stats of Grass-type partners of a Pokémon with this ability from being lowered by the opponent.",
       "has_msg": false
     },
     "171": {
       "name": "Fur Coat",
       "name_zh": "毛皮大衣",
+      "desc_zh": "受到物理技能的伤害减半。",
       "desc_en": "Halves the damage taken from physical moves by a Pokémon with this ability.",
       "has_msg": false
     },
     "172": {
       "name": "Mega Launcher",
       "name_zh": "超级发射器",
+      "desc_zh": "波动系技能的威力提高50%。",
       "desc_en": "Boosts the power of Aura Sphere, Dark Pulse, Dragon Pulse, Heal Pulse, Origin Pulse, and Water Pulse used by a Pokémon with this ability by 50%.",
       "has_msg": false
     },
     "173": {
       "name": "Parental Bond",
       "name_zh": "亲子爱",
+      "desc_zh": "作出一次额外攻击。",
       "desc_en": "Allows all attacking moves that strike a single target a single time used by a Pokémon with this ability to strike a second time with halved power.",
       "has_msg": false
     },
     "174": {
       "name": "Pixilate",
       "name_zh": "妖精皮肤",
+      "desc_zh": "使用普通技能变为妖精系，且技能威力提升30%。",
       "desc_en": "Changes all Normal-type moves used by a Pokémon with this Ability to Fairy-type, and boosts their power by 20%.",
       "has_msg": false
     },
@@ -1068,246 +1243,287 @@
         "Libero"
       ],
       "name_zh": "变幻自如/自由者",
+      "desc_zh": "使用技能前自身变为与技能相同的属性。",
       "desc_en": "Before a Pokémon with this ability uses any move, changes its type to match the move used.",
       "has_msg": false
     },
     "176": {
       "name": "Refrigerate",
       "name_zh": "冰冻皮肤",
+      "desc_zh": "使用普通技能变为冰系，且技能威力提升30%。",
       "desc_en": "Changes all Normal-type moves used by a Pokémon with this Ability to Ice-type, and boosts their power by 20%.",
       "has_msg": false
     },
     "177": {
       "name": "Stance Change",
       "name_zh": "战斗切换",
+      "desc_zh": "使用攻击技时变为剑形态，使用王者之盾时变为盾形态。",
       "desc_en": "Changes Aegislash into Blade Forme when it uses any offensive move, and changes Aegislash into Shield Forme when it uses King's Shield.",
       "has_msg": false
     },
     "178": {
       "name": "Strong Jaw",
       "name_zh": "强壮之颚",
+      "desc_zh": "用牙使用的技能威力提高。",
       "desc_en": "Boosts the power of Bite, Crunch, Fire Fang, Hyper Fang, Ice Fang, Poison Fang and Thunder Fang used by a Pokémon with this ability by 50%.",
       "has_msg": false
     },
     "179": {
       "name": "Sweet Veil",
       "name_zh": "甜幕",
+      "desc_zh": "防止己方精灵进入睡眠状态。",
       "desc_en": "Prevents any Pokémon on the side of a Pokémon with this ability from falling asleep.",
       "has_msg": false
     },
     "180": {
       "name": "Tough Claws",
       "name_zh": "硬爪",
+      "desc_zh": "接触攻击的威力提高。",
       "desc_en": "Boosts the power of contact moves used by a Pokémon with this ability by 1/3.",
       "has_msg": false
     },
     "181": {
       "name": "Competitive",
       "name_zh": "好胜",
+      "desc_zh": "能力降低时特攻大幅提高。",
       "desc_en": "Raises the Special Attack of a Pokémon with this ability by 2 stages every time the enemy lowers any of its stats.",
       "has_msg": false
     },
     "182": {
       "name": "Gale Wings",
       "name_zh": "疾风之翼",
+      "desc_zh": "飞行系技能必定先制。",
       "desc_en": "Raises priority of all Flying-type moves used by a Pokémon with this ability by 1 when the user is at Max HP.",
       "has_msg": false
     },
     "183": {
       "name": "Gooey",
       "name_zh": "黏滑",
+      "desc_zh": "受到接触攻击时降低攻击方速度。",
       "desc_en": "Lowers the Speed of the opponent every time it uses a contact move on a Pokémon with this ability.",
       "has_msg": true
     },
     "184": {
       "name": "Aroma Veil",
       "name_zh": "芳香幕",
+      "desc_zh": "己方所有精灵不会受到精神系技能影响。",
       "desc_en": "Prevents any Pokémon on the side of a Pokémon with this ability from being infatuated, or being under the effect of Disable, Encore, Heal Block, Taunt, and Torment.",
       "has_msg": false
     },
     "185": {
       "name": "Bulletproof",
       "name_zh": "防弹",
+      "desc_zh": "无视弹与爆弹系技能。",
       "desc_en": "Makes a Pokémon with this ability immune to Acid Spray, Aura Sphere, Barrage, Bullet Seed, Egg Bomb, Electro Ball, Energy Ball, Focus Blast, Gyro Ball, Ice Ball, Magnet Bomb, Mist Ball, Mud Bomb, Octazooka, Rock Wrecker, Searing Shot, Seed Bomb, Shadow Ball, Sludge Bomb, Weather Ball, and Zap Cannon.",
       "has_msg": true
     },
     "186": {
       "name": "Grass Pelt",
       "name_zh": "草之毛皮",
+      "desc_zh": "在绿草场地上时防御提高。",
       "desc_en": "Raises the Defense of a Pokémon with this ability by 50% while Grassy Terrain is in effect.",
       "has_msg": false
     },
     "187": {
       "name": "Magician",
       "name_zh": "魔术师",
+      "desc_zh": "攻击目标时获得目标道具。",
       "desc_en": "When a Pokémon with this ability uses an attacking move and it is holding no item, steals the opponent's held item.",
       "has_msg": false
     },
     "188": {
       "name": "Symbiosis",
       "name_zh": "共生",
+      "desc_zh": "能将道具转交给队友。",
       "desc_en": "When a partner of a Pokémon with this ability consumes an item in battle, transfers the item held by the Pokémon with this ability to it.",
       "has_msg": false
     },
     "189": {
       "name": "Desolate Land",
       "name_zh": "终结之地",
+      "desc_zh": "天气变为阳光非常猛烈直到该精灵退场、特性被覆盖或无效化；火系攻击威力增加50%，场上所有水属性的攻击招式无效；招式祈雨、放晴、沙暴、冰雹使用失败；特性降雨、干旱、起沙、冰雹不会发动。",
       "desc_en": "Summons the extremely harsh sunlight weather condition for as long as a Pokémon with this ability stays on the field. Boosts the power of Fire moves by 50%, and causes Water moves to fail. Prevents the weather from being changed by Rain Dance, Sunny Day, Sandstorm, Hail, Drizzle, Drought, Sand Stream, or Snow Warning. Makes all Pokémon immune to being frozen.",
       "has_msg": true
     },
     "190": {
       "name": "Primordial Sea",
       "name_zh": "始源之海",
+      "desc_zh": "天气变为下大雨直到该精灵退场、特性被覆盖或无效化；水系攻击威力增加50%，场上所有火属性的攻击招式无效；招式祈雨、放晴、沙暴、冰雹使用失败；特性降雨、干旱、起沙、冰雹不会发动。",
       "desc_en": "Summons the heavy rain weather condition for as long as a Pokémon with this ability stays on the field. Boosts the power of Water moves by 50%, and causes Fire moves to fail. Prevents the weather from being changed by Rain Dance, Sunny Day, Sandstorm, Hail, Drizzle, Drought, Sand Stream, or Snow Warning.",
       "has_msg": true
     },
     "191": {
       "name": "Delta Stream",
       "name_zh": "德尔塔气流",
+      "desc_zh": "天气变为乱气流直到该精灵退场、特性被覆盖或无效化；乱气流下，所有飞属性的宝可梦受到对飞属性效果拔群的招式伤害减半招式祈雨、放晴、沙暴、冰雹使用失败；特性降雨、干旱、起沙、冰雹不会发动。",
       "desc_en": "Summons the strong winds weather condition for as long as a Pokémon with this ability stays on the field. Causes moves of a type that is normally super-effective against Flying to only deal normal damage against Flying. Prevents the weather from being changed by Rain Dance, Sunny Day, Sandstorm, Hail, Drizzle, Drought, Sand Stream, or Snow Warning.",
       "has_msg": true
     },
     "192": {
       "name": "Full Metal Body",
       "name_zh": "金属防护",
+      "desc_zh": "其能力不会受对手的招式和特性影响而下降。",
       "desc_en": "Prevents the stats of a Pokémon with this ability from being lowered by the opponent. Cannot be ignored by Mold Breaker, Teravolt, Turboblaze, Moongeist Beam, Sunsteel Strike, or Core Enforcer.",
       "has_msg": false
     },
     "193": {
       "name": "Shadow Shield",
       "name_zh": "幻影防守",
+      "desc_zh": "HP全满时受到的伤害会减少。",
       "desc_en": "Reduces the damage taken from an attack by a Pokémon with this ability if it has max HP. Cannot be ignored by Mold Breaker, Teravolt, Turboblaze, Moongeist Beam, Sunsteel Strike, or Core Enforcer.",
       "has_msg": false
     },
     "194": {
       "name": "Comatose",
       "name_zh": "绝对睡眠",
+      "desc_zh": "不会陷入除睡眠以外的异常状态。",
       "desc_en": "Prevents a Pokémon with this ability from becoming afflicted with a status condition other than Sleep.",
       "has_msg": false
     },
     "195": {
       "name": "Power Construct",
       "name_zh": "群聚变形",
+      "desc_zh": "在对战中自己的HP降到一半以下时，会变为「基格尔德・完全体形态」。",
       "desc_en": "Changes Zygarde 10% or Zygarde 50% into Zygarde Complete when it falls under 1/2 max HP.",
       "has_msg": false
     },
     "196": {
       "name": "Soul-Heart",
       "name_zh": "魂心",
+      "desc_zh": "提升特攻威力。",
       "desc_en": "Raises the Special Attack of a Pokémon with this ability by one stage every time a Pokémon on the field is knocked out.",
       "has_msg": true
     },
     "197": {
       "name": "Stakeout",
       "name_zh": "蹲守",
+      "desc_zh": "对于替换出场的宝可梦，可以给予其2倍的招式伤害。",
       "desc_en": "Boosts the power of all moves used by a Pokémon with this ability if it attacks an opponent that switched in or entered the field mid-battle.",
       "has_msg": false
     },
     "198": {
       "name": "Electric Surge",
       "name_zh": "电气制造者",
+      "desc_zh": "出场时出现电气场地状态。",
       "desc_en": "Summons Electric Terrain for 5 turns when a Pokémon with this ability enters the field.",
       "has_msg": true
     },
     "199": {
       "name": "Dazzling",
       "name_zh": "鲜艳之躯",
+      "desc_zh": "对手会变得无法使出先制招式。",
       "desc_en": "Prevents opposing Pokémon from using moves with increased priority.",
       "has_msg": false
     },
     "200": {
       "name": "Berserk",
       "name_zh": "怒火冲天",
+      "desc_zh": "HP低至总HP的一半或以下时，特攻提升。",
       "desc_en": "Raises the Special Attack of a Pokémon with this ability by one stage when it drops below 1/2 max HP.",
       "has_msg": false
     },
     "201": {
       "name": "Battery",
       "name_zh": "蓄电池",
+      "desc_zh": "增加同伴特殊招式的威力。",
       "desc_en": "Boosts the power of allies' special moves.",
       "has_msg": false
     },
     "202": {
       "name": "Corrosion",
       "name_zh": "腐蚀",
+      "desc_zh": "可以令所有属性的宝可梦陷入中毒状态。",
       "desc_en": "Enables a Pokémon with this ability to poison Steel-type and Poison-type Pokémon.",
       "has_msg": false
     },
     "203": {
       "name": "Disguise",
       "name_zh": "画皮",
+      "desc_zh": "可抵挡１次敌人攻击所给予的伤害，并改变样子。",
       "desc_en": "Once only, blocks a damaging attack and nullifies its effects.",
       "has_msg": true
     },
     "204": {
       "name": "Fluffy",
       "name_zh": "毛茸茸",
+      "desc_zh": "所受到的直接攻击伤害会减半，但火属性招式的伤害会倍增。",
       "desc_en": "Halves the damage taken from physical moves by a Pokémon with this ability but doubles damage taken from Fire-type attacks.",
       "has_msg": false
     },
     "205": {
       "name": "Stamina",
       "name_zh": "持久力",
+      "desc_zh": "受到伤害后防御会提高1个等级。",
       "desc_en": "Raises Defense of a Pokémon with this ability by one stage when it is hit by an attack.",
       "has_msg": false
     },
     "206": {
       "name": "Triage",
       "name_zh": "先行治疗",
+      "desc_zh": "可以抢先使出回复招式。",
       "desc_en": "Raises the priority of HP-restoring moves used by a Pokémon with this ability to the highest level.",
       "has_msg": false
     },
     "207": {
       "name": "Wimp Out",
       "name_zh": "跃跃欲逃",
+      "desc_zh": "当HP变为一半时便会逃走或进行替换。",
       "desc_en": "Switches out Pokémon with this ability when it drops below 1/2 max HP.",
       "has_msg": false
     },
     "208": {
       "name": "Dancer",
       "name_zh": "舞者",
+      "desc_zh": "如果场上有宝可梦使出跳舞招式，拥有该特性的宝可梦也能接着使出该相同招式。",
       "desc_en": "When another Pokémon uses Dragon Dance, Quiver Dance, Swords Dance, or Teeter Dance, the Pokémon with this ability will immediately use that move as well.",
       "has_msg": false
     },
     "209": {
       "name": "Shields Down",
       "name_zh": "界限盾壳",
+      "desc_zh": "ＨＰ变为一半时，壳会坏掉，变得有攻击性。",
       "desc_en": "Protects from status conditions. Boosts Minior's attacks but lowers defenses and loses immunity from status conditions when it falls under 1/2 max HP.",
       "has_msg": true
     },
     "210": {
       "name": "Innards Out",
       "name_zh": "飞出的内在物",
+      "desc_zh": "在受到最后一击后给对手造成伤害。",
       "desc_en": "When a Pokémon with this Ability faints, it deals damage to its opponent equal to the amount of HP it had left before last being hit.",
       "has_msg": true
     },
     "211": {
       "name": "Schooling",
       "name_zh": "鱼群",
+      "desc_zh": "当达到一定以上的等级时，便能够在对战时变为鱼群的样子。",
       "desc_en": "Changes Wishiwashi to School Forme when it has over 1/4 max hp.",
       "has_msg": true
     },
     "212": {
       "name": "Surge Surfer",
       "name_zh": "冲浪之尾",
+      "desc_zh": "当处于电气场地时，速度便会倍增。",
       "desc_en": "Doubles the Speed of a Pokémon with this ability during Electric Terrain.",
       "has_msg": false
     },
     "213": {
       "name": "Water Compaction",
       "name_zh": "遇水凝固",
+      "desc_zh": "受到水属性的招式攻击时，防御会提升2个等级。",
       "desc_en": "When a Pokémon with Water Compaction is hit by a Water-type move, its Defense rises by two stages.",
       "has_msg": false
     },
     "214": {
       "name": "Queenly Majesty",
       "name_zh": "女王的威严",
+      "desc_zh": "对手会变得无法使出先制招式。",
       "desc_en": "Prevents opposing Pokémon from using moves with increased priority.",
       "has_msg": false
     },
     "215": {
       "name": "Battle Bond",
       "name_zh": "牵绊变身",
+      "desc_zh": "把对手的宝可梦击倒后便会变化样子。",
       "desc_en": "Transforms Greninja into Ash-Greninja and boosts the power of Water Shuriken when it defeats an opposing Pokémon in battle.",
       "has_msg": false
     },
@@ -1318,240 +1534,280 @@
         "Ball Fetch"
       ],
       "name_zh": "接球手",
+      "desc_zh": "同伴在对战中倒下后，拥有该特性的宝可梦会承继该同伴的特性。",
       "desc_en": "Copies the ability of a defeated partner Pokémon.",
       "has_msg": false
     },
     "217": {
       "name": "RKS System",
       "name_zh": "ＡＲ系统",
+      "desc_zh": "携带对应各属性的道具，借此改变属性。",
       "desc_en": "Changes the type of a Pokémon with this ability to match the Memory it holds.",
       "has_msg": false
     },
     "218": {
       "name": "Psychic Surge",
       "name_zh": "精神制造者",
+      "desc_zh": "出场时出现精神场地状态。",
       "desc_en": "Summons Psychic Terrain for 5 turns when a Pokémon with this ability enters the field.",
       "has_msg": true
     },
     "219": {
       "name": "Grassy Surge",
       "name_zh": "青草制造者",
+      "desc_zh": "出场时出现青草场地状态。",
       "desc_en": "Summons Grassy Terrain for 5 turns when a Pokémon with this ability enters the field.",
       "has_msg": true
     },
     "220": {
       "name": "Misty Surge",
       "name_zh": "薄雾制造者",
+      "desc_zh": "出场时出现薄雾场地状态。",
       "desc_en": "Summons Misty Terrain for 5 turns when a Pokémon with this ability enters the field.",
       "has_msg": true
     },
     "221": {
       "name": "Slush Rush",
       "name_zh": "拨雪",
+      "desc_zh": "冰雹天气时，速度能力变为原来的两倍。",
       "desc_en": "Doubles the Speed of a Pokémon with this ability in Hail.",
       "has_msg": false
     },
     "222": {
       "name": "Emergency Exit",
       "name_zh": "危险回避",
+      "desc_zh": "当HP变为一半时便会逃走或进行替换。",
       "desc_en": "Switches out Pokémon with this ability when it drops below 1/2 max HP.",
       "has_msg": false
     },
     "223": {
       "name": "Merciless",
       "name_zh": "不仁不义",
+      "desc_zh": "攻击中毒状态的对手时，必定会击中要害。",
       "desc_en": "All attacks used on a poisoned Pokémon become Critical Hits.",
       "has_msg": false
     },
     "224": {
       "name": "Water Bubble",
       "name_zh": "水泡",
+      "desc_zh": "降低与自己相对的火属性招式的威力，不会灼伤。",
       "desc_en": "Halves the damage a Pokémon with this ability receives from Fire moves and prevents the Pokémon from being Burned.",
       "has_msg": false
     },
     "225": {
       "name": "Steelworker",
       "name_zh": "钢能力者",
+      "desc_zh": "钢属性的招式威力会提高。",
       "desc_en": "Increases the damage of Steel-type moves by 50%.",
       "has_msg": false
     },
     "226": {
       "name": "Long Reach",
       "name_zh": "远隔",
+      "desc_zh": "可以不接触对手就使出所有的招式。",
       "desc_en": "All moves used by a Pokémon with this ability do not make contact.",
       "has_msg": false
     },
     "227": {
       "name": "Liquid Voice",
       "name_zh": "湿润之声",
+      "desc_zh": "所有的声音招式都变为水属性。",
       "desc_en": "All sound-based moves used by a Pokémon with this ability become Water-type moves.",
       "has_msg": false
     },
     "228": {
       "name": "Galvanize",
       "name_zh": "电气皮肤",
+      "desc_zh": "自己使用的一般属性招式会变成电属性，且威力变为1.3倍。",
       "desc_en": "Changes all Normal-type moves used by a Pokémon with this Ability to Electric-type, and boosts their power by 20%.",
       "has_msg": false
     },
     "229": {
       "name": "Tangling Hair",
       "name_zh": "卷发",
+      "desc_zh": "持有“卷发”的宝可梦便会把用直接攻击招式击中自己的对手宝可梦的速度降低1个等级。",
       "desc_en": "Lowers the Speed of the opponent every time it uses a contact move on a Pokémon with this ability.",
       "has_msg": false
     },
     "230": {
       "name": "Power of Alchemy",
       "name_zh": "化学之力",
+      "desc_zh": "同伴在对战中倒下后，拥有该特性的宝可梦会承继该同伴的特性。",
       "desc_en": "Copies the ability of a defeated partner Pokémon.",
       "has_msg": false
     },
     "231": {
       "name": "Beast Boost",
       "name_zh": "异兽提升",
+      "desc_zh": "打倒对手的时候，会提高自己最高的那项能力。",
       "desc_en": "Raises the currently highest stat (Attack, Defense, Special Attack, Special Defense, or Speed) of a Pokémon with this ability by one stage every time it knocks out a Pokémon.",
       "has_msg": false
     },
     "232": {
       "name": "Prism Armor",
       "name_zh": "棱镜装甲",
+      "desc_zh": "受到效果绝佳的攻击时，可以减弱其威力。",
       "desc_en": "Lowers the damage a Pokémon with this ability takes from super-effective attacks by 25%. Cannot be ignored by Mold Breaker, Teravolt, Turboblaze, Moongeist Beam, Sunsteel Strike, or Core Enforcer.",
       "has_msg": false
     },
     "233": {
       "name": "Neuroforce",
       "name_zh": "脑核之力",
+      "desc_zh": "效果绝佳的攻击，威力会变得更强。",
       "desc_en": "This Pokemon's attacks that are super effective against the target do 1.25x damage.",
       "has_msg": false
     },
     "234": {
       "name": "IntrepidSword",
       "name_zh": "不挠之剑",
+      "desc_zh": "出场时，攻击会提高。",
       "desc_en": "On switch-in, this Pokemon's Attack is raised by 1 stage.",
       "has_msg": true
     },
     "235": {
       "name": "DauntlessShield",
       "name_zh": "不屈之盾",
+      "desc_zh": "出场时，防御会提高。",
       "desc_en": "On switch-in, this Pokemon's Defense is raised by 1 stage.",
       "has_msg": false
     },
     "236": {
       "name": "NeutralizingGas",
       "name_zh": "化学变化气体",
+      "desc_zh": "特性为化学变化气体的宝可梦在场时，场上所有宝可梦的特性效果都会消失或者无法生效。",
       "desc_en": "If the Pokémon with Neutralizing Gas is in the battle, the effects of all Pokémon's Abilities will be nullified or will not be triggered.",
       "has_msg": false
     },
     "237": {
       "name": "HungerSwitch",
       "name_zh": "饱了又饿",
+      "desc_zh": "每回合结束时会在满腹花纹与空腹花纹之间交替改变样子。",
       "desc_en": "The Pokémon changes its form, alternating between its Full Belly Mode and Hangry Mode after the end of each turn.",
       "has_msg": false
     },
     "238": {
       "name": "Cotton Down",
       "name_zh": "棉絮",
+      "desc_zh": "受到攻击后撒下棉絮，降低除自己以外的所有宝可梦的速度。",
       "desc_en": "When the Pokémon is hit by an attack, it scatters cotton fluff around and lowers the Speed stat of all Pokémon except itself.",
       "has_msg": true
     },
     "239": {
       "name": "Propeller Tail",
       "name_zh": "螺旋尾鳍",
+      "desc_zh": "能无视具有吸引对手招式效果的特性或招式的影响。",
       "desc_en": "Ignores the effects of opposing Pokémon's moves/Abilities that redirect move targets.",
       "has_msg": false
     },
     "240": {
       "name": "Mirror Armor",
       "name_zh": "镜甲",
+      "desc_zh": "只反弹自己受到的能力降低效果。",
       "desc_en": "Bounces back only the stat-lowering effects that the Pokémon receives.",
       "has_msg": true
     },
     "241": {
       "name": "Gulp Missile",
       "name_zh": "一口导弹",
+      "desc_zh": "冲浪或潜水时会叼来猎物。受到伤害时，会吐出猎物进行攻击。",
       "desc_en": "If this Pokemon is a Cramorant, it changes forme when it hits a target with Surf or uses the first turn of Dive successfully. It becomes Gulping Form with an Arrokuda in its mouth if it has more than 1/2 of its maximum HP remaining, or Gorging Form with a Pikachu in its mouth if it has 1/2 or less of its maximum HP remaining. If Cramorant gets hit in Gulping or Gorging Form, it spits the Arrokuda or Pikachu at its attacker, even if it has no HP remaining. The projectile deals damage equal to 1/4 of the target's maximum HP, rounded down; this damage is blocked by the Magic Guard Ability but not by a substitute. An Arrokuda also lowers the target's Defense by 1 stage, and a Pikachu paralyzes the target. Cramorant will return to normal if it spits out a projectile, switches out, or Dynamaxes.",
       "has_msg": true
     },
     "242": {
       "name": "Stalwart",
       "name_zh": "坚毅",
+      "desc_zh": "能无视具有吸引对手招式效果的特性或招式的影响。",
       "desc_en": "Ignores the effects of opposing Pokémon's Abilities and moves that draw in moves.",
       "has_msg": false
     },
     "243": {
       "name": "Steam Engine",
       "name_zh": "蒸汽机",
+      "desc_zh": "受到水属性或火属性的招式攻击时，速度会巨幅提高。",
       "desc_en": "This Pokemon's Speed is raised by 6 stages after it is damaged by Fire/Water moves.",
       "has_msg": true
     },
     "244": {
       "name": "Punk Rock",
       "name_zh": "庞克摇滚",
+      "desc_zh": "声音招式的威力会提高。受到的声音招式伤害会减半。",
       "desc_en": "Boosts the power of sound-based moves. The Pokémon also takes half the damage from these kinds of moves.",
       "has_msg": false
     },
     "245": {
       "name": "Sand Spit",
       "name_zh": "吐沙",
+      "desc_zh": "受到攻击时，会刮起沙暴。",
       "desc_en": "The Pokémon creates a sandstorm when it's hit by an attack.",
       "has_msg": true
     },
     "246": {
       "name": "Ice Scales",
       "name_zh": "冰鳞粉",
+      "desc_zh": "由于有冰鳞粉的守护，受到的特殊攻击伤害会减半。",
       "desc_en": "This Pokemon receives 1/2 damage from special moves.",
       "has_msg": false
     },
     "247": {
       "name": "Ripen",
       "name_zh": "熟成",
+      "desc_zh": "使树果成熟，效果变为２倍。",
       "desc_en": "Ripens Berries and doubles their effect.",
       "has_msg": false
     },
     "248": {
       "name": "Ice Face",
       "name_zh": "结冻头",
+      "desc_zh": "头部的冰会代替自己承受物理攻击，但是样子会改变。下冰雹时，冰会恢复原状。",
       "desc_en": "If this Pokemon is a Eiscue, the first physical hit it takes will deal 0 damage. Its ice head is then broken, it changes to Noice Form. The ice will be restored when hail is summoned or when the Pokemon is switched in while hail is active.",
       "has_msg": true
     },
     "249": {
       "name": "Power Spot",
       "name_zh": "能量点",
+      "desc_zh": "只要处在相邻位置，招式的威力就会提高。",
       "desc_en": "This Pokemon's allies have the base power of their moves multiplied by 1.3.",
       "has_msg": false
     },
     "250": {
       "name": "Mimicry",
       "name_zh": "拟态",
+      "desc_zh": "宝可梦的属性会根据场地的状态而变化。",
       "desc_en": "Changes the Pokémon's type depending on the terrain.",
       "has_msg": true
     },
     "251": {
       "name": "Screen Cleaner",
       "name_zh": "除障",
+      "desc_zh": "出场时，敌方和我方的光墙、反射壁和极光幕的效果会消失。",
       "desc_en": "On switch-in, this Pokémon ends the effects of Reflect, Light Screen, and Aurora Veil for both the user's and the opposing side.",
       "has_msg": true
     },
     "252": {
       "name": "Steely Spirit",
       "name_zh": "钢之意志",
+      "desc_zh": "我方的钢属性攻击威力会提高。",
       "desc_en": "This Pokemon and its allies' Steel-type moves have their BP mutiplied by 1.5.",
       "has_msg": false
     },
     "253": {
       "name": "Perish Body",
       "name_zh": "灭亡之躯",
+      "desc_zh": "受到接触类招式攻击时，双方都会在３回合后变为濒死状态。替换后效果消失。",
       "desc_en": "When hit by a move that makes direct contact, the Pokémon and the attacker will faint after three turns unless they switch out of battle.",
       "has_msg": true
     },
     "254": {
       "name": "Wandering Spirit",
       "name_zh": "游魂",
+      "desc_zh": "与使用接触类招式攻击自己的宝可梦互换特性。",
       "desc_en": "The Pokémon exchanges Abilities with a Pokémon that hits it with a move that makes direct contact.",
       "has_msg": true
     },
     "255": {
       "name": "Gorilla Tactics",
       "name_zh": "一猩一意",
+      "desc_zh": "虽然攻击会提高，但是只能使出一开始所选的招式。",
       "desc_en": "Boosts the Pokémon's Attack stat but only allows the use of the first selected move.",
       "has_msg": false
     }

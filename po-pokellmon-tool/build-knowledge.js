@@ -250,8 +250,9 @@ function buildAbilities() {
         if (byNum[num]) byNum[num].name_zh = name;
     }
 
-    // 中文描述（ability_desc.txt）：num 描述
-    const descZhLines = readText(path.join(DATA, 'abilities', 'ability_desc.txt')).split('\n');
+    // 中文描述（ability_desc.txt）：num 描述（该文件为 UTF-16 LE 编码）
+    const descZhRaw = fs.readFileSync(path.join(DATA, 'abilities', 'ability_desc.txt'), 'utf16le').replace(/^\uFEFF/, '');
+    const descZhLines = descZhRaw.split('\n');
     for (const line of descZhLines) {
         const t = line.trim();
         if (!t) continue;
