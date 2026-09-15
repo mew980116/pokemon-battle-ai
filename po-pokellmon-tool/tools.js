@@ -953,7 +953,24 @@ function getAbilityInfo(args) {
     if (/^\d+$/.test(lname) && ABILITIES.byNum[lname]) num = lname;
     if (!num) num = ABILITIES.byName[lname];
     if (!num) num = ABILITIES.byName[String(name).trim()];
-    if (!num) return { error: 'unknown ability: ' + name };
+    if (!num) {
+        var del = null;
+        if (ABILITIES.deleted) {
+            var raw = String(name).trim();
+            if (ABILITIES.deleted[lname]) del = ABILITIES.deleted[lname];
+            else if (ABILITIES.deleted[raw]) del = ABILITIES.deleted[raw];
+            else {
+                for (var k in ABILITIES.deleted) {
+                    var d = ABILITIES.deleted[k];
+                    if (d.name_zh === raw || d.name.toLowerCase() === lname) { del = d; break; }
+                }
+            }
+        }
+        if (del) {
+            return { num: null, name: del.name, name_zh: del.name_zh, desc: del.desc, merged: null, signal: null, deleted: true, note: del.note };
+        }
+        return { error: 'unknown ability: ' + name };
+    }
 
     var a = ABILITIES.byNum[num];
     return {

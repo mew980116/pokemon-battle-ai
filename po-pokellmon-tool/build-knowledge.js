@@ -253,6 +253,15 @@ function buildAbilities() {
     // 中文描述（ability_desc.txt）：num 描述（该文件为 UTF-16 LE 编码）
     const descZhRaw = fs.readFileSync(path.join(DATA, 'abilities', 'ability_desc.txt'), 'utf16le').replace(/^\uFEFF/, '');
     const descZhLines = descZhRaw.split('\n');
+    // 覆盖 PO desc 错位（Gen8 删特性导致编号错位，历史遗留没改；按官方/PS/神奇宝贝百科修正）
+    const DESC_OVERRIDE = {
+        35: '有时能比对手先出手（30% 概率先制）。',
+        50: '接触类招式能无视守住/看穿。',
+        118: '出场时，我方的能力变化会复原。',
+        131: '电属性招式威力提高 30%。',
+        132: '龙属性招式威力提高 30%。',
+        163: '对手不能吃树果；击倒对手后攻击或特攻升（视合体形态）。'
+    };
     // 手工补充的机制 tips（PO 数据缺失的机制细节）
     const DESC_TIPS = {
         26: '（提示：该特性使宝可梦被视为不接触地面 grounded=false——不吃青草场地回复、不受电气场地影响、免疫撒菱/毒菱/黏黏网）'
@@ -264,7 +273,7 @@ function buildAbilities() {
         if (idx < 0) continue;
         const num = parseInt(t.substring(0, idx), 10);
         const desc = t.substring(idx + 1).trim();
-        if (byNum[num]) byNum[num].desc_zh = desc + (DESC_TIPS[num] || '');
+        if (byNum[num]) byNum[num].desc_zh = DESC_OVERRIDE[num] || (desc + (DESC_TIPS[num] || ''));
     }
 
     // 英文描述（ability_battledesc.txt）：num 描述
@@ -301,7 +310,16 @@ function buildAbilities() {
         }
     }
 
-    return { byNum, byName };
+    // 被 PO 删除的特性（Gen8 单打无效果，历史遗留；按官方/PS 补回，供 get_ability_info 查到）
+    const DELETED = {
+        'illuminate': { name: 'Illuminate', name_zh: '发光', desc: '野生遇敌率翻倍（对战无效果）。', note: 'PO 已删（单打无效果）' },
+        'run away': { name: 'Run Away', name_zh: '逃足', desc: '能从野生战斗逃跑（对战无效果）。', note: 'PO 已删（单打无效果）' },
+        'honey gather': { name: 'Honey Gather', name_zh: '集蜜', desc: '战斗后可能拾取蜂蜜（对战无效果）。', note: 'PO 已删（单打无效果）' },
+        'healer': { name: 'Healer', name_zh: '治愈之心', desc: '双打中 30% 几率治愈队友异常状态。', note: 'PO 已删（单打无效果）' },
+        'friend guard': { name: 'Friend Guard', name_zh: '友情守护', desc: '双打中队友受到的伤害减少 1/4。', note: 'PO 已删（单打无效果）' }
+    };
+
+    return { byNum, byName, deleted: DELETED };
 }
 
 function main() {

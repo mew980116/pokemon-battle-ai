@@ -1,257 +1,1277 @@
 {
-  "22": { "trigger": "入场", "msg": "X intimidates Y!", "note": "有专门消息" },
-  "9": { "trigger": "被接触攻击", "msg": "（状态消息：攻击方 is paralyzed!）", "note": "看状态消息" },
-  "49": { "trigger": "被接触攻击", "msg": "（状态消息：攻击方 is burned!）", "note": "看状态消息" },
-  "24": { "trigger": "被接触攻击", "msg": "X's Rough Skin hurts Y（%a hurts）", "note": "看反伤" },
-  "160": { "trigger": "被接触攻击", "msg": "X's Iron Barbs hurts Y", "note": "看反伤" },
-  "27": { "trigger": "被接触攻击", "msg": "X's Effect Spore activates!", "note": "有专门消息" },
-  "26": { "trigger": "持续被动", "msg": "", "note": "无消息；参考 desc（地面无效 + 不接触地面）判断" },
-  "18": { "trigger": "被火系攻击", "msg": "X's Flash Fire raised the power of its Fire-type moves!", "note": "有专门消息" },
-  "10": { "trigger": "被电系攻击", "msg": "X's Volt Absorb absorbs the attack（%a absorbs）", "note": "有专门消息" },
-  "11": { "trigger": "被水系攻击", "msg": "X's Water Absorb absorbs the attack", "note": "有专门消息" },
-  "43": { "trigger": "被声音招式", "msg": "X's Soundproof blocks the attack!", "note": "有专门消息" },
-  "29": { "trigger": "持续被动", "msg": "", "note": "待定：阻止能力下降可能有提示；无则参考 desc 判断" },
-  "7": { "trigger": "持续被动", "msg": "", "note": "待定：阻止麻痹可能有提示；无则参考 desc 判断" },
-  "15": { "trigger": "持续被动", "msg": "", "note": "待定：阻止睡眠可能有提示；无则参考 desc 判断" },
-  "17": { "trigger": "持续被动", "msg": "", "note": "PO合并（Immunity/Pastel Veil）；待定：阻止中毒可能有提示；无则参考 desc 判断" },
-  "5": { "trigger": "满血被致命伤", "msg": "X held on thanks to Sturdy!", "note": "有专门消息；一击必杀无效（见 desc）" },
-  "25": { "trigger": "被攻击", "msg": "", "note": "待定：非克制可能直接 no effect；参考 desc 判断" },
-  "136": { "trigger": "满血被攻击", "msg": "", "note": "无消息；看伤害减半（参考 desc）" },
-  "98": { "trigger": "持续被动", "msg": "", "note": "无消息；看非攻击伤害没发生（参考 desc）" },
-  "47": { "trigger": "被火/冰系攻击", "msg": "", "note": "无消息；看伤害减半（参考 desc）" },
-  "48": { "trigger": "持续被动", "msg": "", "note": "无消息；看睡眠回合减半（参考 desc）" },
-  "157": { "trigger": "被草系招式", "msg": "X's Sap Sipper raised its attack（%a raised）", "note": "有专门消息" },
-  "156": { "trigger": "被变化招式", "msg": "X's Magic Bounce bounced back（%a bounced）", "note": "有专门消息" },
-  "109": { "trigger": "持续被动", "msg": "", "note": "无消息；参考 desc（无视对手强化）判断" },
-  "151": { "trigger": "主动出招", "msg": "", "note": "无消息；看穿替身/光墙命中（参考 desc）" },
-  "144": { "trigger": "下场时", "msg": "", "note": "无消息；看下场后 HP 变化（参考 desc）" },
-  "30": { "trigger": "下场时", "msg": "", "note": "无消息；看再上场异常解除（参考 desc）" },
-  "87": { "trigger": "被水系攻击/雨天", "msg": "X restored HP using its Dry Skin!", "note": "有专门消息" },
-  "44": { "trigger": "回合末(雨天)", "msg": "X's Rain Dish heals it（%a heals）", "note": "有专门消息" },
-  "37": { "trigger": "持续被动", "msg": "", "note": "无消息；看物理伤害异常高（参考 desc）" },
-  "74": { "trigger": "持续被动", "msg": "", "note": "无消息；看物理伤害异常高（参考 desc）" },
-  "94": { "trigger": "回合末(晴天)", "msg": "X lost some HP because of Solar Power!", "note": "有专门消息" },
-  "62": { "trigger": "持续被动", "msg": "", "note": "无消息；看异常后伤害更高（参考 desc）" },
-  "125": { "trigger": "主动出招", "msg": "", "note": "无消息；看没出附加效果（参考 desc）" },
-  "101": { "trigger": "主动出招", "msg": "", "note": "无消息；看低威力招伤害偏高（参考 desc）" },
-  "91": { "trigger": "主动出招", "msg": "", "note": "无消息；看本系招伤害偏高（参考 desc）" },
-  "175": { "trigger": "主动出招", "msg": "X's Protean changed its type（%a，属性变化）", "note": "有专门消息；PO合并（Protean/Libero）" },
-  "174": { "trigger": "主动出招(一般系)", "msg": "", "note": "无消息；看克制变化（如打幽灵 0x→1x、打龙/格斗/恶 1x→2x）" },
-  "3": { "trigger": "回合末", "msg": "X's Speed Boost increases its speed!", "note": "有专门消息" },
-  "153": { "trigger": "击倒对手后", "msg": "X's Moxie raises its attack（%a raised）", "note": "有专门消息；PO合并（Moxie/Chilling Neigh）" },
-  "2": { "trigger": "入场", "msg": "X's Drizzle made it rain!", "note": "有专门消息" },
-  "70": { "trigger": "入场", "msg": "X's Drought intensified the sun's rays!", "note": "有专门消息" },
-  "45": { "trigger": "入场", "msg": "X's Sand Stream whipped up a sandstorm!", "note": "有专门消息" },
-  "117": { "trigger": "入场", "msg": "X's Snow Warning whipped up a hailstorm!", "note": "有专门消息" },
-  "198": { "trigger": "入场", "msg": "X's Electric Surge causes an electric current!", "note": "有专门消息" },
-  "219": { "trigger": "入场", "msg": "X's Grassy Surge makes the grass grow!", "note": "有专门消息" },
-  "220": { "trigger": "入场", "msg": "X's Misty Surge causes mist to swirl!", "note": "有专门消息" },
-  "218": { "trigger": "入场", "msg": "X's Psychic Surge turns the battlefield weird!", "note": "有专门消息" },
-  "104": { "trigger": "入场", "msg": "X has Mold Breaker!", "note": "有专门消息" },
-  "164": { "trigger": "入场", "msg": "X has Teravolt! / X has Turboblaze!", "note": "有专门消息；PO合并（Teravolt/Turboblaze）" },
-  "46": { "trigger": "入场", "msg": "X is exerting its Pressure!", "note": "有专门消息" },
-  "152": { "trigger": "被接触攻击", "msg": "X's ability became Mummy!", "note": "有专门消息" },
-  "36": { "trigger": "入场", "msg": "X traced Y's ability!", "note": "有专门消息" },
-  "88": { "trigger": "入场", "msg": "X's Download activates!", "note": "有专门消息" },
-  "203": { "trigger": "首次被攻击", "msg": "X's disguise served it as a decoy and was busted!", "note": "有专门消息" },
-  "6": { "trigger": "持续被动", "msg": "", "note": "无消息；看自爆/大爆炸没发生（参考 desc）" },
-  "12": { "trigger": "持续被动", "msg": "", "note": "无消息；看魅惑/挑衅无效（参考 desc）" },
-  "13": { "trigger": "持续被动", "msg": "", "note": "无消息；看天气效果没生效（参考 desc）" },
-  "14": { "trigger": "持续被动", "msg": "", "note": "无消息；看低命中招也常中（参考 desc）" },
-  "19": { "trigger": "持续被动", "msg": "", "note": "无消息；看没出附加效果（参考 desc）" },
-  "20": { "trigger": "持续被动", "msg": "", "note": "无消息；看没混乱（参考 desc）" },
-  "23": { "trigger": "持续被动", "msg": "", "note": "无消息；看换人被 PO 拒绝（防逃跑）判断；幽灵系免疫踩影" },
-  "28": { "trigger": "被异常状态", "msg": "（状态消息：异常传染给对手）", "note": "看异常传染" },
-  "31": { "trigger": "被电系招式", "msg": "X's Lightning Rod raised its special attack（%a）", "note": "有专门消息" },
-  "32": { "trigger": "主动出招", "msg": "", "note": "无消息；看附加效果概率翻倍（参考 desc）" },
-  "33": { "trigger": "持续被动(雨天)", "msg": "", "note": "无消息；看速度线（雨天速度翻倍）" },
-  "34": { "trigger": "持续被动(晴天)", "msg": "", "note": "无消息；看速度线（晴天速度翻倍）" },
-  "38": { "trigger": "被接触攻击", "msg": "（状态消息：攻击方 is poisoned!）", "note": "看状态消息" },
-  "39": { "trigger": "持续被动", "msg": "", "note": "无消息；看没畏缩（参考 desc）" },
-  "40": { "trigger": "持续被动", "msg": "", "note": "无消息；看没冰冻（参考 desc）" },
-  "41": { "trigger": "持续被动", "msg": "", "note": "无消息；看没烧伤（参考 desc）" },
-  "42": { "trigger": "持续被动", "msg": "", "note": "无消息；看钢系换人被 PO 拒绝判断" },
-  "63": { "trigger": "持续被动", "msg": "", "note": "无消息；看异常后物防×1.5（参考 desc）" },
-  "64": { "trigger": "被吸血招式", "msg": "X's Liquid Ooze damages（%a）", "note": "有专门消息" },
-  "71": { "trigger": "持续被动", "msg": "", "note": "无消息；看换人被 PO 拒绝（防逃跑）判断；飞行系/幽灵系免疫沙穴" },
-  "75": { "trigger": "持续被动", "msg": "", "note": "无消息；看没被暴击（参考 desc）" },
-  "85": { "trigger": "被火系攻击", "msg": "", "note": "无消息；看火系伤害减半（参考 desc）" },
-  "90": { "trigger": "回合末(中毒)", "msg": "X restored HP using its Poison Heal!", "note": "有专门消息" },
-  "96": { "trigger": "主动出招", "msg": "", "note": "无消息；看所有招按一般系克制结算（参考 desc）" },
-  "110": { "trigger": "主动出招", "msg": "", "note": "无消息；看抵抗招伤害×2（参考 desc）" },
-  "113": { "trigger": "主动出招", "msg": "", "note": "无消息；看一般/格斗招打幽灵有效（参考 desc）" },
-  "114": { "trigger": "被水系招式", "msg": "X's Storm Drain raised its special attack（%a）", "note": "有专门消息" },
-  "115": { "trigger": "回合末(冰雹)", "msg": "X's Ice Body heals it（%a heals）", "note": "有专门消息" },
-  "119": { "trigger": "入场", "msg": "X frisked Y and found its item!", "note": "有专门消息" },
-  "120": { "trigger": "主动出招", "msg": "", "note": "无消息；看反伤招伤害×1.2（参考 desc）" },
-  "126": { "trigger": "能力变化时", "msg": "（能力变化消息：方向反转）", "note": "看能力变化方向反转" },
-  "128": { "trigger": "能力下降时", "msg": "（能力变化消息：攻击升）", "note": "看能力下降反而攻击升" },
-  "129": { "trigger": "持续被动(HP<50%)", "msg": "", "note": "无消息；看半血后伤害减半（参考 desc）" },
-  "130": { "trigger": "被攻击", "msg": "X's Cursed Body disabled Y's move!", "note": "有专门消息" },
-  "133": { "trigger": "被物攻", "msg": "X's Weak Armor lowers Defense and raises Speed!", "note": "有专门消息" },
-  "143": { "trigger": "被接触攻击", "msg": "（状态消息：攻击方 is poisoned!）", "note": "看状态消息" },
-  "146": { "trigger": "持续被动(沙暴)", "msg": "", "note": "无消息；看速度线（沙暴速度翻倍）" },
-  "148": { "trigger": "主动出招(后手)", "msg": "", "note": "无消息；看后手伤害×1.3（参考 desc）" },
-  "149": { "trigger": "被攻击(伪装打破)", "msg": "X's Illusion wore off!", "note": "有专门消息（伪装被打破时显示真身）" },
-  "150": { "trigger": "入场", "msg": "X transformed into Y!", "note": "有专门消息" },
-  "154": { "trigger": "被恶系攻击", "msg": "X's Justified raised its attack（%a）", "note": "有专门消息" },
-  "158": { "trigger": "主动出招(变化招)", "msg": "", "note": "无消息；看变化招先制（参考 desc）" },
-  "165": { "trigger": "主动出招(一般系)", "msg": "", "note": "无消息；看一般系变飞行系克制（参考 desc）" },
-  "176": { "trigger": "主动出招(一般系)", "msg": "", "note": "无消息；看一般系变冰系克制（参考 desc）" },
-  "178": { "trigger": "主动出招", "msg": "", "note": "无消息；看咬招伤害×1.5（参考 desc）" },
-  "180": { "trigger": "主动出招", "msg": "", "note": "无消息；看接触招伤害×1.3（参考 desc）" },
-  "181": { "trigger": "能力下降时", "msg": "（能力变化消息：特攻升）", "note": "看能力下降反而特攻升" },
-  "182": { "trigger": "主动出招(满血)", "msg": "", "note": "无消息；看满血飞行招先制（参考 desc）" },
-  "189": { "trigger": "入场", "msg": "X's Desolate Land made the sun extremely harsh!", "note": "有专门消息" },
-  "190": { "trigger": "入场", "msg": "X's Primordial Sea made it rain heavily!", "note": "有专门消息" },
-  "197": { "trigger": "对手换入时", "msg": "", "note": "无消息；看换入对手伤害×2（参考 desc）" },
-  "199": { "trigger": "持续被动", "msg": "", "note": "无消息；看先制招无效（参考 desc）" },
-  "204": { "trigger": "被接触攻击", "msg": "", "note": "无消息；看接触招减半但火系×2（参考 desc）" },
-  "212": { "trigger": "持续被动(电场)", "msg": "", "note": "无消息；看速度线（电场速度翻倍）" },
-  "214": { "trigger": "持续被动", "msg": "", "note": "无消息；看先制招无效（参考 desc）" },
-  "221": { "trigger": "持续被动(雪天)", "msg": "", "note": "无消息；看速度线（雪天速度翻倍）" },
-  "224": { "trigger": "持续被动", "msg": "", "note": "无消息；看水系伤害×2且不烧伤（参考 desc）" },
-  "228": { "trigger": "主动出招(一般系)", "msg": "", "note": "无消息；看一般系变电系克制（参考 desc）" },
-  "231": { "trigger": "击倒对手后", "msg": "X's Beast Boost raised its highest stat!", "note": "有专门消息" },
-  "234": { "trigger": "入场", "msg": "X's Intrepid Sword raised its Attack!", "note": "有专门消息" },
-  "235": { "trigger": "入场", "msg": "X's Dauntless Shield raised its Defense!", "note": "有专门消息" },
-  "236": { "trigger": "入场", "msg": "X's Neutralizing Gas filled the air!", "note": "有专门消息（全场特性无效）" },
-  "240": { "trigger": "能力下降时", "msg": "X's Mirror Armor reflected the stat change!", "note": "有专门消息" },
-  "246": { "trigger": "持续被动", "msg": "", "note": "无消息；看特攻伤害减半（参考 desc）" },
-  "248": { "trigger": "首次被物攻", "msg": "X's Ice Face took the hit!", "note": "有专门消息" },
-  "255": { "trigger": "持续被动", "msg": "", "note": "无消息；看只出一招但物攻×1.5（参考 desc）" },
-  "16": { "trigger": "被攻击", "msg": "X's Color Change changed its type to %t!", "note": "看属性变化（变攻击招属性）" },
-  "56": { "trigger": "被接触攻击", "msg": "X's Cute Charm infatuated Y!", "note": "看攻击方着迷" },
-  "60": { "trigger": "被偷道具时", "msg": "X's Sticky Hold prevents the item from being taken!", "note": "看道具没被偷" },
-  "61": { "trigger": "回合末", "msg": "X's Shed Skin cured its status!", "note": "看异常解除" },
-  "78": { "trigger": "被电系攻击", "msg": "X's Motor Drive raised its Speed!", "note": "看电免疫+速度升" },
-  "80": { "trigger": "被畏缩", "msg": "X's Steadfast raised its Speed!", "note": "看畏缩后速度升" },
-  "93": { "trigger": "回合末(雨天)", "msg": "X's Hydration cured its status!", "note": "看异常解除" },
-  "102": { "trigger": "持续被动(晴天)", "msg": "（有专门消息）", "note": "看晴天不中异常" },
-  "106": { "trigger": "被接触攻击击倒", "msg": "X's Aftermath damages Y!", "note": "看攻击方反伤" },
-  "107": { "trigger": "入场", "msg": "X's Anticipation made it shudder!", "note": "预知对手克制招" },
-  "108": { "trigger": "入场", "msg": "X's Forewarn alerted it!", "note": "预知对手高威力招" },
-  "112": { "trigger": "入场", "msg": "X's Slow Start is in effect!", "note": "看攻速减半" },
-  "123": { "trigger": "回合末(对方睡眠)", "msg": "（有专门消息）", "note": "看睡眠方掉血" },
-  "139": { "trigger": "回合末", "msg": "X's Harvest recovered its berry!", "note": "看树果回收" },
-  "141": { "trigger": "回合末", "msg": "（有专门消息）", "note": "看能力随机升降" },
-  "142": { "trigger": "持续被动", "msg": "（有专门消息）", "note": "看天气伤害没发生" },
-  "147": { "trigger": "被变化招式", "msg": "（有专门消息）", "note": "看变化招命中减半" },
-  "161": { "trigger": "回合末(HP<50%)", "msg": "（有专门消息）", "note": "看变形态" },
-  "167": { "trigger": "吃树果", "msg": "（有专门消息）", "note": "看额外回血" },
-  "183": { "trigger": "被接触攻击", "msg": "（有专门消息）", "note": "看攻击方速度降" },
-  "185": { "trigger": "被弹爆系招式", "msg": "（有专门消息）", "note": "看弹爆系免疫" },
-  "191": { "trigger": "入场", "msg": "（有专门消息）", "note": "看乱气流天气" },
-  "196": { "trigger": "击倒对手后", "msg": "（有专门消息）", "note": "看特攻升" },
-  "209": { "trigger": "HP<50%", "msg": "（有专门消息）", "note": "看变形态" },
-  "210": { "trigger": "被击倒", "msg": "（有专门消息）", "note": "看击倒后反伤" },
-  "211": { "trigger": "出场/HP变化", "msg": "（有专门消息）", "note": "看变鱼群形态" },
-  "238": { "trigger": "被攻击", "msg": "（有专门消息）", "note": "看全场速度降" },
-  "241": { "trigger": "被攻击", "msg": "（有专门消息）", "note": "看吐猎物攻击" },
-  "243": { "trigger": "被火/水系攻击", "msg": "（有专门消息）", "note": "看速度巨幅提高" },
-  "245": { "trigger": "被攻击", "msg": "（有专门消息）", "note": "看开沙暴" },
-  "250": { "trigger": "场地变化时", "msg": "（有专门消息）", "note": "看属性随场地变" },
-  "251": { "trigger": "入场", "msg": "（有专门消息）", "note": "看双方光墙/反射壁消失" },
-  "253": { "trigger": "被接触攻击", "msg": "（有专门消息）", "note": "看双方灭亡歌倒计时" },
-  "254": { "trigger": "被接触攻击", "msg": "（有专门消息）", "note": "看与攻击方交换特性" },
-  "124": { "trigger": "被接触攻击", "msg": "（有专门消息）", "note": "看偷走攻击方道具" },
-  "140": { "trigger": "击倒对手后", "msg": "（有专门消息）", "note": "看特攻升" },
-  "155": { "trigger": "被恶/虫/鬼系攻击", "msg": "（有专门消息）", "note": "看速度升" },
-  "168": { "trigger": "持续被动", "msg": "（有专门消息）", "note": "看恶系威力提高" },
-  "169": { "trigger": "持续被动", "msg": "（有专门消息）", "note": "看妖精系威力提高" },
-  "200": { "trigger": "HP<50%", "msg": "（有专门消息）", "note": "看特攻升" },
-  "205": { "trigger": "被攻击", "msg": "（有专门消息）", "note": "看物防升" },
-  "229": { "trigger": "被接触攻击", "msg": "（有专门消息）", "note": "看攻击方速度降" },
-  "1": { "trigger": "主动出招", "msg": "", "note": "无消息；看对手被附加害怕（10%，参考 desc）" },
-  "4": { "trigger": "持续被动", "msg": "", "note": "无消息；看没被暴击（参考 desc）" },
-  "8": { "trigger": "持续被动(沙暴)", "msg": "", "note": "无消息；看沙暴下闪避（参考 desc）" },
-  "21": { "trigger": "持续被动", "msg": "", "note": "无消息；看吹飞/龙尾无效（参考 desc）" },
-  "35": { "trigger": "主动出招", "msg": "", "note": "无消息；看偶尔先制（速击30%概率先制；PO desc 误写为发光）" },
-  "50": { "trigger": "主动出招(接触招)", "msg": "", "note": "无消息；看接触招穿守住（无形拳；PO desc 误写为逃足）" },
-  "51": { "trigger": "持续被动", "msg": "", "note": "无消息；看命中没降（参考 desc）" },
-  "52": { "trigger": "持续被动", "msg": "", "note": "无消息；看攻击没降（参考 desc）" },
-  "53": { "trigger": "回合末", "msg": "", "note": "可能有消息（待确认）；看回合末获得对手用掉的道具" },
-  "54": { "trigger": "主动出招", "msg": "", "note": "可能有消息（待确认）；看隔回合行动" },
-  "55": { "trigger": "主动出招", "msg": "", "note": "无消息；看物理伤害高但命中低（参考 desc）" },
-  "57": { "trigger": "持续被动", "msg": "", "note": "无消息；看特攻提高（需队友正负电）" },
-  "58": { "trigger": "持续被动", "msg": "", "note": "无消息；看特攻提高（需队友正负电）" },
-  "59": { "trigger": "天气变化时", "msg": "", "note": "无消息；看属性随天气变（参考 desc）" },
-  "65": { "trigger": "持续被动(HP<1/3)", "msg": "", "note": "无消息；看低血草系伤害提高（参考 desc）" },
-  "66": { "trigger": "持续被动(HP<1/3)", "msg": "", "note": "无消息；看低血火系伤害提高（参考 desc）" },
-  "67": { "trigger": "持续被动(HP<1/3)", "msg": "", "note": "无消息；看低血水系伤害提高（参考 desc）" },
-  "68": { "trigger": "持续被动(HP<1/3)", "msg": "", "note": "无消息；看低血虫系伤害提高（参考 desc）" },
-  "69": { "trigger": "主动出招", "msg": "", "note": "无消息；看反伤招无反伤（参考 desc）" },
-  "72": { "trigger": "持续被动", "msg": "", "note": "无消息；看没睡眠（参考 desc）" },
-  "73": { "trigger": "持续被动", "msg": "", "note": "无消息；看能力没降（参考 desc）" },
-  "76": { "trigger": "持续被动", "msg": "", "note": "无消息；看天气效果没生效（参考 desc）" },
-  "77": { "trigger": "持续被动(混乱)", "msg": "", "note": "无消息；看混乱下闪避（参考 desc）" },
-  "79": { "trigger": "主动出招", "msg": "", "note": "无消息；看同性伤害提高（参考 desc）" },
-  "81": { "trigger": "持续被动(冰雹)", "msg": "", "note": "无消息；看冰雹下闪避（参考 desc）" },
-  "82": { "trigger": "持续被动(HP<1/2)", "msg": "", "note": "无消息；看树果提前吃（参考 desc）" },
-  "83": { "trigger": "被会心一击", "msg": "", "note": "可能有消息（待确认）；看攻击升至最大" },
-  "84": { "trigger": "失去道具时", "msg": "", "note": "无消息；看速度翻倍（参考 desc）" },
-  "86": { "trigger": "能力变化时", "msg": "", "note": "无消息；看能力变化量翻倍（参考 desc）" },
-  "89": { "trigger": "主动出招(拳击)", "msg": "", "note": "无消息；看拳击招伤害×1.2（参考 desc）" },
-  "92": { "trigger": "主动出招", "msg": "", "note": "无消息；看多段攻击固定最大次数（参考 desc）" },
-  "95": { "trigger": "持续被动(异常)", "msg": "", "note": "无消息；看异常时速度提高（参考 desc）" },
-  "97": { "trigger": "会心一击", "msg": "", "note": "无消息；看会心伤害×1.5（参考 desc）" },
-  "99": { "trigger": "持续被动", "msg": "", "note": "无消息；看双方招必中（参考 desc）" },
-  "100": { "trigger": "主动出招", "msg": "", "note": "无消息；看必定后手（参考 desc）" },
-  "103": { "trigger": "持续被动", "msg": "", "note": "无消息；看道具无效（参考 desc）" },
-  "105": { "trigger": "持续被动", "msg": "", "note": "无消息；看会心率提高（参考 desc）" },
-  "111": { "trigger": "被克制攻击", "msg": "", "note": "无消息；看克制伤害减少（参考 desc）" },
-  "116": { "trigger": "被克制攻击", "msg": "", "note": "无消息；看克制伤害减少（参考 desc）" },
-  "118": { "trigger": "入场", "msg": "", "note": "无消息；看队友能力变化被清（怪药；PO desc 误写为集蜜）" },
-  "121": { "trigger": "持续被动", "msg": "", "note": "无消息；看属性随石板变（参考 desc）" },
-  "122": { "trigger": "持续被动(晴天)", "msg": "", "note": "无消息；看晴天攻特防提高（参考 desc）" },
-  "127": { "trigger": "持续被动", "msg": "", "note": "可能有消息（待确认）；看对方树果不发动" },
-  "131": { "trigger": "持续被动", "msg": "", "note": "可能有消息（待确认）；看电系伤害提高（电晶体；PO desc 误写为治愈之心）" },
-  "132": { "trigger": "持续被动", "msg": "", "note": "无消息；看龙系伤害提高（龙颚；PO desc 误写为友情守护）" },
-  "134": { "trigger": "持续被动", "msg": "", "note": "无消息；看体重翻倍（参考 desc）" },
-  "135": { "trigger": "持续被动", "msg": "", "note": "无消息；看体重减半（参考 desc）" },
-  "137": { "trigger": "持续被动(中毒)", "msg": "", "note": "无消息；看中毒时物攻×1.5（参考 desc）" },
-  "138": { "trigger": "持续被动(烧伤)", "msg": "", "note": "无消息；看烧伤时特攻×1.5（参考 desc）" },
-  "145": { "trigger": "持续被动", "msg": "", "note": "无消息；看防御没降（参考 desc）" },
-  "159": { "trigger": "持续被动(沙暴)", "msg": "", "note": "无消息；看沙暴下岩地钢伤害提高（参考 desc）" },
-  "162": { "trigger": "持续被动", "msg": "", "note": "无消息；看全队命中提高（参考 desc）" },
-  "163": { "trigger": "主动出招", "msg": "", "note": "无消息；看无视特性（人马一体=威吓+无视特性；PO desc 误写）" },
-  "166": { "trigger": "持续被动", "msg": "", "note": "无消息；看气场效果反转（参考 desc）" },
-  "170": { "trigger": "持续被动", "msg": "", "note": "无消息；看草系队友能力不降（参考 desc）" },
-  "171": { "trigger": "持续被动", "msg": "", "note": "无消息；看物理伤害减半（参考 desc）" },
-  "172": { "trigger": "主动出招(波动)", "msg": "", "note": "无消息；看波动招×1.5（参考 desc）" },
-  "173": { "trigger": "主动出招", "msg": "", "note": "无消息；看二次攻击（参考 desc）" },
-  "177": { "trigger": "主动出招", "msg": "", "note": "无消息；看攻防形态切换（参考 desc）" },
-  "179": { "trigger": "持续被动", "msg": "", "note": "无消息；看队友不睡眠（参考 desc）" },
-  "184": { "trigger": "持续被动", "msg": "", "note": "无消息；看队友不受精神系（参考 desc）" },
-  "186": { "trigger": "持续被动(草场)", "msg": "", "note": "无消息；看草场防御提高（参考 desc）" },
-  "187": { "trigger": "主动出招", "msg": "", "note": "无消息；看攻击时偷道具（参考 desc）" },
-  "188": { "trigger": "持续被动", "msg": "", "note": "无消息；看道具转交队友（参考 desc）" },
-  "192": { "trigger": "持续被动", "msg": "", "note": "无消息；看能力不降（参考 desc）" },
-  "193": { "trigger": "满血被攻击", "msg": "", "note": "无消息；看满血受伤减半（参考 desc）" },
-  "194": { "trigger": "持续被动", "msg": "", "note": "可能有消息（待确认）；看只有睡眠状态（绝对睡眠）" },
-  "195": { "trigger": "HP<50%", "msg": "", "note": "无消息；看变完全体（参考 desc）" },
-  "201": { "trigger": "持续被动", "msg": "", "note": "无消息；看队友特攻招提高（参考 desc）" },
-  "202": { "trigger": "主动出招", "msg": "", "note": "无消息；看毒钢也能中毒（参考 desc）" },
-  "206": { "trigger": "主动出招(回复)", "msg": "", "note": "无消息；看回复招先制（参考 desc）" },
-  "207": { "trigger": "HP<50%", "msg": "", "note": "无消息；看半血后逃走/替换（参考 desc）" },
-  "208": { "trigger": "对手用舞蹈招", "msg": "", "note": "可能有消息（待确认）；看复制舞蹈招" },
-  "213": { "trigger": "被水系攻击", "msg": "", "note": "可能有消息（待确认）；看物防升2级" },
-  "215": { "trigger": "击倒对手后", "msg": "", "note": "可能有消息（待确认）；看变形态（牵绊变身）" },
-  "216": { "trigger": "队友倒下", "msg": "", "note": "可能有消息（待确认）；看继承队友特性" },
-  "217": { "trigger": "持续被动", "msg": "", "note": "无消息；看属性随道具变（参考 desc）" },
-  "222": { "trigger": "HP<50%", "msg": "", "note": "无消息；看半血后替换（参考 desc）" },
-  "223": { "trigger": "主动出招", "msg": "", "note": "无消息；看中毒目标必暴击（参考 desc）" },
-  "225": { "trigger": "主动出招", "msg": "", "note": "无消息；看钢系伤害提高（参考 desc）" },
-  "226": { "trigger": "主动出招", "msg": "", "note": "无消息；看接触招不触发接触效果（参考 desc）" },
-  "227": { "trigger": "主动出招(声音)", "msg": "", "note": "无消息；看声音招变水系（参考 desc）" },
-  "230": { "trigger": "队友倒下", "msg": "", "note": "无消息；看继承队友特性（参考 desc）" },
-  "232": { "trigger": "被克制攻击", "msg": "", "note": "无消息；看克制伤害减弱（参考 desc）" },
-  "233": { "trigger": "主动出招(克制)", "msg": "", "note": "无消息；看克制招伤害更强（参考 desc）" },
-  "237": { "trigger": "回合末", "msg": "", "note": "无消息；看形态交替（参考 desc）" },
-  "239": { "trigger": "持续被动", "msg": "", "note": "无消息；看无视吸引（参考 desc）" },
-  "242": { "trigger": "持续被动", "msg": "", "note": "无消息；看无视吸引（参考 desc）" },
-  "244": { "trigger": "主动出招(声音)", "msg": "", "note": "无消息；看声音招伤害提高+受声音减半（参考 desc）" },
-  "247": { "trigger": "吃树果", "msg": "", "note": "无消息；看树果效果翻倍（参考 desc）" },
-  "249": { "trigger": "持续被动", "msg": "", "note": "无消息；看相邻队友伤害提高（参考 desc）" },
-  "252": { "trigger": "持续被动", "msg": "", "note": "无消息；看我方钢系伤害提高（参考 desc）" }
+  "1": {
+    "trigger": "主动出招",
+    "msg": "",
+    "note": "无消息；看对手被附加害怕（10%，参考 desc）"
+  },
+  "2": {
+    "trigger": "入场",
+    "msg": "X's Drizzle made it rain!",
+    "note": "有专门消息"
+  },
+  "3": {
+    "trigger": "回合末",
+    "msg": "X's Speed Boost increases its speed!",
+    "note": "有专门消息"
+  },
+  "4": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看没被暴击（参考 desc）"
+  },
+  "5": {
+    "trigger": "满血被致命伤",
+    "msg": "X held on thanks to Sturdy!",
+    "note": "有专门消息；一击必杀无效（见 desc）"
+  },
+  "6": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看自爆/大爆炸没发生（参考 desc）"
+  },
+  "7": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "待定：阻止麻痹可能有提示；无则参考 desc 判断"
+  },
+  "8": {
+    "trigger": "持续被动(沙暴)",
+    "msg": "",
+    "note": "无消息；看沙暴下闪避（参考 desc）"
+  },
+  "9": {
+    "trigger": "被接触攻击",
+    "msg": "（状态消息：攻击方 is paralyzed!）",
+    "note": "看状态消息"
+  },
+  "10": {
+    "trigger": "被电系攻击",
+    "msg": "X's Volt Absorb absorbs the attack（%a absorbs）",
+    "note": "有专门消息"
+  },
+  "11": {
+    "trigger": "被水系攻击",
+    "msg": "X's Water Absorb absorbs the attack",
+    "note": "有专门消息"
+  },
+  "12": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看魅惑/挑衅无效（参考 desc）"
+  },
+  "13": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看天气效果没生效（参考 desc）"
+  },
+  "14": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看低命中招也常中（参考 desc）"
+  },
+  "15": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "待定：阻止睡眠可能有提示；无则参考 desc 判断"
+  },
+  "16": {
+    "trigger": "被攻击",
+    "msg": "X's Color Change changed its type to %t!",
+    "note": "看属性变化（变攻击招属性）"
+  },
+  "17": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "PO合并（Immunity/Pastel Veil）；待定：阻止中毒可能有提示；无则参考 desc 判断"
+  },
+  "18": {
+    "trigger": "被火系攻击",
+    "msg": "X's Flash Fire raised the power of its Fire-type moves!",
+    "note": "有专门消息"
+  },
+  "19": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看没出附加效果（参考 desc）"
+  },
+  "20": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看没混乱（参考 desc）"
+  },
+  "21": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看吹飞/龙尾无效（参考 desc）"
+  },
+  "22": {
+    "trigger": "入场",
+    "msg": "X intimidates Y!",
+    "note": "有专门消息"
+  },
+  "23": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看换人被 PO 拒绝（防逃跑）判断；幽灵系免疫踩影"
+  },
+  "24": {
+    "trigger": "被接触攻击",
+    "msg": "X's Rough Skin hurts Y（%a hurts）",
+    "note": "看反伤"
+  },
+  "25": {
+    "trigger": "被攻击",
+    "msg": "",
+    "note": "待定：非克制可能直接 no effect；参考 desc 判断"
+  },
+  "26": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；参考 desc（地面无效 + 不接触地面）判断"
+  },
+  "27": {
+    "trigger": "被接触攻击",
+    "msg": "X's Effect Spore activates!",
+    "note": "有专门消息"
+  },
+  "28": {
+    "trigger": "被异常状态",
+    "msg": "（状态消息：异常传染给对手）",
+    "note": "看异常传染"
+  },
+  "29": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "待定：阻止能力下降可能有提示；无则参考 desc 判断"
+  },
+  "30": {
+    "trigger": "下场时",
+    "msg": "",
+    "note": "无消息；看再上场异常解除（参考 desc）"
+  },
+  "31": {
+    "trigger": "被电系招式",
+    "msg": "X's Lightning Rod raised its special attack（%a）",
+    "note": "有专门消息"
+  },
+  "32": {
+    "trigger": "主动出招",
+    "msg": "",
+    "note": "无消息；看附加效果概率翻倍（参考 desc）"
+  },
+  "33": {
+    "trigger": "持续被动(雨天)",
+    "msg": "",
+    "note": "无消息；看速度线（雨天速度翻倍）"
+  },
+  "34": {
+    "trigger": "持续被动(晴天)",
+    "msg": "",
+    "note": "无消息；看速度线（晴天速度翻倍）"
+  },
+  "35": {
+    "trigger": "主动出招",
+    "msg": "",
+    "note": "无消息；看偶尔先制（速击30%概率先制；PO desc 误写为发光）"
+  },
+  "36": {
+    "trigger": "入场",
+    "msg": "X traced Y's ability!",
+    "note": "有专门消息"
+  },
+  "37": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看物理伤害异常高（参考 desc）"
+  },
+  "38": {
+    "trigger": "被接触攻击",
+    "msg": "（状态消息：攻击方 is poisoned!）",
+    "note": "看状态消息"
+  },
+  "39": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看没畏缩（参考 desc）"
+  },
+  "40": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看没冰冻（参考 desc）"
+  },
+  "41": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看没烧伤（参考 desc）"
+  },
+  "42": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看钢系换人被 PO 拒绝判断"
+  },
+  "43": {
+    "trigger": "被声音招式",
+    "msg": "X's Soundproof blocks the attack!",
+    "note": "有专门消息"
+  },
+  "44": {
+    "trigger": "回合末(雨天)",
+    "msg": "X's Rain Dish heals it（%a heals）",
+    "note": "有专门消息"
+  },
+  "45": {
+    "trigger": "入场",
+    "msg": "X's Sand Stream whipped up a sandstorm!",
+    "note": "有专门消息"
+  },
+  "46": {
+    "trigger": "入场",
+    "msg": "X is exerting its Pressure!",
+    "note": "有专门消息"
+  },
+  "47": {
+    "trigger": "被火/冰系攻击",
+    "msg": "",
+    "note": "无消息；看伤害减半（参考 desc）"
+  },
+  "48": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看睡眠回合减半（参考 desc）"
+  },
+  "49": {
+    "trigger": "被接触攻击",
+    "msg": "（状态消息：攻击方 is burned!）",
+    "note": "看状态消息"
+  },
+  "50": {
+    "trigger": "主动出招(接触招)",
+    "msg": "",
+    "note": "无消息；看接触招穿守住（无形拳；PO desc 误写为逃足）"
+  },
+  "51": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看命中没降（参考 desc）"
+  },
+  "52": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看攻击没降（参考 desc）"
+  },
+  "53": {
+    "trigger": "回合末",
+    "msg": "（有专门消息）",
+    "note": "看回合末获得对手用掉的道具"
+  },
+  "54": {
+    "trigger": "主动出招",
+    "msg": "（有专门消息）",
+    "note": "看隔回合行动"
+  },
+  "55": {
+    "trigger": "主动出招",
+    "msg": "",
+    "note": "无消息；看物理伤害高但命中低（参考 desc）"
+  },
+  "56": {
+    "trigger": "被接触攻击",
+    "msg": "X's Cute Charm infatuated Y!",
+    "note": "看攻击方着迷"
+  },
+  "57": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看特攻提高（需队友正负电）"
+  },
+  "58": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看特攻提高（需队友正负电）"
+  },
+  "59": {
+    "trigger": "天气变化时",
+    "msg": "",
+    "note": "无消息；看属性随天气变（参考 desc）"
+  },
+  "60": {
+    "trigger": "被偷道具时",
+    "msg": "X's Sticky Hold prevents the item from being taken!",
+    "note": "看道具没被偷"
+  },
+  "61": {
+    "trigger": "回合末",
+    "msg": "X's Shed Skin cured its status!",
+    "note": "看异常解除"
+  },
+  "62": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看异常后伤害更高（参考 desc）"
+  },
+  "63": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看异常后物防×1.5（参考 desc）"
+  },
+  "64": {
+    "trigger": "被吸血招式",
+    "msg": "X's Liquid Ooze damages（%a）",
+    "note": "有专门消息"
+  },
+  "65": {
+    "trigger": "持续被动(HP<1/3)",
+    "msg": "",
+    "note": "无消息；看低血草系伤害提高（参考 desc）"
+  },
+  "66": {
+    "trigger": "持续被动(HP<1/3)",
+    "msg": "",
+    "note": "无消息；看低血火系伤害提高（参考 desc）"
+  },
+  "67": {
+    "trigger": "持续被动(HP<1/3)",
+    "msg": "",
+    "note": "无消息；看低血水系伤害提高（参考 desc）"
+  },
+  "68": {
+    "trigger": "持续被动(HP<1/3)",
+    "msg": "",
+    "note": "无消息；看低血虫系伤害提高（参考 desc）"
+  },
+  "69": {
+    "trigger": "主动出招",
+    "msg": "",
+    "note": "无消息；看反伤招无反伤（参考 desc）"
+  },
+  "70": {
+    "trigger": "入场",
+    "msg": "X's Drought intensified the sun's rays!",
+    "note": "有专门消息"
+  },
+  "71": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看换人被 PO 拒绝（防逃跑）判断；飞行系/幽灵系免疫沙穴"
+  },
+  "72": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看没睡眠（参考 desc）"
+  },
+  "73": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看能力没降（参考 desc）"
+  },
+  "74": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看物理伤害异常高（参考 desc）"
+  },
+  "75": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看没被暴击（参考 desc）"
+  },
+  "76": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看天气效果没生效（参考 desc）"
+  },
+  "77": {
+    "trigger": "持续被动(混乱)",
+    "msg": "",
+    "note": "无消息；看混乱下闪避（参考 desc）"
+  },
+  "78": {
+    "trigger": "被电系攻击",
+    "msg": "X's Motor Drive raised its Speed!",
+    "note": "看电免疫+速度升"
+  },
+  "79": {
+    "trigger": "主动出招",
+    "msg": "",
+    "note": "无消息；看同性伤害提高（参考 desc）"
+  },
+  "80": {
+    "trigger": "被畏缩",
+    "msg": "X's Steadfast raised its Speed!",
+    "note": "看畏缩后速度升"
+  },
+  "81": {
+    "trigger": "持续被动(冰雹)",
+    "msg": "",
+    "note": "无消息；看冰雹下闪避（参考 desc）"
+  },
+  "82": {
+    "trigger": "持续被动(HP<1/2)",
+    "msg": "",
+    "note": "无消息；看树果提前吃（参考 desc）"
+  },
+  "83": {
+    "trigger": "被会心一击",
+    "msg": "（有专门消息）",
+    "note": "看攻击升至最大"
+  },
+  "84": {
+    "trigger": "失去道具时",
+    "msg": "",
+    "note": "无消息；看速度翻倍（参考 desc）"
+  },
+  "85": {
+    "trigger": "被火系攻击",
+    "msg": "",
+    "note": "无消息；看火系伤害减半（参考 desc）"
+  },
+  "86": {
+    "trigger": "能力变化时",
+    "msg": "",
+    "note": "无消息；看能力变化量翻倍（参考 desc）"
+  },
+  "87": {
+    "trigger": "被水系攻击/雨天",
+    "msg": "X restored HP using its Dry Skin!",
+    "note": "有专门消息"
+  },
+  "88": {
+    "trigger": "入场",
+    "msg": "X's Download activates!",
+    "note": "有专门消息"
+  },
+  "89": {
+    "trigger": "主动出招(拳击)",
+    "msg": "",
+    "note": "无消息；看拳击招伤害×1.2（参考 desc）"
+  },
+  "90": {
+    "trigger": "回合末(中毒)",
+    "msg": "X restored HP using its Poison Heal!",
+    "note": "有专门消息"
+  },
+  "91": {
+    "trigger": "主动出招",
+    "msg": "",
+    "note": "无消息；看本系招伤害偏高（参考 desc）"
+  },
+  "92": {
+    "trigger": "主动出招",
+    "msg": "",
+    "note": "无消息；看多段攻击固定最大次数（参考 desc）"
+  },
+  "93": {
+    "trigger": "回合末(雨天)",
+    "msg": "X's Hydration cured its status!",
+    "note": "看异常解除"
+  },
+  "94": {
+    "trigger": "回合末(晴天)",
+    "msg": "X lost some HP because of Solar Power!",
+    "note": "有专门消息"
+  },
+  "95": {
+    "trigger": "持续被动(异常)",
+    "msg": "",
+    "note": "无消息；看异常时速度提高（参考 desc）"
+  },
+  "96": {
+    "trigger": "主动出招",
+    "msg": "",
+    "note": "无消息；看所有招按一般系克制结算（参考 desc）"
+  },
+  "97": {
+    "trigger": "会心一击",
+    "msg": "",
+    "note": "无消息；看会心伤害×1.5（参考 desc）"
+  },
+  "98": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看非攻击伤害没发生（参考 desc）"
+  },
+  "99": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看双方招必中（参考 desc）"
+  },
+  "100": {
+    "trigger": "主动出招",
+    "msg": "",
+    "note": "无消息；看必定后手（参考 desc）"
+  },
+  "101": {
+    "trigger": "主动出招",
+    "msg": "",
+    "note": "无消息；看低威力招伤害偏高（参考 desc）"
+  },
+  "102": {
+    "trigger": "持续被动(晴天)",
+    "msg": "（有专门消息）",
+    "note": "看晴天不中异常"
+  },
+  "103": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看道具无效（参考 desc）"
+  },
+  "104": {
+    "trigger": "入场",
+    "msg": "X has Mold Breaker!",
+    "note": "有专门消息"
+  },
+  "105": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看会心率提高（参考 desc）"
+  },
+  "106": {
+    "trigger": "被接触攻击击倒",
+    "msg": "X's Aftermath damages Y!",
+    "note": "看攻击方反伤"
+  },
+  "107": {
+    "trigger": "入场",
+    "msg": "X's Anticipation made it shudder!",
+    "note": "预知对手克制招"
+  },
+  "108": {
+    "trigger": "入场",
+    "msg": "X's Forewarn alerted it!",
+    "note": "预知对手高威力招"
+  },
+  "109": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；参考 desc（无视对手强化）判断"
+  },
+  "110": {
+    "trigger": "主动出招",
+    "msg": "",
+    "note": "无消息；看抵抗招伤害×2（参考 desc）"
+  },
+  "111": {
+    "trigger": "被克制攻击",
+    "msg": "",
+    "note": "无消息；看克制伤害减少（参考 desc）"
+  },
+  "112": {
+    "trigger": "入场",
+    "msg": "X's Slow Start is in effect!",
+    "note": "看攻速减半"
+  },
+  "113": {
+    "trigger": "主动出招",
+    "msg": "",
+    "note": "无消息；看一般/格斗招打幽灵有效（参考 desc）"
+  },
+  "114": {
+    "trigger": "被水系招式",
+    "msg": "X's Storm Drain raised its special attack（%a）",
+    "note": "有专门消息"
+  },
+  "115": {
+    "trigger": "回合末(冰雹)",
+    "msg": "X's Ice Body heals it（%a heals）",
+    "note": "有专门消息"
+  },
+  "116": {
+    "trigger": "被克制攻击",
+    "msg": "",
+    "note": "无消息；看克制伤害减少（参考 desc）"
+  },
+  "117": {
+    "trigger": "入场",
+    "msg": "X's Snow Warning whipped up a hailstorm!",
+    "note": "有专门消息"
+  },
+  "118": {
+    "trigger": "入场",
+    "msg": "",
+    "note": "无消息；看队友能力变化被清（怪药；PO desc 误写为集蜜）"
+  },
+  "119": {
+    "trigger": "入场",
+    "msg": "X frisked Y and found its item!",
+    "note": "有专门消息"
+  },
+  "120": {
+    "trigger": "主动出招",
+    "msg": "",
+    "note": "无消息；看反伤招伤害×1.2（参考 desc）"
+  },
+  "121": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看属性随石板变（参考 desc）"
+  },
+  "122": {
+    "trigger": "持续被动(晴天)",
+    "msg": "",
+    "note": "无消息；看晴天攻特防提高（参考 desc）"
+  },
+  "123": {
+    "trigger": "回合末(对方睡眠)",
+    "msg": "（有专门消息）",
+    "note": "看睡眠方掉血"
+  },
+  "124": {
+    "trigger": "被接触攻击",
+    "msg": "（有专门消息）",
+    "note": "看偷走攻击方道具"
+  },
+  "125": {
+    "trigger": "主动出招",
+    "msg": "",
+    "note": "无消息；看没出附加效果（参考 desc）"
+  },
+  "126": {
+    "trigger": "能力变化时",
+    "msg": "（能力变化消息：方向反转）",
+    "note": "看能力变化方向反转"
+  },
+  "127": {
+    "trigger": "持续被动",
+    "msg": "（有专门消息）",
+    "note": "看对方树果不发动"
+  },
+  "128": {
+    "trigger": "能力下降时",
+    "msg": "（能力变化消息：攻击升）",
+    "note": "看能力下降反而攻击升"
+  },
+  "129": {
+    "trigger": "持续被动(HP<50%)",
+    "msg": "",
+    "note": "无消息；看半血后伤害减半（参考 desc）"
+  },
+  "130": {
+    "trigger": "被攻击",
+    "msg": "X's Cursed Body disabled Y's move!",
+    "note": "有专门消息"
+  },
+  "131": {
+    "trigger": "持续被动",
+    "msg": "（有专门消息）",
+    "note": "看电系伤害提高（电晶体；PO desc 误写为治愈之心）"
+  },
+  "132": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看龙系伤害提高（龙颚；PO desc 误写为友情守护）"
+  },
+  "133": {
+    "trigger": "被物攻",
+    "msg": "X's Weak Armor lowers Defense and raises Speed!",
+    "note": "有专门消息"
+  },
+  "134": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看体重翻倍（参考 desc）"
+  },
+  "135": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看体重减半（参考 desc）"
+  },
+  "136": {
+    "trigger": "满血被攻击",
+    "msg": "",
+    "note": "无消息；看伤害减半（参考 desc）"
+  },
+  "137": {
+    "trigger": "持续被动(中毒)",
+    "msg": "",
+    "note": "无消息；看中毒时物攻×1.5（参考 desc）"
+  },
+  "138": {
+    "trigger": "持续被动(烧伤)",
+    "msg": "",
+    "note": "无消息；看烧伤时特攻×1.5（参考 desc）"
+  },
+  "139": {
+    "trigger": "回合末",
+    "msg": "X's Harvest recovered its berry!",
+    "note": "看树果回收"
+  },
+  "140": {
+    "trigger": "击倒对手后",
+    "msg": "（有专门消息）",
+    "note": "看特攻升"
+  },
+  "141": {
+    "trigger": "回合末",
+    "msg": "（有专门消息）",
+    "note": "看能力随机升降"
+  },
+  "142": {
+    "trigger": "持续被动",
+    "msg": "（有专门消息）",
+    "note": "看天气伤害没发生"
+  },
+  "143": {
+    "trigger": "被接触攻击",
+    "msg": "（状态消息：攻击方 is poisoned!）",
+    "note": "看状态消息"
+  },
+  "144": {
+    "trigger": "下场时",
+    "msg": "",
+    "note": "无消息；看下场后 HP 变化（参考 desc）"
+  },
+  "145": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看防御没降（参考 desc）"
+  },
+  "146": {
+    "trigger": "持续被动(沙暴)",
+    "msg": "",
+    "note": "无消息；看速度线（沙暴速度翻倍）"
+  },
+  "147": {
+    "trigger": "被变化招式",
+    "msg": "（有专门消息）",
+    "note": "看变化招命中减半"
+  },
+  "148": {
+    "trigger": "主动出招(后手)",
+    "msg": "",
+    "note": "无消息；看后手伤害×1.3（参考 desc）"
+  },
+  "149": {
+    "trigger": "被攻击(伪装打破)",
+    "msg": "X's Illusion wore off!",
+    "note": "有专门消息（伪装被打破时显示真身）"
+  },
+  "150": {
+    "trigger": "入场",
+    "msg": "X transformed into Y!",
+    "note": "有专门消息"
+  },
+  "151": {
+    "trigger": "主动出招",
+    "msg": "",
+    "note": "无消息；看穿替身/光墙命中（参考 desc）"
+  },
+  "152": {
+    "trigger": "被接触攻击",
+    "msg": "X's ability became Mummy!",
+    "note": "有专门消息"
+  },
+  "153": {
+    "trigger": "击倒对手后",
+    "msg": "X's Moxie raises its attack（%a raised）",
+    "note": "有专门消息；PO合并（Moxie/Chilling Neigh）"
+  },
+  "154": {
+    "trigger": "被恶系攻击",
+    "msg": "X's Justified raised its attack（%a）",
+    "note": "有专门消息"
+  },
+  "155": {
+    "trigger": "被恶/虫/鬼系攻击",
+    "msg": "（有专门消息）",
+    "note": "看速度升"
+  },
+  "156": {
+    "trigger": "被变化招式",
+    "msg": "X's Magic Bounce bounced back（%a bounced）",
+    "note": "有专门消息"
+  },
+  "157": {
+    "trigger": "被草系招式",
+    "msg": "X's Sap Sipper raised its attack（%a raised）",
+    "note": "有专门消息"
+  },
+  "158": {
+    "trigger": "主动出招(变化招)",
+    "msg": "",
+    "note": "无消息；看变化招先制（参考 desc）"
+  },
+  "159": {
+    "trigger": "持续被动(沙暴)",
+    "msg": "",
+    "note": "无消息；看沙暴下岩地钢伤害提高（参考 desc）"
+  },
+  "160": {
+    "trigger": "被接触攻击",
+    "msg": "X's Iron Barbs hurts Y",
+    "note": "看反伤"
+  },
+  "161": {
+    "trigger": "回合末(HP<50%)",
+    "msg": "（有专门消息）",
+    "note": "看变形态"
+  },
+  "162": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看全队命中提高（参考 desc）"
+  },
+  "163": {
+    "trigger": "主动出招",
+    "msg": "",
+    "note": "无消息；看无视特性（人马一体=威吓+无视特性；PO desc 误写）"
+  },
+  "164": {
+    "trigger": "入场",
+    "msg": "X has Teravolt! / X has Turboblaze!",
+    "note": "有专门消息；PO合并（Teravolt/Turboblaze）"
+  },
+  "165": {
+    "trigger": "主动出招(一般系)",
+    "msg": "",
+    "note": "无消息；看一般系变飞行系克制（参考 desc）"
+  },
+  "166": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看气场效果反转（参考 desc）"
+  },
+  "167": {
+    "trigger": "吃树果",
+    "msg": "（有专门消息）",
+    "note": "看额外回血"
+  },
+  "168": {
+    "trigger": "持续被动",
+    "msg": "（有专门消息）",
+    "note": "看恶系威力提高"
+  },
+  "169": {
+    "trigger": "持续被动",
+    "msg": "（有专门消息）",
+    "note": "看妖精系威力提高"
+  },
+  "170": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看草系队友能力不降（参考 desc）"
+  },
+  "171": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看物理伤害减半（参考 desc）"
+  },
+  "172": {
+    "trigger": "主动出招(波动)",
+    "msg": "",
+    "note": "无消息；看波动招×1.5（参考 desc）"
+  },
+  "173": {
+    "trigger": "主动出招",
+    "msg": "",
+    "note": "无消息；看二次攻击（参考 desc）"
+  },
+  "174": {
+    "trigger": "主动出招(一般系)",
+    "msg": "",
+    "note": "无消息；看克制变化（如打幽灵 0x→1x、打龙/格斗/恶 1x→2x）"
+  },
+  "175": {
+    "trigger": "主动出招",
+    "msg": "X's Protean changed its type（%a，属性变化）",
+    "note": "有专门消息；PO合并（Protean/Libero）"
+  },
+  "176": {
+    "trigger": "主动出招(一般系)",
+    "msg": "",
+    "note": "无消息；看一般系变冰系克制（参考 desc）"
+  },
+  "177": {
+    "trigger": "主动出招",
+    "msg": "",
+    "note": "无消息；看攻防形态切换（参考 desc）"
+  },
+  "178": {
+    "trigger": "主动出招",
+    "msg": "",
+    "note": "无消息；看咬招伤害×1.5（参考 desc）"
+  },
+  "179": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看队友不睡眠（参考 desc）"
+  },
+  "180": {
+    "trigger": "主动出招",
+    "msg": "",
+    "note": "无消息；看接触招伤害×1.3（参考 desc）"
+  },
+  "181": {
+    "trigger": "能力下降时",
+    "msg": "（能力变化消息：特攻升）",
+    "note": "看能力下降反而特攻升"
+  },
+  "182": {
+    "trigger": "主动出招(满血)",
+    "msg": "",
+    "note": "无消息；看满血飞行招先制（参考 desc）"
+  },
+  "183": {
+    "trigger": "被接触攻击",
+    "msg": "（有专门消息）",
+    "note": "看攻击方速度降"
+  },
+  "184": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看队友不受精神系（参考 desc）"
+  },
+  "185": {
+    "trigger": "被弹爆系招式",
+    "msg": "（有专门消息）",
+    "note": "看弹爆系免疫"
+  },
+  "186": {
+    "trigger": "持续被动(草场)",
+    "msg": "",
+    "note": "无消息；看草场防御提高（参考 desc）"
+  },
+  "187": {
+    "trigger": "主动出招",
+    "msg": "",
+    "note": "无消息；看攻击时偷道具（参考 desc）"
+  },
+  "188": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看道具转交队友（参考 desc）"
+  },
+  "189": {
+    "trigger": "入场",
+    "msg": "X's Desolate Land made the sun extremely harsh!",
+    "note": "有专门消息"
+  },
+  "190": {
+    "trigger": "入场",
+    "msg": "X's Primordial Sea made it rain heavily!",
+    "note": "有专门消息"
+  },
+  "191": {
+    "trigger": "入场",
+    "msg": "（有专门消息）",
+    "note": "看乱气流天气"
+  },
+  "192": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看能力不降（参考 desc）"
+  },
+  "193": {
+    "trigger": "满血被攻击",
+    "msg": "",
+    "note": "无消息；看满血受伤减半（参考 desc）"
+  },
+  "194": {
+    "trigger": "持续被动",
+    "msg": "（有专门消息）",
+    "note": "看只有睡眠状态（绝对睡眠）"
+  },
+  "195": {
+    "trigger": "HP<50%",
+    "msg": "",
+    "note": "无消息；看变完全体（参考 desc）"
+  },
+  "196": {
+    "trigger": "击倒对手后",
+    "msg": "（有专门消息）",
+    "note": "看特攻升"
+  },
+  "197": {
+    "trigger": "对手换入时",
+    "msg": "",
+    "note": "无消息；看换入对手伤害×2（参考 desc）"
+  },
+  "198": {
+    "trigger": "入场",
+    "msg": "X's Electric Surge causes an electric current!",
+    "note": "有专门消息"
+  },
+  "199": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看先制招无效（参考 desc）"
+  },
+  "200": {
+    "trigger": "HP<50%",
+    "msg": "（有专门消息）",
+    "note": "看特攻升"
+  },
+  "201": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看队友特攻招提高（参考 desc）"
+  },
+  "202": {
+    "trigger": "主动出招",
+    "msg": "",
+    "note": "无消息；看毒钢也能中毒（参考 desc）"
+  },
+  "203": {
+    "trigger": "首次被攻击",
+    "msg": "X's disguise served it as a decoy and was busted!",
+    "note": "有专门消息"
+  },
+  "204": {
+    "trigger": "被接触攻击",
+    "msg": "",
+    "note": "无消息；看接触招减半但火系×2（参考 desc）"
+  },
+  "205": {
+    "trigger": "被攻击",
+    "msg": "（有专门消息）",
+    "note": "看物防升"
+  },
+  "206": {
+    "trigger": "主动出招(回复)",
+    "msg": "",
+    "note": "无消息；看回复招先制（参考 desc）"
+  },
+  "207": {
+    "trigger": "HP<50%",
+    "msg": "",
+    "note": "无消息；看半血后逃走/替换（参考 desc）"
+  },
+  "208": {
+    "trigger": "对手用舞蹈招",
+    "msg": "（有专门消息）",
+    "note": "看复制舞蹈招"
+  },
+  "209": {
+    "trigger": "HP<50%",
+    "msg": "（有专门消息）",
+    "note": "看变形态"
+  },
+  "210": {
+    "trigger": "被击倒",
+    "msg": "（有专门消息）",
+    "note": "看击倒后反伤"
+  },
+  "211": {
+    "trigger": "出场/HP变化",
+    "msg": "（有专门消息）",
+    "note": "看变鱼群形态"
+  },
+  "212": {
+    "trigger": "持续被动(电场)",
+    "msg": "",
+    "note": "无消息；看速度线（电场速度翻倍）"
+  },
+  "213": {
+    "trigger": "被水系攻击",
+    "msg": "（有专门消息）",
+    "note": "看物防升2级"
+  },
+  "214": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看先制招无效（参考 desc）"
+  },
+  "215": {
+    "trigger": "击倒对手后",
+    "msg": "（有专门消息）",
+    "note": "看变形态（牵绊变身）"
+  },
+  "216": {
+    "trigger": "队友倒下",
+    "msg": "（有专门消息）",
+    "note": "看继承队友特性"
+  },
+  "217": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看属性随道具变（参考 desc）"
+  },
+  "218": {
+    "trigger": "入场",
+    "msg": "X's Psychic Surge turns the battlefield weird!",
+    "note": "有专门消息"
+  },
+  "219": {
+    "trigger": "入场",
+    "msg": "X's Grassy Surge makes the grass grow!",
+    "note": "有专门消息"
+  },
+  "220": {
+    "trigger": "入场",
+    "msg": "X's Misty Surge causes mist to swirl!",
+    "note": "有专门消息"
+  },
+  "221": {
+    "trigger": "持续被动(雪天)",
+    "msg": "",
+    "note": "无消息；看速度线（雪天速度翻倍）"
+  },
+  "222": {
+    "trigger": "HP<50%",
+    "msg": "",
+    "note": "无消息；看半血后替换（参考 desc）"
+  },
+  "223": {
+    "trigger": "主动出招",
+    "msg": "",
+    "note": "无消息；看中毒目标必暴击（参考 desc）"
+  },
+  "224": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看水系伤害×2且不烧伤（参考 desc）"
+  },
+  "225": {
+    "trigger": "主动出招",
+    "msg": "",
+    "note": "无消息；看钢系伤害提高（参考 desc）"
+  },
+  "226": {
+    "trigger": "主动出招",
+    "msg": "",
+    "note": "无消息；看接触招不触发接触效果（参考 desc）"
+  },
+  "227": {
+    "trigger": "主动出招(声音)",
+    "msg": "",
+    "note": "无消息；看声音招变水系（参考 desc）"
+  },
+  "228": {
+    "trigger": "主动出招(一般系)",
+    "msg": "",
+    "note": "无消息；看一般系变电系克制（参考 desc）"
+  },
+  "229": {
+    "trigger": "被接触攻击",
+    "msg": "（有专门消息）",
+    "note": "看攻击方速度降"
+  },
+  "230": {
+    "trigger": "队友倒下",
+    "msg": "",
+    "note": "无消息；看继承队友特性（参考 desc）"
+  },
+  "231": {
+    "trigger": "击倒对手后",
+    "msg": "X's Beast Boost raised its highest stat!",
+    "note": "有专门消息"
+  },
+  "232": {
+    "trigger": "被克制攻击",
+    "msg": "",
+    "note": "无消息；看克制伤害减弱（参考 desc）"
+  },
+  "233": {
+    "trigger": "主动出招(克制)",
+    "msg": "",
+    "note": "无消息；看克制招伤害更强（参考 desc）"
+  },
+  "234": {
+    "trigger": "入场",
+    "msg": "X's Intrepid Sword raised its Attack!",
+    "note": "有专门消息"
+  },
+  "235": {
+    "trigger": "入场",
+    "msg": "X's Dauntless Shield raised its Defense!",
+    "note": "有专门消息"
+  },
+  "236": {
+    "trigger": "入场",
+    "msg": "X's Neutralizing Gas filled the air!",
+    "note": "有专门消息（全场特性无效）"
+  },
+  "237": {
+    "trigger": "回合末",
+    "msg": "",
+    "note": "无消息；看形态交替（参考 desc）"
+  },
+  "238": {
+    "trigger": "被攻击",
+    "msg": "（有专门消息）",
+    "note": "看全场速度降"
+  },
+  "239": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看无视吸引（参考 desc）"
+  },
+  "240": {
+    "trigger": "能力下降时",
+    "msg": "X's Mirror Armor reflected the stat change!",
+    "note": "有专门消息"
+  },
+  "241": {
+    "trigger": "被攻击",
+    "msg": "（有专门消息）",
+    "note": "看吐猎物攻击"
+  },
+  "242": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看无视吸引（参考 desc）"
+  },
+  "243": {
+    "trigger": "被火/水系攻击",
+    "msg": "（有专门消息）",
+    "note": "看速度巨幅提高"
+  },
+  "244": {
+    "trigger": "主动出招(声音)",
+    "msg": "",
+    "note": "无消息；看声音招伤害提高+受声音减半（参考 desc）"
+  },
+  "245": {
+    "trigger": "被攻击",
+    "msg": "（有专门消息）",
+    "note": "看开沙暴"
+  },
+  "246": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看特攻伤害减半（参考 desc）"
+  },
+  "247": {
+    "trigger": "吃树果",
+    "msg": "",
+    "note": "无消息；看树果效果翻倍（参考 desc）"
+  },
+  "248": {
+    "trigger": "首次被物攻",
+    "msg": "X's Ice Face took the hit!",
+    "note": "有专门消息"
+  },
+  "249": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看相邻队友伤害提高（参考 desc）"
+  },
+  "250": {
+    "trigger": "场地变化时",
+    "msg": "（有专门消息）",
+    "note": "看属性随场地变"
+  },
+  "251": {
+    "trigger": "入场",
+    "msg": "（有专门消息）",
+    "note": "看双方光墙/反射壁消失"
+  },
+  "252": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看我方钢系伤害提高（参考 desc）"
+  },
+  "253": {
+    "trigger": "被接触攻击",
+    "msg": "（有专门消息）",
+    "note": "看双方灭亡歌倒计时"
+  },
+  "254": {
+    "trigger": "被接触攻击",
+    "msg": "（有专门消息）",
+    "note": "看与攻击方交换特性"
+  },
+  "255": {
+    "trigger": "持续被动",
+    "msg": "",
+    "note": "无消息；看只出一招但物攻×1.5（参考 desc）"
+  }
 }

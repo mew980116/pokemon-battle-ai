@@ -251,7 +251,7 @@
     "35": {
       "name": "Quick Draw",
       "name_zh": "速击",
-      "desc_zh": "将拥有发光特性的怪兽排在队伍首位时，遇敌率翻倍。",
+      "desc_zh": "有时能比对手先出手（30% 概率先制）。",
       "desc_en": "If a Pokémon with this ability is the first in your belt, doubles the chance of a wild encounter.",
       "has_msg": false
     },
@@ -356,7 +356,7 @@
     "50": {
       "name": "Unseen Fist",
       "name_zh": "无形拳",
-      "desc_zh": "在野生战斗中，拥有逃足特性的怪兽必定能逃跑。",
+      "desc_zh": "接触类招式能无视守住/看穿。",
       "desc_en": "Allows a Pokémon with this ability to always run from wild battles.",
       "has_msg": false
     },
@@ -832,7 +832,7 @@
     "118": {
       "name": "Curious Medicine",
       "name_zh": "无效特性",
-      "desc_zh": "战斗结束后，拥有集蜜特性的怪兽有几率拾取甜蜜。",
+      "desc_zh": "出场时，我方的能力变化会复原。",
       "desc_en": "Causes a Pokémon with this ability to have a chance to collect Honey after a battle.",
       "has_msg": false
     },
@@ -923,14 +923,14 @@
     "131": {
       "name": "Transistor",
       "name_zh": "电晶体",
-      "desc_zh": "回合结束时30%几率解除一个队友的异常状态。",
+      "desc_zh": "电属性招式威力提高 30%。",
       "desc_en": "Each turn, has a 30% chance to heal any major status condition from partners adjacent to a Pokémon with this ability.",
       "has_msg": false
     },
     "132": {
       "name": "Dragon's Maw",
       "name_zh": "龙颚",
-      "desc_zh": "队友受到的伤害减少1/4。",
+      "desc_zh": "龙属性招式威力提高 30%。",
       "desc_en": "Reduces by 25% damage that partners of a Pokémon with this ability receive.",
       "has_msg": false
     },
@@ -1151,7 +1151,7 @@
     "163": {
       "name": "AsOne",
       "name_zh": "人马一体",
-      "desc_zh": "拥有涡轮火花特性的怪兽使用技能时，无视防御方的特性。",
+      "desc_zh": "对手不能吃树果；击倒对手后攻击或特攻升（视合体形态）。",
       "desc_en": "Prevents opponent abilities from hindering moves used by a Pokémon with this ability.",
       "has_msg": false
     },
@@ -2340,5 +2340,37 @@
     "游魂": 254,
     "gorilla tactics": 255,
     "一猩一意": 255
+  },
+  "deleted": {
+    "illuminate": {
+      "name": "Illuminate",
+      "name_zh": "发光",
+      "desc": "野生遇敌率翻倍（对战无效果）。",
+      "note": "PO 已删（单打无效果）"
+    },
+    "run away": {
+      "name": "Run Away",
+      "name_zh": "逃足",
+      "desc": "能从野生战斗逃跑（对战无效果）。",
+      "note": "PO 已删（单打无效果）"
+    },
+    "honey gather": {
+      "name": "Honey Gather",
+      "name_zh": "集蜜",
+      "desc": "战斗后可能拾取蜂蜜（对战无效果）。",
+      "note": "PO 已删（单打无效果）"
+    },
+    "healer": {
+      "name": "Healer",
+      "name_zh": "治愈之心",
+      "desc": "双打中 30% 几率治愈队友异常状态。",
+      "note": "PO 已删（单打无效果）"
+    },
+    "friend guard": {
+      "name": "Friend Guard",
+      "name_zh": "友情守护",
+      "desc": "双打中队友受到的伤害减少 1/4。",
+      "note": "PO 已删（单打无效果）"
+    }
   }
 }
