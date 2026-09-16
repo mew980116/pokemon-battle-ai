@@ -167,6 +167,8 @@ var TOOL_DEFS = [
                                         iv: { type: 'array', items: { type: 'number' }, description: 'IVs [HP,Atk,Def,SpA,SpD,Spe], default all 31' },
                                         nature: { type: 'string', description: 'Nature name (English or Chinese) or number, default neutral' },
                                         boosts: { type: 'object', description: 'Stat stages, e.g. {"atk":1,"spa":-1}', additionalProperties: { type: 'integer' } },
+                                        atk: { type: 'number', description: 'Direct final Attack stat (bypasses base-stats/EV/IV/nature calculation). Use if you already know the value.' },
+                                        spa: { type: 'number', description: 'Direct final Special Attack stat (bypasses calculation).' },
                                         base_stats: { type: 'array', items: { type: 'number' }, description: 'Explicit base stats [HP,Atk,Def,SpA,SpD,Spe] (alternative to poke name)' },
                                         types: { type: 'array', items: { type: 'string' }, description: 'Types (required if base_stats given, for STAB check)' }
                                     },
@@ -182,6 +184,9 @@ var TOOL_DEFS = [
                                         iv: { type: 'array', items: { type: 'number' }, description: 'IVs [HP,Atk,Def,SpA,SpD,Spe], default all 31' },
                                         nature: { type: 'string', description: 'Nature name or number, default neutral' },
                                         boosts: { type: 'object', description: 'Stat stages, e.g. {"def":1}', additionalProperties: { type: 'integer' } },
+                                        def: { type: 'number', description: 'Direct final Defense stat (bypasses calculation).' },
+                                        spd: { type: 'number', description: 'Direct final Special Defense stat (bypasses calculation).' },
+                                        hp: { type: 'number', description: 'Direct max HP (bypasses calculation), used for the damage %. ' },
                                         base_stats: { type: 'array', items: { type: 'number' }, description: 'Explicit base stats [HP,Atk,Def,SpA,SpD,Spe]' },
                                         types: { type: 'array', items: { type: 'string' }, description: 'Types (required if base_stats given)' }
                                     },
@@ -551,11 +556,11 @@ function calcOneLeg(leg, idx) {
     var dNature = resolveNature(leg.defender);
     var aStat, dStat;
     if (mv.category === 'Physical') {
-        aStat = effectiveStat(atk.baseStats, lv, leg.attacker.ev, leg.attacker.iv, aNature, leg.attacker.boosts, 1);
-        dStat = effectiveStat(def.baseStats, leg.defender.level || lv, leg.defender.ev, leg.defender.iv, dNature, leg.defender.boosts, 2);
+        aStat = (leg.attacker.atk !== undefined && leg.attacker.atk !== null) ? leg.attacker.atk : effectiveStat(atk.baseStats, lv, leg.attacker.ev, leg.attacker.iv, aNature, leg.attacker.boosts, 1);
+        dStat = (leg.defender.def !== undefined && leg.defender.def !== null) ? leg.defender.def : effectiveStat(def.baseStats, leg.defender.level || lv, leg.defender.ev, leg.defender.iv, dNature, leg.defender.boosts, 2);
     } else {
-        aStat = effectiveStat(atk.baseStats, lv, leg.attacker.ev, leg.attacker.iv, aNature, leg.attacker.boosts, 3);
-        dStat = effectiveStat(def.baseStats, leg.defender.level || lv, leg.defender.ev, leg.defender.iv, dNature, leg.defender.boosts, 4);
+        aStat = (leg.attacker.spa !== undefined && leg.attacker.spa !== null) ? leg.attacker.spa : effectiveStat(atk.baseStats, lv, leg.attacker.ev, leg.attacker.iv, aNature, leg.attacker.boosts, 3);
+        dStat = (leg.defender.spd !== undefined && leg.defender.spd !== null) ? leg.defender.spd : effectiveStat(def.baseStats, leg.defender.level || lv, leg.defender.ev, leg.defender.iv, dNature, leg.defender.boosts, 4);
     }
 
     var base = Math.floor(Math.floor(((2 * lv / 5 + 2) * mv.power * aStat) / dStat) / 50) + 2;
@@ -585,7 +590,7 @@ function calcOneLeg(leg, idx) {
     var max = Math.floor(final * 1.00);
 
     // 防守方最大 HP（用于百分比）
-    var defHp = effectiveStat(def.baseStats, leg.defender.level || lv, leg.defender.ev, leg.defender.iv, dNature, leg.defender.boosts, 0);
+    var defHp = (leg.defender.hp !== undefined && leg.defender.hp !== null) ? leg.defender.hp : effectiveStat(def.baseStats, leg.defender.level || lv, leg.defender.ev, leg.defender.iv, dNature, leg.defender.boosts, 0);
     var pctMin = defHp > 0 ? Math.floor(min * 100 / defHp) : 0;
     var pctMax = defHp > 0 ? Math.floor(max * 100 / defHp) : 0;
 

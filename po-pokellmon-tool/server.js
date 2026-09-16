@@ -20,7 +20,7 @@ var tools = require('./tools.js');
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.3.35';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.3.36';   // tool 分支版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（tool 分支：思考 + tool，强度 low）====
 var MODEL = 'deepseek-v4-flash';
@@ -33,7 +33,7 @@ var RETRY_DELAYS = [2000, 5000, 10000]; // 单次请求失败后的重试延迟�
 
 var SYSTEM_PROMPT = require('../po-pokellmon/prompts.js').BATTLE_TIPS +
     ' You may call tools to compute type matchups, apply stat boosts, read the battle history, or record/read your notes before deciding. ' +
-    'IMPORTANT: use save_observation to record what you learn about each opposing pokemon (revealed moves, likely item/ability, damage estimate), and save_strategy to record your current plan each turn, so you can recall them in later turns. ' +
+    'IMPORTANT: use save_observation to record what you learn about each opposing pokemon (revealed moves, likely item/ability, damage estimate), and save_strategy to record your current plan each turn, so you can recall them in later turns. If the opponent has multiple pokemon of the same species (no Species Clause), distinguish them by appending their team slot to the name, e.g. save_observation pokemon="Garchomp#1" vs "Garchomp#2", so their notes do not overwrite each other. ' +
     'Before committing to a move, use calc_damage to check whether your moves can KO or how much damage they deal (it returns the 0.85x and 1.0x random rolls and the % of the defender max HP). ' +
     'For speed comparison, use get_my_stats to read your own pokemon actual stats, and calc_stats to compute any pokemon stats under a given EV/IV/nature/boost (e.g. estimate whether you outspeed the opponent). ' +
     'Record the speed matchup via save_observation using this consistent format so you can recall it later without recomputing: "Speed:<current>(<spread>)|<boostMove>+<stage>:<boosted>|<reference>:<speed>", e.g. "Speed:259(252Spe Adamant)|DragonDance+1:388|Garchomp:303". ' +
