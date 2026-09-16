@@ -598,8 +598,9 @@ function calcOneLeg(leg, idx) {
     }
     min = Math.floor(pokeRound(min) * typeMult);
     max = Math.floor(pokeRound(max) * typeMult);
-    min = Math.floor(min * extra);
-    max = Math.floor(max * extra);
+    // extra 对应 @smogon 的 finalMod，用 pokeRound（四舍五入），对齐 finalMods 应用
+    min = pokeRound(min * extra);
+    max = pokeRound(max * extra);
 
     // 防守方最大 HP（用于百分比）
     var defHp = (leg.defender.hp !== undefined && leg.defender.hp !== null) ? leg.defender.hp : effectiveStat(def.baseStats, leg.defender.level || lv, leg.defender.ev, leg.defender.iv, dNature, leg.defender.boosts, 0);
