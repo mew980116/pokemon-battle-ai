@@ -517,6 +517,11 @@ function boostOf(boosts, statName) {
     return parseInt(v, 10) || 0;
 }
 
+// 宝可梦的 pokeRound：小数部分 > 0.5 才向上取整，否则向下（对齐 @smogon/calc）
+function pokeRound(n) {
+    return n % 1 > 0.5 ? Math.ceil(n) : Math.floor(n);
+}
+
 // 计算有效能力值（含性格 + 能力等级修正）；statIdx 0-5
 function effectiveStat(baseStats, level, ev, iv, nature, boosts, statIdx) {
     var base = baseStats[statIdx];
@@ -563,31 +568,38 @@ function calcOneLeg(leg, idx) {
         dStat = (leg.defender.spd !== undefined && leg.defender.spd !== null) ? leg.defender.spd : effectiveStat(def.baseStats, leg.defender.level || lv, leg.defender.ev, leg.defender.iv, dNature, leg.defender.boosts, 4);
     }
 
-    var base = Math.floor(Math.floor(((2 * lv / 5 + 2) * mv.power * aStat) / dStat) / 50) + 2;
+    var base = Math.floor(Math.floor(Math.floor((2 * lv / 5 + 2) * mv.power * aStat) / dStat) / 50) + 2;
 
     // STAB：攻击方属性含招式属性 -> 1.5
     var stab = 1;
     if (mv.type && atk.types && atk.types.indexOf(mv.type) !== -1) stab = 1.5;
 
-    // 属性克制
-    var mult = stab;
+    // 属性克制（纯克制系数，不含 STAB/extra）
+    var typeMult = 1;
     if (mv.type && def.types && def.types.length) {
         var ai = typeIndex(mv.type);
         if (ai >= 0) {
             for (var t = 0; t < def.types.length; t++) {
                 var di = typeIndex(def.types[t]);
-                if (di >= 0) mult *= CHART[ai][di];
+                if (di >= 0) typeMult *= CHART[ai][di];
             }
         }
     }
 
     // extra 系数（默认 1.0）
     var extra = (leg.extra !== undefined && leg.extra !== null) ? leg.extra : 1.0;
-    mult *= extra;
 
-    var final = Math.floor(base * mult);
-    var min = Math.floor(final * 0.85);
-    var max = Math.floor(final * 1.00);
+    // 对齐 @smogon/calc getFinalDamage 的顺序：随机系数 → STAB(4096定点) → 克制(pokeRound) → extra
+    var min = Math.floor(base * 85 / 100);
+    var max = Math.floor(base * 100 / 100);
+    if (stab === 1.5) {
+        min = min * 6144 / 4096;
+        max = max * 6144 / 4096;
+    }
+    min = Math.floor(pokeRound(min) * typeMult);
+    max = Math.floor(pokeRound(max) * typeMult);
+    min = Math.floor(min * extra);
+    max = Math.floor(max * extra);
 
     // 防守方最大 HP（用于百分比）
     var defHp = (leg.defender.hp !== undefined && leg.defender.hp !== null) ? leg.defender.hp : effectiveStat(def.baseStats, leg.defender.level || lv, leg.defender.ev, leg.defender.iv, dNature, leg.defender.boosts, 0);
@@ -605,7 +617,7 @@ function calcOneLeg(leg, idx) {
             defense_stat: dStat,
             defender_max_hp: defHp,
             stab: stab,
-            type_mult: mult / (stab * extra),
+            type_mult: typeMult,
             extra: extra
         }
     };
