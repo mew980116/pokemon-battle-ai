@@ -276,7 +276,7 @@ var TOOL_DEFS = [
         type: 'function',
         function: {
             name: 'battle_tips',
-            description: 'Look up battle tactics / strategy tips by name, e.g. "优势局" (how to play when ahead), "劣势局" (when behind), "预知未来" (Future Sight), "撒钉", "牺牲", "残局", "太晶", "强化手" etc. Pass up to 10 tip names at once; names can be Chinese or English.',
+            description: 'Look up battle tactics / strategy tips by name, e.g. "优势局" (ahead), "劣势局" (behind), "预知未来" (Future Sight), "撒钉", "牺牲", "残局", "太晶", "强化手", plus core strategy concepts like "联防", "联攻", "攻防转换", "胜利路线". Pass up to 10 tip names at once; Chinese or English. Each core strategy concept has a concise version and a detailed version — add suffix "详解"/"详细"/"展开" for the detailed one (e.g. "联防详解").',
             parameters: {
                 type: 'object',
                 properties: {
@@ -837,7 +837,26 @@ var TIP_ALIASES = {
     '劣势局': 'disadvantage', '落后': 'disadvantage', 'disadvantage': 'disadvantage',
     '核心原则': 'principles', '原则': 'principles', '五原则': 'principles', 'principles': 'principles',
     '案例': 'cases', '实战案例': 'cases', 'cases': 'cases',
-    '记录习惯': 'record-habit', '记笔记': 'record-habit', '记录': 'record-habit'
+    '记录习惯': 'record-habit', '记笔记': 'record-habit', '记录': 'record-habit',
+    // 通用战略层（core_strategy）
+    '联攻联防总纲': 'synergy-overview', '战略总纲': 'synergy-overview', '总纲': 'synergy-overview', '战略层': 'synergy-overview', '胜利路线': 'synergy-overview', 'win condition': 'synergy-overview', 'win_condition': 'synergy-overview', 'wincon': 'synergy-overview', 'synergy': 'synergy-overview', 'core strategy': 'synergy-overview',
+    '联防': 'defensive-synergy', '防守协同': 'defensive-synergy', '防御协同': 'defensive-synergy', 'defensive': 'defensive-synergy',
+    '联攻': 'offensive-synergy', '进攻协同': 'offensive-synergy', 'offensive': 'offensive-synergy',
+    '攻防转换': 'transition', '压制链': 'transition', '转换': 'transition', 'transition': 'transition',
+    '诱杀': 'bait', 'bait': 'bait',
+    '共同消耗': 'chip-progress', 'chip-progress': 'chip-progress', 'chip': 'chip-progress',
+    '速度联防': 'speed-defense', '速度防守': 'speed-defense', 'speed defense': 'speed-defense',
+    '状态联防': 'status-defense', '状态防守': 'status-defense', 'status defense': 'status-defense',
+    '核心分类': 'core-taxonomy', '核心': 'core-taxonomy', 'core taxonomy': 'core-taxonomy',
+    '总纲详解': 'synergy-overview-detail', '总纲详细': 'synergy-overview-detail', '总纲展开': 'synergy-overview-detail', '联攻联防总纲详解': 'synergy-overview-detail',
+    '联防详解': 'defensive-synergy-detail', '联防详细': 'defensive-synergy-detail', '联防展开': 'defensive-synergy-detail',
+    '联攻详解': 'offensive-synergy-detail', '联攻详细': 'offensive-synergy-detail', '联攻展开': 'offensive-synergy-detail',
+    '攻防转换详解': 'transition-detail', '攻防转换详细': 'transition-detail', '攻防转换展开': 'transition-detail', '压制链详解': 'transition-detail', '攻防转换与压制链详解': 'transition-detail',
+    '诱杀详解': 'bait-detail', '诱杀详细': 'bait-detail', '诱杀展开': 'bait-detail',
+    '共同消耗详解': 'chip-progress-detail', '共同消耗详细': 'chip-progress-detail', '共同消耗展开': 'chip-progress-detail',
+    '速度联防详解': 'speed-defense-detail', '速度联防详细': 'speed-defense-detail', '速度联防展开': 'speed-defense-detail',
+    '状态联防详解': 'status-defense-detail', '状态联防详细': 'status-defense-detail', '状态联防展开': 'status-defense-detail',
+    '核心分类详解': 'core-taxonomy-detail', '核心分类详细': 'core-taxonomy-detail', '核心分类展开': 'core-taxonomy-detail'
 };
 
 // 构建 tip 索引：id -> { title, text }
@@ -866,6 +885,19 @@ function buildTipIndex() {
         var title = v.name || pk;
         var text = flattenTip(v, '');
         map[id] = { title: title, text: text };
+    }
+    // 通用战略层（core_strategy）：每条生成精简（summary）+ 详解（detail）两个入口
+    var cs = TACTICS.core_strategy || {};
+    for (var cid in cs) {
+        if (cid === 'meta') continue;
+        var cv = cs[cid];
+        if (!cv) continue;
+        var summaryText = cv.summary || '';
+        if (cv.detail) {
+            summaryText += '\n（要查看详细展开含例子与决策条件：battle_tips(["' + cv.name + '详解"])）';
+        }
+        map[cid] = { title: cv.name, text: summaryText };
+        if (cv.detail) map[cid + '-detail'] = { title: cv.name + '（详解）', text: cv.detail };
     }
     return map;
 }
