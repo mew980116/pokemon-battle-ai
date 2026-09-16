@@ -332,6 +332,8 @@
 
 - [ ] **评估是否引入 @smogon/calc（PS 官方伤害计算器）**：Pokemon Showdown 官方 damage calc 用的 TypeScript 库（npm 包 @smogon/calc），功能全（含道具/特性/天气/场地/状态/暴击等所有修正）。当前 calc_damage 是简化版（标准公式 + extra 系数手动补修正），够用。若后续发现简化版在复杂场景算不准，评估引入 @smogon/calc 或参考其公式补全。注意：TS 库需 npm install + 转译，QScript/Node proxy 环境接入成本高，非必要不引入。
 
+- [ ] **主脚本 20201227.js 伤害计算对齐 @smogon/calc（等 tool 侧验证后再做）**：tool 侧 calc_damage 已对齐（0.3.37：随机系数→STAB(4096定点)→克制(pokeRound)→extra，6 用例与 @smogon/calc 一致）。主脚本 getMoveDamage 有两处差异：① **随机系数顺序反**——movepow[i]（L2427）算出的是「最大伤害」（1.0x，先 base→克制→STAB 连续乘），别处用 `maxpow * 0.85`（L1042/L1285）算最小伤害；正确应「先随机系数(85-100) 再 STAB 再克制」② **取整方式**——主脚本纯浮点连续乘（无逐步 floor/pokeRound），正确应逐步 floor（随机向下取整、STAB 五舍六入 pokeRound、克制向下取整）。对齐需改 L2427 base damage 公式（`(2*level+10)/250` 等价 `(2*level/5+2)/50`，但 buff 里 atk/def 未逐步 floor）+ 后续克制/STAB/修正链 + getPossibleDamage/analyseCurrentDamage 的 `maxpow*0.85`。注意：主脚本是评分用估算、精度要求低于 tool，可先对齐顺序，逐步 floor 视收益再决定。
+
 **已实证**：
 
 - 挣扎保底（全 ban 后 `attackButton()`）不会导致卡死，兜底有效。
