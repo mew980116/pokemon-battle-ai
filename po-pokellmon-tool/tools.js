@@ -967,6 +967,7 @@ function getMoveInfo(args) {
         num: found.num,
         name: mv.name,
         name_zh: mv.name_zh,
+        desc: mv.desc || '',
         power: mv.power,
         accuracy: mv.accuracy,
         category: mv.category,

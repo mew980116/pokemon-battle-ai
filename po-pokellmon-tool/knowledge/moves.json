@@ -7,7 +7,8 @@
     "category": "Status",
     "type": null,
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "(无描述)"
   },
   "1": {
     "name": "Pound",
@@ -19,7 +20,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：拍打。用长长的尾巴或爪子拍打对手。"
   },
   "2": {
     "name": "Karate Chop",
@@ -31,7 +33,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：空手刀。用锋锐的手刀敲打对手攻击，高几率命中要害。"
   },
   "3": {
     "name": "Double Slap",
@@ -43,7 +46,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：往复拍打。连续拍打对手，2～5次连续攻击。"
   },
   "4": {
     "name": "Comet Punch",
@@ -56,7 +60,8 @@
     "tags": [
       "ironFist",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：连续拳。用疯狂的拳头连续揍对手，2～5次连续攻击。"
   },
   "5": {
     "name": "Mega Punch",
@@ -69,7 +74,8 @@
     "tags": [
       "ironFist",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：百万拳击。用充满力量的拳头攻击对手。"
   },
   "6": {
     "name": "Pay Day",
@@ -79,7 +85,8 @@
     "category": "Physical",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：招财猫。朝对手的身体投掷硬币攻击，战斗后能获得金币。"
   },
   "7": {
     "name": "Fire Punch",
@@ -92,7 +99,8 @@
     "tags": [
       "ironFist",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：火焰拳。用充满火焰的拳头攻击，会造成烧伤。"
   },
   "8": {
     "name": "Ice Punch",
@@ -105,7 +113,8 @@
     "tags": [
       "ironFist",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：冷冻拳。用充满冷气的拳头攻击，会造成冰冻。"
   },
   "9": {
     "name": "Thunder Punch",
@@ -118,7 +127,8 @@
     "tags": [
       "ironFist",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：雷电拳。用充满电流的拳头攻击，会造成麻痹。"
   },
   "10": {
     "name": "Scratch",
@@ -130,7 +140,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：抓。用坚硬的尖爪抓击对手。"
   },
   "11": {
     "name": "Vice Grip",
@@ -142,7 +153,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：夹。从两侧夹击对手造成伤害。"
   },
   "12": {
     "name": "Guillotine",
@@ -154,7 +166,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：剪刀断头台。用巨大的钳子切裂对手，命中立即濒死。"
   },
   "13": {
     "name": "Razor Wind",
@@ -164,7 +177,8 @@
     "category": "Special",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：镰鼬风。做出风刃在第二回合攻击，容易命中要害。"
   },
   "14": {
     "name": "Swords Dance",
@@ -174,7 +188,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：剑之舞。跳起战斗之舞，迅速提高自身攻击。"
   },
   "15": {
     "name": "Cut",
@@ -186,7 +201,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：居合斩。用镰刀或爪子切裂对手。能砍断小树。"
   },
   "16": {
     "name": "Gust",
@@ -196,7 +212,8 @@
     "category": "Special",
     "type": "Flying",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：起风。用翅膀扇起剧烈的狂风攻击对手。"
   },
   "17": {
     "name": "Wing Attack",
@@ -208,7 +225,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：翅膀拍击。展开巨大的翅膀拍打对手。"
   },
   "18": {
     "name": "Whirlwind",
@@ -218,7 +236,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": -6,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：吹飞。把对手吹飞，换出其它怪兽。对野生怪兽则结束战斗。"
   },
   "19": {
     "name": "Fly",
@@ -230,7 +249,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：飞空。第一回合飞上天空，第二回合攻击对手。可以飞到去过的城镇。"
   },
   "20": {
     "name": "Bind",
@@ -242,7 +262,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：勒住。4～5回合内用长长的身躯或藤条勒住对手。"
   },
   "21": {
     "name": "Slam",
@@ -254,7 +275,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：打倒。使用长长的尾巴或藤条抽打对手。"
   },
   "22": {
     "name": "Vine Whip",
@@ -266,7 +288,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：藤鞭。用鞭子般细长的藤条抽打对手。"
   },
   "23": {
     "name": "Stomp",
@@ -278,7 +301,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：践踏。用大脚践踏对手，会让对手害怕。"
   },
   "24": {
     "name": "Double Kick",
@@ -290,7 +314,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：连环踢。用双脚飞踢对手，造成2次伤害。"
   },
   "25": {
     "name": "Mega Kick",
@@ -302,7 +327,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：百万腿踢。用巨大的力量对对手作出飞踢攻击。"
   },
   "26": {
     "name": "Jump Kick",
@@ -315,7 +341,8 @@
     "tags": [
       "reckless",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：飞踢。高高跳起向下踢击对手，踢偏的话自身会受到伤害。"
   },
   "27": {
     "name": "Rolling Kick",
@@ -327,7 +354,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：回旋踢。迅速旋转身体踢击对手。"
   },
   "28": {
     "name": "Sand Attack",
@@ -337,7 +365,8 @@
     "category": "Status",
     "type": "Ground",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：扔沙。向对手脸部扔沙，降低命中率。"
   },
   "29": {
     "name": "Headbutt",
@@ -349,7 +378,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：头槌。低头向对手直撞攻击，会让对手害怕。"
   },
   "30": {
     "name": "Horn Attack",
@@ -361,7 +391,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：角突。用尖锐的角攻击对手。"
   },
   "31": {
     "name": "Fury Attack",
@@ -373,7 +404,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：乱突。用角或喙啄击对手，2～5次连续攻击。"
   },
   "32": {
     "name": "Horn Drill",
@@ -385,7 +417,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：尖角钻。用旋转的角突刺对手，命中立即濒死。"
   },
   "33": {
     "name": "Tackle",
@@ -397,7 +430,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：撞击。用全身向对手冲撞攻击。"
   },
   "34": {
     "name": "Body Slam",
@@ -409,7 +443,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：压制。用全身体重压上对手，会造成麻痹。"
   },
   "35": {
     "name": "Wrap",
@@ -421,7 +456,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：卷紧。用长长的身体或藤条4～5回合内缠绕对手。"
   },
   "36": {
     "name": "Take Down",
@@ -434,7 +470,8 @@
     "tags": [
       "reckless",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：突进。鼓起劲冲撞对手，自身也会受到少量伤害。"
   },
   "37": {
     "name": "Thrash",
@@ -446,7 +483,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：暴走。2～3回合内乱撞攻击对手，乱撞后会混乱。"
   },
   "38": {
     "name": "Double-Edge",
@@ -459,7 +497,8 @@
     "tags": [
       "reckless",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：舍身撞。拼上性命向对手突进攻击，自身也会受到大量伤害。"
   },
   "39": {
     "name": "Tail Whip",
@@ -469,7 +508,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：甩尾。左右甩尾让对手松懈，降低对手防御。"
   },
   "40": {
     "name": "Poison Sting",
@@ -479,7 +519,8 @@
     "category": "Physical",
     "type": "Poison",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：毒针。用毒针突刺对手，会造成中毒。"
   },
   "41": {
     "name": "Twineedle",
@@ -489,7 +530,8 @@
     "category": "Physical",
     "type": "Bug",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：双针。用双针连续2次突刺对手，会造成中毒。"
   },
   "42": {
     "name": "Pin Missile",
@@ -499,7 +541,8 @@
     "category": "Physical",
     "type": "Bug",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：导弹针。向对手发射尖针攻击，2～5次连续攻击。"
   },
   "43": {
     "name": "Leer",
@@ -509,7 +552,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：瞪眼。用锐利的目光让对手害怕，降低对手防御。"
   },
   "44": {
     "name": "Bite",
@@ -522,7 +566,8 @@
     "tags": [
       "strongJaw",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：啃咬。用尖锐的牙齿啃咬，会让对手害怕。"
   },
   "45": {
     "name": "Growl",
@@ -534,7 +579,8 @@
     "priority": 0,
     "tags": [
       "voice"
-    ]
+    ],
+    "desc": "PO译名：叫声。用可爱的声音吸引对手，降低对手攻击。"
   },
   "46": {
     "name": "Roar",
@@ -546,7 +592,8 @@
     "priority": -6,
     "tags": [
       "voice"
-    ]
+    ],
+    "desc": "PO译名：吼叫。让对手逃跑，换出其它怪兽。对野生战斗强制结束。"
   },
   "47": {
     "name": "Sing",
@@ -558,7 +605,8 @@
     "priority": 0,
     "tags": [
       "voice"
-    ]
+    ],
+    "desc": "PO译名：歌唱。让对手听见舒适的歌声，进入睡眠状态。"
   },
   "48": {
     "name": "Supersonic",
@@ -570,7 +618,8 @@
     "priority": 0,
     "tags": [
       "voice"
-    ]
+    ],
+    "desc": "PO译名：超音波。从体内发出特殊的音波，让对手混乱。"
   },
   "49": {
     "name": "Sonic Boom",
@@ -580,7 +629,8 @@
     "category": "Special",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：音波爆。向对手发射冲击波攻击，造成20点伤害。"
   },
   "50": {
     "name": "Disable",
@@ -590,7 +640,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：束缚。束缚对手的行动，让对手最近使用的技能4回合内不能使用。"
   },
   "51": {
     "name": "Acid",
@@ -600,7 +651,8 @@
     "category": "Special",
     "type": "Poison",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：溶解液。向对手喷洒强酸攻击，会降低对手特防。"
   },
   "52": {
     "name": "Ember",
@@ -610,7 +662,8 @@
     "category": "Special",
     "type": "Fire",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：火苗。向对手发射小型火焰攻击，会造成烧伤。"
   },
   "53": {
     "name": "Flamethrower",
@@ -620,7 +673,8 @@
     "category": "Special",
     "type": "Fire",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：火焰放射。向对手发射强烈的火焰攻击，会造成烧伤。"
   },
   "54": {
     "name": "Mist",
@@ -630,7 +684,8 @@
     "category": "Status",
     "type": "Ice",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：白雾。在身体上蒙上白雾，5回合内能力不会被对手下降。"
   },
   "55": {
     "name": "Water Gun",
@@ -640,7 +695,8 @@
     "category": "Special",
     "type": "Water",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：水枪。用劲向对手喷水攻击。"
   },
   "56": {
     "name": "Hydro Pump",
@@ -650,7 +706,8 @@
     "category": "Special",
     "type": "Water",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：水压。向对手发射强烈的水柱攻击。"
   },
   "57": {
     "name": "Surf",
@@ -660,7 +717,8 @@
     "category": "Special",
     "type": "Water",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：冲浪。用大浪攻击自身周围所有单位。可以在水上行动。"
   },
   "58": {
     "name": "Ice Beam",
@@ -670,7 +728,8 @@
     "category": "Special",
     "type": "Ice",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：冷冻光线。向对手发射冰冻的光线攻击，会造成冰冻。"
   },
   "59": {
     "name": "Blizzard",
@@ -680,7 +739,8 @@
     "category": "Special",
     "type": "Ice",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：暴风雪。向对手喷射强烈的暴风雪攻击，会造成冰冻。"
   },
   "60": {
     "name": "Psybeam",
@@ -690,7 +750,8 @@
     "category": "Special",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：精神光线。向对手发射神秘的光线攻击，会造成混乱。"
   },
   "61": {
     "name": "Bubble Beam",
@@ -700,7 +761,8 @@
     "category": "Special",
     "type": "Water",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：泡沫光线。向对手发射泡沫攻击，会降低速度。"
   },
   "62": {
     "name": "Aurora Beam",
@@ -710,7 +772,8 @@
     "category": "Special",
     "type": "Ice",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：极光光线。向对手发射彩虹色的光线攻击，会降低攻击。"
   },
   "63": {
     "name": "Hyper Beam",
@@ -720,7 +783,8 @@
     "category": "Special",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：破坏光线。向对手发射强烈的光线攻击，下回合不能行动。"
   },
   "64": {
     "name": "Peck",
@@ -732,7 +796,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：啄。用尖锐的喙或角突刺对手。"
   },
   "65": {
     "name": "Drill Peck",
@@ -744,7 +809,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：钻孔啄。旋转起来用尖喙突刺对手。"
   },
   "66": {
     "name": "Submission",
@@ -757,7 +823,8 @@
     "tags": [
       "reckless",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：地狱车。将自身与对手一起摔落地面，自身也会受到少量伤害。"
   },
   "67": {
     "name": "Low Kick",
@@ -769,7 +836,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：过肩摔。用力踢对手让对手摔倒，对手越重威力越大。"
   },
   "68": {
     "name": "Counter",
@@ -781,7 +849,8 @@
     "priority": -5,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：反击。将受到的物理攻击双倍返还给对手。"
   },
   "69": {
     "name": "Seismic Toss",
@@ -793,7 +862,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：地球投。借助引力投掷。对对手造成与自身等级相同的伤害。"
   },
   "70": {
     "name": "Strength",
@@ -805,7 +875,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：怪力。用全身的力量揍对手。能推动沉重的岩石。"
   },
   "71": {
     "name": "Absorb",
@@ -815,7 +886,8 @@
     "category": "Special",
     "type": "Grass",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：吸取。吸取养分的攻击，伤害的一半回复自身HP。"
   },
   "72": {
     "name": "Mega Drain",
@@ -825,7 +897,8 @@
     "category": "Special",
     "type": "Grass",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：百万吸取。吸取养分的攻击，伤害的一半回复自身HP。"
   },
   "73": {
     "name": "Leech Seed",
@@ -835,7 +908,8 @@
     "category": "Status",
     "type": "Grass",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：寄生种子。每回合吸取寄生的对手少量HP回复自身。"
   },
   "74": {
     "name": "Growth",
@@ -845,7 +919,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：成长。身体一口气迅速成长，提高自身攻击与特攻。"
   },
   "75": {
     "name": "Razor Leaf",
@@ -855,7 +930,8 @@
     "category": "Physical",
     "type": "Grass",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：飞叶斩。射出叶子切割对手，容易命中要害。"
   },
   "76": {
     "name": "Solar Beam",
@@ -865,7 +941,8 @@
     "category": "Special",
     "type": "Grass",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：太阳光线。第一回合积蓄阳光，第二回合发射光束攻击。"
   },
   "77": {
     "name": "Poison Powder",
@@ -875,7 +952,8 @@
     "category": "Status",
     "type": "Poison",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：毒粉。散布毒粉让对手中毒。"
   },
   "78": {
     "name": "Stun Spore",
@@ -885,7 +963,8 @@
     "category": "Status",
     "type": "Grass",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：麻痹粉。散布麻痹粉让对手麻痹。"
   },
   "79": {
     "name": "Sleep Powder",
@@ -895,7 +974,8 @@
     "category": "Status",
     "type": "Grass",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：催眠粉。散布睡眠粉让对手睡眠。"
   },
   "80": {
     "name": "Petal Dance",
@@ -907,7 +987,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：花瓣舞。2～3回合内飞洒花瓣攻击，飞洒后会混乱。"
   },
   "81": {
     "name": "String Shot",
@@ -917,7 +998,8 @@
     "category": "Status",
     "type": "Bug",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：吐丝。从口中吐丝降低对手速度。"
   },
   "82": {
     "name": "Dragon Rage",
@@ -927,7 +1009,8 @@
     "category": "Special",
     "type": "Dragon",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：龙之怒。向对手发射愤怒的冲击波攻击，造成40伤害。"
   },
   "83": {
     "name": "Fire Spin",
@@ -937,7 +1020,8 @@
     "category": "Special",
     "type": "Fire",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：火旋涡。4～5回合内将对手困在剧烈旋转的火漩涡中。"
   },
   "84": {
     "name": "Thunder Shock",
@@ -947,7 +1031,8 @@
     "category": "Special",
     "type": "Electric",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：电击。用电击攻击对手，会造成麻痹。"
   },
   "85": {
     "name": "Thunderbolt",
@@ -957,7 +1042,8 @@
     "category": "Special",
     "type": "Electric",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：十万伏特。用强烈的电击攻击对手，会造成麻痹。"
   },
   "86": {
     "name": "Thunder Wave",
@@ -967,7 +1053,8 @@
     "category": "Status",
     "type": "Electric",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：电磁波。用弱电击让对手处于麻痹状态。"
   },
   "87": {
     "name": "Thunder",
@@ -977,7 +1064,8 @@
     "category": "Special",
     "type": "Electric",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：雷电。将强烈的雷电落在对手身上攻击，会造成麻痹。"
   },
   "88": {
     "name": "Rock Throw",
@@ -987,7 +1075,8 @@
     "category": "Physical",
     "type": "Rock",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：落石。举起小岩石扔向对手。"
   },
   "89": {
     "name": "Earthquake",
@@ -997,7 +1086,8 @@
     "category": "Physical",
     "type": "Ground",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：地震。用地震的冲击攻击自身周围所有单位。"
   },
   "90": {
     "name": "Fissure",
@@ -1007,7 +1097,8 @@
     "category": "Physical",
     "type": "Ground",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：地裂。让对手落进地裂的裂缝中，命中立即濒死。"
   },
   "91": {
     "name": "Dig",
@@ -1019,7 +1110,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：挖洞。第一回合钻下，第二回合攻击对手。能脱离洞窟。"
   },
   "92": {
     "name": "Toxic",
@@ -1029,7 +1121,8 @@
     "category": "Status",
     "type": "Poison",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：剧毒。让对手处于剧毒状态。每回合损失的伤害增加。"
   },
   "93": {
     "name": "Confusion",
@@ -1039,7 +1132,8 @@
     "category": "Special",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：念力。向对手送出弱念力攻击，会让对手混乱。"
   },
   "94": {
     "name": "Psychic",
@@ -1049,7 +1143,8 @@
     "category": "Special",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：精神干扰。向对手送出强念力攻击，会降低对手特防。"
   },
   "95": {
     "name": "Hypnosis",
@@ -1059,7 +1154,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：催眠术。给予对手施加睡意的暗示，让对手睡眠。"
   },
   "96": {
     "name": "Meditate",
@@ -1069,7 +1165,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：瑜珈之形。从身体中引出沉睡的力量，提高自身攻击。"
   },
   "97": {
     "name": "Agility",
@@ -1079,7 +1176,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：高速移动。放松身体高速移动，大幅提高自身速度。"
   },
   "98": {
     "name": "Quick Attack",
@@ -1091,7 +1189,8 @@
     "priority": 1,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：电光石火。用无法看清的速度突击对手，必定能先制攻击。"
   },
   "99": {
     "name": "Rage",
@@ -1103,7 +1202,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：愤怒。出招期间受到攻击的话会因愤怒的力量提高攻击。"
   },
   "100": {
     "name": "Teleport",
@@ -1113,7 +1213,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：瞬间移动。结束对野生怪兽的战斗。可以前往最后离开的城镇。"
   },
   "101": {
     "name": "Night Shade",
@@ -1123,7 +1224,8 @@
     "category": "Special",
     "type": "Ghost",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：黑夜魔影。作出恐怖的幻影，对对手造成与自身等级相同的伤害。"
   },
   "102": {
     "name": "Mimic",
@@ -1133,7 +1235,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：模仿。在战斗期间，将对手最后使用的技能作为自己的技能使用。"
   },
   "103": {
     "name": "Screech",
@@ -1145,7 +1248,8 @@
     "priority": 0,
     "tags": [
       "voice"
-    ]
+    ],
+    "desc": "PO译名：噪音。发出让人不由得想堵住耳朵的声音大幅降低对手的防御。"
   },
   "104": {
     "name": "Double Team",
@@ -1155,7 +1259,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：影分身。以迅捷的速度制造出分身迷惑对手增加回避率。"
   },
   "105": {
     "name": "Recover",
@@ -1165,7 +1270,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：自我再生。让细胞再生，回复自身最大HP的50%。"
   },
   "106": {
     "name": "Harden",
@@ -1175,7 +1281,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：变硬。用尽全身的力量让身体变硬提高自身防御。"
   },
   "107": {
     "name": "Minimize",
@@ -1185,7 +1292,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：变小。让身体变小，大幅提高自身回避率。"
   },
   "108": {
     "name": "Smokescreen",
@@ -1195,7 +1303,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：烟幕。喷射烟或墨降低对手的回避率。"
   },
   "109": {
     "name": "Confuse Ray",
@@ -1205,7 +1314,8 @@
     "category": "Status",
     "type": "Ghost",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：怪异光线。发出怪异的光芒迷惑对手，让对手混乱。"
   },
   "110": {
     "name": "Withdraw",
@@ -1215,7 +1325,8 @@
     "category": "Status",
     "type": "Water",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：躲进贝壳。躲进贝壳里守护自己，提高自身防御。"
   },
   "111": {
     "name": "Defense Curl",
@@ -1225,7 +1336,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：变圆。将身体缩圆提高自身防御。"
   },
   "112": {
     "name": "Barrier",
@@ -1235,7 +1347,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：栅栏。制造坚固的障壁提高自身防御。"
   },
   "113": {
     "name": "Light Screen",
@@ -1245,7 +1358,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：光之壁。5回合内用神秘的墙壁减弱对方特殊攻击的伤害。"
   },
   "114": {
     "name": "Haze",
@@ -1255,7 +1369,8 @@
     "category": "Status",
     "type": "Ice",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：黑雾。发出黑雾取消战斗中所有怪兽的能力变化。"
   },
   "115": {
     "name": "Reflect",
@@ -1265,7 +1380,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：反射盾。5回合内用神秘的墙壁减弱对方物理攻击的伤害。"
   },
   "116": {
     "name": "Focus Energy",
@@ -1275,7 +1391,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：蓄气。深呼吸集中气势，让自身的攻击容易命中要害。"
   },
   "117": {
     "name": "Bide",
@@ -1287,7 +1404,8 @@
     "priority": 1,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：克制。2回合内受到的伤害2倍返还给对手。"
   },
   "118": {
     "name": "Metronome",
@@ -1297,7 +1415,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：摇手指。摇动手指刺激自己的大脑，从所有技能中随机发出一个。"
   },
   "119": {
     "name": "Mirror Move",
@@ -1307,7 +1426,8 @@
     "category": "Status",
     "type": "Flying",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：鹦鹉学舌。模仿对手最后使用的技能作为自己的技能使用。"
   },
   "120": {
     "name": "Self-Destruct",
@@ -1317,7 +1437,8 @@
     "category": "Physical",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：自爆。爆炸攻击自身周围所有对象，使用后进入濒死状态。"
   },
   "121": {
     "name": "Egg Bomb",
@@ -1327,7 +1448,8 @@
     "category": "Physical",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：蛋蛋爆弹。用力将大蛋扔向对手攻击。"
   },
   "122": {
     "name": "Lick",
@@ -1339,7 +1461,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：舌舔。用长舌头舔遍对手，会造成麻痹。"
   },
   "123": {
     "name": "Smog",
@@ -1349,7 +1472,8 @@
     "category": "Special",
     "type": "Poison",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：毒雾。向对手喷射作呕的瓦斯攻击，会造成中毒。"
   },
   "124": {
     "name": "Sludge",
@@ -1359,7 +1483,8 @@
     "category": "Special",
     "type": "Poison",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：淤泥攻击。向对手投掷肮脏的淤泥攻击，会造成中毒。"
   },
   "125": {
     "name": "Bone Club",
@@ -1369,7 +1494,8 @@
     "category": "Physical",
     "type": "Ground",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：骨头棍。用手中的骨头殴打对手，会让对手害怕。"
   },
   "126": {
     "name": "Fire Blast",
@@ -1379,7 +1505,8 @@
     "category": "Special",
     "type": "Fire",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：大字火。用爆成大字的火焰烧尽对手，会造成烧伤。"
   },
   "127": {
     "name": "Waterfall",
@@ -1391,7 +1518,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：登瀑。鼓劲向对手突击，会让对手害怕。可以游上瀑布。"
   },
   "128": {
     "name": "Clamp",
@@ -1403,7 +1531,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：贝壳夹。4～5回合内用坚硬的厚壳夹住对手。"
   },
   "129": {
     "name": "Swift",
@@ -1413,7 +1542,8 @@
     "category": "Special",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：迅星。发射星形的光攻击对手，必定能命中目标。"
   },
   "130": {
     "name": "Skull Bash",
@@ -1425,7 +1555,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：火箭头槌。第一回合缩下头提高防御，第二回合攻击对手。"
   },
   "131": {
     "name": "Spike Cannon",
@@ -1435,7 +1566,8 @@
     "category": "Physical",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：尖刺加农炮。向对手发射尖针，2～5次连续攻击。"
   },
   "132": {
     "name": "Constrict",
@@ -1447,7 +1579,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：缠绕。用触手或藤条缠绕对手，会降低对手的速度。"
   },
   "133": {
     "name": "Amnesia",
@@ -1457,7 +1590,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：超级健忘。脑海中瞬间把某些事忘记，大幅提高自身特防。"
   },
   "134": {
     "name": "Kinesis",
@@ -1467,7 +1601,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：弄弯匙子。弯曲匙子吸引注意力，降低对手的命中率。"
   },
   "135": {
     "name": "Soft-Boiled",
@@ -1477,7 +1612,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：生蛋。回复自身最大HP的50%。也可以将HP分给队友。"
   },
   "136": {
     "name": "High Jump Kick",
@@ -1490,7 +1626,8 @@
     "tags": [
       "reckless",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：飞膝踢。高高跳起向下踢击对手，踢偏的话自身会受到伤害。"
   },
   "137": {
     "name": "Glare",
@@ -1500,7 +1637,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：蛇瞪眼。用腹部的花纹吓对手，让对手处于麻痹状态。"
   },
   "138": {
     "name": "Dream Eater",
@@ -1510,7 +1648,8 @@
     "category": "Special",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：食梦。吞食睡眠对手的梦，伤害的一半回复自身HP。"
   },
   "139": {
     "name": "Poison Gas",
@@ -1520,7 +1659,8 @@
     "category": "Status",
     "type": "Poison",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：毒瓦斯。向对手的脸喷射毒瓦斯，造成中毒。"
   },
   "140": {
     "name": "Barrage",
@@ -1530,7 +1670,8 @@
     "category": "Physical",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：扔蛋。向对手投掷圆圆的东西，2～5次连续攻击。"
   },
   "141": {
     "name": "Leech Life",
@@ -1542,7 +1683,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：吸血。吸取对手的血，伤害的一半回复自身HP。"
   },
   "142": {
     "name": "Lovely Kiss",
@@ -1552,7 +1694,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：恶魔之吻。用恐怖的脸亲吻对手，让对手睡眠。"
   },
   "143": {
     "name": "Sky Attack",
@@ -1562,7 +1705,8 @@
     "category": "Physical",
     "type": "Flying",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：神鸟。第二回合攻击对手，偶尔会造成害怕，容易命中要害。"
   },
   "144": {
     "name": "Transform",
@@ -1572,7 +1716,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：变身。变成对方怪兽的样子，并且可以使用和对方一样的技能。"
   },
   "145": {
     "name": "Bubble",
@@ -1582,7 +1727,8 @@
     "category": "Special",
     "type": "Water",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：水泡。向对手喷射无数的水泡攻击，会降低对手的速度。"
   },
   "146": {
     "name": "Dizzy Punch",
@@ -1595,7 +1741,8 @@
     "tags": [
       "ironFist",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：飘飘拳。有节奏地出拳攻击对手，会造成混乱。"
   },
   "147": {
     "name": "Spore",
@@ -1605,7 +1752,8 @@
     "category": "Status",
     "type": "Grass",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：蘑菇孢子。向对手撒下有催眠效果的孢子，造成睡眠状态。"
   },
   "148": {
     "name": "Flash",
@@ -1615,7 +1763,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：闪光。用耀眼的光芒降低对手的命中率。能照亮黑暗的洞窟。"
   },
   "149": {
     "name": "Psywave",
@@ -1625,7 +1774,8 @@
     "category": "Special",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：精神波动。向对手发射神秘的念波，每次使用伤害都会变动。"
   },
   "150": {
     "name": "Splash",
@@ -1635,7 +1785,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：弹跳。毫无攻击地乱跳，似乎什么都没发生……"
   },
   "151": {
     "name": "Acid Armor",
@@ -1645,7 +1796,8 @@
     "category": "Status",
     "type": "Poison",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：溶化。通过改变细胞变成液体大幅提高自身防御。"
   },
   "152": {
     "name": "Crabhammer",
@@ -1657,7 +1809,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：蟹钳锤。用巨大的钳子打倒对手，容易命中要害。"
   },
   "153": {
     "name": "Explosion",
@@ -1667,7 +1820,8 @@
     "category": "Physical",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：大爆炸。用大爆炸攻击自身周围所有对象，使用后进入濒死状态。"
   },
   "154": {
     "name": "Fury Swipes",
@@ -1679,7 +1833,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：乱抓。用爪子或镰刀爪击对手，2～5次连续攻击。"
   },
   "155": {
     "name": "Bonemerang",
@@ -1689,7 +1844,8 @@
     "category": "Physical",
     "type": "Ground",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：骨头回旋镖。用手中的骨头投掷对手，造成飞去飞来二次伤害。"
   },
   "156": {
     "name": "Rest",
@@ -1699,7 +1855,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：睡眠。2回合内睡眠，回复自身HP与异常状态。"
   },
   "157": {
     "name": "Rock Slide",
@@ -1709,7 +1866,8 @@
     "category": "Physical",
     "type": "Rock",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：岩崩。用力投掷巨大的岩石攻击，会让对手害怕。"
   },
   "158": {
     "name": "Hyper Fang",
@@ -1722,7 +1880,8 @@
     "tags": [
       "strongJaw",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：必杀门牙。用尖锐的牙齿猛力啃咬，会让对手害怕。"
   },
   "159": {
     "name": "Sharpen",
@@ -1732,7 +1891,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：变方。增加身体的棱角变方，提高自身攻击。"
   },
   "160": {
     "name": "Conversion",
@@ -1742,7 +1902,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：属性切换。自身属性变为与自身学会的其中一个技能一样。"
   },
   "161": {
     "name": "Tri Attack",
@@ -1752,7 +1913,8 @@
     "category": "Special",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：三角攻击。发出三种光线攻击，会造成麻痹、烧伤或冰冻。"
   },
   "162": {
     "name": "Super Fang",
@@ -1764,7 +1926,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：愤怒门牙。用尖锐的牙齿猛力啃咬，对手的当前HP减半。"
   },
   "163": {
     "name": "Slash",
@@ -1776,7 +1939,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：切裂。用爪子或镰刀切裂对手，容易命中要害。"
   },
   "164": {
     "name": "Substitute",
@@ -1786,7 +1950,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：替身。削减自身少许HP制造分身，作为自己的替身。"
   },
   "165": {
     "name": "Struggle",
@@ -1799,7 +1964,8 @@
     "tags": [
       "reckless",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：拼命。用尽PP时的最后挣扎攻击对手，自身也会受到少量伤害。"
   },
   "166": {
     "name": "Sketch",
@@ -1809,7 +1975,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：素描。将对手最后使用的技能化为己用，使用一次后素描会消失。"
   },
   "167": {
     "name": "Triple Kick",
@@ -1821,7 +1988,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：三连踢。连续三次踢击对手，每次踢中伤害提高。"
   },
   "168": {
     "name": "Thief",
@@ -1833,7 +2001,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：偷盗。攻击的同时偷取道具，自身已经携带道具的时候不会偷取。"
   },
   "169": {
     "name": "Spider Web",
@@ -1843,7 +2012,8 @@
     "category": "Status",
     "type": "Bug",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：蜘蛛网。吐出黏着的细丝缠绕对手全身，让对手不能从战斗中逃跑。"
   },
   "170": {
     "name": "Mind Reader",
@@ -1853,7 +2023,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：心眼。用心感受对手的动向，下次攻击必定能命中对手。"
   },
   "171": {
     "name": "Nightmare",
@@ -1863,7 +2034,8 @@
     "category": "Status",
     "type": "Ghost",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：噩梦。让睡眠状态的对手看到噩梦，每回合损失HP。"
   },
   "172": {
     "name": "Flame Wheel",
@@ -1875,7 +2047,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：火焰车。缠绕火焰向对手突进攻击，会造成烧伤。"
   },
   "173": {
     "name": "Snore",
@@ -1887,7 +2060,8 @@
     "priority": 0,
     "tags": [
       "voice"
-    ]
+    ],
+    "desc": "PO译名：鼾声。自身在睡眠时发出杂音攻击。 PO译名： 。会让对手害怕。"
   },
   "174": {
     "name": "Curse",
@@ -1897,7 +2071,8 @@
     "category": "Status",
     "type": "Ghost",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：诅咒。使用的效果取决于使用者是不是幽灵属性。"
   },
   "175": {
     "name": "Flail",
@@ -1909,7 +2084,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：垂死挣扎。拼命挣扎攻击，自身HP越少技能威力越大。"
   },
   "176": {
     "name": "Conversion 2",
@@ -1919,7 +2095,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：属性切换２。自身的属性变为对对手最后一次使用的技能有抗性的属性。"
   },
   "177": {
     "name": "Aeroblast",
@@ -1929,7 +2106,8 @@
     "category": "Special",
     "type": "Flying",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：空中爆破。发射空气的漩涡攻击，容易命中要害。"
   },
   "178": {
     "name": "Cotton Spore",
@@ -1939,7 +2117,8 @@
     "category": "Status",
     "type": "Grass",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：棉花孢子。用棉花般轻飘飘的孢子缠住对手，大幅降低对手速度。"
   },
   "179": {
     "name": "Reversal",
@@ -1951,7 +2130,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：起死回生。用尽最后的全力攻击，自身HP越少威力越大。"
   },
   "180": {
     "name": "Spite",
@@ -1961,7 +2141,8 @@
     "category": "Status",
     "type": "Ghost",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：恨。怨恨对手最后使用的技能，减少该技能4PP。"
   },
   "181": {
     "name": "Powder Snow",
@@ -1971,7 +2152,8 @@
     "category": "Special",
     "type": "Ice",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：细雪。喷射冰冷的雪花攻击对手，会造成冰冻。"
   },
   "182": {
     "name": "Protect",
@@ -1981,7 +2163,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 4,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：保护。完全不受对手攻击，连续使用容易失败。"
   },
   "183": {
     "name": "Mach Punch",
@@ -1994,7 +2177,8 @@
     "tags": [
       "ironFist",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：音速拳。用无法看清的速度出拳，必定能先制攻击。"
   },
   "184": {
     "name": "Scary Face",
@@ -2004,7 +2188,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：恐惧颜。用恐怖的脸瞪对手，大幅降低对手速度。"
   },
   "185": {
     "name": "Feint Attack",
@@ -2016,7 +2201,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：暗算。瞄准对手的空隙痛打对手，必定能命中目标。"
   },
   "186": {
     "name": "Sweet Kiss",
@@ -2026,7 +2212,8 @@
     "category": "Status",
     "type": "Fairy",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：天使之吻。像天使般亲吻对手，让对手混乱。"
   },
   "187": {
     "name": "Belly Drum",
@@ -2036,7 +2223,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：腹鼓。减少自身最大HP的50%，将自身攻击提升到最大。"
   },
   "188": {
     "name": "Sludge Bomb",
@@ -2046,7 +2234,8 @@
     "category": "Special",
     "type": "Poison",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：淤泥爆弹。向对手投掷肮脏的淤泥攻击，会造成中毒。"
   },
   "189": {
     "name": "Mud-Slap",
@@ -2056,7 +2245,8 @@
     "category": "Special",
     "type": "Ground",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：扔泥。向对手的脸投掷泥块攻击，降低命中率。"
   },
   "190": {
     "name": "Octazooka",
@@ -2066,7 +2256,8 @@
     "category": "Special",
     "type": "Water",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：墨汁炮。向对手的脸喷射墨汁攻击，会降低命中率。"
   },
   "191": {
     "name": "Spikes",
@@ -2076,7 +2267,8 @@
     "category": "Status",
     "type": "Ground",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：撒菱。在对手脚下撒菱，让换上来的怪兽受到伤害。"
   },
   "192": {
     "name": "Zap Cannon",
@@ -2086,7 +2278,8 @@
     "category": "Special",
     "type": "Electric",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：电磁炮。发射大炮般的电击攻击，让对手麻痹。"
   },
   "193": {
     "name": "Foresight",
@@ -2096,7 +2289,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：识破。让技能可以命中幽灵系或回避率高的对手。"
   },
   "194": {
     "name": "Destiny Bond",
@@ -2106,7 +2300,8 @@
     "category": "Status",
     "type": "Ghost",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：同旅。出招后受到攻击濒死时，让攻击方同时濒死。"
   },
   "195": {
     "name": "Perish Song",
@@ -2118,7 +2313,8 @@
     "priority": 0,
     "tags": [
       "voice"
-    ]
+    ],
+    "desc": "PO译名：灭亡之歌。听到歌声的怪兽在3回合后濒死，交换后效果解除。"
   },
   "196": {
     "name": "Icy Wind",
@@ -2128,7 +2324,8 @@
     "category": "Special",
     "type": "Ice",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：冰冻之风。向对手喷射冰冷的冷气攻击，降低对手速度。"
   },
   "197": {
     "name": "Detect",
@@ -2138,7 +2335,8 @@
     "category": "Status",
     "type": "Fighting",
     "priority": 4,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：见切。完全不受对手攻击，连续使用容易失败。"
   },
   "198": {
     "name": "Bone Rush",
@@ -2148,7 +2346,8 @@
     "category": "Physical",
     "type": "Ground",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：骨头冲锋。用坚硬的骨头痛打对手，2～5次连续攻击。"
   },
   "199": {
     "name": "Lock-On",
@@ -2158,7 +2357,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：锁定。确实瞄准对手，下次攻击必定能命中对手。"
   },
   "200": {
     "name": "Outrage",
@@ -2170,7 +2370,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：逆鳞。2～3回合内乱撞攻击，乱撞后会混乱。"
   },
   "201": {
     "name": "Sandstorm",
@@ -2180,7 +2381,8 @@
     "category": "Status",
     "type": "Rock",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：沙暴。5回合内刮起沙暴，对岩、地、钢系以外的怪兽造成伤害。"
   },
   "202": {
     "name": "Giga Drain",
@@ -2190,7 +2392,8 @@
     "category": "Special",
     "type": "Grass",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：亿万吸取。吸取养分的攻击，伤害的一半回复自身HP。"
   },
   "203": {
     "name": "Endure",
@@ -2200,7 +2403,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 4,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：忍耐。受到攻击后必定会留下1HP，连续使用容易失败。"
   },
   "204": {
     "name": "Charm",
@@ -2210,7 +2414,8 @@
     "category": "Status",
     "type": "Fairy",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：撒娇。撒娇让对手松懈下来，大幅降低对手攻击。"
   },
   "205": {
     "name": "Rollout",
@@ -2222,7 +2427,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：滚动。5回合内连续滚动攻击，每次命中威力增加。"
   },
   "206": {
     "name": "False Swipe",
@@ -2234,7 +2440,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：刀背打。控制力道作出必定会让对手留下1HP的攻击。"
   },
   "207": {
     "name": "Swagger",
@@ -2244,7 +2451,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：虚张声势。让对手发怒并混乱，发怒的对手攻击大幅上升。"
   },
   "208": {
     "name": "Milk Drink",
@@ -2254,7 +2462,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：饮奶。回复自身最大HP的50%。也可以将HP分给队友。"
   },
   "209": {
     "name": "Spark",
@@ -2266,7 +2475,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：电火花。缠绕电流向对手突进攻击，会造成麻痹。"
   },
   "210": {
     "name": "Fury Cutter",
@@ -2278,7 +2488,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：连续切。用镰刀或爪子连续切砍对手，连续命中威力会增加。"
   },
   "211": {
     "name": "Steel Wing",
@@ -2290,7 +2501,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：钢之翼。用坚硬的翅膀拍打对手，会提高自身防御。"
   },
   "212": {
     "name": "Mean Look",
@@ -2300,7 +2512,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：黑眼神。用如同要把对手吸入般的黑色目光盯住，让对手不能从战斗中逃跑。"
   },
   "213": {
     "name": "Attract",
@@ -2310,7 +2523,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：着迷。诱惑异性对手让它着迷，让对手难以使用技能。"
   },
   "214": {
     "name": "Sleep Talk",
@@ -2320,7 +2534,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：梦话。从自身学会的技能中发出一个，自身在睡眠的时候才能使用。"
   },
   "215": {
     "name": "Heal Bell",
@@ -2330,7 +2545,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：治愈之铃。发出舒适的铃声，回复己方所有怪兽异常状态。"
   },
   "216": {
     "name": "Return",
@@ -2342,7 +2558,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：报恩。为了训练师全力向对手攻击，亲密度越高威力越大。"
   },
   "217": {
     "name": "Present",
@@ -2352,7 +2569,8 @@
     "category": "Physical",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：礼物。将设有机关的箱子交给对手进行攻击，也有可能变成回复对手HP。"
   },
   "218": {
     "name": "Frustration",
@@ -2364,7 +2582,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：撒气。为了发泄不满而全力向对手攻击，亲密度越低威力越大。"
   },
   "219": {
     "name": "Safeguard",
@@ -2374,7 +2593,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：神秘守护。5回合内用神秘的力量守护防止异常状态。"
   },
   "220": {
     "name": "Pain Split",
@@ -2384,7 +2604,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：痛苦平分。将自身与对手的HP加起来平分。"
   },
   "221": {
     "name": "Sacred Fire",
@@ -2394,7 +2615,8 @@
     "category": "Physical",
     "type": "Fire",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：神圣火焰。用神秘的火焰烧毁对手，会造成烧伤。"
   },
   "222": {
     "name": "Magnitude",
@@ -2404,7 +2626,8 @@
     "category": "Physical",
     "type": "Ground",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：震级变化。震动地面攻击自身周围所有对象，技能威力会有多种变化。"
   },
   "223": {
     "name": "Dynamic Punch",
@@ -2417,7 +2640,8 @@
     "tags": [
       "ironFist",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：爆裂拳。用全身的力量出拳，必定让对手混乱。"
   },
   "224": {
     "name": "Megahorn",
@@ -2429,7 +2653,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：百万角击。用坚硬的大角狠狠地突刺对手。"
   },
   "225": {
     "name": "Dragon Breath",
@@ -2439,7 +2664,8 @@
     "category": "Special",
     "type": "Dragon",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：龙之吐息。向对手喷射猛烈的吐息攻击，会造成麻痹。"
   },
   "226": {
     "name": "Baton Pass",
@@ -2449,7 +2675,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：接力棒。与队友交换，自身能力变化保留给换上来的队友。"
   },
   "227": {
     "name": "Encore",
@@ -2459,7 +2686,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：鼓掌。让对手3回合内只能使用最后使用的技能。"
   },
   "228": {
     "name": "Pursuit",
@@ -2471,7 +2699,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：追击。在对方交换的时候使用技能会做出双倍威力的攻击。"
   },
   "229": {
     "name": "Rapid Spin",
@@ -2483,7 +2712,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：高速旋转。旋转攻击对手。将束缚状态、寄生种子与撒菱等弹飞。"
   },
   "230": {
     "name": "Sweet Scent",
@@ -2493,7 +2723,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：香甜气息。用香气降低对手的回避率。"
   },
   "231": {
     "name": "Iron Tail",
@@ -2505,7 +2736,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：铁尾。用坚硬的尾巴拍打对手，会降低对手防御。"
   },
   "232": {
     "name": "Metal Claw",
@@ -2517,7 +2749,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：金属爪。用钢铁的爪子切裂对手，会提高自身攻击。"
   },
   "233": {
     "name": "Vital Throw",
@@ -2529,7 +2762,8 @@
     "priority": -1,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：当身投。在对方行动后攻击，相应的自身的攻击必定能命中。"
   },
   "234": {
     "name": "Morning Sun",
@@ -2539,7 +2773,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：朝之阳。回复自身HP，回复量取决于天气。"
   },
   "235": {
     "name": "Synthesis",
@@ -2549,7 +2784,8 @@
     "category": "Status",
     "type": "Grass",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：光合作用。回复自身HP，回复量取决于天气。"
   },
   "236": {
     "name": "Moonlight",
@@ -2559,7 +2795,8 @@
     "category": "Status",
     "type": "Fairy",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：月之光。回复自身HP，回复量取决于天气。"
   },
   "237": {
     "name": "Hidden Power",
@@ -2569,7 +2806,8 @@
     "category": "Special",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：觉醒力量。技能的属性与威力取决于不同的使用者。"
   },
   "238": {
     "name": "Cross Chop",
@@ -2581,7 +2819,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：十字切。用双手十字劈打对手，容易命中要害。"
   },
   "239": {
     "name": "Twister",
@@ -2591,7 +2830,8 @@
     "category": "Special",
     "type": "Dragon",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：龙卷风。引发龙卷风把对手卷入，会让对手害怕。"
   },
   "240": {
     "name": "Rain Dance",
@@ -2601,7 +2841,8 @@
     "category": "Status",
     "type": "Water",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：祈雨。5回合内下雨，提高水系技能威力。"
   },
   "241": {
     "name": "Sunny Day",
@@ -2611,7 +2852,8 @@
     "category": "Status",
     "type": "Fire",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：放晴。5回合内增强阳光，提高火系技能威力。"
   },
   "242": {
     "name": "Crunch",
@@ -2624,7 +2866,8 @@
     "tags": [
       "strongJaw",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：咬碎。用锋锐的牙齿啃咬对手，会降低对手防御。"
   },
   "243": {
     "name": "Mirror Coat",
@@ -2634,7 +2877,8 @@
     "category": "Special",
     "type": "Psychic",
     "priority": -5,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：镜面反射。将受到的特殊攻击双倍返还给对手。"
   },
   "244": {
     "name": "Psych Up",
@@ -2644,7 +2888,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：自我暗示。对自身施加暗示，来让自身能力变化与对手一样。"
   },
   "245": {
     "name": "Extreme Speed",
@@ -2656,7 +2901,8 @@
     "priority": 2,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：神速。以眼睛无法看见的急速猛烈向对手突进，必定能先制攻击。"
   },
   "246": {
     "name": "Ancient Power",
@@ -2666,7 +2912,8 @@
     "category": "Special",
     "type": "Rock",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：原始力量。用原始的力量攻击，会提高自身所有能力。"
   },
   "247": {
     "name": "Shadow Ball",
@@ -2676,7 +2923,8 @@
     "category": "Special",
     "type": "Ghost",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：阴影球。投掷黑色的影块攻击，会降低对手特防。"
   },
   "248": {
     "name": "Future Sight",
@@ -2686,7 +2934,8 @@
     "category": "Special",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：预知未来。使用技能的2回合后，向对方发送念力攻击。"
   },
   "249": {
     "name": "Rock Smash",
@@ -2698,7 +2947,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：碎岩。用能击碎岩石的拳头攻击，会降低对手防御。"
   },
   "250": {
     "name": "Whirlpool",
@@ -2708,7 +2958,8 @@
     "category": "Special",
     "type": "Water",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：漩涡。4～5回合内将对手困在强烈的漩涡中。"
   },
   "251": {
     "name": "Beat Up",
@@ -2718,7 +2969,8 @@
     "category": "Physical",
     "type": "Dark",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：围攻。己方全员攻击，队友越多攻击次数越多。"
   },
   "252": {
     "name": "Fake Out",
@@ -2730,7 +2982,8 @@
     "priority": 3,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：下马威。先制攻击让对手害怕。只有战斗刚开始时才可以成功使用。"
   },
   "253": {
     "name": "Uproar",
@@ -2742,7 +2995,8 @@
     "priority": 0,
     "tags": [
       "voice"
-    ]
+    ],
+    "desc": "PO译名：吵闹。3回合内吵闹攻击对手，期间谁也无法入睡。"
   },
   "254": {
     "name": "Stockpile",
@@ -2752,7 +3006,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：能量储存。储存力量提高自身防御与特防，最多储存三次。"
   },
   "255": {
     "name": "Spit Up",
@@ -2762,7 +3017,8 @@
     "category": "Special",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：能量释放。将储存的力量喷向对手，储存得越多威力越大。"
   },
   "256": {
     "name": "Swallow",
@@ -2772,7 +3028,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：能量吸入。用储存的力量回复自身HP，储存得越多回复回复越多。"
   },
   "257": {
     "name": "Heat Wave",
@@ -2782,7 +3039,8 @@
     "category": "Special",
     "type": "Fire",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：热风。向对手喷射炽热的气息攻击，会造成烧伤。"
   },
   "258": {
     "name": "Hail",
@@ -2792,7 +3050,8 @@
     "category": "Status",
     "type": "Ice",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：冰雹。使场上在5回合内处于冰雹天气。"
   },
   "259": {
     "name": "Torment",
@@ -2802,7 +3061,8 @@
     "category": "Status",
     "type": "Dark",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：寻衅。找对手的碴，让对手不能连续使用相同技能。"
   },
   "260": {
     "name": "Flatter",
@@ -2812,7 +3072,8 @@
     "category": "Status",
     "type": "Dark",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：煽动。煽动对手使对手混乱，同时提高对手特攻。"
   },
   "261": {
     "name": "Will-O-Wisp",
@@ -2822,7 +3083,8 @@
     "category": "Status",
     "type": "Fire",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：鬼火。发出阴森怪异的火焰让对手烧伤。"
   },
   "262": {
     "name": "Memento",
@@ -2832,7 +3094,8 @@
     "category": "Status",
     "type": "Dark",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：临别礼物。自身进入濒死状态，大幅降低对手攻击与特攻。"
   },
   "263": {
     "name": "Facade",
@@ -2844,7 +3107,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：空元气。自身处于中毒、麻痹或烧伤状态时技能威力翻倍。"
   },
   "264": {
     "name": "Focus Punch",
@@ -2857,7 +3121,8 @@
     "tags": [
       "ironFist",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：气合拳。凝聚精神出拳，出拳期间受到伤害攻击失败。"
   },
   "265": {
     "name": "Smelling Salts",
@@ -2869,7 +3134,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：清醒。对麻痹状态的对手威力翻倍，同时解除对手的麻痹。"
   },
   "266": {
     "name": "Follow Me",
@@ -2879,7 +3145,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 2,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：跟我来。吸引对手的注意，让对手将攻击全部指向自身。"
   },
   "267": {
     "name": "Nature Power",
@@ -2889,7 +3156,8 @@
     "category": "Special",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：自然力量。用自然的力量攻击，随使用的地点不同技能会产生变化。"
   },
   "268": {
     "name": "Charge",
@@ -2899,7 +3167,8 @@
     "category": "Status",
     "type": "Electric",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：充电。提高下回合使用电系技能的威力，同时提高自身特防。"
   },
   "269": {
     "name": "Taunt",
@@ -2909,7 +3178,8 @@
     "category": "Status",
     "type": "Dark",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：挑拨。让对手愤怒，3回合内对手只能使用攻击技能。"
   },
   "270": {
     "name": "Helping Hand",
@@ -2919,7 +3189,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 5,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：帮手。帮助同伴，被帮助的同伴的技能威力比平时高。"
   },
   "271": {
     "name": "Trick",
@@ -2929,7 +3200,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：戏法。捉住对手的空隙交换自身与对手的道具。"
   },
   "272": {
     "name": "Role Play",
@@ -2939,7 +3211,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：换装。变成与对手相同的特性。"
   },
   "273": {
     "name": "Wish",
@@ -2949,7 +3222,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：许愿。下回合回复自身最大HP的50%。"
   },
   "274": {
     "name": "Assist",
@@ -2959,7 +3233,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：猫之手。紧急借助队友的力量，使用队友学会的技能之一。"
   },
   "275": {
     "name": "Ingrain",
@@ -2969,7 +3244,8 @@
     "category": "Status",
     "type": "Grass",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：扎根。将根插入大地，每回合回复自身HP，扎根时不能交换。"
   },
   "276": {
     "name": "Superpower",
@@ -2981,7 +3257,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：蛮力。发出蛮力攻击对手，降低自身攻击与防御。"
   },
   "277": {
     "name": "Magic Coat",
@@ -2991,7 +3268,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 4,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：魔装反射。受到异常状态或寄生种子等效果时反弹给对手。"
   },
   "278": {
     "name": "Recycle",
@@ -3001,7 +3279,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：道具回收。将自身在战斗中用过的道具再生。"
   },
   "279": {
     "name": "Revenge",
@@ -3013,7 +3292,8 @@
     "priority": -4,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：复仇。受到对手的伤害时，对对手造成的伤害翻倍。"
   },
   "280": {
     "name": "Brick Break",
@@ -3025,7 +3305,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：瓦割。用力劈下手刀攻击对手，能破坏光之墙与反射盾。"
   },
   "281": {
     "name": "Yawn",
@@ -3035,7 +3316,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：哈欠。大打呵欠诱发睡意，下回合让对手睡眠。"
   },
   "282": {
     "name": "Knock Off",
@@ -3047,7 +3329,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：打落。打落对手道具，直到战斗结束为止都不能使用。"
   },
   "283": {
     "name": "Endeavor",
@@ -3059,7 +3342,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：莽撞。让对手的HP变为与自身HP一样。"
   },
   "284": {
     "name": "Eruption",
@@ -3069,7 +3353,8 @@
     "category": "Special",
     "type": "Fire",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：喷火。爆发愤怒攻击对手，自身HP越少威力越低。"
   },
   "285": {
     "name": "Skill Swap",
@@ -3079,7 +3364,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：特性交换。用超能力交换自身与对手的特性。"
   },
   "286": {
     "name": "Imprison",
@@ -3089,7 +3375,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：封印。让对方不能使用自身学会的技能。"
   },
   "287": {
     "name": "Refresh",
@@ -3099,7 +3386,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：精神回复。让身体休息，解除自身中毒麻痹烧伤的异常状态。"
   },
   "288": {
     "name": "Grudge",
@@ -3109,7 +3397,8 @@
     "category": "Status",
     "type": "Ghost",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：怨念。受到对方技能濒死时，让该技能PP变为0。"
   },
   "289": {
     "name": "Snatch",
@@ -3119,7 +3408,8 @@
     "category": "Status",
     "type": "Dark",
     "priority": 4,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：抢夺。抢夺对方正要使用的回复技或能力变化技为自身使用。"
   },
   "290": {
     "name": "Secret Power",
@@ -3129,7 +3419,8 @@
     "category": "Physical",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：秘密力量。用秘密力量攻击对手，随使用的地点改变追加效果。"
   },
   "291": {
     "name": "Dive",
@@ -3141,7 +3432,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：潜水。第一回合下潜第二回合浮上来攻击。能潜下大海深处。"
   },
   "292": {
     "name": "Arm Thrust",
@@ -3153,7 +3445,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：突张。张开双手猛推对手，2～5次连续攻击。"
   },
   "293": {
     "name": "Camouflage",
@@ -3163,7 +3456,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：保护色。配合水边、草地或洞窟等地点改变自身属性。"
   },
   "294": {
     "name": "Tail Glow",
@@ -3173,7 +3467,8 @@
     "category": "Status",
     "type": "Bug",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：萤火。凝视明灭的荧光统一自身精神，超大幅提高自身特攻。"
   },
   "295": {
     "name": "Luster Purge",
@@ -3183,7 +3478,8 @@
     "category": "Special",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：光栅净化。释放眩目的光芒攻击，会降低对手特防。"
   },
   "296": {
     "name": "Mist Ball",
@@ -3193,7 +3489,8 @@
     "category": "Special",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：迷雾球。用雾状的羽毛包覆对手，会降低对手特攻。"
   },
   "297": {
     "name": "Feather Dance",
@@ -3203,7 +3500,8 @@
     "category": "Status",
     "type": "Flying",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：羽毛舞。在对手身体上散布羽毛，大幅降低对手攻击。"
   },
   "298": {
     "name": "Teeter Dance",
@@ -3213,7 +3511,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：草裙舞。跳起摇摆的舞蹈，让自身周围所有对象混乱。"
   },
   "299": {
     "name": "Blaze Kick",
@@ -3225,7 +3524,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：火花踢。会让击中的对象烧伤，容易命中要害。"
   },
   "300": {
     "name": "Mud Sport",
@@ -3235,7 +3535,8 @@
     "category": "Status",
     "type": "Ground",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：玩泥。涂满泥变得黏糊糊，只要自身在场，电系技能威力减弱。"
   },
   "301": {
     "name": "Ice Ball",
@@ -3247,7 +3548,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：冰球。5回合内连续滚动攻击，每次命中威力增加。"
   },
   "302": {
     "name": "Needle Arm",
@@ -3259,7 +3561,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：针刺臂膀。用力挥舞针刺的手腕攻击，会让对手害怕。"
   },
   "303": {
     "name": "Slack Off",
@@ -3269,7 +3572,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：偷懒。偷懒休息，回复自身最大HP的50%。"
   },
   "304": {
     "name": "Hyper Voice",
@@ -3281,7 +3585,8 @@
     "priority": 0,
     "tags": [
       "voice"
-    ]
+    ],
+    "desc": "PO译名：高级噪音。用又吵又响的巨大震动攻击对手。"
   },
   "305": {
     "name": "Poison Fang",
@@ -3294,7 +3599,8 @@
     "tags": [
       "strongJaw",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：剧毒之牙。用毒牙啃咬对手攻击，会造成剧毒状态。"
   },
   "306": {
     "name": "Crush Claw",
@@ -3306,7 +3612,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：崩击之爪。用锋锐的硬爪切裂对手，会降低对手防御。"
   },
   "307": {
     "name": "Blast Burn",
@@ -3316,7 +3623,8 @@
     "category": "Special",
     "type": "Fire",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：爆裂燃烧。用爆炸的火焰烧毁对手，下回合不能行动。"
   },
   "308": {
     "name": "Hydro Cannon",
@@ -3326,7 +3634,8 @@
     "category": "Special",
     "type": "Water",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：水压加农。发射水压大炮攻击对手，下回合不能行动。"
   },
   "309": {
     "name": "Meteor Mash",
@@ -3339,7 +3648,8 @@
     "tags": [
       "ironFist",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：彗星拳。像彗星般出拳攻击对手，会提高自身攻击。"
   },
   "310": {
     "name": "Astonish",
@@ -3351,7 +3661,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：恐吓。用大声突然惊吓对手，会让对手害怕。"
   },
   "311": {
     "name": "Weather Ball",
@@ -3361,7 +3672,8 @@
     "category": "Special",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：气象球。技能的属性与威力随使用时的天气不同而改变。"
   },
   "312": {
     "name": "Aromatherapy",
@@ -3371,7 +3683,8 @@
     "category": "Status",
     "type": "Grass",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：芳香疗法。让己方全员呼吸舒适安详的香气，回复异常状态。"
   },
   "313": {
     "name": "Fake Tears",
@@ -3381,7 +3694,8 @@
     "category": "Status",
     "type": "Dark",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：假哭。流下眼泪假哭，骗取对手特防大幅下降。"
   },
   "314": {
     "name": "Air Cutter",
@@ -3391,7 +3705,8 @@
     "category": "Special",
     "type": "Flying",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：空气刃。用锋锐的气流切裂对手，容易命中要害。"
   },
   "315": {
     "name": "Overheat",
@@ -3401,7 +3716,8 @@
     "category": "Special",
     "type": "Fire",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：燃烧殆尽。全力攻击对手，使用后的副作用会大幅降低自身特攻。"
   },
   "316": {
     "name": "Odor Sleuth",
@@ -3411,7 +3727,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：嗅觉。对鬼系无效的技能可以击中鬼系，对回避率高的对手也容易击中。"
   },
   "317": {
     "name": "Rock Tomb",
@@ -3421,7 +3738,8 @@
     "category": "Physical",
     "type": "Rock",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：岩石封。投掷岩石攻击，封锁对手行动来降低速度。"
   },
   "318": {
     "name": "Silver Wind",
@@ -3431,7 +3749,8 @@
     "category": "Special",
     "type": "Bug",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：银色之风。将鳞粉散布在风中攻击，能提高自身所有能力。"
   },
   "319": {
     "name": "Metal Sound",
@@ -3443,7 +3762,8 @@
     "priority": 0,
     "tags": [
       "voice"
-    ]
+    ],
+    "desc": "PO译名：金属音。发出刮金属般讨厌的声音，大幅降低对手特防。"
   },
   "320": {
     "name": "Grass Whistle",
@@ -3455,7 +3775,8 @@
     "priority": 0,
     "tags": [
       "voice"
-    ]
+    ],
+    "desc": "PO译名：草笛。发出悦耳的笛音，令对手睡眠。"
   },
   "321": {
     "name": "Tickle",
@@ -3465,7 +3786,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：挠痒。挠痒令对手发笑，降低对手攻击与防御。"
   },
   "322": {
     "name": "Cosmic Power",
@@ -3475,7 +3797,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：宇宙力量。吸取宇宙的神秘力量，提高自身防御与特防。"
   },
   "323": {
     "name": "Water Spout",
@@ -3485,7 +3808,8 @@
     "category": "Special",
     "type": "Water",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：喷水。喷出海水攻击，自身剩余HP越高威力越大。"
   },
   "324": {
     "name": "Signal Beam",
@@ -3495,7 +3819,8 @@
     "category": "Special",
     "type": "Bug",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：信号光线。发射神秘的光芒攻击，会令对手混乱。"
   },
   "325": {
     "name": "Shadow Punch",
@@ -3508,7 +3833,8 @@
     "tags": [
       "ironFist",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：暗影拳。发出融入黑影中的拳头，必定能命中目标。"
   },
   "326": {
     "name": "Extrasensory",
@@ -3518,7 +3844,8 @@
     "category": "Special",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：神通力。发出不可见的神秘力量攻击，会让对手害怕。"
   },
   "327": {
     "name": "Sky Uppercut",
@@ -3531,7 +3858,8 @@
     "tags": [
       "ironFist",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：升空拳。发出将对手击上天空的上勾拳。"
   },
   "328": {
     "name": "Sand Tomb",
@@ -3541,7 +3869,8 @@
     "category": "Physical",
     "type": "Ground",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：沙地狱。4～5回合内将对手困进剧烈的沙暴中。"
   },
   "329": {
     "name": "Sheer Cold",
@@ -3551,7 +3880,8 @@
     "category": "Special",
     "type": "Ice",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：绝对零度。以绝对零度的冰冷攻击对手，命中立即濒死。"
   },
   "330": {
     "name": "Muddy Water",
@@ -3561,7 +3891,8 @@
     "category": "Special",
     "type": "Water",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：浊流。向对手喷射污浊的水流攻击，会降低对手命中率。"
   },
   "331": {
     "name": "Bullet Seed",
@@ -3571,7 +3902,8 @@
     "category": "Physical",
     "type": "Grass",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：种子机枪。尽情发射种子攻击，2～5次连续攻击。"
   },
   "332": {
     "name": "Aerial Ace",
@@ -3583,7 +3915,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：燕返。以迅捷的速度玩弄对手后斩切，必定能命中目标。"
   },
   "333": {
     "name": "Icicle Spear",
@@ -3593,7 +3926,8 @@
     "category": "Physical",
     "type": "Ice",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：冰柱针。发射尖锐的冰柱攻击，2～5次连续攻击。"
   },
   "334": {
     "name": "Iron Defense",
@@ -3603,7 +3937,8 @@
     "category": "Status",
     "type": "Steel",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：铁壁。让皮肤变得和铁一样坚硬，大幅提高自身防御。"
   },
   "335": {
     "name": "Block",
@@ -3613,7 +3948,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：禁止通行。张开双手挡住对手的退路，让对手不能逃跑。"
   },
   "336": {
     "name": "Howl",
@@ -3623,7 +3959,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：远吠。大声发出吼叫提高气势，提高自身攻击。"
   },
   "337": {
     "name": "Dragon Claw",
@@ -3635,7 +3972,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：龙之爪。用锋锐的巨爪切裂对手。"
   },
   "338": {
     "name": "Frenzy Plant",
@@ -3645,7 +3983,8 @@
     "category": "Special",
     "type": "Grass",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：硬化植物。用巨大的树木拍击对手，下回合不能行动。"
   },
   "339": {
     "name": "Bulk Up",
@@ -3655,7 +3994,8 @@
     "category": "Status",
     "type": "Fighting",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：巨大化。汇聚身体的力量，增强肌肉，提高自身攻击与防御。"
   },
   "340": {
     "name": "Bounce",
@@ -3667,7 +4007,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：飞跃。高高跃上天空，第二回合攻击对手，会造成麻痹。"
   },
   "341": {
     "name": "Mud Shot",
@@ -3677,7 +4018,8 @@
     "category": "Special",
     "type": "Ground",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：泥浆喷射。向对手投掷泥块攻击，同时降低对手速度。"
   },
   "342": {
     "name": "Poison Tail",
@@ -3689,7 +4031,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：毒尾。用尾巴拍打，会造成中毒，并且容易命中要害。"
   },
   "343": {
     "name": "Covet",
@@ -3701,7 +4044,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：索要。撒娇接近对手，夺取对手的道具。"
   },
   "344": {
     "name": "Volt Tackle",
@@ -3714,7 +4058,8 @@
     "tags": [
       "reckless",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：高压电击。缠绕电流突进，自身也会受到大量伤害。会造成麻痹。"
   },
   "345": {
     "name": "Magical Leaf",
@@ -3724,7 +4069,8 @@
     "category": "Special",
     "type": "Grass",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：魔叶斩。发出会追尾对手的神秘树叶，必定能命中目标。"
   },
   "346": {
     "name": "Water Sport",
@@ -3734,7 +4080,8 @@
     "category": "Status",
     "type": "Water",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：玩水。浇满水变得湿答答，只要自身在场，火焰技能威力减弱。"
   },
   "347": {
     "name": "Calm Mind",
@@ -3744,7 +4091,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：冥想。静心凝神，提高自身特攻与特防。"
   },
   "348": {
     "name": "Leaf Blade",
@@ -3756,7 +4104,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：刃叶斩。像用剑一般用叶子切裂对手，容易命中要害。"
   },
   "349": {
     "name": "Dragon Dance",
@@ -3766,7 +4115,8 @@
     "category": "Status",
     "type": "Dragon",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：龙之舞。跳起充满力量的神秘舞蹈，提高自身攻击与速度。"
   },
   "350": {
     "name": "Rock Blast",
@@ -3776,7 +4126,8 @@
     "category": "Physical",
     "type": "Rock",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：岩石爆破。发射坚硬的岩石攻击对手，2～5次连续攻击。"
   },
   "351": {
     "name": "Shock Wave",
@@ -3786,7 +4137,8 @@
     "category": "Special",
     "type": "Electric",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：电击波。快速用电击攻击对手，必定能命中目标。"
   },
   "352": {
     "name": "Water Pulse",
@@ -3798,7 +4150,8 @@
     "priority": 0,
     "tags": [
       "megaLauncher"
-    ]
+    ],
+    "desc": "PO译名：水之波动。以水的震动给予对手攻击，会让对手混乱。"
   },
   "353": {
     "name": "Doom Desire",
@@ -3808,7 +4161,8 @@
     "category": "Special",
     "type": "Steel",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：破灭之愿。使用技能的2回合后，以无数光束攻击对手。"
   },
   "354": {
     "name": "Psycho Boost",
@@ -3818,7 +4172,8 @@
     "category": "Special",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：精神增压。全力攻击对手，使用后的副作用会大幅降低自身特攻。"
   },
   "355": {
     "name": "Roost",
@@ -3828,7 +4183,8 @@
     "category": "Status",
     "type": "Flying",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：羽栖。落到地面让身体休息，回复最大HP的50%。"
   },
   "356": {
     "name": "Gravity",
@@ -3838,7 +4194,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：重力。5回合内提高重力，封锁浮游或飞上天空的技能。"
   },
   "357": {
     "name": "Miracle Eye",
@@ -3848,7 +4205,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：奇迹之眼。对恶系无效的技能可以击中恶系，对回避率高的对手也容易击中。"
   },
   "358": {
     "name": "Wake-Up Slap",
@@ -3860,7 +4218,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：清醒拍打。对睡眠状态的对手能造成大伤害，但同时会弄醒对手。"
   },
   "359": {
     "name": "Hammer Arm",
@@ -3873,7 +4232,8 @@
     "tags": [
       "ironFist",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：臂锤。挥舞又强又重的拳头造成伤害，会降低自身的速度。"
   },
   "360": {
     "name": "Gyro Ball",
@@ -3885,7 +4245,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：螺旋球。高速旋转身体撞击对手，速度比对手越低伤害越大。"
   },
   "361": {
     "name": "Healing Wish",
@@ -3895,7 +4256,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：治愈之愿。自身进入濒死状态，让交换上场的怪兽回复异常状态与HP。"
   },
   "362": {
     "name": "Brine",
@@ -3905,7 +4267,8 @@
     "category": "Special",
     "type": "Water",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：潮水。如果对手HP低于50%，此技能威力翻倍。"
   },
   "363": {
     "name": "Natural Gift",
@@ -3915,7 +4278,8 @@
     "category": "Physical",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：自然恩惠。通过从树果上获得的力量进行攻击，携带的树果不同，技能属性与威力也不同。"
   },
   "364": {
     "name": "Feint",
@@ -3925,7 +4289,8 @@
     "category": "Physical",
     "type": "Normal",
     "priority": 2,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：佯攻。能够攻击保护或见切的对手，并解除对手的保护。"
   },
   "365": {
     "name": "Pluck",
@@ -3937,7 +4302,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：啄食。用喙攻击，如果对手携带果实，啄取该果实食用并获得其效果。"
   },
   "366": {
     "name": "Tailwind",
@@ -3947,7 +4313,8 @@
     "category": "Status",
     "type": "Flying",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：顺风。制造出剧烈的旋风，4回合内提高己方全员的速度。"
   },
   "367": {
     "name": "Acupressure",
@@ -3957,7 +4324,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：点穴。按摩穴道激活身体，迅速提高其中一项能力。"
   },
   "368": {
     "name": "Metal Burst",
@@ -3967,7 +4335,8 @@
     "category": "Physical",
     "type": "Steel",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：金属爆破。最近一次受到的攻击伤害大力返还给对手。"
   },
   "369": {
     "name": "U-turn",
@@ -3979,7 +4348,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：蜻蜓回转。攻击后高速返回，交换怪兽出场。"
   },
   "370": {
     "name": "Close Combat",
@@ -3991,7 +4361,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：近战。舍弃防御纵近对手身前突击，降低自身防御与特防。"
   },
   "371": {
     "name": "Payback",
@@ -4003,7 +4374,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：报复。蓄力攻击，如果在对手之后出招，技能威力翻倍。"
   },
   "372": {
     "name": "Assurance",
@@ -4015,7 +4387,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：连打。本回合内如果对手已经受到伤害，技能威力翻倍。"
   },
   "373": {
     "name": "Embargo",
@@ -4025,7 +4398,8 @@
     "category": "Status",
     "type": "Dark",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：扣押。携带的道具不能使用。对方训练师不能向该怪兽使用道具。"
   },
   "374": {
     "name": "Fling",
@@ -4035,7 +4409,8 @@
     "category": "Physical",
     "type": "Dark",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：投掷。将装备的道具丢向对手进行攻击，威力与特效取决于道具。"
   },
   "375": {
     "name": "Psycho Shift",
@@ -4045,7 +4420,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：精神转移。用超能力施加暗示，将自身的异常状态转移到对手身上。"
   },
   "376": {
     "name": "Trump Card",
@@ -4057,7 +4433,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：王牌。王牌的PP越少，威力越大。"
   },
   "377": {
     "name": "Heal Block",
@@ -4067,7 +4444,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：回复封印。5回合内不能使用回复HP的技能、特性或道具。"
   },
   "378": {
     "name": "Wring Out",
@@ -4079,7 +4457,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：绞紧。强力绞住对手，对手剩余HP越高威力越大。"
   },
   "379": {
     "name": "Power Trick",
@@ -4089,7 +4468,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：力量戏法。通过超能力交换自身攻击与防御。"
   },
   "380": {
     "name": "Gastro Acid",
@@ -4099,7 +4479,8 @@
     "category": "Status",
     "type": "Poison",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：胃液。将胃液喷向对手的身体，无效化对手特性的效果。"
   },
   "381": {
     "name": "Lucky Chant",
@@ -4109,7 +4490,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：咒语。向天祈愿，保护己方怪兽不会被命中要害。"
   },
   "382": {
     "name": "Me First",
@@ -4119,7 +4501,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：先取。抢先使用对手要使用的技能并提高威力，如果不是先出招则会失败。"
   },
   "383": {
     "name": "Copycat",
@@ -4129,7 +4512,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：效仿。模仿之前出现的技能使用，如果之前没有技能则会失败。"
   },
   "384": {
     "name": "Power Swap",
@@ -4139,7 +4523,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：力量交换。用超能力交换自身与对手的攻击与特攻等级。"
   },
   "385": {
     "name": "Guard Swap",
@@ -4149,7 +4534,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：防御交换。用超能力交换自身与对手的防御与特防等级。"
   },
   "386": {
     "name": "Punishment",
@@ -4161,7 +4547,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：惩罚。对手的能力提升得越高，技能威力越大。"
   },
   "387": {
     "name": "Last Resort",
@@ -4173,7 +4560,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：最终手段。学会的技能全部用过一次之后才能使用的最后手段。"
   },
   "388": {
     "name": "Worry Seed",
@@ -4183,7 +4571,8 @@
     "category": "Status",
     "type": "Grass",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：烦恼种子。给对手种下烦恼的种子，让对手无法睡觉，特性变成不眠。"
   },
   "389": {
     "name": "Sucker Punch",
@@ -4195,7 +4584,8 @@
     "priority": 1,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：偷袭。比对手先攻击，如果对手不是选择攻击技能则会失败。"
   },
   "390": {
     "name": "Toxic Spikes",
@@ -4205,7 +4595,8 @@
     "category": "Status",
     "type": "Poison",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：毒菱。在对手脚边撒下毒菱，让交换上场的怪兽中毒。"
   },
   "391": {
     "name": "Heart Swap",
@@ -4215,7 +4606,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：心灵交换。用超能力交换自身与对手的能力等级。"
   },
   "392": {
     "name": "Aqua Ring",
@@ -4225,7 +4617,8 @@
     "category": "Status",
     "type": "Water",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：液态圈。在自己的身体周围覆上水幕，每回合回复HP。"
   },
   "393": {
     "name": "Magnet Rise",
@@ -4235,7 +4628,8 @@
     "category": "Status",
     "type": "Electric",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：电磁浮游。用电产生的磁力浮在空中，5回合内浮游。"
   },
   "394": {
     "name": "Flare Blitz",
@@ -4248,7 +4642,8 @@
     "tags": [
       "reckless",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：火焰驱进。包裹火焰突进，自身也会受到大量伤害。会造成烧伤。"
   },
   "395": {
     "name": "Force Palm",
@@ -4260,7 +4655,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：发劲。向对手的身体发出冲击波攻击，会造成麻痹。"
   },
   "396": {
     "name": "Aura Sphere",
@@ -4272,7 +4668,8 @@
     "priority": 0,
     "tags": [
       "megaLauncher"
-    ]
+    ],
+    "desc": "PO译名：波导弹。从身体内释放出波导的力量，必定能命中目标。"
   },
   "397": {
     "name": "Rock Polish",
@@ -4282,7 +4679,8 @@
     "category": "Status",
     "type": "Rock",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：岩切。打磨身体，减少空气阻力，可以迅速提高速度。"
   },
   "398": {
     "name": "Poison Jab",
@@ -4294,7 +4692,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：毒突。用充满毒液的触手或爪子突刺对手，会造成中毒。"
   },
   "399": {
     "name": "Dark Pulse",
@@ -4306,7 +4705,8 @@
     "priority": 0,
     "tags": [
       "megaLauncher"
-    ]
+    ],
+    "desc": "PO译名：恶之波动。从体内发出充满恶意的灵气，会让对手害怕。"
   },
   "400": {
     "name": "Night Slash",
@@ -4318,7 +4718,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：试刀。瞄准瞬间的空隙斩杀对手，容易命中要害。"
   },
   "401": {
     "name": "Aqua Tail",
@@ -4330,7 +4731,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：水之尾。如狂暴的海浪般挥舞尾巴攻击。"
   },
   "402": {
     "name": "Seed Bomb",
@@ -4340,7 +4742,8 @@
     "category": "Physical",
     "type": "Grass",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：种子爆弹。甩下有坚硬外壳的种子进行攻击。"
   },
   "403": {
     "name": "Air Slash",
@@ -4350,7 +4753,8 @@
     "category": "Special",
     "type": "Flying",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：空气切割。用连天空也能切裂的空气刃攻击，会让对手害怕。"
   },
   "404": {
     "name": "X-Scissor",
@@ -4362,7 +4766,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：十字剪。用镰刀或爪子交叉切裂对手。"
   },
   "405": {
     "name": "Bug Buzz",
@@ -4374,7 +4779,8 @@
     "priority": 0,
     "tags": [
       "voice"
-    ]
+    ],
+    "desc": "PO译名：虫鸣。通过振翼产生音波攻击，会降低对手特防。"
   },
   "406": {
     "name": "Dragon Pulse",
@@ -4386,7 +4792,8 @@
     "priority": 0,
     "tags": [
       "megaLauncher"
-    ]
+    ],
+    "desc": "PO译名：龙之波动。从巨口中掀起冲击波攻击对手。"
   },
   "407": {
     "name": "Dragon Rush",
@@ -4398,7 +4805,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：龙之冲锋。发出恐怖的杀气撞击对手，会让对手害怕。"
   },
   "408": {
     "name": "Power Gem",
@@ -4408,7 +4816,8 @@
     "category": "Special",
     "type": "Rock",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：力量宝石。发出宝石般的光芒攻击对手。"
   },
   "409": {
     "name": "Drain Punch",
@@ -4421,7 +4830,8 @@
     "tags": [
       "ironFist",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：吸取拳。从拳头上吸取对手的力量，伤害的一半回复自身HP。"
   },
   "410": {
     "name": "Vacuum Wave",
@@ -4431,7 +4841,8 @@
     "category": "Special",
     "type": "Fighting",
     "priority": 1,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：真空波。挥舞拳头发出真空波，必定能先制攻击。"
   },
   "411": {
     "name": "Focus Blast",
@@ -4441,7 +4852,8 @@
     "category": "Special",
     "type": "Fighting",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：气合弹。提高气势释放全身的力量，会降低对手特防。"
   },
   "412": {
     "name": "Energy Ball",
@@ -4451,7 +4863,8 @@
     "category": "Special",
     "type": "Grass",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：能量球。从大自然中吸收生命的力量发射，会降低对手特防。"
   },
   "413": {
     "name": "Brave Bird",
@@ -4464,7 +4877,8 @@
     "tags": [
       "reckless",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：勇鸟。收拢翅膀在低空飞行中突击，自身也会受到大量伤害。"
   },
   "414": {
     "name": "Earth Power",
@@ -4474,7 +4888,8 @@
     "category": "Special",
     "type": "Ground",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：大地之力。在对手脚下释放大地的力量，会降低对手特防。"
   },
   "415": {
     "name": "Switcheroo",
@@ -4484,7 +4899,8 @@
     "category": "Status",
     "type": "Dark",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：偷换。用肉眼看不清的速度交换双方道具。"
   },
   "416": {
     "name": "Giga Impact",
@@ -4496,7 +4912,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：亿万冲击。用尽自身所有力量突击对手，下回合不能行动。"
   },
   "417": {
     "name": "Nasty Plot",
@@ -4506,7 +4923,8 @@
     "category": "Status",
     "type": "Dark",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：阴谋。活化大脑以考虑更多的阴谋，大幅提高自身的特攻。"
   },
   "418": {
     "name": "Bullet Punch",
@@ -4519,7 +4937,8 @@
     "tags": [
       "ironFist",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：子弹拳。用子弹般的速度向对手出拳，必定能先制攻击。"
   },
   "419": {
     "name": "Avalanche",
@@ -4531,7 +4950,8 @@
     "priority": -4,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：雪崩。如果受到对手的伤害，此技能对对手的伤害翻倍。"
   },
   "420": {
     "name": "Ice Shard",
@@ -4541,7 +4961,8 @@
     "category": "Physical",
     "type": "Ice",
     "priority": 1,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：冰之砾。瞬间做出冰块射向对手，必定能先制攻击。"
   },
   "421": {
     "name": "Shadow Claw",
@@ -4553,7 +4974,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：阴影爪。从阴影中做出尖爪切裂对手，高几率命中要害。"
   },
   "422": {
     "name": "Thunder Fang",
@@ -4566,7 +4988,8 @@
     "tags": [
       "strongJaw",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：雷之牙。用带有电流的牙齿啃咬，能令对手害怕或麻痹。"
   },
   "423": {
     "name": "Ice Fang",
@@ -4579,7 +5002,8 @@
     "tags": [
       "strongJaw",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：冰之牙。用带有冷气的牙齿啃咬，能令对手害怕或冰冻。"
   },
   "424": {
     "name": "Fire Fang",
@@ -4592,7 +5016,8 @@
     "tags": [
       "strongJaw",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：火之牙。用带有火焰的牙齿啃咬，能令对手害怕或烧伤。"
   },
   "425": {
     "name": "Shadow Sneak",
@@ -4604,7 +5029,8 @@
     "priority": 1,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：影击。将影子延伸到对手背后进行攻击，必定能先制攻击。"
   },
   "426": {
     "name": "Mud Bomb",
@@ -4614,7 +5040,8 @@
     "category": "Special",
     "type": "Ground",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：泥爆弹。发射坚硬的泥块攻击，会降低对手命中率。"
   },
   "427": {
     "name": "Psycho Cut",
@@ -4624,7 +5051,8 @@
     "category": "Physical",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：精神切割。用实体化的心灵之刃切裂对手，容易命中要害。"
   },
   "428": {
     "name": "Zen Headbutt",
@@ -4636,7 +5064,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：思念头槌。将思念的力量集中在前额攻击，会让对手害怕。"
   },
   "429": {
     "name": "Mirror Shot",
@@ -4646,7 +5075,8 @@
     "category": "Special",
     "type": "Steel",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：镜面射击。从磨光的身体上向对手发出闪光，会降低对手命中率。"
   },
   "430": {
     "name": "Flash Cannon",
@@ -4656,7 +5086,8 @@
     "category": "Special",
     "type": "Steel",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：光栅加农。将身体的光芒集中在一点放出，会降低对手特防。"
   },
   "431": {
     "name": "Rock Climb",
@@ -4668,7 +5099,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：攀岩。突进攻击会造成对手混乱。能攀上凹凸的岩壁。"
   },
   "432": {
     "name": "Defog",
@@ -4678,7 +5110,8 @@
     "category": "Status",
     "type": "Flying",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：除雾。用强风清除对手的反射盾或光之壁等效果。会降低回避率。"
   },
   "433": {
     "name": "Trick Room",
@@ -4688,7 +5121,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": -7,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：欺骗空间。制造出不可思议的空间，5回合内速度慢的怪兽优先行动。"
   },
   "434": {
     "name": "Draco Meteor",
@@ -4698,7 +5132,8 @@
     "category": "Special",
     "type": "Dragon",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：龙星群。从天空朝对手落下陨石，使用后的副作用会大幅降低自身特攻。"
   },
   "435": {
     "name": "Discharge",
@@ -4708,7 +5143,8 @@
     "category": "Special",
     "type": "Electric",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：放电。发出眩目的电击攻击自身周围所有对象，会造成麻痹。"
   },
   "436": {
     "name": "Lava Plume",
@@ -4718,7 +5154,8 @@
     "category": "Special",
     "type": "Fire",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：喷烟。用鲜红的火焰攻击自身周围所有对象，会造成烧伤。"
   },
   "437": {
     "name": "Leaf Storm",
@@ -4728,7 +5165,8 @@
     "category": "Special",
     "type": "Grass",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：飞叶风暴。用尖锐的叶子制造风暴，使用后的副作用会大幅降低自身特攻。"
   },
   "438": {
     "name": "Power Whip",
@@ -4740,7 +5178,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：强力鞭挞。挥舞蔓藤或触手强烈抽打对手。"
   },
   "439": {
     "name": "Rock Wrecker",
@@ -4750,7 +5189,8 @@
     "category": "Physical",
     "type": "Rock",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：岩石炮。发射巨大的岩石攻击对手，下回合不能行动。"
   },
   "440": {
     "name": "Cross Poison",
@@ -4762,7 +5202,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：毒十字。用毒刃切裂对手，会造成中毒，容易命中要害。"
   },
   "441": {
     "name": "Gunk Shot",
@@ -4772,7 +5213,8 @@
     "category": "Physical",
     "type": "Poison",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：粉尘射击。喷射脏垃圾攻击对手，会造成中毒。"
   },
   "442": {
     "name": "Iron Head",
@@ -4784,7 +5226,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：铁头槌。用钢铁般坚硬的脑袋攻击，会造成害怕。"
   },
   "443": {
     "name": "Magnet Bomb",
@@ -4794,7 +5237,8 @@
     "category": "Physical",
     "type": "Steel",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：磁体炸弹。发射跟踪目标的爆弹，必定能命中目标。"
   },
   "444": {
     "name": "Stone Edge",
@@ -4804,7 +5248,8 @@
     "category": "Physical",
     "type": "Rock",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：石刃。用尖锐的岩石突刺对手，容易命中要害。"
   },
   "445": {
     "name": "Captivate",
@@ -4814,7 +5259,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：诱惑。诱惑异性对手，大幅降低对手特攻。"
   },
   "446": {
     "name": "Stealth Rock",
@@ -4824,7 +5270,8 @@
     "category": "Status",
     "type": "Rock",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：秘密岩石。在对手身旁散布无数漂浮的岩石，对交换上场的怪兽造成伤害。"
   },
   "447": {
     "name": "Grass Knot",
@@ -4836,7 +5283,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：草绳结。缠绕草结绊倒对手，对手越重伤害越大。"
   },
   "448": {
     "name": "Chatter",
@@ -4848,7 +5296,8 @@
     "priority": 0,
     "tags": [
       "voice"
-    ]
+    ],
+    "desc": "PO译名：喋喋不休。用学会的话产生音波攻击，会让对手混乱。"
   },
   "449": {
     "name": "Judgment",
@@ -4858,7 +5307,8 @@
     "category": "Special",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：制裁之砾。向对手发出无数光弹，属性由自身携带的石板决定。"
   },
   "450": {
     "name": "Bug Bite",
@@ -4871,7 +5321,8 @@
     "tags": [
       "strongJaw",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：虫食。啃咬攻击，如果对手携带树果，将树果吃掉获得效果。"
   },
   "451": {
     "name": "Charge Beam",
@@ -4881,7 +5332,8 @@
     "category": "Special",
     "type": "Electric",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：充电光线。向对手发射电束，积储电能提高自身特攻。"
   },
   "452": {
     "name": "Wood Hammer",
@@ -4894,7 +5346,8 @@
     "tags": [
       "reckless",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：木锤。用坚硬的身体拍打对手，自身也会受到大量伤害。"
   },
   "453": {
     "name": "Aqua Jet",
@@ -4906,7 +5359,8 @@
     "priority": 1,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：水流喷射。以肉眼无法看见的速度冲向对手，必定能先制攻击。"
   },
   "454": {
     "name": "Attack Order",
@@ -4916,7 +5370,8 @@
     "category": "Physical",
     "type": "Bug",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：攻击指令。呼唤下仆攻击对手，容易命中要害。"
   },
   "455": {
     "name": "Defend Order",
@@ -4926,7 +5381,8 @@
     "category": "Status",
     "type": "Bug",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：防御指令。呼唤下仆围绕在身旁，提高防御与特防。"
   },
   "456": {
     "name": "Heal Order",
@@ -4936,7 +5392,8 @@
     "category": "Status",
     "type": "Bug",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：回复指令。呼唤下仆治疗自身，回复自身最大HP的50%。"
   },
   "457": {
     "name": "Head Smash",
@@ -4949,7 +5406,8 @@
     "tags": [
       "reckless",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：双刃头槌。拼上性命以全身力量头撞，自身也会受到非常大的伤害。"
   },
   "458": {
     "name": "Double Hit",
@@ -4961,7 +5419,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：双重攻击。用尾巴等部位拍打对手，2次连续攻击。"
   },
   "459": {
     "name": "Roar of Time",
@@ -4971,7 +5430,8 @@
     "category": "Special",
     "type": "Dragon",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：时之咆哮。发出连时间也能扭曲的强大能量攻击对手，下回合不能行动。"
   },
   "460": {
     "name": "Spacial Rend",
@@ -4981,7 +5441,8 @@
     "category": "Special",
     "type": "Dragon",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：亚空切断。将对手连同其周围的空间一起撕裂，容易命中要害。"
   },
   "461": {
     "name": "Lunar Dance",
@@ -4991,7 +5452,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：新月之舞。自身进入濒死状态，回复交换上场的怪兽所有状态。"
   },
   "462": {
     "name": "Crush Grip",
@@ -5003,7 +5465,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：捏碎。用强大的力量捏碎对手，对手剩余HP越多威力越大。"
   },
   "463": {
     "name": "Magma Storm",
@@ -5013,7 +5476,8 @@
     "category": "Special",
     "type": "Fire",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：熔岩风暴。4～5回合内将对手包裹在剧烈翻滚的火焰中。"
   },
   "464": {
     "name": "Dark Void",
@@ -5023,7 +5487,8 @@
     "category": "Status",
     "type": "Dark",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：黑洞。将对手拉进黑暗的世界中，令对手睡眠。"
   },
   "465": {
     "name": "Seed Flare",
@@ -5033,7 +5498,8 @@
     "category": "Special",
     "type": "Grass",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：闪耀种子。从体内发出冲击波，会降低对手特防。"
   },
   "466": {
     "name": "Ominous Wind",
@@ -5043,7 +5509,8 @@
     "category": "Special",
     "type": "Ghost",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：妖风。发出令人寒毛悚立的暴风攻击对手，能提高自身所有能力。"
   },
   "467": {
     "name": "Shadow Force",
@@ -5055,7 +5522,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：影袭。第一回合消失，第二回合攻击对手。即使对手保护也能击中。"
   },
   "468": {
     "name": "Hone Claws",
@@ -5065,7 +5533,8 @@
     "category": "Status",
     "type": "Dark",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：磨爪。磨利尖爪，提高自身攻击与命中率。"
   },
   "469": {
     "name": "Wide Guard",
@@ -5075,7 +5544,8 @@
     "category": "Status",
     "type": "Rock",
     "priority": 3,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：广域防御。一回合内防御目标是己方全队的伤害，连续使用容易失败。"
   },
   "470": {
     "name": "Guard Split",
@@ -5085,7 +5555,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：防御平分。将自身与对手的防御与特防相加后平分。"
   },
   "471": {
     "name": "Power Split",
@@ -5095,7 +5566,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：力量平分。将自身与对手的攻击与特攻相加后平分。"
   },
   "472": {
     "name": "Wonder Room",
@@ -5105,7 +5577,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：神奇空间。制造出不可思议的空间，5回合内所有怪兽的防御与特防交换。"
   },
   "473": {
     "name": "Psyshock",
@@ -5115,7 +5588,8 @@
     "category": "Special",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：精神冲击。将神秘的意念实体化攻击对手，造成物理伤害。"
   },
   "474": {
     "name": "Venoshock",
@@ -5125,7 +5599,8 @@
     "category": "Special",
     "type": "Poison",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：毒液冲击。向对手喷射特殊的毒液，对中毒状态的目标伤害翻倍。"
   },
   "475": {
     "name": "Autotomize",
@@ -5135,7 +5610,8 @@
     "category": "Status",
     "type": "Steel",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：身体净化。削除身体多余的部分，大幅提高自身速度并且体重变轻。"
   },
   "476": {
     "name": "Rage Powder",
@@ -5145,7 +5621,8 @@
     "category": "Status",
     "type": "Bug",
     "priority": 2,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：愤怒之粉。将令人烦躁的粉末撒在自己身上吸引注意，使对方的攻击全部指向自己。"
   },
   "477": {
     "name": "Telekinesis",
@@ -5155,7 +5632,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：念动力。用超能力令对手浮在天空，3回合内容易被命中。"
   },
   "478": {
     "name": "Magic Room",
@@ -5165,7 +5643,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：魔术空间。制造出不可思议的空间，5回合内所有怪兽的道具失效。"
   },
   "479": {
     "name": "Smack Down",
@@ -5175,7 +5654,8 @@
     "category": "Physical",
     "type": "Rock",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：击坠。投掷石头或弹炮攻击对方，将对方击落地面。"
   },
   "480": {
     "name": "Storm Throw",
@@ -5187,7 +5667,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：山岚。向对手发出强烈的一击，必定命中要害。"
   },
   "481": {
     "name": "Flame Burst",
@@ -5197,7 +5678,8 @@
     "category": "Special",
     "type": "Fire",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：爆裂火焰。向对手发射击中后会爆裂的火焰，爆裂的火焰会飞溅到对手身旁的怪兽上。"
   },
   "482": {
     "name": "Sludge Wave",
@@ -5207,7 +5689,8 @@
     "category": "Special",
     "type": "Poison",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：淤泥波。用淤泥波攻击自身周围所有单位，会造成中毒。"
   },
   "483": {
     "name": "Quiver Dance",
@@ -5217,7 +5700,8 @@
     "category": "Status",
     "type": "Bug",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：蝶之舞。轻盈地跳出神秘而美丽的舞蹈，提高自身特攻、特防与速度。"
   },
   "484": {
     "name": "Heavy Slam",
@@ -5229,7 +5713,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：重量炸弹。用沉重的身体冲撞对方，自身体重比对方越高威力越大。"
   },
   "485": {
     "name": "Synchronoise",
@@ -5239,7 +5724,8 @@
     "category": "Special",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：同调噪音。以神秘的电波对周围所有与自身属性相同的怪兽造成伤害。"
   },
   "486": {
     "name": "Electro Ball",
@@ -5249,7 +5735,8 @@
     "category": "Special",
     "type": "Electric",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：电球。用电团砸向对方，自身速度比对方越高威力越大。"
   },
   "487": {
     "name": "Soak",
@@ -5259,7 +5746,8 @@
     "category": "Status",
     "type": "Water",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：浸水。将大量的水泼洒在对方身上，使对方变成水属性。"
   },
   "488": {
     "name": "Flame Charge",
@@ -5271,7 +5759,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：硝化冲锋。包裹火焰攻击对手，凝聚力量提高自身的速度。"
   },
   "489": {
     "name": "Coil",
@@ -5281,7 +5770,8 @@
     "category": "Status",
     "type": "Poison",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：盘蜷。盘蜷起来集中精神，提高自身攻击、防御与命中率。"
   },
   "490": {
     "name": "Low Sweep",
@@ -5293,7 +5783,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：下旋。以迅捷的速度瞄准对手下盘攻击，降低对手的速度。"
   },
   "491": {
     "name": "Acid Spray",
@@ -5303,7 +5794,8 @@
     "category": "Special",
     "type": "Poison",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：酸性炸弹。喷射能融化对手的液体攻击，大幅降低对手特防。"
   },
   "492": {
     "name": "Foul Play",
@@ -5315,7 +5807,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：诈骗。利用对方的能力，对方的攻击越高伤害越大。"
   },
   "493": {
     "name": "Simple Beam",
@@ -5325,7 +5818,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：单纯光线。向对方发送神秘的念波，接收到的怪兽特性变成单纯。"
   },
   "494": {
     "name": "Entrainment",
@@ -5335,7 +5829,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：变为同伴。以神秘的节奏跳舞让对方模仿，使对方特性变为与自身一样。"
   },
   "495": {
     "name": "After You",
@@ -5345,7 +5840,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：您先请。支援目标，让目标接在自身行动之后行动。"
   },
   "496": {
     "name": "Round",
@@ -5357,7 +5853,8 @@
     "priority": 0,
     "tags": [
       "voice"
-    ]
+    ],
+    "desc": "PO译名：轮唱。用歌声攻击对手，大家一起轮唱的话威力上升。"
   },
   "497": {
     "name": "Echoed Voice",
@@ -5369,7 +5866,8 @@
     "priority": 0,
     "tags": [
       "voice"
-    ]
+    ],
+    "desc": "PO译名：回音。用响亮的声音攻击对手，每回合都有怪兽使用该技能则威力增加。"
   },
   "498": {
     "name": "Chip Away",
@@ -5381,7 +5879,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：循序渐进。瞄准目标空隙作出厚实的一击，无视对方能力变化造成伤害。"
   },
   "499": {
     "name": "Clear Smog",
@@ -5391,7 +5890,8 @@
     "category": "Special",
     "type": "Poison",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：净化之雾。向对手投射特殊的泥块攻击，取消对手的能力变化。"
   },
   "500": {
     "name": "Stored Power",
@@ -5401,7 +5901,8 @@
     "category": "Special",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：援助力量。用积攒的力量攻击对方，自身能力提升得越高威力越大。"
   },
   "501": {
     "name": "Quick Guard",
@@ -5411,7 +5912,8 @@
     "category": "Status",
     "type": "Fighting",
     "priority": 3,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：快速防御。保护己方的怪兽免受对手的先制攻击，连续使用容易失败。"
   },
   "502": {
     "name": "Ally Switch",
@@ -5421,7 +5923,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 2,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：位置交换。用神秘的力量瞬间移动，交换自身与队友的所在位置。"
   },
   "503": {
     "name": "Scald",
@@ -5431,7 +5934,8 @@
     "category": "Special",
     "type": "Water",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：沸水。发射滚开的沸水攻击对手，会造成烧伤。"
   },
   "504": {
     "name": "Shell Smash",
@@ -5441,7 +5945,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：破壳而出。打破外壳，降低自身防御与特防，提高自身攻击、特攻与速度。"
   },
   "505": {
     "name": "Heal Pulse",
@@ -5453,7 +5958,8 @@
     "priority": 0,
     "tags": [
       "megaLauncher"
-    ]
+    ],
+    "desc": "PO译名：治愈波动。发出治疗的波动，回复对手最大HP的50%。"
   },
   "506": {
     "name": "Hex",
@@ -5463,7 +5969,8 @@
     "category": "Special",
     "type": "Ghost",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：厄运。不给喘息地向对手攻击，对处于异常状态的对手造成大伤害。"
   },
   "507": {
     "name": "Sky Drop",
@@ -5475,7 +5982,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：自由下落。第一回合抓起对方飞上天空，第二回合扔下来。抓起来的怪兽不能行动。"
   },
   "508": {
     "name": "Shift Gear",
@@ -5485,7 +5993,8 @@
     "category": "Status",
     "type": "Steel",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：齿轮变换。转动齿轮提高自身攻击，并大幅提高速度。"
   },
   "509": {
     "name": "Circle Throw",
@@ -5497,7 +6006,8 @@
     "priority": -6,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：仰投。将对手扔飞，换出其它怪兽，对野生怪兽则结束战斗。"
   },
   "510": {
     "name": "Incinerate",
@@ -5507,7 +6017,8 @@
     "category": "Special",
     "type": "Fire",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：燃尽。用火焰攻击对手，如果对手携带树果则将它烧掉。"
   },
   "511": {
     "name": "Quash",
@@ -5517,7 +6028,8 @@
     "category": "Status",
     "type": "Dark",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：押后。压住对手，使对手行动顺序变为最后。"
   },
   "512": {
     "name": "Acrobatics",
@@ -5529,7 +6041,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：杂耍。轻灵地攻击对方，自身不携带道具时造成大伤害。"
   },
   "513": {
     "name": "Reflect Type",
@@ -5539,7 +6052,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：镜面属性。反射出对手的属性，使自身属性变为与对手一样。"
   },
   "514": {
     "name": "Retaliate",
@@ -5551,7 +6065,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：报仇。上回合己方有怪兽被击倒时，伤害翻倍"
   },
   "515": {
     "name": "Final Gambit",
@@ -5563,7 +6078,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：豁命攻击。豁出性命攻击对方，自身损失所有HP，对对方造成等量的伤害。"
   },
   "516": {
     "name": "Bestow",
@@ -5573,7 +6089,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：传递礼物。对方不携带道具时，将自身道具交给对方。"
   },
   "517": {
     "name": "Inferno",
@@ -5583,7 +6100,8 @@
     "category": "Special",
     "type": "Fire",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：炼狱。用剧烈的火焰包裹对手进行攻击，会造成烧伤。"
   },
   "518": {
     "name": "Water Pledge",
@@ -5593,7 +6111,8 @@
     "category": "Special",
     "type": "Water",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：水之誓。用水柱攻击，与火组合的话威力上升，天空会出现彩虹。"
   },
   "519": {
     "name": "Fire Pledge",
@@ -5603,7 +6122,8 @@
     "category": "Special",
     "type": "Fire",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：火之誓。用火柱攻击，与草组合的话威力上升，周围变成火海。"
   },
   "520": {
     "name": "Grass Pledge",
@@ -5613,7 +6133,8 @@
     "category": "Special",
     "type": "Grass",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：草之誓。用草柱攻击，与水组合的话威力上升，周围变成湿原。"
   },
   "521": {
     "name": "Volt Switch",
@@ -5623,7 +6144,8 @@
     "category": "Special",
     "type": "Electric",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：闪电交替。攻击后以飞快的速度返回，交换出怪兽。"
   },
   "522": {
     "name": "Struggle Bug",
@@ -5633,7 +6155,8 @@
     "category": "Special",
     "type": "Bug",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：虫之抵抗。反抗对手，降低对手特攻。"
   },
   "523": {
     "name": "Bulldoze",
@@ -5643,7 +6166,8 @@
     "category": "Physical",
     "type": "Ground",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：压路。践踏地面，攻击自身周围所有单位，降低目标速度。"
   },
   "524": {
     "name": "Frost Breath",
@@ -5653,7 +6177,8 @@
     "category": "Special",
     "type": "Ice",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：冰之吐息。喷出冰冷的气息攻击对手，必定能命中要害。"
   },
   "525": {
     "name": "Dragon Tail",
@@ -5665,7 +6190,8 @@
     "priority": -6,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：龙之尾。将对手弹飞，换出其它怪兽，对野生怪兽则结束战斗。"
   },
   "526": {
     "name": "Work Up",
@@ -5675,7 +6201,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：鼓舞士气。振奋自己，提高自身攻击与特攻。"
   },
   "527": {
     "name": "Electroweb",
@@ -5685,7 +6212,8 @@
     "category": "Special",
     "type": "Electric",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：电网。用电网捉住对手攻击，降低对手速度。"
   },
   "528": {
     "name": "Wild Charge",
@@ -5698,7 +6226,8 @@
     "tags": [
       "reckless",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：野性电击。缠绕电流撞击对手，自身也会受到少量伤害。"
   },
   "529": {
     "name": "Drill Run",
@@ -5710,7 +6239,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：钻头直击。将身体像钻头一般转动，撞击对手，容易命中要害。"
   },
   "530": {
     "name": "Dual Chop",
@@ -5722,7 +6252,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：连环切击。用身体坚硬的部分敲打对手，造成2次连续伤害。"
   },
   "531": {
     "name": "Heart Stamp",
@@ -5734,7 +6265,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：心灵压迫。以可爱的样子迷惑对手，再作出强烈的一击，会让对手害怕。"
   },
   "532": {
     "name": "Horn Leech",
@@ -5746,7 +6278,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：木角。将角刺入对方身体吸取养分，所造成伤害的50%回复自身HP。"
   },
   "533": {
     "name": "Sacred Sword",
@@ -5758,7 +6291,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：神圣之剑。用长角砍杀对方，无视对方能力变化造成伤害。"
   },
   "534": {
     "name": "Razor Shell",
@@ -5770,7 +6304,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：贝壳刃。用锋锐的贝壳切砍对方，会降低对方防御。"
   },
   "535": {
     "name": "Heat Crash",
@@ -5782,7 +6317,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：热践踏。用燃烧的身体冲撞对方，自身体重比对方越高威力越大。"
   },
   "536": {
     "name": "Leaf Tornado",
@@ -5792,7 +6328,8 @@
     "category": "Special",
     "type": "Grass",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：草旋风。用锋锐的树叶围绕对方攻击，会降低对方命中率。"
   },
   "537": {
     "name": "Steamroller",
@@ -5804,7 +6341,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：坚硬滚动。滚动蜷成一团的身体压碎对手，会让对手害怕。"
   },
   "538": {
     "name": "Cotton Guard",
@@ -5814,7 +6352,8 @@
     "category": "Status",
     "type": "Grass",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：棉花防御。用轻飘飘的绒毛将自身身体包裹起来，大幅提高自身防御。"
   },
   "539": {
     "name": "Night Daze",
@@ -5824,7 +6363,8 @@
     "category": "Special",
     "type": "Dark",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：暗夜爆破。发出暗黑的冲击波攻击对手，会降低对手命中率。"
   },
   "540": {
     "name": "Psystrike",
@@ -5834,7 +6374,8 @@
     "category": "Special",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：精神破坏。将神秘的意念实体化攻击对方，造成物理伤害。"
   },
   "541": {
     "name": "Tail Slap",
@@ -5846,7 +6387,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：扫荡拍打。用坚硬的尾巴拍击对手，2～5次连续攻击。"
   },
   "542": {
     "name": "Hurricane",
@@ -5856,7 +6398,8 @@
     "category": "Special",
     "type": "Flying",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：暴风。用强风包裹对方，会造成混乱。"
   },
   "543": {
     "name": "Head Charge",
@@ -5869,7 +6412,8 @@
     "tags": [
       "reckless",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：阿弗罗撞击。用爆炸头冲撞对手，自身也会受到少量伤害。"
   },
   "544": {
     "name": "Gear Grind",
@@ -5881,7 +6425,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：齿轮飞盘。向对手投掷钢铁齿轮攻击，造成2次伤害。"
   },
   "545": {
     "name": "Searing Shot",
@@ -5891,7 +6436,8 @@
     "category": "Special",
     "type": "Fire",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：火焰弹。用通红的火焰攻击自身周围所有单位，会造成烧伤。"
   },
   "546": {
     "name": "Techno Blast",
@@ -5901,7 +6447,8 @@
     "category": "Special",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：科技爆破。向对方发射光弹，随自身携带的磁带改变属性。"
   },
   "547": {
     "name": "Relic Song",
@@ -5913,7 +6460,8 @@
     "priority": 0,
     "tags": [
       "voice"
-    ]
+    ],
+    "desc": "PO译名：古代之歌。让对手听见古代的歌声，打动对手的心，会造成睡眠。"
   },
   "548": {
     "name": "Secret Sword",
@@ -5923,7 +6471,8 @@
     "category": "Special",
     "type": "Fighting",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：神秘之剑。用长角砍杀对方，角上寄宿的神秘力量会造成物理伤害。"
   },
   "549": {
     "name": "Glaciate",
@@ -5933,7 +6482,8 @@
     "category": "Special",
     "type": "Ice",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：冰封世界。向对手喷出冰冻的冷气，降低对手速度。"
   },
   "550": {
     "name": "Bolt Strike",
@@ -5945,7 +6495,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：雷击。在身上缠绕庞大的电流冲击对手，会造成麻痹。"
   },
   "551": {
     "name": "Blue Flare",
@@ -5955,7 +6506,8 @@
     "category": "Special",
     "type": "Fire",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：青色火焰。用美丽的青色火焰缠绕对手攻击，会造成烧伤。"
   },
   "552": {
     "name": "Fiery Dance",
@@ -5965,7 +6517,8 @@
     "category": "Special",
     "type": "Fire",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：火焰之舞。用火翼拍打对手，会提高自身特攻。"
   },
   "553": {
     "name": "Freeze Shock",
@@ -5975,7 +6528,8 @@
     "category": "Physical",
     "type": "Ice",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：冰结电击。在第二回合用寄宿电流的冰块打击对手，会造成麻痹。"
   },
   "554": {
     "name": "Ice Burn",
@@ -5985,7 +6539,8 @@
     "category": "Special",
     "type": "Ice",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：冰冷闪光。在第二回合用可以冻结一切的强烈冷气包裹对手，会造成烧伤。"
   },
   "555": {
     "name": "Snarl",
@@ -5997,7 +6552,8 @@
     "priority": 0,
     "tags": [
       "voice"
-    ]
+    ],
+    "desc": "PO译名：大喊。没完没了地向对手怒吼，降低对手特攻。"
   },
   "556": {
     "name": "Icicle Crash",
@@ -6007,7 +6563,8 @@
     "category": "Physical",
     "type": "Ice",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：冰柱坠落。用巨大的冰柱强烈冲击对手，会让对手害怕。"
   },
   "557": {
     "name": "V-create",
@@ -6019,7 +6576,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：创造胜利。从额头发出灼热的火焰，舍身撞击对手，降低自身防御、特防与速度。"
   },
   "558": {
     "name": "Fusion Flare",
@@ -6029,7 +6587,8 @@
     "category": "Special",
     "type": "Fire",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：交织火焰。用巨大的火焰打倒对方，受到巨大的雷电影响时技能威力上升。"
   },
   "559": {
     "name": "Fusion Bolt",
@@ -6039,7 +6598,8 @@
     "category": "Physical",
     "type": "Electric",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：交织闪电。用巨大的雷电打倒对方，受到巨大的火焰影响时技能威力上升。"
   },
   "560": {
     "name": "Baby-Doll Eyes",
@@ -6049,7 +6609,8 @@
     "category": "Status",
     "type": "Fairy",
     "priority": 1,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：可爱目光。用可爱的目光注视对手，降低其攻击。必定能够先制攻击。"
   },
   "561": {
     "name": "Boomburst",
@@ -6061,7 +6622,8 @@
     "priority": 0,
     "tags": [
       "voice"
-    ]
+    ],
+    "desc": "PO译名：爆音波。发出恐怖的爆音，靠其破坏力攻击周围所有目标。"
   },
   "562": {
     "name": "Crafty Shield",
@@ -6071,7 +6633,8 @@
     "category": "Status",
     "type": "Fairy",
     "priority": 3,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：欺诈防御。使用不可思议的力量，防御己方受到的变化技能，但会受到攻击技能。"
   },
   "563": {
     "name": "Dazzling Gleam",
@@ -6081,7 +6644,8 @@
     "category": "Special",
     "type": "Fairy",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：魔法闪光。放出强力的光，对对手造成伤害。"
   },
   "564": {
     "name": "Draining Kiss",
@@ -6093,7 +6657,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：吸收之吻。亲吻对手吸取对手的能量，所造成伤害的一半回复自身。"
   },
   "565": {
     "name": "Fairy Wind",
@@ -6103,7 +6668,8 @@
     "category": "Special",
     "type": "Fairy",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：妖精之风。发出妖精之风攻击对手。"
   },
   "566": {
     "name": "Flying Press",
@@ -6115,7 +6681,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：飞行压制。从天空向对手俯冲，这个技能同时是格斗与飞行属性。"
   },
   "567": {
     "name": "Forest's Curse",
@@ -6125,7 +6692,8 @@
     "category": "Status",
     "type": "Grass",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：森林诅咒。对对手施加森林诅咒，受到诅咒的对手增加草属性。"
   },
   "568": {
     "name": "Freeze-Dry",
@@ -6135,7 +6703,8 @@
     "category": "Special",
     "type": "Ice",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：冷冻干燥。急速冷却对手，一定几率冻结。这个技能对水系效果显著。"
   },
   "569": {
     "name": "Geomancy",
@@ -6145,7 +6714,8 @@
     "category": "Status",
     "type": "Fairy",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：大地控制。第一回合吸收能量，第二回合大幅提高自身特攻、特防与速度。"
   },
   "570": {
     "name": "Petal Blizzard",
@@ -6155,7 +6725,8 @@
     "category": "Physical",
     "type": "Grass",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：花吹雪。引发剧烈的花吹雪，攻击周围所有目标。"
   },
   "571": {
     "name": "Infestation",
@@ -6167,7 +6738,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：缠身。4～5回合内纠缠对手进行攻击，其间对手不能交换。"
   },
   "572": {
     "name": "Moonblast",
@@ -6177,7 +6749,8 @@
     "category": "Special",
     "type": "Fairy",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：月爆。借用月亮的力量攻击对手，有几率降低其特攻。"
   },
   "573": {
     "name": "Mystical Fire",
@@ -6187,7 +6760,8 @@
     "category": "Special",
     "type": "Fire",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：魔法火焰。呼出特殊的热火攻击，降低对手的特攻。"
   },
   "574": {
     "name": "Noble Roar",
@@ -6199,7 +6773,8 @@
     "priority": 0,
     "tags": [
       "voice"
-    ]
+    ],
+    "desc": "PO译名：咆哮。大声咆哮威吓对手，降低其攻击与特攻。"
   },
   "575": {
     "name": "Nuzzle",
@@ -6211,7 +6786,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：脸颊磨蹭。用带电的脸颊磨蹭对手攻击，造成麻痹状态。"
   },
   "576": {
     "name": "Oblivion Wing",
@@ -6221,7 +6797,8 @@
     "category": "Special",
     "type": "Flying",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：死亡之翼。从盯准的目标上吸收HP，所造成伤害的一半以上回复自身HP。"
   },
   "577": {
     "name": "Parabolic Charge",
@@ -6231,7 +6808,8 @@
     "category": "Special",
     "type": "Electric",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：抛物式充电。攻击周围全部精灵，所造成伤害的一半回复自身。"
   },
   "578": {
     "name": "Phantom Force",
@@ -6243,7 +6821,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：幽灵潜袭。第一回合消失到不知何处，第二回合攻击对手。可以无视保护进行攻击。"
   },
   "579": {
     "name": "Play Rough",
@@ -6255,7 +6834,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：嬉闹。戏弄对手攻击，有几率降低对手攻击。"
   },
   "580": {
     "name": "Play Nice",
@@ -6265,7 +6845,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：好好相处。增进与对手的感情，使其失去战斗力，降低其攻击。"
   },
   "581": {
     "name": "Trick-or-Treat",
@@ -6275,7 +6856,8 @@
     "category": "Status",
     "type": "Ghost",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：万圣节捣蛋。邀请对手参加复活节，使对手增加幽灵属性。"
   },
   "582": {
     "name": "Water Shuriken",
@@ -6285,7 +6867,8 @@
     "category": "Special",
     "type": "Water",
     "priority": 1,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：水之手里剑。用粘液做成的手里剑射出2～5次，必定能够先制攻击。"
   },
   "583": {
     "name": "Aromatic Mist",
@@ -6295,7 +6878,8 @@
     "category": "Status",
     "type": "Fairy",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：芳香迷雾。用神秘的芳香提高己方所有精灵的特防。"
   },
   "584": {
     "name": "Belch",
@@ -6305,7 +6889,8 @@
     "category": "Special",
     "type": "Poison",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：打嗝。朝对手打一个饱嗝攻击，必须吃过树果才能使用这个技能。"
   },
   "585": {
     "name": "Confide",
@@ -6317,7 +6902,8 @@
     "priority": 0,
     "tags": [
       "voice"
-    ]
+    ],
+    "desc": "PO译名：私密话。向对手述说秘密，使其失去集中力，降低其特攻。"
   },
   "586": {
     "name": "Disarming Voice",
@@ -6329,7 +6915,8 @@
     "priority": 0,
     "tags": [
       "voice"
-    ]
+    ],
+    "desc": "PO译名：魅力声音。发出魅惑的叫声，对对手造成精神伤害。攻击必定命中。"
   },
   "587": {
     "name": "Eerie Impulse",
@@ -6339,7 +6926,8 @@
     "category": "Status",
     "type": "Electric",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：怪电波。身体发出怪电波覆盖对手，使其特攻大幅降低。"
   },
   "588": {
     "name": "Electric Terrain",
@@ -6349,7 +6937,8 @@
     "category": "Status",
     "type": "Electric",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：电流场地。5回合内让脚下变成电流场地，地面上的精灵不会睡眠。"
   },
   "589": {
     "name": "Electrify",
@@ -6359,7 +6948,8 @@
     "category": "Status",
     "type": "Electric",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：送电。如果在对方出招前送电，当回合内对方使用的技能变为电属性。"
   },
   "590": {
     "name": "Fairy Lock",
@@ -6369,7 +6959,8 @@
     "category": "Status",
     "type": "Fairy",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：妖精之锁。给战场锁上锁，使下回合所有精灵不能逃跑。"
   },
   "591": {
     "name": "Fell Stinger",
@@ -6381,7 +6972,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：终结针刺。用这个技能击倒对手时，自己的攻击大幅提高。"
   },
   "592": {
     "name": "Flower Shield",
@@ -6391,7 +6983,8 @@
     "category": "Status",
     "type": "Fairy",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：鲜花防御。使用不可思的力量，提高场上所有草系精灵的防御。"
   },
   "593": {
     "name": "Grassy Terrain",
@@ -6401,7 +6994,8 @@
     "category": "Status",
     "type": "Grass",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：绿草场地。5回合内让脚下变成绿草场地，地面上的精灵每回合回复。"
   },
   "594": {
     "name": "Ion Deluge",
@@ -6411,7 +7005,8 @@
     "category": "Status",
     "type": "Electric",
     "priority": 1,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：等离子倾泻。散布带电粒子，将普通系技能变为电系。"
   },
   "595": {
     "name": "King's Shield",
@@ -6421,7 +7016,8 @@
     "category": "Status",
     "type": "Steel",
     "priority": 4,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：王者之盾。在防守对手攻击的同时，进入防御态势，让触碰到的对手攻击大幅降低。"
   },
   "596": {
     "name": "Land's Wrath",
@@ -6431,7 +7027,8 @@
     "category": "Physical",
     "type": "Ground",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：大地原力。凝聚大地的原力，攻击对方所有精灵。"
   },
   "597": {
     "name": "Magnetic Flux",
@@ -6441,7 +7038,8 @@
     "category": "Status",
     "type": "Electric",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：磁场操作。提高所有正极与负极特性的精灵的防御与特防。"
   },
   "598": {
     "name": "Mat Block",
@@ -6451,7 +7049,8 @@
     "category": "Status",
     "type": "Fighting",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：叠返。翻起榻榻米作为盾牌，防御自身与队友受到的技能伤害。不能防守变化技能。"
   },
   "599": {
     "name": "Misty Terrain",
@@ -6461,7 +7060,8 @@
     "category": "Status",
     "type": "Fairy",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：迷雾场地。5回合内让脚下变成迷雾场地，地面上的精灵不会处于异常状态。"
   },
   "600": {
     "name": "Parting Shot",
@@ -6471,7 +7071,8 @@
     "category": "Status",
     "type": "Dark",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：退场台词。撂下最后的话，降低对手的攻击与特攻，之后将自身与队友交换。"
   },
   "601": {
     "name": "Powder",
@@ -6481,7 +7082,8 @@
     "category": "Status",
     "type": "Bug",
     "priority": 1,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：粉尘。对目标喷洒粉尘，如果目标使用火系技能则引发爆炸并受到伤害。"
   },
   "602": {
     "name": "Power-Up Punch",
@@ -6494,7 +7096,8 @@
     "tags": [
       "ironFist",
       "touch"
-    ]
+    ],
+    "desc": "PO译名：增强拳。重复打击使拳头越来越硬，每次击中对手时攻击提高。"
   },
   "603": {
     "name": "Rototiller",
@@ -6504,7 +7107,8 @@
     "category": "Status",
     "type": "Ground",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：耕地。耕耘土地，利于草木生长。使所有草系精灵的攻击与特攻提高。"
   },
   "604": {
     "name": "Spiky Shield",
@@ -6514,7 +7118,8 @@
     "category": "Status",
     "type": "Grass",
     "priority": 4,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：棘刺防御。在防守对手攻击的同时，削减触碰到的对手的体力。"
   },
   "605": {
     "name": "Sticky Web",
@@ -6524,7 +7129,8 @@
     "category": "Status",
     "type": "Bug",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：黏网。在对方周围布满黏着的网，让交换出来的对手速度降低。"
   },
   "606": {
     "name": "Topsy-Turvy",
@@ -6534,7 +7140,8 @@
     "category": "Status",
     "type": "Dark",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：翻转。对手身上的所有能力变化逆转。"
   },
   "607": {
     "name": "Venom Drench",
@@ -6544,7 +7151,8 @@
     "category": "Status",
     "type": "Poison",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：毒液陷阱。喷洒特殊的毒液，使中毒状态的对手的攻击、特攻与速度降低。"
   },
   "608": {
     "name": "Happy Hour",
@@ -6554,7 +7162,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：开心时间。战斗后获得双倍金币"
   },
   "609": {
     "name": "Celebrate",
@@ -6564,7 +7173,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：庆祝。在你的节日好好庆祝一下！"
   },
   "610": {
     "name": "Hold Back",
@@ -6576,7 +7186,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": "PO译名：手下留情。如果可以击倒对方，则不击倒而留下1HP。"
   },
   "611": {
     "name": "Diamond Storm",
@@ -6586,7 +7197,8 @@
     "category": "Physical",
     "type": "Rock",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：钻石风暴 。50%几率提升自身物防。"
   },
   "612": {
     "name": "Light of Ruin",
@@ -6598,7 +7210,8 @@
     "priority": 0,
     "tags": [
       "reckless"
-    ]
+    ],
+    "desc": "PO译名：毁灭之光。1/2伤害反弹。"
   },
   "613": {
     "name": "Steam Eruption",
@@ -6608,7 +7221,8 @@
     "category": "Special",
     "type": "Water",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：蒸汽喷发。"
   },
   "614": {
     "name": "Hyperspace Hole",
@@ -6618,7 +7232,8 @@
     "category": "Special",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：超空间虫洞。"
   },
   "615": {
     "name": "Hold Hands",
@@ -6628,7 +7243,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：手牵手。"
   },
   "616": {
     "name": "Thousand Arrows",
@@ -6638,7 +7254,8 @@
     "category": "Physical",
     "type": "Ground",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：万箭齐发。"
   },
   "617": {
     "name": "Thousand Waves",
@@ -6648,7 +7265,8 @@
     "category": "Physical",
     "type": "Ground",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": "PO译名：千波共震。"
   },
   "618": {
     "name": "Origin Pulse",
@@ -6660,7 +7278,8 @@
     "priority": 0,
     "tags": [
       "megaLauncher"
-    ]
+    ],
+    "desc": ""
   },
   "619": {
     "name": "Precipice Blades",
@@ -6670,7 +7289,8 @@
     "category": "Physical",
     "type": "Ground",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "620": {
     "name": "Dragon Ascent",
@@ -6682,7 +7302,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "621": {
     "name": "Hyperspace Fury",
@@ -6692,7 +7313,8 @@
     "category": "Physical",
     "type": "Dark",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "622": {
     "name": "Core Enforcer",
@@ -6702,7 +7324,8 @@
     "category": "Special",
     "type": "Dragon",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "623": {
     "name": "Fleur Cannon",
@@ -6712,7 +7335,8 @@
     "category": "Special",
     "type": "Fairy",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "624": {
     "name": "High Horsepower",
@@ -6724,7 +7348,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "625": {
     "name": "Leafage",
@@ -6734,7 +7359,8 @@
     "category": "Physical",
     "type": "Grass",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "626": {
     "name": "Moongeist Beam",
@@ -6744,7 +7370,8 @@
     "category": "Special",
     "type": "Ghost",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "627": {
     "name": "Nature's Madness",
@@ -6754,7 +7381,8 @@
     "category": "Special",
     "type": "Fairy",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "628": {
     "name": "Revelation Dance",
@@ -6764,7 +7392,8 @@
     "category": "Special",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "629": {
     "name": "Shell Trap",
@@ -6774,7 +7403,8 @@
     "category": "Special",
     "type": "Fire",
     "priority": -3,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "630": {
     "name": "Solar Blade",
@@ -6786,7 +7416,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "631": {
     "name": "Sunsteel Strike",
@@ -6798,7 +7429,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "632": {
     "name": "Accelerock",
@@ -6810,7 +7442,8 @@
     "priority": 1,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "633": {
     "name": "Psychic Terrain",
@@ -6820,7 +7453,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "634": {
     "name": "Throat Chop",
@@ -6832,7 +7466,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "635": {
     "name": "Aurora Veil",
@@ -6842,7 +7477,8 @@
     "category": "Status",
     "type": "Ice",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "636": {
     "name": "Laser Focus",
@@ -6852,7 +7488,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "637": {
     "name": "Clanging Scales",
@@ -6864,7 +7501,8 @@
     "priority": 0,
     "tags": [
       "voice"
-    ]
+    ],
+    "desc": ""
   },
   "638": {
     "name": "Multi-Attack",
@@ -6876,7 +7514,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "639": {
     "name": "Trop Kick",
@@ -6888,7 +7527,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "640": {
     "name": "Dragon Hammer",
@@ -6900,7 +7540,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "641": {
     "name": "Instruct",
@@ -6910,7 +7551,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "642": {
     "name": "Spirit Shackle",
@@ -6920,7 +7562,8 @@
     "category": "Physical",
     "type": "Ghost",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "643": {
     "name": "Darkest Lariat",
@@ -6932,7 +7575,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "644": {
     "name": "Sparkling Aria",
@@ -6944,7 +7588,8 @@
     "priority": 0,
     "tags": [
       "voice"
-    ]
+    ],
+    "desc": ""
   },
   "645": {
     "name": "Shore Up",
@@ -6954,7 +7599,8 @@
     "category": "Status",
     "type": "Ground",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "646": {
     "name": "First Impression",
@@ -6966,7 +7612,8 @@
     "priority": 2,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "647": {
     "name": "Baneful Bunker",
@@ -6976,7 +7623,8 @@
     "category": "Status",
     "type": "Poison",
     "priority": 4,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "648": {
     "name": "Ice Hammer",
@@ -6989,7 +7637,8 @@
     "tags": [
       "ironFist",
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "649": {
     "name": "Floral Healing",
@@ -6999,7 +7648,8 @@
     "category": "Status",
     "type": "Fairy",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "650": {
     "name": "Strength Sap",
@@ -7009,7 +7659,8 @@
     "category": "Status",
     "type": "Grass",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "651": {
     "name": "Spotlight",
@@ -7019,7 +7670,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 3,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "652": {
     "name": "Toxic Thread",
@@ -7029,7 +7681,8 @@
     "category": "Status",
     "type": "Poison",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "653": {
     "name": "Gear Up",
@@ -7039,7 +7692,8 @@
     "category": "Status",
     "type": "Steel",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "654": {
     "name": "Pollen Puff",
@@ -7049,7 +7703,8 @@
     "category": "Special",
     "type": "Bug",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "655": {
     "name": "Anchor Shot",
@@ -7061,7 +7716,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "656": {
     "name": "Lunge",
@@ -7073,7 +7729,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "657": {
     "name": "Fire Lash",
@@ -7085,7 +7742,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "658": {
     "name": "Power Trip",
@@ -7097,7 +7755,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "659": {
     "name": "Burn Up",
@@ -7107,7 +7766,8 @@
     "category": "Special",
     "type": "Fire",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "660": {
     "name": "Speed Swap",
@@ -7117,7 +7777,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "661": {
     "name": "Smart Strike",
@@ -7129,7 +7790,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "662": {
     "name": "Purify",
@@ -7139,7 +7801,8 @@
     "category": "Status",
     "type": "Poison",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "663": {
     "name": "Beak Blast",
@@ -7149,7 +7812,8 @@
     "category": "Physical",
     "type": "Flying",
     "priority": -3,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "664": {
     "name": "Brutal Swing",
@@ -7161,7 +7825,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "665": {
     "name": "Psychic Fangs",
@@ -7174,7 +7839,8 @@
     "tags": [
       "strongJaw",
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "666": {
     "name": "Stomping Tantrum",
@@ -7186,7 +7852,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "667": {
     "name": "Shadow Bone",
@@ -7196,7 +7863,8 @@
     "category": "Physical",
     "type": "Ghost",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "668": {
     "name": "Liquidation",
@@ -7208,7 +7876,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "669": {
     "name": "Prismatic Laser",
@@ -7218,7 +7887,8 @@
     "category": "Special",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "670": {
     "name": "Spectral Thief",
@@ -7230,7 +7900,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "671": {
     "name": "Tearful Look",
@@ -7240,7 +7911,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "672": {
     "name": "Zing Zap",
@@ -7252,7 +7924,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "673": {
     "name": "Breakneck Blitz",
@@ -7262,7 +7935,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "674": {
     "name": "All-Out Pummeling",
@@ -7272,7 +7946,8 @@
     "category": "Status",
     "type": "Fighting",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "675": {
     "name": "Supersonic Skystrike",
@@ -7282,7 +7957,8 @@
     "category": "Status",
     "type": "Flying",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "676": {
     "name": "Acid Downpour",
@@ -7292,7 +7968,8 @@
     "category": "Status",
     "type": "Poison",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "677": {
     "name": "Tectonic Rage",
@@ -7302,7 +7979,8 @@
     "category": "Status",
     "type": "Ground",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "678": {
     "name": "Continental Crush",
@@ -7312,7 +7990,8 @@
     "category": "Status",
     "type": "Rock",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "679": {
     "name": "Savage Spin-Out",
@@ -7322,7 +8001,8 @@
     "category": "Status",
     "type": "Bug",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "680": {
     "name": "Never-Ending Nightmare",
@@ -7332,7 +8012,8 @@
     "category": "Status",
     "type": "Ghost",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "681": {
     "name": "Corkscrew Crash",
@@ -7342,7 +8023,8 @@
     "category": "Status",
     "type": "Steel",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "682": {
     "name": "Inferno Overdrive",
@@ -7352,7 +8034,8 @@
     "category": "Status",
     "type": "Fire",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "683": {
     "name": "Hydro Vortex",
@@ -7362,7 +8045,8 @@
     "category": "Status",
     "type": "Water",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "684": {
     "name": "Bloom Doom",
@@ -7372,7 +8056,8 @@
     "category": "Status",
     "type": "Grass",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "685": {
     "name": "Gigavolt Havoc",
@@ -7382,7 +8067,8 @@
     "category": "Status",
     "type": "Electric",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "686": {
     "name": "Shattered Psyche",
@@ -7392,7 +8078,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "687": {
     "name": "Subzero Slammer",
@@ -7402,7 +8089,8 @@
     "category": "Status",
     "type": "Ice",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "688": {
     "name": "Devastating Drake",
@@ -7412,7 +8100,8 @@
     "category": "Status",
     "type": "Dragon",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "689": {
     "name": "Black Hole Eclipse",
@@ -7422,7 +8111,8 @@
     "category": "Status",
     "type": "Dark",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "690": {
     "name": "Twinkle Tackle",
@@ -7432,7 +8122,8 @@
     "category": "Status",
     "type": "Fairy",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "691": {
     "name": "Castatropika",
@@ -7444,7 +8135,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "692": {
     "name": "Stoked Sparksurfer",
@@ -7454,7 +8146,8 @@
     "category": "Special",
     "type": "Electric",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "693": {
     "name": "Extreme Evoboost",
@@ -7464,7 +8157,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "694": {
     "name": "Pulverizing Pancake",
@@ -7476,7 +8170,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "695": {
     "name": "Genesis Supernova",
@@ -7486,7 +8181,8 @@
     "category": "Special",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "696": {
     "name": "Guardian of Alola",
@@ -7496,7 +8192,8 @@
     "category": "Status",
     "type": "Fairy",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "697": {
     "name": "Sinister Arrow Raid",
@@ -7506,7 +8203,8 @@
     "category": "Physical",
     "type": "Ghost",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "698": {
     "name": "Malicious Moonsault",
@@ -7518,7 +8216,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "699": {
     "name": "Oceanic Operetta",
@@ -7528,7 +8227,8 @@
     "category": "Special",
     "type": "Water",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "700": {
     "name": "Soul-Stealing 7-Star Strike",
@@ -7540,7 +8240,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "701": {
     "name": "10,000,000 Volt Thunderbolt",
@@ -7550,7 +8251,8 @@
     "category": "Special",
     "type": "Electric",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "702": {
     "name": "Clangorous Soulblaze",
@@ -7562,7 +8264,8 @@
     "priority": 0,
     "tags": [
       "voice"
-    ]
+    ],
+    "desc": ""
   },
   "703": {
     "name": "Splintered Stormshards",
@@ -7572,7 +8275,8 @@
     "category": "Physical",
     "type": "Rock",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "704": {
     "name": "Mind Blown",
@@ -7584,7 +8288,8 @@
     "priority": 0,
     "tags": [
       "reckless"
-    ]
+    ],
+    "desc": ""
   },
   "705": {
     "name": "Photon Geyser",
@@ -7594,7 +8299,8 @@
     "category": "Special",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "706": {
     "name": "Searing Sunraze Smash",
@@ -7606,7 +8312,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "707": {
     "name": "Menacing Moonraze Maelstrom",
@@ -7616,7 +8323,8 @@
     "category": "Special",
     "type": "Ghost",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "708": {
     "name": "Let's Snuggle Forever",
@@ -7628,7 +8336,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "709": {
     "name": "Plasma Fists",
@@ -7640,7 +8349,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "710": {
     "name": "Light That Burns the Sky",
@@ -7650,7 +8360,8 @@
     "category": "Special",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "711": {
     "name": "(No Move)",
@@ -7660,7 +8371,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "712": {
     "name": "(No Move)",
@@ -7670,7 +8382,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "713": {
     "name": "(No Move)",
@@ -7680,7 +8393,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "714": {
     "name": "(No Move)",
@@ -7690,7 +8404,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "715": {
     "name": "(No Move)",
@@ -7700,7 +8415,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "716": {
     "name": "(No Move)",
@@ -7710,7 +8426,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "717": {
     "name": "(No Move)",
@@ -7720,7 +8437,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "718": {
     "name": "(No Move)",
@@ -7730,7 +8448,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "719": {
     "name": "(No Move)",
@@ -7740,7 +8459,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "720": {
     "name": "(No Move)",
@@ -7750,7 +8470,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "721": {
     "name": "(No Move)",
@@ -7760,7 +8481,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "722": {
     "name": "(No Move)",
@@ -7770,7 +8492,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "723": {
     "name": "(No Move)",
@@ -7780,7 +8503,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "724": {
     "name": "(No Move)",
@@ -7790,7 +8514,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "725": {
     "name": "(No Move)",
@@ -7800,7 +8525,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "726": {
     "name": "(No Move)",
@@ -7810,7 +8536,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "727": {
     "name": "(No Move)",
@@ -7820,7 +8547,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "728": {
     "name": "(No Move)",
@@ -7830,7 +8558,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "729": {
     "name": "Zippy Zap",
@@ -7840,7 +8569,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "730": {
     "name": "Splishy Splash",
@@ -7850,7 +8580,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "731": {
     "name": "Floaty Fall",
@@ -7860,7 +8591,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "732": {
     "name": "Pika Papow",
@@ -7870,7 +8602,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "733": {
     "name": "Bouncy Bubble",
@@ -7880,7 +8613,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "734": {
     "name": "Buzzy Buzz",
@@ -7890,7 +8624,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "735": {
     "name": "Sizzly Slide",
@@ -7900,7 +8635,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "736": {
     "name": "Glitzy Glow",
@@ -7910,7 +8646,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "737": {
     "name": "Baddy Bad",
@@ -7920,7 +8657,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "738": {
     "name": "Sappy Seed",
@@ -7930,7 +8668,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "739": {
     "name": "Freezy Frost",
@@ -7940,7 +8679,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "740": {
     "name": "Sparkly Swirl",
@@ -7950,7 +8690,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "741": {
     "name": "Veevee Volley",
@@ -7960,7 +8701,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "742": {
     "name": "Double Iron Bash",
@@ -7973,7 +8715,8 @@
     "tags": [
       "ironFist",
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "743": {
     "name": "(No Move)",
@@ -7983,7 +8726,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "744": {
     "name": "Dynamax Cannon",
@@ -7993,7 +8737,8 @@
     "category": "Special",
     "type": "Dragon",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "745": {
     "name": "Snipe Shot",
@@ -8003,7 +8748,8 @@
     "category": "Special",
     "type": "Water",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "746": {
     "name": "Jaw Lock",
@@ -8015,7 +8761,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "747": {
     "name": "Stuff Cheeks",
@@ -8025,7 +8772,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "748": {
     "name": "No Retreat",
@@ -8035,7 +8783,8 @@
     "category": "Status",
     "type": "Fighting",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "749": {
     "name": "Tar Shot",
@@ -8045,7 +8794,8 @@
     "category": "Status",
     "type": "Rock",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "750": {
     "name": "Magic Powder",
@@ -8055,7 +8805,8 @@
     "category": "Status",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "751": {
     "name": "Dragon Darts",
@@ -8065,7 +8816,8 @@
     "category": "Physical",
     "type": "Dragon",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "752": {
     "name": "Teatime",
@@ -8075,7 +8827,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "753": {
     "name": "Octolock",
@@ -8085,7 +8838,8 @@
     "category": "Status",
     "type": "Fighting",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "754": {
     "name": "Bolt Beak",
@@ -8097,7 +8851,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "755": {
     "name": "Fishious Rend",
@@ -8110,7 +8865,8 @@
     "tags": [
       "strongJaw",
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "756": {
     "name": "Court Change",
@@ -8120,7 +8876,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "757": {
     "name": "(No Move)",
@@ -8130,7 +8887,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "758": {
     "name": "(No Move)",
@@ -8140,7 +8898,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "759": {
     "name": "(No Move)",
@@ -8150,7 +8909,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "760": {
     "name": "(No Move)",
@@ -8160,7 +8920,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "761": {
     "name": "(No Move)",
@@ -8170,7 +8931,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "762": {
     "name": "(No Move)",
@@ -8180,7 +8942,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "763": {
     "name": "(No Move)",
@@ -8190,7 +8953,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "764": {
     "name": "(No Move)",
@@ -8200,7 +8964,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "765": {
     "name": "(No Move)",
@@ -8210,7 +8975,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "766": {
     "name": "(No Move)",
@@ -8220,7 +8986,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "767": {
     "name": "(No Move)",
@@ -8230,7 +8997,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "768": {
     "name": "(No Move)",
@@ -8240,7 +9008,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "769": {
     "name": "(No Move)",
@@ -8250,7 +9019,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "770": {
     "name": "(No Move)",
@@ -8260,7 +9030,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "771": {
     "name": "(No Move)",
@@ -8270,7 +9041,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "772": {
     "name": "(No Move)",
@@ -8280,7 +9052,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "773": {
     "name": "(No Move)",
@@ -8290,7 +9063,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "774": {
     "name": "(No Move)",
@@ -8300,7 +9074,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "775": {
     "name": "Clangorous Soul",
@@ -8312,7 +9087,8 @@
     "priority": 0,
     "tags": [
       "voice"
-    ]
+    ],
+    "desc": ""
   },
   "776": {
     "name": "Body Press",
@@ -8324,7 +9100,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "777": {
     "name": "Decorate",
@@ -8334,7 +9111,8 @@
     "category": "Status",
     "type": "Fairy",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "778": {
     "name": "Drum Beating",
@@ -8344,7 +9122,8 @@
     "category": "Physical",
     "type": "Grass",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "779": {
     "name": "Snap Trap",
@@ -8356,7 +9135,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "780": {
     "name": "Pyro Ball",
@@ -8366,7 +9146,8 @@
     "category": "Physical",
     "type": "Fire",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "781": {
     "name": "Behemoth Blade",
@@ -8378,7 +9159,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "782": {
     "name": "Behemoth Bash",
@@ -8390,7 +9172,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "783": {
     "name": "Aura Wheel",
@@ -8400,7 +9183,8 @@
     "category": "Physical",
     "type": "Electric",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "784": {
     "name": "Breaking Swipe",
@@ -8412,7 +9196,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "785": {
     "name": "Branch Poke",
@@ -8424,7 +9209,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "786": {
     "name": "Overdrive",
@@ -8436,7 +9222,8 @@
     "priority": 0,
     "tags": [
       "voice"
-    ]
+    ],
+    "desc": ""
   },
   "787": {
     "name": "Apple Acid",
@@ -8446,7 +9233,8 @@
     "category": "Special",
     "type": "Grass",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "788": {
     "name": "Grav Apple",
@@ -8456,7 +9244,8 @@
     "category": "Physical",
     "type": "Grass",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "789": {
     "name": "Spirit Break",
@@ -8468,7 +9257,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "790": {
     "name": "Strange Steam",
@@ -8478,7 +9268,8 @@
     "category": "Special",
     "type": "Fairy",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "791": {
     "name": "Life Dew",
@@ -8488,7 +9279,8 @@
     "category": "Status",
     "type": "Water",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "792": {
     "name": "Obstruct",
@@ -8498,7 +9290,8 @@
     "category": "Status",
     "type": "Dark",
     "priority": 4,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "793": {
     "name": "False Surrender",
@@ -8510,7 +9303,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "794": {
     "name": "Meteor Assault",
@@ -8520,7 +9314,8 @@
     "category": "Physical",
     "type": "Fighting",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "795": {
     "name": "Eternabeam",
@@ -8530,7 +9325,8 @@
     "category": "Special",
     "type": "Dragon",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "796": {
     "name": "Steel Beam",
@@ -8542,7 +9338,8 @@
     "priority": 0,
     "tags": [
       "reckless"
-    ]
+    ],
+    "desc": ""
   },
   "797": {
     "name": "(No Move)",
@@ -8552,7 +9349,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "798": {
     "name": "(No Move)",
@@ -8562,7 +9360,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "799": {
     "name": "(No Move)",
@@ -8572,7 +9371,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "800": {
     "name": "(No Move)",
@@ -8582,7 +9382,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "801": {
     "name": "(No Move) ",
@@ -8592,7 +9393,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "802": {
     "name": "(No Move)",
@@ -8602,7 +9404,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "803": {
     "name": "(No Move)",
@@ -8612,7 +9415,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "804": {
     "name": "(No Move)",
@@ -8622,7 +9426,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "805": {
     "name": "(No Move)",
@@ -8632,7 +9437,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "806": {
     "name": "(No Move)",
@@ -8642,7 +9448,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "807": {
     "name": "(No Move)",
@@ -8652,7 +9459,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "808": {
     "name": "(No Move)",
@@ -8662,7 +9470,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "809": {
     "name": "(No Move)",
@@ -8672,7 +9481,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "810": {
     "name": "(No Move)",
@@ -8682,7 +9492,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "811": {
     "name": "(No Move)",
@@ -8692,7 +9503,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "812": {
     "name": "(No Move)",
@@ -8702,7 +9514,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "813": {
     "name": "(No Move)",
@@ -8712,7 +9525,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "814": {
     "name": "(No Move)",
@@ -8722,7 +9536,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "815": {
     "name": "(No Move)",
@@ -8732,7 +9547,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "816": {
     "name": "(No Move)",
@@ -8742,7 +9558,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "817": {
     "name": "(No Move)",
@@ -8752,7 +9569,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "818": {
     "name": "(No Move)",
@@ -8762,7 +9580,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "819": {
     "name": "(No Move)",
@@ -8772,7 +9591,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "820": {
     "name": "(No Move)",
@@ -8782,7 +9602,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "821": {
     "name": "(No Move)",
@@ -8792,7 +9613,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "822": {
     "name": "(No Move)",
@@ -8802,7 +9624,8 @@
     "category": "Status",
     "type": "Normal",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "823": {
     "name": "Expanding Force",
@@ -8812,7 +9635,8 @@
     "category": "Special",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "824": {
     "name": "Steel Roller",
@@ -8822,7 +9646,8 @@
     "category": "Physical",
     "type": "Steel",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "825": {
     "name": "Scale Shot",
@@ -8832,7 +9657,8 @@
     "category": "Physical",
     "type": "Dragon",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "826": {
     "name": "Meteor Beam",
@@ -8842,7 +9668,8 @@
     "category": "Special",
     "type": "Rock",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "827": {
     "name": "Shell Side Arm",
@@ -8852,7 +9679,8 @@
     "category": "Special",
     "type": "Poison",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "828": {
     "name": "Misty Explosion",
@@ -8862,7 +9690,8 @@
     "category": "Special",
     "type": "Fairy",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "829": {
     "name": "Grassy Glide",
@@ -8874,7 +9703,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "830": {
     "name": "Rising Voltage",
@@ -8884,7 +9714,8 @@
     "category": "Special",
     "type": "Electric",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "831": {
     "name": "Terrain Pulse",
@@ -8896,7 +9727,8 @@
     "priority": 0,
     "tags": [
       "megaLauncher"
-    ]
+    ],
+    "desc": ""
   },
   "832": {
     "name": "Skitter Smack",
@@ -8908,7 +9740,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "833": {
     "name": "Burning Jealousy",
@@ -8918,7 +9751,8 @@
     "category": "Special",
     "type": "Fire",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "834": {
     "name": "Lash Out",
@@ -8930,7 +9764,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "835": {
     "name": "Poltergeist",
@@ -8940,7 +9775,8 @@
     "category": "Physical",
     "type": "Ghost",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "836": {
     "name": "Corrosive Gas",
@@ -8950,7 +9786,8 @@
     "category": "Status",
     "type": "Poison",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "837": {
     "name": "Coaching",
@@ -8960,7 +9797,8 @@
     "category": "Status",
     "type": "Fighting",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "838": {
     "name": "Flip Turn",
@@ -8972,7 +9810,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "839": {
     "name": "Triple Axel",
@@ -8984,7 +9823,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "840": {
     "name": "Dual Wingbeat",
@@ -8996,7 +9836,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "841": {
     "name": "Scorching Sands",
@@ -9006,7 +9847,8 @@
     "category": "Special",
     "type": "Ground",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "842": {
     "name": "Jungle Healing",
@@ -9016,7 +9858,8 @@
     "category": "Status",
     "type": "Grass",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "843": {
     "name": "Wicked Blow",
@@ -9028,7 +9871,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "844": {
     "name": "Surging Strikes",
@@ -9040,7 +9884,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "845": {
     "name": "Thunder Cage",
@@ -9050,7 +9895,8 @@
     "category": "Special",
     "type": "Electric",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "846": {
     "name": "Dragon Energy",
@@ -9060,7 +9906,8 @@
     "category": "Special",
     "type": "Dragon",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "847": {
     "name": "Freezing Glare",
@@ -9070,7 +9917,8 @@
     "category": "Special",
     "type": "Psychic",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "848": {
     "name": "Fiery Wrath",
@@ -9080,7 +9928,8 @@
     "category": "Special",
     "type": "Dark",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "849": {
     "name": "Thunderous Kick",
@@ -9092,7 +9941,8 @@
     "priority": 0,
     "tags": [
       "touch"
-    ]
+    ],
+    "desc": ""
   },
   "850": {
     "name": "Glacial Lance",
@@ -9102,7 +9952,8 @@
     "category": "Physical",
     "type": "Ice",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "851": {
     "name": "Astral Barrage",
@@ -9112,7 +9963,8 @@
     "category": "Special",
     "type": "Ghost",
     "priority": 0,
-    "tags": []
+    "tags": [],
+    "desc": ""
   },
   "852": {
     "name": "Eerie Spell",
@@ -9124,6 +9976,7 @@
     "priority": 0,
     "tags": [
       "voice"
-    ]
+    ],
+    "desc": ""
   }
 }

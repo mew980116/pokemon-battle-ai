@@ -336,6 +336,8 @@
 
 - [ ] **calc_damage 补全特性/道具/天气/场地等修正（对齐 @smogon，后续做）**：当前已对齐基础公式 + 能力等级 + extra（0.3.38，20 用例）。尚未自动算：① 特性/道具能力值修正（大力士/瑜伽之力/专爱头带/眼镜/太阳之力/毅力/活力/蹲守/水泡等）——现靠 LLM 用 atk/spa 直接值绕过 ② 天气/场地加成（晴火×1.5、电场×1.3 等）③ 光墙/反射壁/极光幕 ④ 击中要害 ⑤ 防守减伤特性（厚脂肪/毛茸茸/多重鳞片/坚硬岩石等）。方向：先评估哪些 LLM 常用且 extra 补不准，再决定补进 calc_damage 还是继续靠 extra/直接值。可参考 @smogon/calc 的 calculateAtModsSMSSSV / calculateFinalModsSMSSSV（已装 C:\temp-calc\node_modules）。
 
+- [ ] **smogon 生态资源（暂记，看情况做）**：① **Usage Stats**（各分级使用率/配招/道具/特性/努力分布，作对手配置先验）——随机队向暂缓，等适配 PS 组队对战再说 ② **@pkmn/data / @pkmn/dex**（PS 完整数据层，补学习面/招式效果等）③ **pokemon-showdown 引擎**（MCTS/rollout 搜索，工程量大，短期不需要）④ **Smogon Analysis/Dex**（标准配招/counter/check 分析，可做 get_set_analysis tool）。
+
 **已实证**：
 
 - 挣扎保底（全 ban 后 `attackButton()`）不会导致卡死，兜底有效。

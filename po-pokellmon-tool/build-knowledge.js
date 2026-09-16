@@ -183,6 +183,20 @@ function buildMoves() {
         if ((parseInt(parts[1], 10) & 1) === 1) touchMap[parseInt(parts[0], 10)] = true;
     }
 
+    // 招式描述：move_description.txt（UTF-16 LE，num -> 中文描述）
+    const descMap = {};
+    const descRaw = fs.readFileSync(path.join(DATA, 'moves', 'move_description.txt'), 'utf16le').replace(/^\uFEFF/, '');
+    const descLines = descRaw.split('\n');
+    for (const line of descLines) {
+        const t = line.trim();
+        if (!t) continue;
+        const idx = t.indexOf(' ');
+        if (idx < 0) continue;
+        const num = parseInt(t.substring(0, idx), 10);
+        const desc = t.substring(idx + 1).trim();
+        if (desc) descMap[num] = desc;
+    }
+
     // movedata.json 里已解析好的 5 个 tag 字段 -> tag 名
     const TAG_FIELDS = [['voice', 'voice'], ['ironFist', 'ironFist'], ['reckless', 'reckless'], ['strongJaw', 'strongJaw'], ['megaLauncher', 'megaLauncher']];
 
@@ -202,7 +216,8 @@ function buildMoves() {
             category: CATEGORY[m.category] || 'Status',
             type: (tn === 18) ? null : (TYPE_NAMES[tn] || 'Normal'),
             priority: m.priority || 0,
-            tags: tags
+            tags: tags,
+            desc: descMap[m.num] || ''
         };
     }
     return result;

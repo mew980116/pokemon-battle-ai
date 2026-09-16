@@ -171,6 +171,7 @@ po-pokellmon/
 | 0.3.36 (tool) | ① calc_damage 支持直接输入能力值（attacker.atk/spa、defender.def/spd/hp，绕过种族值/EV/IV/性格计算，用于已知对手防御/HP 时直接算伤害）② system prompt 引导 save_observation 同名宝可梦用「名字#槽位」区分（避免无种族条款同名覆盖） |
 | 0.3.37 (tool) | 修正 calc_damage 伤害公式对齐 @smogon/calc（PS 官方计算器）：随机系数→STAB(4096定点)→克制(pokeRound)→extra 的取整顺序，消除 1-3 点偏差；新增 test-calc-compare.js 对比脚本（6 用例全对齐） |
 | 0.3.38 (tool) | calc_damage 的 extra 应用从 floor 改 pokeRound（对齐 @smogon finalMod 四舍五入）；test-calc-compare.js 扩展能力等级 + extra 用例（灼伤/达人带/生命宝珠），20/20 与 @smogon/calc 一致 |
+| 0.3.39 (tool) | get_move_info 补招式描述：buildMoves 读 move_description.txt（UTF-16 LE，num→中文描述）生成 desc 字段，get_move_info 返回 desc（中文效果描述）；TODO 记 smogon 生态资源（usage stats/@pkmn/data/引擎/analysis，看情况做） |
 | 0.3.0 (tool) | 新增 `calc_damage` tool：标准宝可梦伤害公式（最多 10 组 leg，返回 0.85x/1.0x 随机档伤害 + 防守方 HP 百分比 + detail）。新增 `po-pokellmon-tool/build-knowledge.js` 生成 `pokemon.json`（种族值/属性/中英文名索引）、`natures.json`（性格 buff/debuff）、`moves.json`（含招式 type + 中文名）。system prompt 引导 LLM 算伤后与战报实际伤害对比、异常（≈2x 差）提交 submit_feedback |
 | 0.3.1 (tool) | 新增 `run_js` 逃生舱 tool：LLM 可在 `vm` 沙箱跑一段同步 JS 覆盖无现成 tool 的计算（暴露 data/typeMul/effStat/resolvePokemon/resolveMove/calcDamage + print/console.log）。限制：同步、无 require/process/fs、2s 超时、结果/输出截 2000 字符 |
 | 0.3.2 (tool) | 修复 run_js 沙箱 2 个 bug：① `effStat` 签名从 7 参数简化为 `effStat(baseStat, boost?, level?)`（LLM 原 7 参数签名用错得 NaN，被迫手写公式）② `print`/`console.log` 改 `arguments` 全量拼接（原只收单参数丢输出）。新增 [test-tools.js](../po-pokellmon-tool/test-tools.js) 回归测试（验证 LLM 调用 get_type_matchup/calc_damage/run_js）。调参：`MAX_TOOL_ROUNDS` 10→15、`TIMEOUT_MS` 180s→240s |
