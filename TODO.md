@@ -292,6 +292,8 @@
 
 - [x] 🔴 **【高优先级】认输根因 = state URL 过长（已修 0.3.43）**：实测 `sys.synchronousWebCall` 120s 不超时（排除 webCall 超时），翻旧 server 输出无崩溃/DeepSeek 报错；真正根因是 **state 里的 fullHistory 随回合累积，`?state=<encodeURIComponent>` 到 turn 23 已 ~16KB**，逼近 Node 默认 `maxHeaderSize`(16KB) → 请求被拒 → PO webCall 返回空 → `JSON.parse` 崩 → 连续 3 次失败（跨度>15s）→ 认输。修复：`http.createServer({ maxHeaderSize: 65536 })`（放宽到 64KB）+ 加 crash 日志（crash.log）。长尾：fullHistory 无界增长，超长局（100+ 回合）仍可能再触顶，后续考虑改成 POST（state 放 body）或裁剪 fullHistory。
 
+- [ ] **历史战报改为 server 端拼接（根治 state URL 过长）**：当前 PO 每回合把完整 `fullHistory` 塞进 `?state=` 发出，随回合线性增长（turn 23 已 ~16KB），虽已放宽 maxHeaderSize 到 64KB，超长局仍会再触顶。方案：PO 侧只发本回合新增的战报片段（`pklmTurnLog`，不再重复发累计的 fullHistory），server 按 `battleId` 缓存累积拼接成完整 history 供 `get_battle_history` tool 用。URL 从 O(回合数) 降到 O(1)，从根上解决。需改：① po-script.js 采集 state 不再带 fullHistory（或只带增量）② server 端按 battleId 维护 `historyStore[battleId]`（append 增量、对战结束释放，类似 notesStore）。
+
 - [x] **允许 LLM 读写对战观察（memory）**：已完成 —— `save_observation` / `get_observation` / `save_strategy` / `get_strategy` 四个 tool 已实现并运行。后续持续完善：看 LLM 还可以观察什么、记什么（如对手操作倾向/习惯、常见先读模式等），按需扩展笔记字段或新增观察维度。
 
 - [x] **战术思路 tool（可无限扩充的战术知识库，避免 system prompt 膨胀）**（已做 battle_tips 基础：10 组队战术 + random_battle_playbook，可继续扩充条目）：把宝可梦对战的战术思路/打法套路做成可调用 tool，LLM 决策前按需查，而不是全塞进 system prompt（prompt 太长会稀释重点、增加 token 成本）。设计方向：一个 `get_tactic(name)` 或分类的 `list_tactics()` + `get_tactic(name)`，内容用结构化文本描述「触发条件 + 做法 + 目的 + 风险」。可塞的战术清单（持续扩充）：
