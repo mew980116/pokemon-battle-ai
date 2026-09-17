@@ -290,7 +290,7 @@
 - [ ] 🔴 **【高优先级】对战主脑切 `deepseek-v4-pro`（待实测对比后定）**：实测（2026-09-16）确认 `deepseek-v4-pro` 端点可用、**未被路由到 flash**（响应 `model:deepseek-v4-pro`）；开 thinking + tool 多轮时**不回传 reasoning_content 不报错**（两场景均 200），故切换**无需**改 [server.js](po-pokellmon-tool/server.js) 的 reasoning_content 回传逻辑。附带发现：回传 reasoning_content 提升 prompt cache 命中（cached_tokens 384 vs 256、miss 41 vs 169），属可选优化。落地：`MODEL`→`deepseek-v4-pro`（建议提成 env `POKELLMON_MODEL` 可一键回 flash），thinking 从 `low` 起步——Pro-max 在多轮 tool（MAX_TOOL_ROUNDS=15）下可能逼近 240s 超时，先 low 测延迟再决定是否按「关键回合（换人/残局/强化手判断）升 high/max」分级。切后实测对比 Flash/Pro 的决策质量 + 延迟再定。
   - 背景：Flash 强「工具/agent 执行」（DeepSWE 74.2 > Pro 62.7）弱「闭卷深想」（HLE 36.8 < Pro 42.7）；对战主脑瓶颈是「决策浅/缺全局意识」而非工具执行，故倾向 Pro。R1 无资源 + 工具调用弱，不作主脑。
 
-- [ ] 🔴 **【高优先级】单回合超时导致断联认输（已定位，待改）**：实测最近两场（battle43/44）都出现「打到一半 parse error → 认输」，根因是**部分回合 tool 调用过多、单回合耗时 114~146s**，超过 PO 的 `sys.synchronousWebCall` 超时 → 返回空 → `JSON.parse` 崩 → 连续 3 次失败（跨度>15s）→ 认输。server 侧**无任何 DeepSeek 报错**（grep 无 `[choice] fail/error`），纯 PO↔server 超时。修复方向：① server 加**单回合总时长上限**（如 60~90s，到点直接返回兜底动作，不再继续 tool loop）② 或 `MAX_TOOL_ROUNDS` 15→5~6 硬封顶。待确认后改（涉及决策行为）。
+- [x] 🔴 **【高优先级】认输根因 = state URL 过长（已修 0.3.43）**：实测 `sys.synchronousWebCall` 120s 不超时（排除 webCall 超时），翻旧 server 输出无崩溃/DeepSeek 报错；真正根因是 **state 里的 fullHistory 随回合累积，`?state=<encodeURIComponent>` 到 turn 23 已 ~16KB**，逼近 Node 默认 `maxHeaderSize`(16KB) → 请求被拒 → PO webCall 返回空 → `JSON.parse` 崩 → 连续 3 次失败（跨度>15s）→ 认输。修复：`http.createServer({ maxHeaderSize: 65536 })`（放宽到 64KB）+ 加 crash 日志（crash.log）。长尾：fullHistory 无界增长，超长局（100+ 回合）仍可能再触顶，后续考虑改成 POST（state 放 body）或裁剪 fullHistory。
 
 - [x] **允许 LLM 读写对战观察（memory）**：已完成 —— `save_observation` / `get_observation` / `save_strategy` / `get_strategy` 四个 tool 已实现并运行。后续持续完善：看 LLM 还可以观察什么、记什么（如对手操作倾向/习惯、常见先读模式等），按需扩展笔记字段或新增观察维度。
 

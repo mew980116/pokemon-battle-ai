@@ -18,9 +18,25 @@ var fs = require('fs');
 var path = require('path');
 var tools = require('./tools.js');
 
+// crash 日志：未捕获异常/未处理拒绝写 crash.log（含堆栈），便于定位服务器崩溃导致的断联
+function appendCrashLog(msg) {
+    try { fs.appendFileSync(path.join(__dirname, 'crash.log'), new Date().toISOString() + ' ' + msg + '\n'); } catch (e) {}
+}
+process.on('uncaughtException', function (err) {
+    var s = err && err.stack ? err.stack : String(err);
+    appendCrashLog('uncaughtException: ' + s);
+    console.error('uncaughtException: ' + s);
+    process.exit(1);
+});
+process.on('unhandledRejection', function (reason) {
+    var s = reason && reason.stack ? reason.stack : String(reason);
+    appendCrashLog('unhandledRejection: ' + s);
+    console.error('unhandledRejection: ' + s);
+});
+
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.3.42';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.3.43';   // tool 分支版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（tool 分支：思考 + tool，强度 low）====
 var MODEL = 'deepseek-v4-flash';
@@ -29,7 +45,7 @@ var REASONING_EFFORT = 'low';           // 思考强度 low（high 太慢，先�
 var MAX_TOKENS = null;                  // 不限制输出 token（思考链 + 最终答案）
 var TIMEOUT_MS = 240000;                // 放宽：240s（tool 多轮往返慢）
 var MAX_TOOL_ROUNDS = 15;               // 最多 function calling 轮数，超过则 fallback
-var MAX_TURN_MS = 60000;                // 单回合总时长上限：超过则 no-think 收尾（避免超过 PO webCall 超时；待实测阈值后调整）
+var MAX_TURN_MS = 0;                    // 单回合总时长上限（0=禁用 no-think 收尾；实测 webCall 120s 不超时，暂不需要兜底）
 var RETRY_DELAYS = [2000, 5000, 10000]; // 单次请求失败后的重试延迟：第1次2s、第2次5s、第3次10s（第3次降级 no think），再失败 fallback
 
 var SYSTEM_PROMPT = require('../po-pokellmon/prompts.js').BATTLE_TIPS +
@@ -591,7 +607,7 @@ function handleChoice(res, state) {
     loop();
 }
 
-var server = http.createServer(function (req, res) {
+var server = http.createServer({ maxHeaderSize: 65536 }, function (req, res) {
     var u = url.parse(req.url, true);
 
     if (req.method === 'GET' && u.pathname === '/health') {
