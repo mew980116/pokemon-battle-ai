@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8092";
-var PKLM_VERSION = "0.6.0";       // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.6.1";       // 脚本版本（改动时 bump，随日志记录）
 var pklmLastWebFailTime = 0;       // 上次 webCall 失败时间戳（ms），用于断线时节流重发
 var pklmSilent = false;            // 静默模式：清分少女等无人值守 BOT 账号不向 PO 窗口 print 任何脚本输出
 var pklmFailCount = 0;             // 连续 webCall 失败次数（成功即归零）
@@ -75,7 +75,7 @@ var pklmHistory = [];
 var pklmFullHistory = [];          // 完整战报（不限长度，供 tool 的 get_battle_history 读取）
 var pklmTurnLog = "";
 var pklmCurrentTurn = 0;
-var pklmOppMoves = [{}, {}, {}, {}, {}, {}];  // 对手每只宝可梦（按记录 slot 区分）已暴露招式 [slot]: [{name,type}]
+var pklmOppMoves = [[], [], [], [], [], []];  // 对手每只宝可梦（按记录 slot 区分）已暴露招式 [slot]: [{name,type}]
 var pklmOppSlots = [0, 1, 2, 3, 4, 5];        // 记录 slot i 当前在哪个队伍槽位（0=场上，1-5=后备；初始 i→i）
 var pklmCurrentOppSlot = 0;                    // 当前场上对手宝可梦对应的记录 slot
 var pklmOppAbility = [-1, -1, -1, -1, -1, -1]; // 记录 slot → 已确定特性 ID（-1 未知）
@@ -1072,7 +1072,7 @@ function pklmSpotLabel(spot) {
         pklmAutoEnable();
         pklmCheckMsgFiles();   // 对战启动扫描消息表文件依赖，缺失则提示
         // 重置对手记录（slot 追踪 + 特性解析）
-        pklmOppMoves = [{}, {}, {}, {}, {}, {}];
+        pklmOppMoves = [[], [], [], [], [], []];
         pklmOppSlots = [0, 1, 2, 3, 4, 5];
         pklmCurrentOppSlot = 0;
         pklmOppAbility = [-1, -1, -1, -1, -1, -1];

@@ -152,7 +152,7 @@ function hpBarHtml(pct){ var c=hpColor(pct); return '<div class="hpbar"><i style
 function renderActive(el, p, isMe){
   var hc=hpColor(p.hpPct||0);
   var nameColor=isMe?'#eaf6ff':'#ffeef1';
-  var moves=(p.moves||[]).map(moveHtml).join('');
+  var moves=(Array.isArray(p.moves)?p.moves:[]).map(moveHtml).join('');
   var boosts=boostsHtml(p.boosts);
   el.innerHTML='<div class="poke'+(p.hpPct===0?' ko':'')+'">'+
     '<span class="name" style="color:'+nameColor+'">'+esc(p.name||'?')+'</span>'+
@@ -313,16 +313,26 @@ function loadBattle(file){
   });
 }
 
-// 初始化：加载 battle 列表
-fetch('/api/battles').then(function(r){return r.json();}).then(function(list){
-  var sel=document.getElementById('selBattle');
-  list.forEach(function(f){
-    var o=document.createElement('option');
-    o.value=f.file; o.textContent='['+(f.source==='tool'?'TOOL':'NO-THINK')+'] '+f.name+' ('+Math.round(f.bytes/1024)+'KB)';
-    sel.appendChild(o);
+// 初始化：加载 battle 列表（每 4s 自动刷新，新对战自动出现并切换过去）
+function loadBattleList(){
+  fetch('/api/battles').then(function(r){return r.json();}).then(function(list){
+    var sel=document.getElementById('selBattle');
+    var prev=sel.value;
+    sel.innerHTML='';
+    list.forEach(function(f){
+      var o=document.createElement('option');
+      o.value=f.file; o.textContent='['+(f.source==='tool'?'TOOL':'NO-THINK')+'] '+f.name+' ('+Math.round(f.bytes/1024)+'KB)';
+      sel.appendChild(o);
+    });
+    if(list.length && !liveMode){
+      var newest=list[0].file;
+      if(newest!==prev){ sel.value=newest; loadBattle(newest); }
+      else { sel.value=prev; }
+    }
   });
-  if(list.length) loadBattle(list[0].file);
-});
+}
+loadBattleList();
+setInterval(loadBattleList, 4000);
 
 // ===== 实时模式：SSE 收 /events，边打边追加 =====
 var liveMode=false, liveList=[], es=null;
