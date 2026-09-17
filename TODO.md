@@ -287,6 +287,11 @@
 
 **tool 模式长期 TODO**：
 
+- [ ] 🔴 **【高优先级】对战主脑切 `deepseek-v4-pro`（待实测对比后定）**：实测（2026-09-16）确认 `deepseek-v4-pro` 端点可用、**未被路由到 flash**（响应 `model:deepseek-v4-pro`）；开 thinking + tool 多轮时**不回传 reasoning_content 不报错**（两场景均 200），故切换**无需**改 [server.js](po-pokellmon-tool/server.js) 的 reasoning_content 回传逻辑。附带发现：回传 reasoning_content 提升 prompt cache 命中（cached_tokens 384 vs 256、miss 41 vs 169），属可选优化。落地：`MODEL`→`deepseek-v4-pro`（建议提成 env `POKELLMON_MODEL` 可一键回 flash），thinking 从 `low` 起步——Pro-max 在多轮 tool（MAX_TOOL_ROUNDS=15）下可能逼近 240s 超时，先 low 测延迟再决定是否按「关键回合（换人/残局/强化手判断）升 high/max」分级。切后实测对比 Flash/Pro 的决策质量 + 延迟再定。
+  - 背景：Flash 强「工具/agent 执行」（DeepSWE 74.2 > Pro 62.7）弱「闭卷深想」（HLE 36.8 < Pro 42.7）；对战主脑瓶颈是「决策浅/缺全局意识」而非工具执行，故倾向 Pro。R1 无资源 + 工具调用弱，不作主脑。
+
+- [ ] 🔴 **【高优先级】单回合超时导致断联认输（已定位，待改）**：实测最近两场（battle43/44）都出现「打到一半 parse error → 认输」，根因是**部分回合 tool 调用过多、单回合耗时 114~146s**，超过 PO 的 `sys.synchronousWebCall` 超时 → 返回空 → `JSON.parse` 崩 → 连续 3 次失败（跨度>15s）→ 认输。server 侧**无任何 DeepSeek 报错**（grep 无 `[choice] fail/error`），纯 PO↔server 超时。修复方向：① server 加**单回合总时长上限**（如 60~90s，到点直接返回兜底动作，不再继续 tool loop）② 或 `MAX_TOOL_ROUNDS` 15→5~6 硬封顶。待确认后改（涉及决策行为）。
+
 - [x] **允许 LLM 读写对战观察（memory）**：已完成 —— `save_observation` / `get_observation` / `save_strategy` / `get_strategy` 四个 tool 已实现并运行。后续持续完善：看 LLM 还可以观察什么、记什么（如对手操作倾向/习惯、常见先读模式等），按需扩展笔记字段或新增观察维度。
 
 - [x] **战术思路 tool（可无限扩充的战术知识库，避免 system prompt 膨胀）**（已做 battle_tips 基础：10 组队战术 + random_battle_playbook，可继续扩充条目）：把宝可梦对战的战术思路/打法套路做成可调用 tool，LLM 决策前按需查，而不是全塞进 system prompt（prompt 太长会稀释重点、增加 token 成本）。设计方向：一个 `get_tactic(name)` 或分类的 `list_tactics()` + `get_tactic(name)`，内容用结构化文本描述「触发条件 + 做法 + 目的 + 风险」。可塞的战术清单（持续扩充）：
@@ -335,6 +340,8 @@
 - [ ] **主脚本 20201227.js 伤害计算对齐 @smogon/calc（等 tool 侧验证后再做）**：tool 侧 calc_damage 已对齐（0.3.37：随机系数→STAB(4096定点)→克制(pokeRound)→extra，6 用例与 @smogon/calc 一致）。主脚本 getMoveDamage 有两处差异：① **随机系数顺序反**——movepow[i]（L2427）算出的是「最大伤害」（1.0x，先 base→克制→STAB 连续乘），别处用 `maxpow * 0.85`（L1042/L1285）算最小伤害；正确应「先随机系数(85-100) 再 STAB 再克制」② **取整方式**——主脚本纯浮点连续乘（无逐步 floor/pokeRound），正确应逐步 floor（随机向下取整、STAB 五舍六入 pokeRound、克制向下取整）。对齐需改 L2427 base damage 公式（`(2*level+10)/250` 等价 `(2*level/5+2)/50`，但 buff 里 atk/def 未逐步 floor）+ 后续克制/STAB/修正链 + getPossibleDamage/analyseCurrentDamage 的 `maxpow*0.85`。注意：主脚本是评分用估算、精度要求低于 tool，可先对齐顺序，逐步 floor 视收益再决定。
 
 - [ ] **calc_damage 补全特性/道具/天气/场地等修正（对齐 @smogon，后续做）**：当前已对齐基础公式 + 能力等级 + extra（0.3.38，20 用例）。尚未自动算：① 特性/道具能力值修正（大力士/瑜伽之力/专爱头带/眼镜/太阳之力/毅力/活力/蹲守/水泡等）——现靠 LLM 用 atk/spa 直接值绕过 ② 天气/场地加成（晴火×1.5、电场×1.3 等）③ 光墙/反射壁/极光幕 ④ 击中要害 ⑤ 防守减伤特性（厚脂肪/毛茸茸/多重鳞片/坚硬岩石等）。方向：先评估哪些 LLM 常用且 extra 补不准，再决定补进 calc_damage 还是继续靠 extra/直接值。可参考 @smogon/calc 的 calculateAtModsSMSSSV / calculateFinalModsSMSSSV（已装 C:\temp-calc\node_modules）。
+
+- [x] **calc_damage/calc_stats 支持形态宝可梦（forme≠0）**（已修 0.3.41）：`resolvePokemonInput` 用 `POKEMON.byName[name.toLowerCase()]` 反查，`buildPokemon` 改为收录基础形态 + 合法形态（按 pokemons.txt 的 tag 排除 Mega 'M' / 极巨化 'G'），key 用 `num:forme`（基础形态仍 `num` 兼容），形态缺 type1 时继承基础形态。现已支持 Rotom-Wash / Landorus-Therian / Deoxys-Attack / Giratina-Origin / 洛托姆各形态等（真实种族值）。
 
 - [ ] **smogon 生态资源（暂记，看情况做）**：① **Usage Stats**（各分级使用率/配招/道具/特性/努力分布，作对手配置先验）——随机队向暂缓，等适配 PS 组队对战再说 ② **@pkmn/data / @pkmn/dex**（PS 完整数据层，补学习面/招式效果等）③ **pokemon-showdown 引擎**（MCTS/rollout 搜索，工程量大，短期不需要）④ **Smogon Analysis/Dex**（标准配招/counter/check 分析，可做 get_set_analysis tool）。
 

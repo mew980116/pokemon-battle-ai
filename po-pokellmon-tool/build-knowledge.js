@@ -49,67 +49,98 @@ function parsePokeId(token) {
     };
 }
 
-// 构建 pokemon.json（只取 forme=0）
+// 构建 pokemon.json（收录基础形态 + 合法形态，排除 Mega 'M' / 极巨化 'G'）
 function buildPokemon() {
     const byNum = {};
     const byName = {};
 
-    // 种族值：num:forme hp atk def spa spd spe
+    function keyOf(num, forme) {
+        return forme === 0 ? String(num) : (num + ':' + forme);
+    }
+
+    // 1) 英文名 + tag（pokemons.txt 决定收录范围：跳过 Mega 'M' / 极巨化 'G'）
+    const nameEn = {};
+    const enLines = readText(path.join(DATA, 'pokes', 'pokemons.txt')).split('\n');
+    for (const line of enLines) {
+        const t = line.trim();
+        if (!t) continue;
+        const idx = t.indexOf(' ');
+        if (idx < 0) continue;
+        const id = parsePokeId(t.substring(0, idx));
+        if (id.tag === 'M' || id.tag === 'G') continue;   // Mega / Gigantamax 不收
+        nameEn[keyOf(id.num, id.forme)] = t.substring(idx + 1).trim();
+    }
+
+    // 2) 种族值（num:forme hp atk def spa spd spe）
     const stats = readText(path.join(DATA, 'pokes', 'stats.txt')).split('\n');
     for (const line of stats) {
         const t = line.trim();
         if (!t) continue;
         const parts = t.split(/\s+/);
         const id = parsePokeId(parts[0]);
-        if (id.forme !== 0) continue;
-        byNum[id.num] = byNum[id.num] || {};
-        byNum[id.num].baseStats = parts.slice(1, 7).map(Number);
+        const key = keyOf(id.num, id.forme);
+        if (nameEn[key] === undefined) continue;   // 没名字（或已排除 Mega/Gmax）跳过
+        byNum[key] = byNum[key] || { num: id.num, forme: id.forme };
+        byNum[key].baseStats = parts.slice(1, 7).map(Number);
     }
 
-    // 属性 type1 / type2（18=无第二属性）
+    // 3) 属性 type1（18 属性名；形态缺条目时继承基础形态）
     const type1 = readText(path.join(DATA, 'pokes', 'type1.txt')).split('\n');
     for (const line of type1) {
         const t = line.trim();
         if (!t) continue;
         const parts = t.split(/\s+/);
         const id = parsePokeId(parts[0]);
-        if (id.forme !== 0 || !byNum[id.num]) continue;
+        const key = keyOf(id.num, id.forme);
+        if (!byNum[key]) continue;
         const tn = parseInt(parts[1], 10);
-        byNum[id.num].types = [TYPE_NAMES[tn] || 'Normal'];
+        byNum[key].types = [TYPE_NAMES[tn] || 'Normal'];
     }
+    // 形态继承基础形态的 type1（type1.txt 通常只有 forme=0 条目）
+    for (const key in byNum) {
+        const p = byNum[key];
+        if (p.forme !== 0 && !p.types) {
+            const base = byNum[String(p.num)];
+            p.types = (base && base.types) ? [base.types[0]] : [];
+        }
+    }
+
+    // 4) 属性 type2（18=无第二属性；各形态有各自条目）
     const type2 = readText(path.join(DATA, 'pokes', 'type2.txt')).split('\n');
     for (const line of type2) {
         const t = line.trim();
         if (!t) continue;
         const parts = t.split(/\s+/);
         const id = parsePokeId(parts[0]);
-        if (id.forme !== 0 || !byNum[id.num]) continue;
+        const key = keyOf(id.num, id.forme);
+        if (!byNum[key]) continue;
         const tn = parseInt(parts[1], 10);
-        if (tn !== 18) byNum[id.num].types.push(TYPE_NAMES[tn]);
+        if (tn !== 18) {
+            if (!byNum[key].types) byNum[key].types = [];
+            byNum[key].types.push(TYPE_NAMES[tn]);
+        }
     }
 
-    // 英文名（pokes/pokemons.txt）——优先
-    const enNames = readText(path.join(DATA, 'pokes', 'pokemons.txt')).split('\n');
-    for (const line of enNames) {
+    // 5) 英文名写入 + byName
+    for (const key in nameEn) {
+        if (!byNum[key]) continue;
+        byNum[key].name_en = nameEn[key];
+        byName[nameEn[key].toLowerCase()] = key;
+    }
+
+    // 6) 中文名（zh-cn，同样跳过 Mega/Gmax）
+    const zhLines = readText(path.join(DATA, 'zh-cn', 'db', 'pokes', 'pokemons.txt')).split('\n');
+    for (const line of zhLines) {
         const t = line.trim();
         if (!t) continue;
         const idx = t.indexOf(' ');
+        if (idx < 0) continue;
         const id = parsePokeId(t.substring(0, idx));
-        if (id.forme !== 0 || !byNum[id.num]) continue;
-        byNum[id.num].name_en = t.substring(idx + 1).trim();
-        byName[byNum[id.num].name_en.toLowerCase()] = id.num;
-    }
-
-    // 中文名（zh-cn/db/pokes/pokemons.txt）——兜底
-    const zhNames = readText(path.join(DATA, 'zh-cn', 'db', 'pokes', 'pokemons.txt')).split('\n');
-    for (const line of zhNames) {
-        const t = line.trim();
-        if (!t) continue;
-        const idx = t.indexOf(' ');
-        const id = parsePokeId(t.substring(0, idx));
-        if (id.forme !== 0 || !byNum[id.num]) continue;
-        byNum[id.num].name_zh = t.substring(idx + 1).trim();
-        byName[byNum[id.num].name_zh] = id.num;
+        if (id.tag === 'M' || id.tag === 'G') continue;
+        const key = keyOf(id.num, id.forme);
+        if (!byNum[key]) continue;
+        byNum[key].name_zh = t.substring(idx + 1).trim();
+        byName[byNum[key].name_zh] = key;
     }
 
     return { byNum, byName };
