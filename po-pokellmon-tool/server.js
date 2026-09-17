@@ -36,7 +36,7 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.3.43';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.3.44';   // tool 分支版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（tool 分支：思考 + tool，强度 low）====
 var MODEL = 'deepseek-v4-flash';
@@ -307,6 +307,9 @@ function buildPrompt(state, notes) {
         var meAbi = me.ability ? 'Ability:' + me.ability + ',' : '';
         var meItem = me.item ? 'Item:' + me.item + ',' : '';
         p += 'Your current pokemon:' + me.name + ',Type:' + (me.types || []).join('&') + ',HP:' + (me.hpPct || 0) + '%,' + meAbi + meItem + meStatus + meBoosts + '\n';
+        if (me.fainted) {
+            p += 'NOTE: Your current pokemon has fainted. You need to switch in a replacement pokemon this turn.\n';
+        }
     }
 
     p += '\nAvailable actions (choose one number):\n';
