@@ -354,6 +354,14 @@
 
 - [ ] **calc_damage 补全特性/道具/天气/场地等修正（对齐 @smogon，后续做）**：当前已对齐基础公式 + 能力等级 + extra（0.3.38，20 用例）。尚未自动算：① 特性/道具能力值修正（大力士/瑜伽之力/专爱头带/眼镜/太阳之力/毅力/活力/蹲守/水泡等）——现靠 LLM 用 atk/spa 直接值绕过 ② 天气/场地加成（晴火×1.5、电场×1.3 等）③ 光墙/反射壁/极光幕 ④ 击中要害 ⑤ 防守减伤特性（厚脂肪/毛茸茸/多重鳞片/坚硬岩石等）。方向：先评估哪些 LLM 常用且 extra 补不准，再决定补进 calc_damage 还是继续靠 extra/直接值。可参考 @smogon/calc 的 calculateAtModsSMSSSV / calculateFinalModsSMSSSV（已装 C:\temp-calc\node_modules）。
 
+- [ ] **【待一起做】calc_damage 特殊属性克制招式未处理（实测算错）**：`calcOneLeg` 的 typeMult 只做 `CHART[move.type][defType]`，以下 3 个招式的特殊属性克制全错（2026-09-17 实测 vs @smogon/calc）：
+  - **Freeze-Dry 冷冻干燥**：对 Water 固定 2x（覆盖正常冰→水 0.5x）。实测 Vaporeon（水）：我们 34-41（0.5x）vs smogon 138-164（2x），**少 4 倍**；Swampert（水/地）：我们 72-85（1x）vs smogon 288-340（4x），少 4 倍；Flygon（地/龙）无差异 ✅。
+  - **Flying Press 飞身重压**：type=Fighting 但实为格斗+飞行双属性，倍率 = Fighting 倍率 × Flying 倍率。实测 Venusaur（草/毒）：我们 0.5x vs smogon 1x（**少 2 倍**）；Tyranitar（岩/恶）：我们 4x vs smogon 2x（**多 2 倍**）。
+  - **Thousand Arrows 千箭齐发**：Ground 系但整体倍率算完若为 0 则改成 1（可打飞行系/浮游）。实测 Tornadus（飞行）：我们 **0（免疫）** vs smogon 180-213（1x）。
+  - 规则来源：@smogon/calc `mechanics/util.ts` getMoveEffectiveness（Freeze-Dry 对 Water→2；Flying Press 额外乘 Flying 倍率）+ `mechanics/gen789.ts:420`（Thousand Arrows 整体 0→1）。PO 数据里这 3 招都有（另 Sky Drop 是「对飞行系无法使用」不是倍率问题；Nihil Light 是 Gen9 新招 PO 无）。
+  - 修复方案（改 `calcOneLeg` 的 typeMult 段，约 15 行）：逐属性算 eff 时 `Freeze-Dry && Water → 2`；`Flying Press` 再乘 `CHART[Flying][defType]`；乘法累加完后 `if (mvName === 'Thousand Arrows' && typeMult === 0) typeMult = 1`。注意特判靠招式英文名（`mv.name`），需在 calc_damage 描述里注明「用 name 传招式才能识别特殊招式」。
+  - 验证：临时脚本 `po-pokellmon-tool/tmp-check-special.js`（已删，修复时重建即可，模式同 test-calc-compare.js）；修完把这几条用例并入 test-calc-compare.js。
+
 - [x] **calc_damage/calc_stats 支持形态宝可梦（forme≠0）**（已修 0.3.41）：`resolvePokemonInput` 用 `POKEMON.byName[name.toLowerCase()]` 反查，`buildPokemon` 改为收录基础形态 + 合法形态（按 pokemons.txt 的 tag 排除 Mega 'M' / 极巨化 'G'），key 用 `num:forme`（基础形态仍 `num` 兼容），形态缺 type1 时继承基础形态。现已支持 Rotom-Wash / Landorus-Therian / Deoxys-Attack / Giratina-Origin / 洛托姆各形态等（真实种族值）。
 
 - [ ] **smogon 生态资源（暂记，看情况做）**：① **Usage Stats**（各分级使用率/配招/道具/特性/努力分布，作对手配置先验）——随机队向暂缓，等适配 PS 组队对战再说 ② **@pkmn/data / @pkmn/dex**（PS 完整数据层，补学习面/招式效果等）③ **pokemon-showdown 引擎**（MCTS/rollout 搜索，工程量大，短期不需要）④ **Smogon Analysis/Dex**（标准配招/counter/check 分析，可做 get_set_analysis tool）。
