@@ -104,6 +104,20 @@ var TOOL_DEFS = [
     {
         type: 'function',
         function: {
+            name: 'update_worklog',
+            description: 'Set/OVERWRITE the WORKLOG for the CURRENT turn — a running scratchpad of your working state, which stays in your context for the rest of this turn. Use it like a harness worklog to make your reasoning explicit and durable even without a thinking channel: (a) after reading the battle state, write the task you are solving and how you break it into steps; (b) after each tool call, refresh it with what you confirmed, how your plan changed, and what is still open; (c) mark it done when you commit to an action. Because it is overwritten, always write the FULL current state, not a delta. It is cleared at the start of every new turn.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    text: { type: 'string', description: 'Full worklog text (replaces the previous one). Suggested shape: Goal / Steps / Confirmed / Open / Next action.' }
+                },
+                required: ['text']
+            }
+        }
+    },
+    {
+        type: 'function',
+        function: {
             name: 'get_observation',
             description: 'Read your saved pokemon observations. Omit pokemon to read all observations.',
             parameters: {
@@ -1087,13 +1101,21 @@ function getItemInfo(args) {
     };
 }
 
-// tool 执行器：根据 name 分发；ctx 含 state（供 get_battle_history 读取战报）+ notes（笔记存储）+ turn
+// ===== update_worklog：本轮工作暂存（覆盖式）。内容由 server 注入回 system，实现「始终在上下文」=====
+function updateWorklog(args, ctx) {
+    var text = (args && args.text) ? String(args.text) : '';
+    if (ctx && typeof ctx.setWorklog === 'function') ctx.setWorklog(text);
+    return { ok: true, chars: text.length };
+}
+
+// tool 执行器：根据 name 分发；ctx 含 state（供 get_battle_history 读取战报）+ notes（笔记存储）+ turn + setWorklog
 function runTool(name, args, ctx) {
     if (name === 'get_type_matchup') return getTypeMatchup(args);
     if (name === 'calc_stat_boost') return calcStatBoost(args);
     if (name === 'get_battle_history') return getBattleHistory(args, ctx && ctx.state);
     if (name === 'save_observation') return saveObservation(args, ctx);
     if (name === 'save_strategy') return saveStrategy(args, ctx);
+    if (name === 'update_worklog') return updateWorklog(args, ctx);
     if (name === 'get_observation') return getObservation(args, ctx);
     if (name === 'get_strategy') return getStrategy(args, ctx);
     if (name === 'submit_feedback') return submitFeedback(args, ctx);

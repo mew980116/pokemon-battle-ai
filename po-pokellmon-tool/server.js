@@ -36,7 +36,7 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.3.52';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.3.53';   // tool 分支版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
 // 对战主脑用 v4-pro（闭卷深想强，决策更深）；一键回 flash：POKELLMON_MODEL=deepseek-v4-flash
@@ -56,7 +56,7 @@ var RETRY_DELAYS = [2000, 5000, 10000]; // 单次请求失败后的重试延迟�
 // 工作流是流程性要求（不属于单个 tool 的用法），所以留在 system prompt。
 var WORKFLOW = 'WORKFLOW — follow this order every turn: ' +
     '(1) REVIEW: read the last turn(s) with get_battle_history and work out what they reveal about the opponent — the speed line (who moved first; any speed boost, paralysis, Tailwind or Choice Scarf clue), which moves / items / abilities are now EXPOSED or can be EXCLUDED, and back-calculate from the damage dealt and taken to infer their EV spread and any offensive boost (item or ability). Record all of it with save_observation, tagging every fact [proved] or [estimated]. ' +
-    '(2) PLAN: re-read your previous save_strategy notes, look at the actions you are offered, and run the simulations you need (get_my_stats / calc_stats / calc_damage) plus the tactical guidance you need (battle_tips) before committing. ' +
+    '(2) PLAN: re-read your previous save_strategy notes, look at the actions you are offered, and run the simulations you need (get_my_stats / calc_stats / calc_damage) plus the tactical guidance you need (battle_tips). Keep update_worklog as your running plan for this turn (goal → steps → confirmed → open → next action) and refresh it after each step, so your working state stays in context across tool calls. ' +
     '(3) VERIFY: never trust memory for a move / ability / item effect, power or accuracy — call get_move_info / get_ability_info / get_item_info unless that detail is already present in the context. Always call get_knowledge for the switch rules before switching unless they are already present in the context. ' +
     '(4) DECIDE: choose the action, then write your read + plan with save_strategy.';
 
@@ -555,11 +555,25 @@ function handleChoice(res, state) {
         ? { thinking: true, effort: FIRST_TURN_EFFORT }
         : null;
     if (turnThinkingOpts) console.log('[choice] turn 0 -> thinking ' + FIRST_TURN_EFFORT);
-    function callDS(noThink, cb) { callDeepSeek(messages, noThink, cb, turnThinkingOpts); }
+
+    // 本轮工作暂存（worklog）：LLM 用 update_worklog 覆盖写入；每次请求把它注入 system，
+    // 使它在本次决策的后续所有 tool 轮次里始终可见，且不会随轮数累积膨胀。
+    var worklog = '';
+    function callDS(noThink, cb) {
+        var msgs = messages;
+        if (worklog) {
+            msgs = messages.slice();
+            msgs[0] = {
+                role: 'system',
+                content: SYSTEM_PROMPT + '\n\n[WORKLOG — your working state for this turn; refresh it with update_worklog as you progress]\n' + worklog
+            };
+        }
+        callDeepSeek(msgs, noThink, cb, turnThinkingOpts);
+    }
 
     // 最后兜底：关思考（no-think）快速要一个答案，不再继续 tool loop
     function finalizeNoThink() {
-        callDeepSeek(messages, true, function (err, statusCode, data) {
+        callDS(true, function (err, statusCode, data) {
             var reply = '';
             if (!err && statusCode === 200) {
                 var msg2 = extractMessage(data);
@@ -607,7 +621,7 @@ function handleChoice(res, state) {
                     var tc = toolCalls[i];
                     var args = {};
                     try { args = JSON.parse(tc.function.arguments || '{}'); } catch (e) {}
-                    var result = tools.runTool(tc.function.name, args, { state: state, notes: notes, turn: state.turn });
+                    var result = tools.runTool(tc.function.name, args, { state: state, notes: notes, turn: state.turn, setWorklog: function (t) { worklog = t; } });
                     called.push({ name: tc.function.name, args: args, result: result });
                     messages.push({ role: 'tool', tool_call_id: tc.id, content: JSON.stringify(result) });
                 }
