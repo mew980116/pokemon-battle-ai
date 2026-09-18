@@ -751,6 +751,17 @@ function getMyStats(args, ctx) {
         var m = myStats[i];
         if (wanted && m.name !== wanted && String(m.slot) !== wanted) continue;
         var p = POKEMON.byNum[String(m.numRef)];
+        if (!p && m.name) {
+            var nk = POKEMON.byName[String(m.name).toLowerCase()];   // byName 的值是 byNum 的 key（字符串）
+            if (nk) p = POKEMON.byNum[nk];
+        }
+        if (!p) {
+            // PO 的 numRef 用高位编码形态：Raichu-Alola = 65562 = 0x1001A -> forme 1, num 26
+            var baseNum = m.numRef & 0xFFFF;
+            var forme = m.numRef >> 16;
+            if (forme) p = POKEMON.byNum[baseNum + ':' + forme];
+            if (!p) p = POKEMON.byNum[String(baseNum)];
+        }
         if (!p) { out.push({ slot: m.slot, name: m.name, error: 'unknown numRef ' + m.numRef }); continue; }
         var nat = NATURES.byNum[String(m.nature)] || { buff: 0, debuff: 0 };
         var stats = {};

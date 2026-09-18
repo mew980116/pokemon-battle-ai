@@ -36,7 +36,7 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.3.50';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.3.51';   // tool 分支版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
 // 对战主脑用 v4-pro（闭卷深想强，决策更深）；一键回 flash：POKELLMON_MODEL=deepseek-v4-flash
@@ -45,7 +45,7 @@ var THINKING_ENABLED = false;           // 关闭 reasoning（v4-pro 思考链�
 var REASONING_EFFORT = 'low';           // 仅在 THINKING_ENABLED=true 时生效
 var MAX_TOKENS = null;                  // 不限制输出 token（思考链 + 最终答案）
 var TIMEOUT_MS = 240000;                // 放宽：240s（tool 多轮往返慢）
-var MAX_TOOL_ROUNDS = 15;               // 最多 function calling 轮数，超过则 fallback
+var MAX_TOOL_ROUNDS = 25;               // 最多 function calling 轮数，超过则 fallback
 var MAX_TURN_MS = 0;                    // 单回合总时长上限（0=禁用 no-think 收尾；实测 webCall 120s 不超时，暂不需要兜底）
 var RETRY_DELAYS = [2000, 5000, 10000]; // 单次请求失败后的重试延迟：第1次2s、第2次5s、第3次10s（第3次降级 no think），再失败 fallback
 
