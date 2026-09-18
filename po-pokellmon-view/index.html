@@ -61,6 +61,9 @@ body{font-family:"Segoe UI","Microsoft YaHei",sans-serif;color:var(--text);font-
 .hist{font-family:Consolas,"Microsoft YaHei",monospace;font-size:14px;line-height:1.6;white-space:pre-wrap;color:var(--dim)}
 .hist .hl{color:var(--text)}
 
+/* 完整 Prompt：自动换行（长行不横向滚动） */
+#prompt{font-family:Consolas,"Microsoft YaHei",monospace;font-size:12px;line-height:1.5;color:var(--dim);white-space:pre-wrap;word-break:break-all;margin:0}
+
 /* LLM 交互 */
 .llm .kv{display:flex;gap:8px;margin-bottom:5px;align-items:flex-start}
 .llm .kv .k{flex:0 0 84px;color:var(--faint);font-size:12px;letter-spacing:.05em;padding-top:1px}
@@ -112,24 +115,22 @@ body{font-family:"Segoe UI","Microsoft YaHei",sans-serif;color:var(--text);font-
       <div id="meActive"></div>
       <div class="row-label">我方后备（含招式）</div>
       <div id="meBench"></div>
-      <div class="row-label">我方六只</div>
-      <div id="meTeam"></div>
     </div>
   </div>
 
   <div class="col-mid">
-    <div class="panel grow">
+    <div class="panel grow" id="histPanel">
       <h3>历史战报（该决策时刻）</h3>
       <div class="hist" id="history"></div>
     </div>
-    <div class="panel grow">
+    <div class="panel grow" id="promptPanel">
       <h3>完整 Prompt</h3>
       <pre id="prompt"></pre>
     </div>
   </div>
 
   <div class="col-right">
-    <div class="panel llm-panel">
+    <div class="panel llm-panel" id="llmPanel">
       <h3>LLM 交互（当前这条决策）</h3>
       <div id="liveBox" style="display:none">
         <div class="kv"><span class="k">实时</span><span class="v"><span id="liveTimer">0.0s</span> <span id="livePhase"></span></span></div>
@@ -189,17 +190,6 @@ function renderBench(el, bench){
   }).join('');
 }
 
-function renderTeam(el, team){
-  if(!team||!team.length){ el.innerHTML=''; return; }
-  el.innerHTML=team.map(function(t){
-    return '<div class="poke'+(t.ko?' ko':'')+'">'+
-      '<span class="name">'+esc(t.name)+'</span>'+
-      statusChip(t.status)+
-      (t.ko?'<span class="pct" style="color:var(--faint)">KO</span>':hpBarHtml(t.hpPct||0))+
-    '</div>';
-  }).join('');
-}
-
 function renderBattle(st){
   if(!st){ return; }
   renderActive(document.getElementById('oppActive'), st.opp||{}, false);
@@ -214,7 +204,6 @@ function renderBattle(st){
     }).join('');
   renderActive(document.getElementById('meActive'), st.me||{}, true);
   renderBench(document.getElementById('meBench'), st.bench||[]);
-  renderTeam(document.getElementById('meTeam'), st.myTeam||[]);
 }
 
 function renderLLM(d){
@@ -258,6 +247,28 @@ function renderLLM(d){
   }
 }
 
+// ===== 自动滚动（直播姬插件无法手动滚动，内容需自动展示）=====
+function followBottom(id){
+  var el=document.getElementById(id);
+  if(el) el.scrollTop=el.scrollHeight;
+}
+var promptHold=0;
+function resetPromptScroll(){
+  var el=document.getElementById('promptPanel');
+  if(el) el.scrollTop=0;
+  promptHold=60;                       // 新内容先停约 3.6s 再开始滚
+}
+function promptScrollStep(){
+  var el=document.getElementById('promptPanel');
+  if(!el) return;
+  var max=el.scrollHeight-el.clientHeight;
+  if(max<=4) return;                   // 内容没超出，无需滚动
+  if(promptHold>0){ promptHold--; return; }
+  if(el.scrollTop>=max-1){ el.scrollTop=0; promptHold=60; return; }   // 到底：停一下再回顶
+  el.scrollTop += Math.max(1, Math.ceil(max/500));                    // 约 30s 滚完一屏
+}
+setInterval(promptScrollStep, 60);
+
 function render(d){
   renderBattle(d.state);
   renderLLM(d);
@@ -267,6 +278,9 @@ function render(d){
   document.getElementById('prompt').textContent='[SYSTEM]\n'+(d.systemPrompt||'(未记录)')+'\n\n[USER]\n'+(d.prompt||'');
   document.getElementById('slider').value=cur;
   document.getElementById('stepInfo').textContent='第 '+(cur+1)+' / '+BATTLE.length+' 条 · turn '+(d.turn!=null?d.turn:'?');
+  followBottom('histPanel');            // 战报：自动滚到最新回合
+  followBottom('llmPanel');             // LLM 交互：自动滚到最新 tool 调用
+  resetPromptScroll();                  // Prompt：从头开始慢滚
 }
 
 function navTo(i){
