@@ -26,10 +26,11 @@ body{font-family:"Segoe UI","Microsoft YaHei",sans-serif;color:var(--text);font-
 .topbar .tag.notool{background:rgba(56,189,248,.15);color:var(--me)}
 .topbar .tag.tool{background:rgba(245,158,11,.15);color:var(--up)}
 
-.main{flex:1 1 auto;display:flex;gap:10px;padding:10px;min-height:0}
-.col-left{flex:0 0 27%;display:flex;flex-direction:column;gap:8px;min-height:0;overflow-y:auto}
-.col-mid{flex:1 1 auto;display:flex;flex-direction:column;gap:8px;min-height:0;overflow-y:auto;min-width:0}
-.col-right{flex:0 0 31%;display:flex;flex-direction:column;gap:8px;min-height:0;overflow-y:auto;min-width:320px}
+.main{flex:1 1 auto;display:flex;gap:10px;padding:10px;min-height:0;overflow-x:auto}
+.col-left{flex:0 0 27%;min-width:170px;display:flex;flex-direction:column;gap:8px;min-height:0;overflow-y:auto}
+.col-left .panel{flex:0 0 auto}
+.col-mid{flex:1 1 auto;display:flex;flex-direction:column;gap:8px;min-height:0;overflow-y:auto;min-width:240px}
+.col-right{flex:0 0 31%;display:flex;flex-direction:column;gap:8px;min-height:0;overflow-y:auto;min-width:300px}
 
 .panel{background:var(--panel);border:1px solid var(--edge);border-radius:9px;padding:10px;display:flex;flex-direction:column;min-height:0}
 .panel h3{font-size:12px;font-weight:700;letter-spacing:.12em;color:var(--faint);margin-bottom:8px;flex:0 0 auto}
@@ -42,7 +43,7 @@ body{font-family:"Segoe UI","Microsoft YaHei",sans-serif;color:var(--text);font-
 .poke .name{font-weight:700;font-size:14px}
 .poke .types{display:flex;gap:4px}
 .tchip{font-size:10px;font-weight:700;color:#fff;padding:2px 6px;border-radius:3px;text-shadow:0 1px 1px rgba(0,0,0,.4)}
-.hpbar{flex:1;height:8px;border-radius:4px;background:rgba(0,0,0,.5);overflow:hidden;min-width:60px}
+.hpbar{flex:1;height:8px;border-radius:4px;background:rgba(0,0,0,.5);overflow:hidden;min-width:40px}
 .hpbar i{display:block;height:100%;border-radius:4px}
 .pct{font-family:Consolas,monospace;font-weight:700;font-size:13px;min-width:40px;text-align:right}
 .ko{opacity:.6;filter:grayscale(.5)}
