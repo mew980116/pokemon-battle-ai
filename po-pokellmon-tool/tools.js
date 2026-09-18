@@ -133,7 +133,7 @@ var TOOL_DEFS = [
         type: 'function',
         function: {
             name: 'submit_feedback',
-            description: 'Submit feedback when (a) a tool result disagrees with what you observe in the battle log (e.g. calc_damage off by roughly 2x with no modifier to explain it), or (b) you wish a tool existed for a computation the current tools cannot do. Describe what you expected vs what you got, or the tool you want and why.',
+            description: 'Report a problem or a gap to the developer. Call it ONLY when (a) a tool result disagrees with what the battle log shows (e.g. calc_damage off by roughly 2x with no modifier to explain it, or a state field that contradicts the log), or (b) you wanted a tool that does not exist. Do NOT use it to jot down ordinary decisions, notes, or "no issue" remarks — use save_strategy for your plans and save_observation for opponent facts.',
             parameters: {
                 type: 'object',
                 properties: {

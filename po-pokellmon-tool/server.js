@@ -36,7 +36,7 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.3.49';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.3.50';   // tool 分支版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
 // 对战主脑用 v4-pro（闭卷深想强，决策更深）；一键回 flash：POKELLMON_MODEL=deepseek-v4-flash
@@ -49,11 +49,18 @@ var MAX_TOOL_ROUNDS = 15;               // 最多 function calling 轮数，超�
 var MAX_TURN_MS = 0;                    // 单回合总时长上限（0=禁用 no-think 收尾；实测 webCall 120s 不超时，暂不需要兜底）
 var RETRY_DELAYS = [2000, 5000, 10000]; // 单次请求失败后的重试延迟：第1次2s、第2次5s、第3次10s（第3次降级 no think），再失败 fallback
 
-// system prompt 只保留：战术底色（BATTLE_TIPS）+ 通用 tool 引导 + 跨回合记忆要求。
-// 各 tool 的「何时调用 / 怎么用」全部下沉到 tools.js 的 tool description（tool helper），避免 system prompt 膨胀。
+// system prompt 结构：战术底色（BATTLE_TIPS）+ 每回合工作流（WORKFLOW）+ 一句 tool 指引。
+// 各 tool 的「何时调用 / 怎么用」下沉到 tools.js 的 tool description（tool helper），避免 system prompt 膨胀。
+// 工作流是流程性要求（不属于单个 tool 的用法），所以留在 system prompt。
+var WORKFLOW = 'WORKFLOW — follow this order every turn: ' +
+    '(1) REVIEW: read the last turn(s) with get_battle_history and work out what they reveal about the opponent — the speed line (who moved first; any speed boost, paralysis, Tailwind or Choice Scarf clue), which moves / items / abilities are now EXPOSED or can be EXCLUDED, and back-calculate from the damage dealt and taken to infer their EV spread and any offensive boost (item or ability). Record all of it with save_observation, tagging every fact [proved] or [estimated]. ' +
+    '(2) PLAN: re-read your previous save_strategy notes, look at the actions you are offered, and run the simulations you need (get_my_stats / calc_stats / calc_damage) plus the tactical guidance you need (battle_tips) before committing. ' +
+    '(3) VERIFY: never trust memory for a move / ability / item effect, power or accuracy — call get_move_info / get_ability_info / get_item_info unless that detail is already present in the context. Always call get_knowledge for the switch rules before switching unless they are already present in the context. ' +
+    '(4) DECIDE: choose the action, then write your read + plan with save_strategy.';
+
 var SYSTEM_PROMPT = require('../po-pokellmon/prompts.js').BATTLE_TIPS +
-    ' You decide by calling the tools you have been given. Every tool description states when to call it — follow that guidance: check facts (rules, move/ability/item details, type matchups, stats, damage) before you commit, verify instead of assuming, and reach for a tool whenever a check would sharpen the decision. ' +
-    'Your notes are your memory across turns: keep save_observation (one note per opposing pokemon; tag every inferred fact [estimated] or [proved]) and save_strategy (your read + plan for the turn) up to date so later turns can recall them.';
+    ' You decide by calling the tools you have been given; every tool description states when to call it, so follow the workflow below and that guidance.' +
+    '\n\n' + WORKFLOW;
 
 // 复用 po-pokellmon 知识库
 var KNOWLEDGE_DIR = path.join(__dirname, '..', 'po-pokellmon', 'knowledge');
@@ -243,8 +250,8 @@ function buildPrompt(state, notes) {
     var oh = state.oppHazards || [];
     p += 'Weather:' + (state.weather || 'None') +
         ' | Terrain:' + (state.terrain || 'None') +
-        ' | My hazards:' + (mh.length ? '[' + mh.join(',') + ']' : 'None') +
-        ' | Opp hazards:' + (oh.length ? '[' + oh.join(',') + ']' : 'None') + '\n';
+        ' | Hazards on MY side (damage MY switch-ins):' + (mh.length ? '[' + mh.join(',') + ']' : 'None') +
+        ' | Hazards on OPP side (damage THEIR switch-ins):' + (oh.length ? '[' + oh.join(',') + ']' : 'None') + '\n';
 
     // 默认注入笔记：对手场上这只的观察 + 最近 2 回合思路
     if (notes) {
