@@ -36,13 +36,15 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.3.51';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.3.52';   // tool 分支版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
 // 对战主脑用 v4-pro（闭卷深想强，决策更深）；一键回 flash：POKELLMON_MODEL=deepseek-v4-flash
 var MODEL = process.env.POKELLMON_MODEL || 'deepseek-v4-pro';
 var THINKING_ENABLED = false;           // 关闭 reasoning（v4-pro 思考链过长/慢，先关；需要时改回 true）
 var REASONING_EFFORT = 'low';           // 仅在 THINKING_ENABLED=true 时生效
+var FIRST_TURN_THINKING = true;         // 首回合（turn 0）单独开思考，之后沿用上面的全局设置
+var FIRST_TURN_EFFORT = 'high';         // 首回合思考强度（low/high/max）
 var MAX_TOKENS = null;                  // 不限制输出 token（思考链 + 最终答案）
 var TIMEOUT_MS = 240000;                // 放宽：240s（tool 多轮往返慢）
 var MAX_TOOL_ROUNDS = 25;               // 最多 function calling 轮数，超过则 fallback
@@ -84,7 +86,7 @@ function getApiKey() {
     return null;
 }
 
-function callDeepSeek(messages, noThink, cb) {
+function callDeepSeek(messages, noThink, cb, opts) {
     var apiKey = getApiKey();
     if (!apiKey) {
         cb(new Error('missing DEEPSEEK_API_KEY (set env var or create apikey.txt)'));
@@ -98,9 +100,12 @@ function callDeepSeek(messages, noThink, cb) {
     };
     var mt = MAX_TOKENS;
     if (mt) payloadObj.max_tokens = mt;
-    if (THINKING_ENABLED && !noThink) {
+    // 思考开关：opts 显式指定时优先（首回合 high），否则用全局设置；noThink（重试降级）永远优先
+    var thinkOn = (opts && opts.thinking !== undefined) ? opts.thinking : THINKING_ENABLED;
+    var effort = (opts && opts.effort !== undefined) ? opts.effort : REASONING_EFFORT;
+    if (thinkOn && !noThink) {
         payloadObj.thinking = { type: 'enabled' };
-        if (REASONING_EFFORT) payloadObj.reasoning_effort = REASONING_EFFORT;
+        if (effort) payloadObj.reasoning_effort = effort;
     } else {
         payloadObj.thinking = { type: 'disabled' };
     }
@@ -511,6 +516,7 @@ function handleChoice(res, state) {
             scriptVersion: state.scriptVersion || '',
             account: state.account || '',
             turn: state.turn,
+            thinking: turnThinkingOpts ? (FIRST_TURN_EFFORT + ' (first-turn)') : (THINKING_ENABLED ? REASONING_EFFORT : 'off'),
             totalMs: Date.now() - startTime,
             rounds: rounds,
             toolLog: toolLog,
@@ -544,6 +550,13 @@ function handleChoice(res, state) {
         attempt(0);
     }
 
+    // 首回合（turn 0）单独开思考（high），其余回合沿用全局设置（当前关闭）
+    var turnThinkingOpts = (FIRST_TURN_THINKING && state.turn === 0)
+        ? { thinking: true, effort: FIRST_TURN_EFFORT }
+        : null;
+    if (turnThinkingOpts) console.log('[choice] turn 0 -> thinking ' + FIRST_TURN_EFFORT);
+    function callDS(noThink, cb) { callDeepSeek(messages, noThink, cb, turnThinkingOpts); }
+
     // 最后兜底：关思考（no-think）快速要一个答案，不再继续 tool loop
     function finalizeNoThink() {
         callDeepSeek(messages, true, function (err, statusCode, data) {
@@ -563,7 +576,7 @@ function handleChoice(res, state) {
     function attempt(retryIdx) {
         var noThink = retryIdx >= RETRY_DELAYS.length;   // 最后一次重试用 no think
         var t0 = Date.now();
-        callDeepSeek(messages, noThink, function (err, statusCode, data) {
+        callDS(noThink, function (err, statusCode, data) {
             var ms = Date.now() - t0;
 
             if (err || statusCode !== 200) {
