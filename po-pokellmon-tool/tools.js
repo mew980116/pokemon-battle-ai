@@ -75,12 +75,12 @@ var TOOL_DEFS = [
         type: 'function',
         function: {
             name: 'save_observation',
-            description: 'Record or update your observation about ONE opposing pokemon (e.g. revealed moves, likely item/ability, damage estimate). Overwrites the previous note by default; set append=true to append instead.',
+            description: 'Record or update your observation about ONE opposing pokemon (e.g. revealed moves, likely item/ability, damage estimate). Tag how each fact was obtained: [proved] if directly observed (revealed move, triggered ability/item message, observed damage), [estimated] if inferred (likely item, possible ability, EV spread, unrevealed moves) — e.g. "item: Choice Scarf [estimated] | move: Knock Off [proved]". Always tag inferences so a guess is not later mistaken for a fact. Overwrites the previous note by default; set append=true to append instead.',
             parameters: {
                 type: 'object',
                 properties: {
                     pokemon: { type: 'string', description: 'Opposing pokemon name' },
-                    text: { type: 'string', description: 'Your observation text' },
+                    text: { type: 'string', description: 'Your observation text. Tag each fact as [proved] (directly observed) or [estimated] (inferred).' },
                     append: { type: 'boolean', description: 'If true, append to the existing note instead of overwriting. Default false.' }
                 },
                 required: ['pokemon', 'text']

@@ -36,13 +36,13 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.3.47';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.3.48';   // tool 分支版本（改动时 bump，随日志记录）
 
-// ==== DeepSeek 模型参数（tool 分支：思考 + tool，强度 low）====
+// ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
 // 对战主脑用 v4-pro（闭卷深想强，决策更深）；一键回 flash：POKELLMON_MODEL=deepseek-v4-flash
 var MODEL = process.env.POKELLMON_MODEL || 'deepseek-v4-pro';
-var THINKING_ENABLED = true;            // 思考模式（非思考拉垮且不调 tool）
-var REASONING_EFFORT = 'low';           // 思考强度 low（high 太慢，先试 low）
+var THINKING_ENABLED = false;           // 关闭 reasoning（v4-pro 思考链过长/慢，先关；需要时改回 true）
+var REASONING_EFFORT = 'low';           // 仅在 THINKING_ENABLED=true 时生效
 var MAX_TOKENS = null;                  // 不限制输出 token（思考链 + 最终答案）
 var TIMEOUT_MS = 240000;                // 放宽：240s（tool 多轮往返慢）
 var MAX_TOOL_ROUNDS = 15;               // 最多 function calling 轮数，超过则 fallback
@@ -51,7 +51,7 @@ var RETRY_DELAYS = [2000, 5000, 10000]; // 单次请求失败后的重试延迟�
 
 var SYSTEM_PROMPT = require('../po-pokellmon/prompts.js').BATTLE_TIPS +
     ' You may call tools to compute type matchups, apply stat boosts, read the battle history, or record/read your notes before deciding. ' +
-    'IMPORTANT: use save_observation to record what you learn about each opposing pokemon (revealed moves, likely item/ability, damage estimate), and save_strategy to record your current plan each turn, so you can recall them in later turns. If the opponent has multiple pokemon of the same species (no Species Clause), distinguish them by appending their team slot to the name, e.g. save_observation pokemon="Garchomp#1" vs "Garchomp#2", so their notes do not overwrite each other. ' +
+    'IMPORTANT: use save_observation to record what you learn about each opposing pokemon (revealed moves, likely item/ability, damage estimate), and save_strategy to record your current plan each turn, so you can recall them in later turns. ALWAYS tag how each opponent fact was obtained: [proved] when directly observed (a revealed move, a triggered ability/item message, an observed damage number), [estimated] when it is your inference (likely item, possible ability, EV spread, unrevealed moves) — e.g. "item: Choice Scarf [estimated] | move: Knock Off [proved]". Never leave an inference untagged, so a guess is not later mistaken for a fact. If the opponent has multiple pokemon of the same species (no Species Clause), distinguish them by appending their team slot to the name, e.g. save_observation pokemon="Garchomp#1" vs "Garchomp#2", so their notes do not overwrite each other. ' +
     'Before committing to a move, use calc_damage to check whether your moves can KO or how much damage they deal (it returns the 0.85x and 1.0x random rolls and the % of the defender max HP). ' +
     'For speed comparison, use get_my_stats to read your own pokemon actual stats, and calc_stats to compute any pokemon stats under a given EV/IV/nature/boost (e.g. estimate whether you outspeed the opponent). ' +
     'Record the speed matchup via save_observation using this consistent format so you can recall it later without recomputing: "Speed:<current>(<spread>)|<boostMove>+<stage>:<boosted>|<reference>:<speed>", e.g. "Speed:259(252Spe Adamant)|DragonDance+1:388|Garchomp:303". ' +
@@ -320,6 +320,7 @@ function buildPrompt(state, notes) {
             var mi = moveInfo(me.moves[m]);
             idx++;
             p += idx + '. ' + mi.name + ':Type:' + mi.type + ',Power:' + mi.power + ',Acc:' + mi.acc + '%';
+            if (mi.pp !== undefined && mi.pp !== null) p += ',PP:' + mi.pp;
             if (mi.power > 0) {   // 变化招式（Power:0）不写克制关系
                 var mult = damageMultiplier(mi.type, oppTypes);
                 var multStr = (mult === 0) ? 'no effect' : (mult + 'x');
@@ -338,7 +339,7 @@ function buildPrompt(state, notes) {
                 var ms = '';
                 for (var mi = 0; mi < bk.moves.length; mi++) {
                     if (mi > 0) ms += '|';
-                    ms += bk.moves[mi].name + ',' + bk.moves[mi].type;
+                    ms += bk.moves[mi].name + ',' + bk.moves[mi].type + ((bk.moves[mi].pp !== undefined && bk.moves[mi].pp !== null) ? ',PP' + bk.moves[mi].pp : '');
                 }
                 sw += ',Moves:[' + ms + ']';
             }

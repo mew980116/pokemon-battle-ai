@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8092";
-var PKLM_VERSION = "0.6.2";       // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.6.3";       // 脚本版本（改动时 bump，随日志记录）
 var pklmLastWebFailTime = 0;       // 上次 webCall 失败时间戳（ms），用于断线时节流重发
 var pklmSilent = false;            // 静默模式：清分少女等无人值守 BOT 账号不向 PO 窗口 print 任何脚本输出
 var pklmFailCount = 0;             // 连续 webCall 失败次数（成功即归零）
@@ -556,7 +556,7 @@ function pklmCollectBench() {
                 types: [],
                 hpPct: (tp.totalLife > 0) ? Math.floor(tp.life / tp.totalLife * 100) : 0,
                 status: pklmStatusName(tp.status),
-                moves: pklmCollectMoves(tp, false, false),
+                moves: pklmCollectMoves(tp, true, false),   // 带 num/pp（剩余 PP，供耗 PP / 残局判断）
                 ability: pklmAbilityName(tp.ability),
                 item: pklmItemName(tp.item)
             };
