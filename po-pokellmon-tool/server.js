@@ -36,7 +36,7 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.3.53';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.3.54';   // tool 分支版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
 // 对战主脑用 v4-pro（闭卷深想强，决策更深）；一键回 flash：POKELLMON_MODEL=deepseek-v4-flash
@@ -44,7 +44,7 @@ var MODEL = process.env.POKELLMON_MODEL || 'deepseek-v4-pro';
 var THINKING_ENABLED = false;           // 关闭 reasoning（v4-pro 思考链过长/慢，先关；需要时改回 true）
 var REASONING_EFFORT = 'low';           // 仅在 THINKING_ENABLED=true 时生效
 var FIRST_TURN_THINKING = true;         // 首回合（turn 0）单独开思考，之后沿用上面的全局设置
-var FIRST_TURN_EFFORT = 'high';         // 首回合思考强度（low/high/max）
+var FIRST_TURN_EFFORT = 'low';          // 首回合思考强度（low/high/max）
 var MAX_TOKENS = null;                  // 不限制输出 token（思考链 + 最终答案）
 var TIMEOUT_MS = 240000;                // 放宽：240s（tool 多轮往返慢）
 var MAX_TOOL_ROUNDS = 25;               // 最多 function calling 轮数，超过则 fallback
