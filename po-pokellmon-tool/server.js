@@ -36,7 +36,7 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.3.46';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.3.47';   // tool 分支版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（tool 分支：思考 + tool，强度 low）====
 // 对战主脑用 v4-pro（闭卷深想强，决策更深）；一键回 flash：POKELLMON_MODEL=deepseek-v4-flash
@@ -432,6 +432,16 @@ function pushToView(entry) {
     } catch (e) {}
 }
 
+// 回合内增量推送：LLM 思考中（收到局面 / 每轮 tool 调用后），供 view 实时显示
+function pushProgress(state, obj) {
+    if (!state.log) return;
+    obj.type = 'progress';
+    obj.battleId = (state.battleId !== undefined && state.battleId !== null) ? state.battleId : null;
+    obj.turn = state.turn;
+    obj.ts = new Date().toISOString();
+    pushToView(obj);
+}
+
 function writeLog(entry) {
     try {
         fs.mkdirSync(LOG_DIR, { recursive: true });
@@ -481,6 +491,8 @@ function handleChoice(res, state) {
     var userPrompt = prompt + '\n' + switchHint + '\n' + constraint;
 
     console.log('[choice] turn=' + (state.turn || '?') + ' prompt_len=' + userPrompt.length);
+    // 实时推送：开始思考（前端据此启动正计时）
+    pushProgress(state, { phase: 'start' });
 
     var messages = [
         { role: 'system', content: SYSTEM_PROMPT },
@@ -495,6 +507,7 @@ function handleChoice(res, state) {
     function logEntry(reply, action) {
         if (!state.log) return;
         writeLog({
+            type: 'turn',
             ts: new Date().toISOString(),
             serverVersion: SERVER_VERSION,
             scriptVersion: state.scriptVersion || '',
@@ -589,6 +602,12 @@ function handleChoice(res, state) {
                 }
                 toolLog.push({ round: rounds, ms: ms, usage: usage, calls: called });
                 console.log('[tool] round ' + rounds + ' ' + ms + 'ms: ' + JSON.stringify(called));
+                // 实时推送本轮 tool 调用（只带 name/args，完整 result 在最终 entry 里）
+                var liveCalls = [];
+                for (var ci = 0; ci < called.length; ci++) {
+                    liveCalls.push({ name: called[ci].name, args: called[ci].args });
+                }
+                pushProgress(state, { phase: 'tool', round: rounds, ms: ms, calls: liveCalls });
 
                 if (rounds >= MAX_TOOL_ROUNDS) {
                     var fa2 = fallbackAction(state, 'tool_rounds_exceeded');

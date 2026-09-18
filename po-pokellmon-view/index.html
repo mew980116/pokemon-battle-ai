@@ -74,6 +74,13 @@ body{font-family:"Segoe UI","Microsoft YaHei",sans-serif;color:var(--text);font-
 .tok{background:var(--panel2);border-radius:6px;padding:6px;text-align:center}
 .tok .n{font-family:Consolas,monospace;font-size:16px;font-weight:700}
 .tok .l{font-size:10px;color:var(--faint);margin-top:2px}
+
+/* 实时进行中（LLM 思考中） */
+#liveBox{border:1px dashed rgba(74,222,128,.35);border-radius:7px;padding:7px 8px;margin-bottom:8px;background:rgba(74,222,128,.05)}
+#liveTimer{font-family:Consolas,monospace;font-weight:700;color:#86efac;font-size:14px}
+#liveTools{max-height:150px;overflow-y:auto}
+.toolcall.live{background:rgba(74,222,128,.06);border-left-color:#86efac;animation:liveIn .25s ease}
+@keyframes liveIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
 </style>
 </head>
 <body>
@@ -111,6 +118,10 @@ body{font-family:"Segoe UI","Microsoft YaHei",sans-serif;color:var(--text);font-
   <div class="col-right">
     <div class="panel llm-panel">
       <h3>LLM 交互（当前这条决策）</h3>
+      <div id="liveBox" style="display:none">
+        <div class="kv"><span class="k">实时</span><span class="v"><span id="liveTimer">0.0s</span> <span id="livePhase"></span></span></div>
+        <div id="liveTools"></div>
+      </div>
       <div class="llm" id="llmInfo"></div>
       <div class="tokgrid" id="tokGrid"></div>
       <div id="toolCalls"></div>
@@ -334,6 +345,52 @@ function loadBattleList(){
 loadBattleList();
 setInterval(loadBattleList, 4000);
 
+// ===== 进行中面板：LLM 思考中（SSE progress 事件，含正计时）=====
+var liveStartTs=0, liveTimerId=null, liveBid=null;
+function liveTick(){
+  if(!liveStartTs) return;
+  var el=document.getElementById('liveTimer');
+  if(el) el.textContent=((Date.now()-liveStartTs)/1000).toFixed(1)+'s';
+}
+function renderProgress(d){
+  var box=document.getElementById('liveBox');
+  if(!box) return;
+  var bid=(d.battleId!=null)?String(d.battleId):'?';
+  if(d.phase==='start'){
+    liveBid=bid;
+    liveStartTs=d.ts?Date.parse(d.ts):Date.now();
+    if(liveTimerId) clearInterval(liveTimerId);
+    document.getElementById('liveTools').innerHTML='';
+    document.getElementById('livePhase').textContent='思考中… (turn '+(d.turn!=null?d.turn:'?')+')';
+    box.style.display='block';
+    liveTick();
+    liveTimerId=setInterval(liveTick,100);
+    return;
+  }
+  if(d.phase==='tool'){
+    if(bid!==liveBid) return;   // 其他对战，忽略
+    var html='';
+    (d.calls||[]).forEach(function(c){
+      html+='<div class="toolcall live"><div class="fn">'+esc(c.name)+'</div>'+
+        '<div style="font-size:11px;color:var(--dim)">args: '+esc(JSON.stringify(c.args))+'</div></div>';
+    });
+    if(html){
+      var lt=document.getElementById('liveTools');
+      if(lt){ lt.insertAdjacentHTML('beforeend',html); lt.scrollTop=lt.scrollHeight; }
+    }
+    liveTick();
+    return;
+  }
+}
+function stopProgress(){
+  if(liveTimerId){ clearInterval(liveTimerId); liveTimerId=null; }
+  liveStartTs=0;
+  var box=document.getElementById('liveBox');
+  if(box) box.style.display='none';
+  var lt=document.getElementById('liveTools');
+  if(lt) lt.innerHTML='';
+}
+
 // ===== 实时模式：SSE 收 /events，边打边追加 =====
 var liveMode=false, liveList=[], es=null;
 function toggleLive(){
@@ -349,6 +406,8 @@ function startLive(){
   es=new EventSource('/events');
   es.onmessage=function(ev){
     var d; try{ d=JSON.parse(ev.data); }catch(e){ return; }
+    if(d.type==='progress'){ renderProgress(d); return; }   // 思考中：走实时面板，不进回合列表
+    stopProgress();                                          // 回合完成，停表
     var bid=(d.state&&d.state.battleId!=null)?d.state.battleId:'?';
     if(liveList.length){
       var lastBid=(liveList[0].state&&liveList[0].state.battleId!=null)?liveList[0].state.battleId:'?';
@@ -367,6 +426,7 @@ function startLive(){
 function stopLive(){
   liveMode=false;
   if(es){ try{es.close();}catch(e){} es=null; }
+  stopProgress();
   document.getElementById('btnLive').textContent='LIVE 实时';
   var sel=document.getElementById('selBattle');
   if(sel.value) loadBattle(sel.value);
