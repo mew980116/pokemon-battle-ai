@@ -214,19 +214,40 @@ function buildMoves() {
         if ((parseInt(parts[1], 10) & 1) === 1) touchMap[parseInt(parts[0], 10)] = true;
     }
 
-    // 招式描述：move_description.txt（UTF-16 LE，num -> 中文描述）
-    const descMap = {};
-    const descRaw = fs.readFileSync(path.join(DATA, 'moves', 'move_description.txt'), 'utf16le').replace(/^\uFEFF/, '');
-    const descLines = descRaw.split('\n');
-    for (const line of descLines) {
+    // 对战效果描述：zh-cn/db/moves/8G/effect.txt（UTF-8，num -> 中文对战效果 + 图鉴口吻）
+    // 覆盖到 Gen8 全部招式（852），比 po-data/moves/move_effect.txt（只到 466、仅特殊效果）全得多；
+    // 中文文本描述附加效果但不含数值，概率/等级由下面的 8G 数值表补齐。
+    // 注：po-data/moves/move_description.txt 是纯图鉴风味文本（"用长长的尾巴拍打对手"），对决策无价值，不使用。
+    const effectMap = {};
+    const effRaw = readText(path.join(DATA, 'zh-cn', 'db', 'moves', '8G', 'effect.txt'));
+    for (const line of effRaw.split('\n')) {
         const t = line.trim();
         if (!t) continue;
         const idx = t.indexOf(' ');
         if (idx < 0) continue;
         const num = parseInt(t.substring(0, idx), 10);
-        const desc = t.substring(idx + 1).trim();
-        if (desc) descMap[num] = desc;
+        const d = t.substring(idx + 1).trim();
+        if (d) effectMap[num] = d;
     }
+
+    // 数值表（8G，格式 "num value"；0 表示无，跳过）
+    function readNumTable(file) {
+        const map = {};
+        const raw = readText(path.join(DATA, 'moves', '8G', file));
+        for (const line of raw.split('\n')) {
+            const t = line.trim();
+            if (!t) continue;
+            const parts = t.split(/\s+/);
+            const k = parseInt(parts[0], 10);
+            const v = parseInt(parts[1], 10);
+            if (!isNaN(k) && !isNaN(v) && v !== 0) map[k] = v;
+        }
+        return map;
+    }
+    const effectChanceMap = readNumTable('effect_chance.txt');   // 附加效果触发概率 %
+    const flinchMap = readNumTable('flinch_chance.txt');         // 畏缩概率 %
+    const healingMap = readNumTable('healing.txt');              // 回复/自损 %（负值=自损）
+    const critMap = readNumTable('crit_rate.txt');               // 暴击等级（>=1 为高暴击）
 
     // movedata.json 里已解析好的 5 个 tag 字段 -> tag 名
     const TAG_FIELDS = [['voice', 'voice'], ['ironFist', 'ironFist'], ['reckless', 'reckless'], ['strongJaw', 'strongJaw'], ['megaLauncher', 'megaLauncher']];
@@ -248,7 +269,11 @@ function buildMoves() {
             type: (tn === 18) ? null : (TYPE_NAMES[tn] || 'Normal'),
             priority: m.priority || 0,
             tags: tags,
-            desc: descMap[m.num] || ''
+            desc: effectMap[m.num] || '',
+            effect_chance: effectChanceMap[m.num] || 0,
+            flinch_chance: flinchMap[m.num] || 0,
+            healing: healingMap[m.num] || 0,
+            crit_rate: critMap[m.num] || 0
         };
     }
     return result;

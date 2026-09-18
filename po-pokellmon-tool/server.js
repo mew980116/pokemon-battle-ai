@@ -36,7 +36,7 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.3.48';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.3.49';   // tool 分支版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
 // 对战主脑用 v4-pro（闭卷深想强，决策更深）；一键回 flash：POKELLMON_MODEL=deepseek-v4-flash
@@ -49,21 +49,11 @@ var MAX_TOOL_ROUNDS = 15;               // 最多 function calling 轮数，超�
 var MAX_TURN_MS = 0;                    // 单回合总时长上限（0=禁用 no-think 收尾；实测 webCall 120s 不超时，暂不需要兜底）
 var RETRY_DELAYS = [2000, 5000, 10000]; // 单次请求失败后的重试延迟：第1次2s、第2次5s、第3次10s（第3次降级 no think），再失败 fallback
 
+// system prompt 只保留：战术底色（BATTLE_TIPS）+ 通用 tool 引导 + 跨回合记忆要求。
+// 各 tool 的「何时调用 / 怎么用」全部下沉到 tools.js 的 tool description（tool helper），避免 system prompt 膨胀。
 var SYSTEM_PROMPT = require('../po-pokellmon/prompts.js').BATTLE_TIPS +
-    ' You may call tools to compute type matchups, apply stat boosts, read the battle history, or record/read your notes before deciding. ' +
-    'IMPORTANT: use save_observation to record what you learn about each opposing pokemon (revealed moves, likely item/ability, damage estimate), and save_strategy to record your current plan each turn, so you can recall them in later turns. ALWAYS tag how each opponent fact was obtained: [proved] when directly observed (a revealed move, a triggered ability/item message, an observed damage number), [estimated] when it is your inference (likely item, possible ability, EV spread, unrevealed moves) — e.g. "item: Choice Scarf [estimated] | move: Knock Off [proved]". Never leave an inference untagged, so a guess is not later mistaken for a fact. If the opponent has multiple pokemon of the same species (no Species Clause), distinguish them by appending their team slot to the name, e.g. save_observation pokemon="Garchomp#1" vs "Garchomp#2", so their notes do not overwrite each other. ' +
-    'Before committing to a move, use calc_damage to check whether your moves can KO or how much damage they deal (it returns the 0.85x and 1.0x random rolls and the % of the defender max HP). ' +
-    'For speed comparison, use get_my_stats to read your own pokemon actual stats, and calc_stats to compute any pokemon stats under a given EV/IV/nature/boost (e.g. estimate whether you outspeed the opponent). ' +
-    'Record the speed matchup via save_observation using this consistent format so you can recall it later without recomputing: "Speed:<current>(<spread>)|<boostMove>+<stage>:<boosted>|<reference>:<speed>", e.g. "Speed:259(252Spe Adamant)|DragonDance+1:388|Garchomp:303". ' +
-    'Each turn, before deciding, review the previous turn(s) battle log and infer any speed observation from it (who moved first, any speed boost like Dragon Dance/Agility, speed drop, paralysis, Tailwind, or Choice Scarf clues), then record it via save_observation so your speed-line notes stay up to date. ' +
-    'For strategic guidance (how to play in a given situation), call battle_tips with the relevant tip names, e.g. ["优势局"] when you are ahead, ["劣势局"] when behind, ["残局"] in the endgame, ["太晶"] before terastallizing, ["牺牲"] when deciding a sacrifice, ["预知未来"]/["撒钉"]/["强化手"] etc. You may pass up to 10 tip names at once. ' +
-    'For objective battle rules and mechanics (switch cost, type/status conditions, weather/terrain effects, what "grounded"/接触地面 means), call get_knowledge with the topic names, e.g. ["换人"] before switching, ["天气"]/["场地"] when they are up, ["地面"] to check grounded, ["异常状态"] for status conditions. You may pass up to 10 topic names at once. ' +
-    'To check a move mechanics (contact recoil, sound immunity, punch/bite/pulse/recoil tags, priority), call get_move_info with the move name, e.g. ["地震"] or ["Earthquake"]. ' +
-    'To check an ability mechanics and how to infer/exclude it from the battle log (trigger message / status / type / effect changes), call get_ability_info with the ability name, e.g. ["威吓"] or ["Intimidate"]. ' +
-    'To check a held item effect, call get_item_info with the item name, e.g. ["讲究头带"] or ["Choice Band"]. ' +
-    'After using calc_damage, compare its result with the actual damage shown in the battle log (via get_battle_history). If the calculated damage differs from the observed damage by a large factor (roughly 2x or more) and no obvious modifier explains it, call submit_feedback to report the discrepancy (state which attacker/move/defender and the expected vs actual damage). ' +
-    'If no built-in tool covers a computation you need (e.g. speed comparison, batch damage, custom scoring), you may write a small synchronous JS snippet and run it via run_js; it exposes data/typeMul/effStat/resolvePokemon/resolveMove/calcDamage and print/console.log. Prefer the built-in tools first and use run_js only as a fallback. ' +
-    'If you need battle information or computation that no available tool provides, call submit_feedback to tell us what tool you wish you had.';
+    ' You decide by calling the tools you have been given. Every tool description states when to call it — follow that guidance: check facts (rules, move/ability/item details, type matchups, stats, damage) before you commit, verify instead of assuming, and reach for a tool whenever a check would sharpen the decision. ' +
+    'Your notes are your memory across turns: keep save_observation (one note per opposing pokemon; tag every inferred fact [estimated] or [proved]) and save_strategy (your read + plan for the turn) up to date so later turns can recall them.';
 
 // 复用 po-pokellmon 知识库
 var KNOWLEDGE_DIR = path.join(__dirname, '..', 'po-pokellmon', 'knowledge');

@@ -60,7 +60,7 @@ var TOOL_DEFS = [
         type: 'function',
         function: {
             name: 'get_battle_history',
-            description: 'Read the battle log (turn-by-turn history) for a given turn range. Use this to recall what happened in previous turns instead of guessing. Omit both arguments to read the full history.',
+            description: 'Read the battle log (turn-by-turn history) for a given turn range. Call it at the start of each turn to review what actually happened last turn(s) — who moved first, how much damage landed, which move/ability/item triggered, what boosts or status changed — instead of guessing from memory. Omit both arguments to read the full history.',
             parameters: {
                 type: 'object',
                 properties: {
@@ -75,7 +75,7 @@ var TOOL_DEFS = [
         type: 'function',
         function: {
             name: 'save_observation',
-            description: 'Record or update your observation about ONE opposing pokemon (e.g. revealed moves, likely item/ability, damage estimate). Tag how each fact was obtained: [proved] if directly observed (revealed move, triggered ability/item message, observed damage), [estimated] if inferred (likely item, possible ability, EV spread, unrevealed moves) — e.g. "item: Choice Scarf [estimated] | move: Knock Off [proved]". Always tag inferences so a guess is not later mistaken for a fact. Overwrites the previous note by default; set append=true to append instead.',
+            description: 'Record or update your observation about ONE opposing pokemon (e.g. revealed moves, likely item/ability, damage estimate). Tag how each fact was obtained: [proved] if directly observed (revealed move, triggered ability/item message, observed damage), [estimated] if inferred (likely item, possible ability, EV spread, unrevealed moves) — e.g. "item: Choice Scarf [estimated] | move: Knock Off [proved]". Always tag inferences so a guess is not later mistaken for a fact. If the opponent has several pokemon of the same species (no Species Clause), append the team slot to the name (pokemon="Garchomp#1" vs "Garchomp#2") so their notes do not overwrite each other. Keep the speed line in this exact format so you can recall it later without recomputing: "Speed:<current>(<spread>)|<boostMove>+<stage>:<boosted>|<reference>:<speed>", e.g. "Speed:259(252Spe Adamant)|DragonDance+1:388|Garchomp:303". Overwrites the previous note by default; set append=true to append instead.',
             parameters: {
                 type: 'object',
                 properties: {
@@ -91,11 +91,11 @@ var TOOL_DEFS = [
         type: 'function',
         function: {
             name: 'save_strategy',
-            description: 'Record your current strategic thinking/plan for this turn (e.g. "opponent likely switches to X, so I should use Y"). Stored per turn.',
+            description: 'Record your strategic thinking for this turn: your READ on the opponent plus the action you commit to. Stored per turn, and re-read (and re-checked against reality) in later turns. Write it as a compact read→plan note following these steps: (1) Is the opponent likely to ATTACK, and with what? Consider their revealed moves plus moves they plausibly carry but have not shown. (2) Are they likely to SWITCH, and to whom? Infer only from the pokemon they have revealed plus their current HP/status. (3) What do they KNOW about my team, and how will they treat what they have not seen — as a threat, or ignore it? (4) Given all that, what is their single most likely action, what is my best response to it, and if my prediction is wrong does it leave me badly off? (5) Final call: the action you actually choose. Two extra heuristics: when several moves could KO, prefer the one that also covers a likely switch-in over the single highest damage; when you hard-counter the pokemon in front but know little about their bench, consider setting hazards / boosting / Substitute instead of attacking into a switch. Keep it concise: state the read, the plan, and what would falsify the read.',
             parameters: {
                 type: 'object',
                 properties: {
-                    text: { type: 'string', description: 'Your strategy/thinking text' }
+                    text: { type: 'string', description: 'Your read + plan, following the 5 steps: likely attack? likely switch? what they know about me? their most likely action + my response + risk if wrong? final call?' }
                 },
                 required: ['text']
             }
@@ -133,7 +133,7 @@ var TOOL_DEFS = [
         type: 'function',
         function: {
             name: 'submit_feedback',
-            description: 'Submit feedback about what tool or capability you wish you had (e.g. damage calculation, speed comparison, opponent move prediction). Use this when the available tools are insufficient for the decision.',
+            description: 'Submit feedback when (a) a tool result disagrees with what you observe in the battle log (e.g. calc_damage off by roughly 2x with no modifier to explain it), or (b) you wish a tool existed for a computation the current tools cannot do. Describe what you expected vs what you got, or the tool you want and why.',
             parameters: {
                 type: 'object',
                 properties: {
@@ -147,7 +147,7 @@ var TOOL_DEFS = [
         type: 'function',
         function: {
             name: 'calc_damage',
-            description: 'Compute the damage range of up to 10 attacker/defender/move combinations using the standard Pokemon damage formula. Returns the minimum (0.85x roll) and maximum (1.0x roll) damage, plus the percentage of the defender max HP. NOTE: this is a SIMPLIFIED calculator — it does NOT auto-apply item/ability/weather/terrain/burn/critical-hit/STAB-removal etc.; pass an extra multiplier (e.g. 1.5 for critical hit, 0.5 for burn) if needed. Use it to check KO thresholds, then compare the result against the actual damage in the battle log.',
+            description: 'Compute the damage range of up to 10 attacker/defender/move combinations using the standard Pokemon damage formula. Returns the minimum (0.85x roll) and maximum (1.0x roll) damage, plus the percentage of the defender max HP. NOTE: this is a SIMPLIFIED calculator — it does NOT auto-apply item/ability/weather/terrain/burn/critical-hit/STAB-removal etc.; pass an extra multiplier (e.g. 1.5 for critical hit, 0.5 for burn) if needed. Call it before committing to a move whenever a KO threshold or the expected damage actually matters; then compare the result with the damage you observe in the battle log (call submit_feedback if they disagree by a large factor).',
             parameters: {
                 type: 'object',
                 properties: {
@@ -217,7 +217,7 @@ var TOOL_DEFS = [
         type: 'function',
         function: {
             name: 'run_js',
-            description: 'Run a small JavaScript snippet in a sandbox to compute something no built-in tool covers (e.g. speed comparison, batch damage over a set of pokemon, custom scoring). Sandbox exposes: data.pokemon/data.moves/data.natures/data.types/data.typechart, typeMul(attackType, defendTypes), effStat(baseStat, boost?, level?), resolvePokemon(nameOrNum), resolveMove(name), calcDamage(attackerObj, defenderObj, moveObj), and print/console.log for output. The last expression value is returned. Use only for computation you cannot do with built-in tools.',
+            description: 'Run a small JavaScript snippet in a sandbox to compute something no built-in tool covers (e.g. speed comparison, batch damage over a set of pokemon, custom scoring). Sandbox exposes: data.pokemon/data.moves/data.natures/data.types/data.typechart, typeMul(attackType, defendTypes), effStat(baseStat, boost?, level?), resolvePokemon(nameOrNum), resolveMove(name), calcDamage(attackerObj, defenderObj, moveObj), and print/console.log for output. The last expression value is returned. Call it only as a last resort, when a computation you need is genuinely not covered by any built-in tool — prefer the built-in tools.',
             parameters: {
                 type: 'object',
                 properties: {
@@ -231,7 +231,7 @@ var TOOL_DEFS = [
         type: 'function',
         function: {
             name: 'calc_stats',
-            description: 'Compute the final stat(s) of a pokemon given its name (or explicit base stats) plus EVs, IVs, nature, and stat-stage boosts. Returns the requested stats after applying nature and boost. Use this for speed comparison or any stat estimate. Up to 10 legs in one call.',
+            description: 'Compute the final stat(s) of a pokemon given its name (or explicit base stats) plus EVs, IVs, nature, and stat-stage boosts. Returns the requested stats after applying nature and boost. Call it for any stat estimate you cannot read directly — most often a SPEED comparison (do I outspeed, with or without a boost / Choice Scarf / a speed ability?), or to work out a hidden stat. Up to 10 legs in one call.',
             parameters: {
                 type: 'object',
                 properties: {
@@ -262,7 +262,7 @@ var TOOL_DEFS = [
         type: 'function',
         function: {
             name: 'get_my_stats',
-            description: 'Get the final unboosted stats (HP/Atk/Def/SpA/SpD/Spe) of MY pokemon from the actual battle data (real EVs, IVs, nature, and level). Specify a pokemon name or slot to get one, or omit to get all six of my team.',
+            description: 'Get the final unboosted stats (HP/Atk/Def/SpA/SpD/Spe) of MY pokemon from the actual battle data (real EVs, IVs, nature, and level). Call it to read your own exact stats before a speed or damage comparison, instead of assuming a spread. Specify a pokemon name or slot to get one, or omit to get all six of my team.',
             parameters: {
                 type: 'object',
                 properties: {
@@ -276,7 +276,7 @@ var TOOL_DEFS = [
         type: 'function',
         function: {
             name: 'battle_tips',
-            description: 'Look up battle tactics / strategy tips by name, e.g. "优势局" (ahead), "劣势局" (behind), "预知未来" (Future Sight), "撒钉", "牺牲", "残局", "太晶", "强化手", plus core strategy concepts like "联防", "联攻", "攻防转换", "胜利路线". Pass up to 10 tip names at once; Chinese or English. Each core strategy concept has a concise version and a detailed version — add suffix "详解"/"详细"/"展开" for the detailed one (e.g. "联防详解").',
+            description: 'Look up battle tactics / strategy tips by name, e.g. "优势局" (ahead), "劣势局" (behind), "预知未来" (Future Sight), "撒钉", "牺牲", "残局", "太晶", "强化手", plus core strategy concepts like "联防", "联攻", "攻防转换", "胜利路线". Call it whenever you need strategic guidance for the current situation (ahead / behind / endgame / deciding a switch or a sacrifice) or want to review a core concept before committing. Pass up to 10 tip names at once; Chinese or English. Each core strategy concept has a concise version and a detailed version — add suffix "详解"/"详细"/"展开" for the detailed one (e.g. "联防详解").',
             parameters: {
                 type: 'object',
                 properties: {
@@ -290,7 +290,7 @@ var TOOL_DEFS = [
         type: 'function',
         function: {
             name: 'get_knowledge',
-            description: 'Read objective battle mechanics and rules (switch cost, type/status immunities, weather effects, terrain effects, what "grounded"/接触地面 means). Use this for factual rules; use battle_tips for strategic advice.',
+            description: 'Read objective battle mechanics and rules (switch cost, type/status immunities, weather effects, terrain effects, what "grounded"/接触地面 means). Call it before acting on a rule you are unsure about — especially before switching, or when weather/terrain/status/grounded interactions decide the play — so you never act on a wrong assumption. Use this for factual rules; use battle_tips for strategic advice.',
             parameters: {
                 type: 'object',
                 properties: {
@@ -304,7 +304,7 @@ var TOOL_DEFS = [
         type: 'function',
         function: {
             name: 'get_move_info',
-            description: 'Look up a move details: power, accuracy, category (Physical/Special/Status), type, priority, and tags (contact/sound/punch/bite/pulse/recoil) with their meanings. Use to check move mechanics like contact recoil, sound immunity, or ability-boosted tags.',
+            description: 'Look up a move mechanics: power, accuracy, category, type, priority, its battle effect (desc — what it actually does on hit, e.g. "可能引起烧伤" = may burn, "自身物攻提升两级" = raises own Attack by 2), secondary-effect chance (effect_chance %), flinch chance (%), healing/recoil (% of max HP; negative = self-damage), crit rate (>=1 = high crit), and tags (contact/sound/punch/bite/pulse/recoil) with meanings. Call this when a move decision hinges on its side effects or tags — e.g. to see what a status move actually does, how reliable a secondary effect is, whether contact triggers recoil abilities (Rough Skin/Static/Flame Body), or whether sound immunity blocks it.',
             parameters: {
                 type: 'object',
                 properties: {
@@ -318,7 +318,7 @@ var TOOL_DEFS = [
         type: 'function',
         function: {
             name: 'get_ability_info',
-            description: 'Look up an ability details: description, whether it triggers a visible message in the battle log (and when), and how to infer/exclude it from the battle log (e.g. via status/type/effect changes). Use to check ability mechanics and to infer an opponent ability from observed triggers.',
+            description: 'Look up an ability details: description, whether it triggers a visible message in the battle log (and when), and how to infer/exclude it from the battle log (e.g. via status/type/effect changes). Call it when an opponent ability matters (to check its mechanics) or when the battle log shows — or lacks — a trigger and you want to narrow down which ability it is.',
             parameters: {
                 type: 'object',
                 properties: {
@@ -332,7 +332,7 @@ var TOOL_DEFS = [
         type: 'function',
         function: {
             name: 'get_item_info',
-            description: 'Look up an item details: description and effect. Use to check what a held item does (e.g. Choice items lock a move, Leftovers heal each turn, Focus Sash survives a hit at full HP, Rocky Helmet recoils contact moves).',
+            description: 'Look up an item details: description and effect. Call it when an item decides a play — e.g. to check what a revealed/likely opponent item does (Choice items lock a move, Leftovers heal each turn, Focus Sash survives a hit at full HP, Rocky Helmet recoils contact moves), or to re-check your own item before relying on it.',
             parameters: {
                 type: 'object',
                 properties: {
@@ -995,7 +995,7 @@ function getMoveInfo(args) {
         var t = mv.tags[i];
         if (MOVE_TAGS[t]) tagMeanings[t] = MOVE_TAGS[t];
     }
-    return {
+    var out = {
         num: found.num,
         name: mv.name,
         name_zh: mv.name_zh,
@@ -1008,6 +1008,12 @@ function getMoveInfo(args) {
         tags: mv.tags,
         tag_meanings: tagMeanings
     };
+    // 附加效果数值（为 0 的字段不输出，避免噪音）
+    if (mv.effect_chance) out.effect_chance = mv.effect_chance;   // 附加效果触发概率 %
+    if (mv.flinch_chance) out.flinch_chance = mv.flinch_chance;   // 畏缩概率 %
+    if (mv.healing) out.healing = mv.healing;                     // 回复/自损 %（负值=自损）
+    if (mv.crit_rate) out.crit_rate = mv.crit_rate;               // 暴击等级（>=1 为高暴击）
+    return out;
 }
 
 // ===== get_ability_info：查特性详情 + 触发提示（数据来自 knowledge/abilities.json + ability_signals.json）=====
