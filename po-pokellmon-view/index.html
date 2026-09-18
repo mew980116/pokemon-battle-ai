@@ -13,16 +13,16 @@
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%}
-body{font-family:"Segoe UI","Microsoft YaHei",sans-serif;color:var(--text);font-size:13px;background:var(--bg);display:flex;flex-direction:column;overflow:hidden}
+body{font-family:"Segoe UI","Microsoft YaHei",sans-serif;color:var(--text);font-size:15px;background:var(--bg);display:flex;flex-direction:column;overflow:hidden}
 
 .topbar{flex:0 0 auto;display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--panel);border-bottom:1px solid var(--edge);flex-wrap:wrap}
-.topbar select{background:var(--panel2);color:var(--text);border:1px solid var(--edge);border-radius:6px;padding:6px 10px;font-size:13px;max-width:420px}
-.topbar button{background:transparent;color:var(--dim);border:1px solid var(--edge);border-radius:6px;padding:6px 12px;cursor:pointer;font-size:13px}
+.topbar select{background:var(--panel2);color:var(--text);border:1px solid var(--edge);border-radius:6px;padding:6px 10px;font-size:15px;max-width:420px}
+.topbar button{background:transparent;color:var(--dim);border:1px solid var(--edge);border-radius:6px;padding:6px 12px;cursor:pointer;font-size:15px}
 .topbar button:hover{color:var(--text);border-color:var(--me)}
 .topbar .nav{display:flex;align-items:center;gap:8px}
 .topbar .nav input[type=range]{width:200px}
-.topbar .stepinfo{font-family:Consolas,monospace;color:var(--dim);font-size:12px;min-width:120px}
-.topbar .tag{font-size:11px;padding:2px 8px;border-radius:4px;font-weight:700;letter-spacing:.05em}
+.topbar .stepinfo{font-family:Consolas,monospace;color:var(--dim);font-size:14px;min-width:120px}
+.topbar .tag{font-size:12px;padding:2px 8px;border-radius:4px;font-weight:700;letter-spacing:.05em}
 .topbar .tag.notool{background:rgba(56,189,248,.15);color:var(--me)}
 .topbar .tag.tool{background:rgba(245,158,11,.15);color:var(--up)}
 
@@ -33,53 +33,53 @@ body{font-family:"Segoe UI","Microsoft YaHei",sans-serif;color:var(--text);font-
 .col-right{flex:0 0 31%;display:flex;flex-direction:column;gap:8px;min-height:0;overflow-y:auto;min-width:300px}
 
 .panel{background:var(--panel);border:1px solid var(--edge);border-radius:9px;padding:10px;display:flex;flex-direction:column;min-height:0}
-.panel h3{font-size:12px;font-weight:700;letter-spacing:.12em;color:var(--faint);margin-bottom:8px;flex:0 0 auto}
-.grow{flex:1 1 auto;min-height:110px;overflow-y:auto}
+.panel h3{font-size:14px;font-weight:700;letter-spacing:.12em;color:var(--faint);margin-bottom:8px;flex:0 0 auto}
+.grow{flex:1 1 auto;min-height:130px;overflow-y:auto}
 .llm-panel{flex:1 1 auto;min-height:0;overflow-y:auto}
 #toolCalls{overflow-y:auto}
 
 /* 对战卡 */
-.poke{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:7px;background:var(--panel2);margin-bottom:5px}
-.poke .name{font-weight:700;font-size:14px}
+.poke{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:7px;background:var(--panel2);margin-bottom:5px;flex-wrap:wrap}
+.poke .name{font-weight:700;font-size:16px}
 .poke .types{display:flex;gap:4px}
-.tchip{font-size:10px;font-weight:700;color:#fff;padding:2px 6px;border-radius:3px;text-shadow:0 1px 1px rgba(0,0,0,.4)}
+.tchip{font-size:12px;font-weight:700;color:#fff;padding:2px 6px;border-radius:3px;text-shadow:0 1px 1px rgba(0,0,0,.4)}
 .hpbar{flex:1;height:8px;border-radius:4px;background:rgba(0,0,0,.5);overflow:hidden;min-width:40px}
 .hpbar i{display:block;height:100%;border-radius:4px}
-.pct{font-family:Consolas,monospace;font-weight:700;font-size:13px;min-width:40px;text-align:right}
+.pct{font-family:Consolas,monospace;font-weight:700;font-size:15px;min-width:40px;text-align:right}
 .ko{opacity:.6;filter:grayscale(.5)}
-.boost{font-family:Consolas,monospace;font-size:11px;font-weight:700;padding:1px 5px;border-radius:3px}
+.boost{font-family:Consolas,monospace;font-size:12px;font-weight:700;padding:1px 5px;border-radius:3px}
 .boost.up{background:rgba(245,158,11,.18);color:var(--up)}
 .boost.down{background:rgba(96,165,250,.18);color:var(--down)}
 .moves{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px}
-.mv{font-size:11px;padding:2px 6px;border-radius:4px;background:rgba(0,0,0,.25);display:inline-flex;align-items:center;gap:4px}
+.mv{font-size:12px;padding:2px 6px;border-radius:4px;background:rgba(0,0,0,.25);display:inline-flex;align-items:center;gap:4px}
 .mv .t{width:9px;height:9px;border-radius:50%;display:inline-block}
 .mv .pp{color:var(--faint);font-family:Consolas,monospace}
-.st{font-size:10px;font-weight:700;color:#fff;padding:2px 5px;border-radius:3px}
-.row-label{font-size:11px;color:var(--faint);letter-spacing:.1em;margin:8px 0 4px;font-weight:700}
+.st{font-size:12px;font-weight:700;color:#fff;padding:2px 5px;border-radius:3px}
+.row-label{font-size:12px;color:var(--faint);letter-spacing:.1em;margin:8px 0 4px;font-weight:700}
 
 /* 战报 */
-.hist{font-family:Consolas,"Microsoft YaHei",monospace;font-size:12px;line-height:1.6;white-space:pre-wrap;color:var(--dim)}
+.hist{font-family:Consolas,"Microsoft YaHei",monospace;font-size:14px;line-height:1.6;white-space:pre-wrap;color:var(--dim)}
 .hist .hl{color:var(--text)}
 
 /* LLM 交互 */
 .llm .kv{display:flex;gap:8px;margin-bottom:5px;align-items:flex-start}
-.llm .kv .k{flex:0 0 84px;color:var(--faint);font-size:11px;letter-spacing:.05em;padding-top:1px}
-.llm .kv .v{flex:1;font-family:Consolas,monospace;font-size:12px;word-break:break-all}
+.llm .kv .k{flex:0 0 84px;color:var(--faint);font-size:12px;letter-spacing:.05em;padding-top:1px}
+.llm .kv .v{flex:1;font-family:Consolas,monospace;font-size:14px;word-break:break-all}
 .llm .kv .v.json{color:#a5d6ff}
-.llm pre{font-family:Consolas,"Microsoft YaHei",monospace;font-size:11px;line-height:1.5;color:var(--dim);white-space:pre-wrap;word-break:break-all;background:var(--panel2);border-radius:6px;padding:8px;max-height:200px;overflow-y:auto}
+.llm pre{font-family:Consolas,"Microsoft YaHei",monospace;font-size:12px;line-height:1.5;color:var(--dim);white-space:pre-wrap;word-break:break-all;background:var(--panel2);border-radius:6px;padding:8px;max-height:200px;overflow-y:auto}
 .toolcall{background:rgba(245,158,11,.06);border-left:2px solid var(--up);padding:6px 8px;border-radius:4px;margin-bottom:5px}
-.toolcall .fn{color:var(--up);font-weight:700;font-size:12px}
-.badge{font-size:10px;padding:1px 6px;border-radius:3px;font-weight:700}
+.toolcall .fn{color:var(--up);font-weight:700;font-size:14px}
+.badge{font-size:12px;padding:1px 6px;border-radius:3px;font-weight:700}
 .badge.fb{background:rgba(248,113,113,.2);color:#fca5a5}
 .badge.ok{background:rgba(74,222,128,.15);color:#86efac}
 .tokgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:4px}
 .tok{background:var(--panel2);border-radius:6px;padding:6px;text-align:center}
-.tok .n{font-family:Consolas,monospace;font-size:16px;font-weight:700}
-.tok .l{font-size:10px;color:var(--faint);margin-top:2px}
+.tok .n{font-family:Consolas,monospace;font-size:18px;font-weight:700}
+.tok .l{font-size:12px;color:var(--faint);margin-top:2px}
 
 /* 实时进行中（LLM 思考中） */
 #liveBox{border:1px dashed rgba(74,222,128,.35);border-radius:7px;padding:7px 8px;margin-bottom:8px;background:rgba(74,222,128,.05)}
-#liveTimer{font-family:Consolas,monospace;font-weight:700;color:#86efac;font-size:14px}
+#liveTimer{font-family:Consolas,monospace;font-weight:700;color:#86efac;font-size:16px}
 #liveTools{max-height:150px;overflow-y:auto}
 .toolcall.live{background:rgba(74,222,128,.06);border-left-color:#86efac;animation:liveIn .25s ease}
 @keyframes liveIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
@@ -177,7 +177,7 @@ function renderActive(el, p, isMe){
 }
 
 function renderBench(el, bench){
-  if(!bench||!bench.length){ el.innerHTML='<div style="color:var(--faint);font-size:12px">无</div>'; return; }
+  if(!bench||!bench.length){ el.innerHTML='<div style="color:var(--faint);font-size:14px">无</div>'; return; }
   el.innerHTML=bench.map(function(b){
     return '<div class="poke'+(b.ko?' ko':'')+'">'+
       '<span class="name">'+esc(b.name)+'</span>'+
@@ -206,7 +206,7 @@ function renderBattle(st){
   // 对手后备：用 oppTeam 展示详情（HP%/状态/KO/未亮相），跳过 slot 0（场上已在 oppActive 展示）
   var ob=document.getElementById('oppBench');
   var oppTeam=(st.oppTeam||[]).slice(1, 6);
-  ob.innerHTML='<div style="color:var(--dim);font-size:12px;margin-bottom:4px">剩余 '+(st.oppRemaining!=null?st.oppRemaining:'?')+' 只</div>'+
+  ob.innerHTML='<div style="color:var(--dim);font-size:14px;margin-bottom:4px">剩余 '+(st.oppRemaining!=null?st.oppRemaining:'?')+' 只</div>'+
     oppTeam.map(function(b){
       if(b.ko) return '<div class="poke ko"><span class="name">'+esc(b.name||'???')+'</span><span class="pct" style="color:var(--faint)">KO</span></div>';
       if(b.revealed) return '<div class="poke"><span class="name">'+esc(b.name)+'</span>'+statusChip(b.status)+hpBarHtml(b.hpPct||0)+'</div>';
@@ -248,8 +248,8 @@ function renderLLM(d){
     d.toolLog.forEach(function(round){
       round.calls.forEach(function(c){
         html+='<div class="toolcall"><div class="fn">'+esc(c.name)+'</div>'+
-          '<div style="font-size:11px;color:var(--dim)">args: '+esc(JSON.stringify(c.args))+'</div>'+
-          '<div style="font-size:11px;color:var(--dim)">→ '+esc(JSON.stringify(c.result))+'</div></div>';
+          '<div style="font-size:12px;color:var(--dim)">args: '+esc(JSON.stringify(c.args))+'</div>'+
+          '<div style="font-size:12px;color:var(--dim)">→ '+esc(JSON.stringify(c.result))+'</div></div>';
       });
     });
     tc.innerHTML=html;
@@ -336,7 +336,7 @@ function renderProgress(d){
     var html='';
     (d.calls||[]).forEach(function(c){
       html+='<div class="toolcall live"><div class="fn">'+esc(c.name)+'</div>'+
-        '<div style="font-size:11px;color:var(--dim)">args: '+esc(JSON.stringify(c.args))+'</div></div>';
+        '<div style="font-size:12px;color:var(--dim)">args: '+esc(JSON.stringify(c.args))+'</div></div>';
     });
     if(html){
       var lt=document.getElementById('liveTools');
