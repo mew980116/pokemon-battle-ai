@@ -36,10 +36,11 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.3.45';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.3.46';   // tool 分支版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（tool 分支：思考 + tool，强度 low）====
-var MODEL = 'deepseek-v4-flash';
+// 对战主脑用 v4-pro（闭卷深想强，决策更深）；一键回 flash：POKELLMON_MODEL=deepseek-v4-flash
+var MODEL = process.env.POKELLMON_MODEL || 'deepseek-v4-pro';
 var THINKING_ENABLED = true;            // 思考模式（非思考拉垮且不调 tool）
 var REASONING_EFFORT = 'low';           // 思考强度 low（high 太慢，先试 low）
 var MAX_TOKENS = null;                  // 不限制输出 token（思考链 + 最终答案）
