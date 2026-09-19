@@ -150,6 +150,7 @@
   - 规则来源：@smogon/calc `mechanics/util.ts` getMoveEffectiveness（Freeze-Dry 对 Water→2；Flying Press 额外乘 Flying 倍率）+ `mechanics/gen789.ts:420`（Thousand Arrows 整体 0→1）。PO 数据里这 3 招都有（另 Sky Drop 是「对飞行系无法使用」不是倍率问题；Nihil Light 是 Gen9 新招 PO 无）。
   - 修复方案（改 `calcOneLeg` 的 typeMult 段，约 15 行）：逐属性算 eff 时 `Freeze-Dry && Water → 2`；`Flying Press` 再乘 `CHART[Flying][defType]`；乘法累加完后 `if (mvName === 'Thousand Arrows' && typeMult === 0) typeMult = 1`。注意特判靠招式英文名（`mv.name`），需在 calc_damage 描述里注明「用 name 传招式才能识别特殊招式」。
   - 验证：临时脚本 `po-pokellmon-tool/tmp-check-special.js`（已删，修复时重建即可，模式同 test-calc-compare.js）；修完把这几条用例并入 test-calc-compare.js。
+  - **附带同源问题（同一轮一起改）**：PO 的 `po-data/moves/8G/power.txt` 用 **1 作哨兵值**表示「威力不固定」——共 48 招（OHKO / 固定伤害 / 按体重或 HP 计算，如 Guillotine、Horn Drill、Fissure、Seismic Toss、Night Shade、Super Fang、Flail、Reversal、Counter、Mirror Coat、Spit Up、Wring Out、Crush Grip…）。这些招 `get_move_info` 会报 `Power:1`（误导），按 `name` 传进 `calc_damage` 也会按 1 算。改成 `power: null` + 标 `variable_power: true` 并附一句说明（这类招本就无法用固定威力算）。
 
 - [x] **calc_damage/calc_stats 支持形态宝可梦（forme≠0）**（已修 0.3.41）：`resolvePokemonInput` 用 `POKEMON.byName[name.toLowerCase()]` 反查，`buildPokemon` 改为收录基础形态 + 合法形态（按 pokemons.txt 的 tag 排除 Mega 'M' / 极巨化 'G'），key 用 `num:forme`（基础形态仍 `num` 兼容），形态缺 type1 时继承基础形态。现已支持 Rotom-Wash / Landorus-Therian / Deoxys-Attack / Giratina-Origin / 洛托姆各形态等（真实种族值）。
 
