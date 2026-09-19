@@ -19,13 +19,19 @@
 //      /eval battle.data.team(battle.opp).poke(0).item   → 对手道具（PO 客户端是否直接可见）
 //      /eval battle.data.field.zone(battle.opp,0)       → 对手场地陷阱
 //
-// 自检：贴好后开一局，只要看到 [PROBE] === onOfferChoice (heartbeat) === 就说明绑定成功。
+// 自检：贴好后开一局，只要看到 [PROBE #n] === onOfferChoice (heartbeat) === 就说明绑定成功。
+// 注意：每行都带自增序号 #n —— PO 的文本控件会折叠「连续完全相同」的行（复制粘贴时最容易丢重复行），
+//       有了序号每行都唯一，既不会丢、也能数出回调真实触发了几次。
 // =====================================================================
 
+// 每条都带自增序号：PO 的文本控件会把**连续完全相同**的行折叠（粘贴时尤其容易丢），
+// 加上 #N 后每行都唯一 → 不会丢，也能数出回调真实触发了几次。
+var pProbeSeq = 0;
 function pProbe() {
     var a = [];
     for (var i = 0; i < arguments.length; i++) a.push(String(arguments[i]));
-    print('[PROBE] ' + a.join(' '));
+    pProbeSeq++;
+    print('[PROBE #' + pProbeSeq + '] ' + a.join(' '));
 }
 
 function pProbeSpot(spot) {
