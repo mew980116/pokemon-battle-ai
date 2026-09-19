@@ -319,4 +319,15 @@ const D = fsLeg({ from_state: 'me' }, { from_state: 'opp' }, 'Stored Power', nul
 const dOk = !!(D.error && D.error.indexOf('from_state needs the live battle state') >= 0);
 if (!dOk) fdiff++;
 console.log('[' + (dOk ? 'OK  ' : 'DIFF') + '] 无 state 时 -> ' + D.error);
-console.log('from_state：' + (4 - fdiff) + '/4 通过');
+// 取值优先级：系统读得到的以系统为准（并标注 OVERRIDES），读不到的保留 LLM 手填
+const E = fsLeg({ from_state: 'me', ev: [0, 0, 0, 0, 0, 0], boosts: { atk: 6 } }, { from_state: 'opp' }, 'Stored Power', fakeState);
+const eOk = E.detail.inputs_used.attacker_src.ev.indexOf('OVERRIDES') >= 0 && E.detail.inputs_used.attacker_src.boosts.indexOf('OVERRIDES') >= 0 && E.detail.power === 140;
+if (!eOk) fdiff++;
+console.log('[' + (eOk ? 'OK  ' : 'DIFF') + '] 我方手填错值 -> 系统覆盖并标注：ev=' + E.detail.inputs_used.attacker_src.ev + ' | boosts=' + E.detail.inputs_used.attacker_src.boosts);
+const F = fsLeg({ from_state: 'me' }, { from_state: 'opp', ev: [252, 0, 252, 0, 4, 0], nature: 'Bold', ability: 'Unaware' }, 'Stored Power', fakeState);
+const fOk = F.detail.inputs_used.defender_src.ev === 'your input (state cannot read opponent EVs)' &&
+    F.detail.inputs_used.defender_src.nature === 'your input (state cannot read opponent nature)' &&
+    F.detail.inputs_used.defender_src.ability === 'your input (no confirmed ability in state)';
+if (!fOk) fdiff++;
+console.log('[' + (fOk ? 'OK  ' : 'DIFF') + '] 对手手填 ev/nature/ability -> 保留：' + JSON.stringify({ ev: F.detail.inputs_used.defender_src.ev, nature: F.detail.inputs_used.defender_src.nature, ability: F.detail.inputs_used.defender_src.ability }));
+console.log('from_state：' + (6 - fdiff) + '/6 通过');

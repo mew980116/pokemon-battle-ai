@@ -189,7 +189,7 @@ var TOOL_DEFS = [
                                     description: 'Attacking pokemon. Either give its name/number, or give explicit base stats.',
                                     properties: {
                                         poke: { type: 'string', description: 'Pokemon name (English or Chinese) or Pokedex number, e.g. "Garchomp" or "445"' },
-                                        from_state: { type: 'string', enum: ['me', 'opp'], description: 'RECOMMENDED: take this side straight from the live battle state instead of typing the numbers. "me" = my active pokemon (level/EV/IV/nature + boosts/item/ability/HP% read from the battle), "opp" = the opponent active (boosts/HP%/status + its revealed item and confirmed ability only — EV/nature stay unknown). Anything you also pass explicitly overrides the state value. The result echoes exactly what was used in detail.inputs_used.' },
+                                        from_state: { type: 'string', enum: ['me', 'opp'], description: 'RECOMMENDED: take this side straight from the live battle state instead of typing the numbers. "me" = my active pokemon (level/EV/IV/nature/boosts/item/ability/HP%), "opp" = the opponent active (boosts/HP%/status + its revealed item and log-confirmed ability). PRIORITY RULE: values the state KNOWS always win — if yours differs, detail.inputs_used marks it "OVERRIDES your value"; values the state CANNOT know (opponent EV/IV/nature/level, unresolved ability/item) keep whatever you pass, so you may hand-fill an opponent spread you deduced from damage rolls.' },
                                         level: { type: 'integer', description: 'Level, default 100' },
                                         ev: { type: 'array', items: { type: 'number' }, description: 'EVs [HP,Atk,Def,SpA,SpD,Spe], default all 0' },
                                         iv: { type: 'array', items: { type: 'number' }, description: 'IVs [HP,Atk,Def,SpA,SpD,Spe], default all 31' },
@@ -212,7 +212,7 @@ var TOOL_DEFS = [
                                     description: 'Defending pokemon, same structure as attacker.',
                                     properties: {
                                         poke: { type: 'string', description: 'Pokemon name (English or Chinese) or Pokedex number' },
-                                        from_state: { type: 'string', enum: ['me', 'opp'], description: 'RECOMMENDED: take this side straight from the live battle state. "me" = my active pokemon (full data: level/EV/IV/nature/boosts/item/ability/HP%), "opp" = the opponent active (only what has been revealed: boosts/HP%/status/item/confirmed ability). Explicitly passed fields override the state value. See detail.inputs_used for what was actually used.' },
+                                        from_state: { type: 'string', enum: ['me', 'opp'], description: 'RECOMMENDED: take this side straight from the live battle state. "me" = my active pokemon (full data: level/EV/IV/nature/boosts/item/ability/HP%), "opp" = the opponent active (only what has been revealed: boosts/HP%/status/item/confirmed ability). Same PRIORITY RULE as the attacker: state-known values win (marked "OVERRIDES your value"); state-unknown values (opponent EV/IV/nature/level) keep your input. See detail.inputs_used.' },
                                         level: { type: 'integer', description: 'Level, default 100' },
                                         ev: { type: 'array', items: { type: 'number' }, description: 'EVs [HP,Atk,Def,SpA,SpD,Spe], default all 0' },
                                         iv: { type: 'array', items: { type: 'number' }, description: 'IVs [HP,Atk,Def,SpA,SpD,Spe], default all 31' },
@@ -951,42 +951,69 @@ function resolveStateSide(v, dflt) {
     return dflt;
 }
 
+// 取值优先级规则（0.4.5 起）：
+//   系统**读得到**的字段 → 以系统为准（若覆盖了 LLM 手填的值，会在 inputs_used 里注明 OVERRIDES）；
+//   系统**读不到**的字段（对手的 EV/IV/性格/等级、未解析出特性/道具）→ 保留 LLM 手填的值（LLM 可能从伤害反推出来）。
+function takeFromState(out, src, key, val, fromState) {
+    if (val === undefined || val === null) return;
+    if (out[key] !== undefined && JSON.stringify(out[key]) !== JSON.stringify(val)) {
+        src[key] = fromState + ' (OVERRIDES your value ' + JSON.stringify(out[key]) + ')';
+    } else {
+        src[key] = fromState;
+    }
+    out[key] = val;
+}
+// LLM 手填了、而系统读不到的字段 → 记一笔来源，明确告诉它「这是你自己填的，系统没覆盖」
+function keepExplicit(out, src, key, note) {
+    if (out[key] !== undefined) src[key] = 'your input' + (note ? ' (' + note + ')' : '');
+}
+
 function applyFromState(state, spec, side) {
     var out = {}, src = {};
     for (var k in spec) { if (k !== 'from_state') out[k] = spec[k]; }
     if (side === 'opp') {
         var o = state.opp || {};
-        if (out.poke === undefined && o.name) { out.poke = o.name; src.poke = 'state.opp.name'; }
-        if (out.boosts === undefined && o.boosts) { out.boosts = parseStateBoosts(o.boosts); src.boosts = 'state.opp.boosts'; }
-        if (out.hpPct === undefined && o.hpPct !== undefined && o.hpPct !== null) { out.hpPct = o.hpPct; src.hpPct = 'state.opp.hpPct'; }
-        if (out.status === undefined && o.status && STATE_STATUS_MAP[o.status]) { out.status = STATE_STATUS_MAP[o.status]; src.status = 'state.opp.status'; }
-        if (out.ability === undefined && o.abilityInferred) { out.ability = o.abilityInferred; src.ability = 'state.opp.abilityInferred (proved by log)'; }
-        if (out.item === undefined && o.itemInferred) { out.item = o.itemInferred; src.item = 'state.opp.itemInferred (revealed)'; }
-        // 没解析出来就要说清楚「没应用」，否则 LLM 会以为 from_state 已经把它自己推断的特性带进去了
+        takeFromState(out, src, 'poke', o.name, 'state.opp.name');
+        takeFromState(out, src, 'boosts', o.boosts ? parseStateBoosts(o.boosts) : null, 'state.opp.boosts');
+        if (o.hpPct !== undefined && o.hpPct !== null) takeFromState(out, src, 'hpPct', o.hpPct, 'state.opp.hpPct');
+        if (o.status && STATE_STATUS_MAP[o.status]) takeFromState(out, src, 'status', STATE_STATUS_MAP[o.status], 'state.opp.status');
+        if (o.abilityInferred) takeFromState(out, src, 'ability', o.abilityInferred, 'state.opp.abilityInferred (proved by log)');
+        if (o.itemInferred) takeFromState(out, src, 'item', o.itemInferred, 'state.opp.itemInferred (revealed)');
+        // 系统读不到的：说明「没应用」或「用了你填的」
         if (out.ability === undefined) {
             var pa = o.possibleAbilities || [];
-            src.ability = 'NOT applied — still unresolved' + (pa.length ? (', candidates: ' + pa.join(' / ') + '. Pass `ability` explicitly if you have narrowed it down.') : '. Pass `ability` explicitly if you know it.');
+            src.ability = 'NOT applied — still unresolved' + (pa.length
+                ? ', candidates: ' + pa.join(' / ') + '. Pass `ability` explicitly if you have narrowed it down.'
+                : '. Pass `ability` explicitly if you know it.');
+        } else if (!o.abilityInferred) {
+            src.ability = 'your input (no confirmed ability in state)';
         }
         if (out.item === undefined) src.item = 'NOT applied — item not revealed yet (pass `item` explicitly if known)';
-        src.ev = 'unknown for opponent (assumed 0/neutral)';
-        src.nature = 'unknown for opponent (assumed neutral)';
+        else if (!o.itemInferred) src.item = 'your input (item not revealed yet)';
+        // 对手的 EV/IV/性格/等级：系统读不到 → 保留 LLM 手填（常用于「从伤害反推配置」）
+        keepExplicit(out, src, 'ev', 'state cannot read opponent EVs');
+        keepExplicit(out, src, 'iv', 'state cannot read opponent IVs');
+        keepExplicit(out, src, 'nature', 'state cannot read opponent nature');
+        keepExplicit(out, src, 'level', 'state cannot read opponent level');
+        if (out.ev === undefined) src.ev = 'unknown for opponent (assumed 0) — pass `ev` if you deduced the spread';
+        if (out.nature === undefined) src.nature = 'unknown for opponent (assumed neutral) — pass `nature` if you deduced it';
     } else {
         var me = state.me || {};
         var ms = null, arr = state.myStats || [];
         for (var i = 0; i < arr.length; i++) { if (String(arr[i].slot) === '0') ms = arr[i]; }
         if (!ms && arr.length) ms = arr[0];
-        if (out.poke === undefined && me.name) { out.poke = me.name; src.poke = 'state.me.name'; }
+        takeFromState(out, src, 'poke', me.name, 'state.me.name');
         if (ms) {
-            if (out.level === undefined && ms.level) { out.level = ms.level; src.level = 'state.myStats.level'; }
-            if (out.ev === undefined && ms.ev) { out.ev = ms.ev; src.ev = 'state.myStats.ev'; }
-            if (out.iv === undefined && ms.iv) { out.iv = ms.iv; src.iv = 'state.myStats.iv'; }
-            if (out.nature === undefined && ms.nature !== undefined && ms.nature !== null) { out.nature = ms.nature; src.nature = 'state.myStats.nature'; }
+            if (ms.level) takeFromState(out, src, 'level', ms.level, 'state.myStats.level');
+            if (ms.ev) takeFromState(out, src, 'ev', ms.ev, 'state.myStats.ev');
+            if (ms.iv) takeFromState(out, src, 'iv', ms.iv, 'state.myStats.iv');
+            if (ms.nature !== undefined && ms.nature !== null) takeFromState(out, src, 'nature', ms.nature, 'state.myStats.nature');
         }
-        if (out.boosts === undefined && me.boosts) { out.boosts = parseStateBoosts(me.boosts); src.boosts = 'state.me.boosts'; }
-        if (out.hpPct === undefined && me.hpPct !== undefined && me.hpPct !== null) { out.hpPct = me.hpPct; src.hpPct = 'state.me.hpPct'; }
-        if (out.status === undefined && me.status && STATE_STATUS_MAP[me.status]) { out.status = STATE_STATUS_MAP[me.status]; src.status = 'state.me.status'; }
-        if (out.ability === undefined && me.ability) { out.ability = me.ability; src.ability = 'state.me.ability'; }
-        if (out.item === undefined && me.item) { out.item = me.item; src.item = 'state.me.item'; }
+        takeFromState(out, src, 'boosts', me.boosts ? parseStateBoosts(me.boosts) : null, 'state.me.boosts');
+        if (me.hpPct !== undefined && me.hpPct !== null) takeFromState(out, src, 'hpPct', me.hpPct, 'state.me.hpPct');
+        if (me.status && STATE_STATUS_MAP[me.status]) takeFromState(out, src, 'status', STATE_STATUS_MAP[me.status], 'state.me.status');
+        takeFromState(out, src, 'ability', me.ability, 'state.me.ability');
+        takeFromState(out, src, 'item', me.item, 'state.me.item');
         if (out.ability === undefined) src.ability = 'NOT applied — state has no ability for my active pokemon';
         if (out.item === undefined) src.item = 'NOT applied — state has no item (none held?)';
     }
