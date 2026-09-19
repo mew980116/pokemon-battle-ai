@@ -252,7 +252,7 @@
       "name": "Quick Draw",
       "name_zh": "速击",
       "desc_zh": "有时能比对手先出手（30% 概率先制）。",
-      "desc_en": "If a Pokémon with this ability is the first in your belt, doubles the chance of a wild encounter.",
+      "desc_en": "This Pokemon has a 30% chance to move first in its priority bracket.",
       "has_msg": false
     },
     "36": {
@@ -357,7 +357,7 @@
       "name": "Unseen Fist",
       "name_zh": "无形拳",
       "desc_zh": "接触类招式能无视守住/看穿。",
-      "desc_en": "Allows a Pokémon with this ability to always run from wild battles.",
+      "desc_en": "Contact moves used by this Pokemon ignore the effects of protection moves (Protect, Detect, King's Shield, etc.).",
       "has_msg": false
     },
     "51": {
@@ -833,7 +833,7 @@
       "name": "Curious Medicine",
       "name_zh": "无效特性",
       "desc_zh": "出场时，我方的能力变化会复原。",
-      "desc_en": "Causes a Pokémon with this ability to have a chance to collect Honey after a battle.",
+      "desc_en": "When this Pokemon enters the field, the stat stages of its allies are reset.",
       "has_msg": false
     },
     "119": {
@@ -923,15 +923,15 @@
     "131": {
       "name": "Transistor",
       "name_zh": "电晶体",
-      "desc_zh": "电属性招式威力提高 30%。",
-      "desc_en": "Each turn, has a 30% chance to heal any major status condition from partners adjacent to a Pokémon with this ability.",
+      "desc_zh": "电属性招式威力提高 50%。",
+      "desc_en": "Powers up Electric-type moves by 50%.",
       "has_msg": false
     },
     "132": {
       "name": "Dragon's Maw",
       "name_zh": "龙颚",
-      "desc_zh": "龙属性招式威力提高 30%。",
-      "desc_en": "Reduces by 25% damage that partners of a Pokémon with this ability receive.",
+      "desc_zh": "龙属性招式威力提高 50%。",
+      "desc_en": "Powers up Dragon-type moves by 50%.",
       "has_msg": false
     },
     "133": {
@@ -1152,7 +1152,7 @@
       "name": "AsOne",
       "name_zh": "人马一体",
       "desc_zh": "对手不能吃树果；击倒对手后攻击或特攻升（视合体形态）。",
-      "desc_en": "Prevents opponent abilities from hindering moves used by a Pokémon with this ability.",
+      "desc_en": "Combines Unnerve (opponents cannot eat Berries) with Chilling Neigh / Grim Neigh (raises Attack / Special Attack after knocking out a Pokemon).",
       "has_msg": false
     },
     "164": {
@@ -1590,14 +1590,14 @@
     "224": {
       "name": "Water Bubble",
       "name_zh": "水泡",
-      "desc_zh": "降低与自己相对的火属性招式的威力，不会灼伤。",
-      "desc_en": "Halves the damage a Pokémon with this ability receives from Fire moves and prevents the Pokémon from being Burned.",
+      "desc_zh": "水属性招式威力加倍；受到的（对面）火属性招式伤害减半，且不会灼伤。",
+      "desc_en": "Doubles the power of this Pokemon's Water-type moves; halves the damage it takes from Fire-type moves and prevents it from being burned.",
       "has_msg": false
     },
     "225": {
       "name": "Steelworker",
       "name_zh": "钢能力者",
-      "desc_zh": "钢属性的招式威力会提高。",
+      "desc_zh": "钢属性招式威力提高 50%。",
       "desc_en": "Increases the damage of Steel-type moves by 50%.",
       "has_msg": false
     },

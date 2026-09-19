@@ -242,3 +242,48 @@ const hpOk = hpLeg.detail.defender_max_hp === 400;
 if (!hpOk) ddiff++;
 console.log('[' + (hpOk ? 'OK  ' : 'DIFF') + '] defender.hp 直传=400 -> defender_max_hp=' + hpLeg.detail.defender_max_hp + ' percent=' + hpLeg.percent_min + '-' + hpLeg.percent_max);
 console.log('直接能力值路径：' + (directCases.length + 1 - ddiff) + '/' + (directCases.length + 1) + ' 一致');
+
+// ===== 护栏检查（护栏只影响 notes，不影响伤害）=====
+// 背景：0.4.0 的 psAbilityExists 用 SMOGON.ABILITIES（其实是数组）按名字索引，永远 miss
+//      → 对**每个**特性/道具都误报「拼错、未生效」，battle71 里 LLM 因此不信任 Unaware/Transistor。
+console.log('\n--- 护栏检查 ---');
+let gdiff = 0;
+const gBase = { poke: 'Garchomp', ev: [0, 252, 0, 0, 0, 252], nature: 'Jolly' };
+const gDef = { poke: 'Blissey', ev: [252, 0, 252, 0, 0, 0], nature: 'Bold' };
+for (const ab of ['Unaware', 'Transistor', 'Adaptability', 'Huge Power', 'Multiscale']) {
+  const r = tools.runTool('calc_damage', { legs: [{ attacker: Object.assign({}, gBase, { ability: ab }), defender: gDef, move: { name: 'Earthquake' } }] }, {}).legs[0];
+  const bad = r.notes.some(n => n.indexOf('not recognised') >= 0);
+  if (bad) gdiff++;
+  console.log('[' + (bad ? 'DIFF' : 'OK  ') + '] 合法特性 ' + ab + ' 不应报拼错');
+}
+const typo = tools.runTool('calc_damage', { legs: [{ attacker: Object.assign({}, gBase, { ability: 'Huge Powr' }), defender: gDef, move: { name: 'Earthquake' } }] }, {}).legs[0];
+const typoOk = typo.notes.some(n => n.indexOf('not recognised') >= 0);
+if (!typoOk) gdiff++;
+console.log('[' + (typoOk ? 'OK  ' : 'DIFF') + '] 拼错特性名应报「not recognised」');
+const spNoBoost = tools.runTool('calc_damage', { legs: [{ attacker: { poke: 'Mew', ev: [252, 0, 4, 0, 252, 0], nature: 'Calm' }, defender: { poke: 'Clefable', ev: [252, 0, 252, 0, 4, 0], nature: 'Bold' }, move: { name: 'Stored Power' } }] }, {}).legs[0];
+const spOk = spNoBoost.detail.power === 20 && spNoBoost.notes.some(n => n.indexOf('scales its base power') >= 0);
+if (!spOk) gdiff++;
+console.log('[' + (spOk ? 'OK  ' : 'DIFF') + '] Stored Power 无 boosts 应提示（BP=20）');
+const spPw = tools.runTool('calc_damage', { legs: [{ attacker: { poke: 'Mew', ev: [252, 0, 4, 0, 252, 0], nature: 'Calm' }, defender: { poke: 'Clefable', ev: [252, 0, 252, 0, 4, 0], nature: 'Bold' }, move: { name: 'Stored Power', power: 140, category: 'Special', type: 'Psychic' } }] }, {}).legs[0];
+const pwOk = spPw.notes.some(n => n.indexOf('was IGNORED') >= 0);
+if (!pwOk) gdiff++;
+console.log('[' + (pwOk ? 'OK  ' : 'DIFF') + '] name+power 不一致应提示 power 被忽略');
+console.log('护栏检查：' + (8 - gdiff) + '/8 通过');
+
+// ===== 特性描述数据（Gen8 口径）=====
+console.log('\n--- 特性描述（Gen8 数值口径）---');
+let adiff = 0;
+const expectDesc = { Transistor: '50%', "Dragon's Maw": '50%', Steelworker: '50%', 'Water Bubble': '加倍' };
+for (const nm in expectDesc) {
+  const a = tools.runTool('get_ability_info', { ability: nm }, {});
+  const ok = String(a.desc || '').indexOf(expectDesc[nm]) >= 0;
+  if (!ok) adiff++;
+  console.log('[' + (ok ? 'OK  ' : 'DIFF') + '] ' + nm + ' zh desc 应含「' + expectDesc[nm] + '」-> ' + a.desc);
+}
+for (const [nm, num] of [['Transistor', 131], ["Dragon's Maw", 132], ['Unseen Fist', 50], ['Water Bubble', 224]]) {
+  const a = tools.runTool('get_ability_info', { ability: nm }, {});
+  const ok = a.desc_en && !/wild encounter|collect Honey|partners adjacent|wild battles|Reduces by 25%/.test(a.desc_en);
+  if (!ok) adiff++;
+  console.log('[' + (ok ? 'OK  ' : 'DIFF') + '] ' + nm + ' desc_en 不应是串行的别的特性文案 -> ' + String(a.desc_en).slice(0, 70));
+}
+console.log('特性描述：' + (8 - adiff) + '/8 通过');

@@ -405,13 +405,28 @@ function buildAbilities() {
     const descZhRaw = fs.readFileSync(path.join(DATA, 'abilities', 'ability_desc.txt'), 'utf16le').replace(/^\uFEFF/, '');
     const descZhLines = descZhRaw.split('\n');
     // 覆盖 PO desc 错位（Gen8 删特性导致编号错位，历史遗留没改；按官方/PS/神奇宝贝百科修正）
+    // 注意数值口径：本项目是 Gen8 单打，**必须用 Gen8 数值**（PO 的 zh 描述来自较新版本，把
+    // Transistor/Dragon's Maw 写成了 Gen9 的 30%，实际 Gen8 是 50% —— battle71 里 LLM 就照着
+    // 我们给错的「30%」自己推出 1.3x，而计算器按 Gen8 的 1.5x 算，两边打架）。
     const DESC_OVERRIDE = {
         35: '有时能比对手先出手（30% 概率先制）。',
         50: '接触类招式能无视守住/看穿。',
         118: '出场时，我方的能力变化会复原。',
-        131: '电属性招式威力提高 30%。',
-        132: '龙属性招式威力提高 30%。',
-        163: '对手不能吃树果；击倒对手后攻击或特攻升（视合体形态）。'
+        131: '电属性招式威力提高 50%。',      // Gen8 = 1.5x（Gen9 才削到 1.3x）
+        132: '龙属性招式威力提高 50%。',      // Gen8 = 1.5x
+        163: '对手不能吃树果；击倒对手后攻击或特攻升（视合体形态）。',
+        224: '水属性招式威力加倍；受到的（对面）火属性招式伤害减半，且不会灼伤。',   // PO 只写了防御向，漏了攻击向 ×2
+        225: '钢属性招式威力提高 50%。'      // PO 中文描述没写数值
+    };
+    // 英文描述覆盖：ability_battledesc.txt 按编号取，PO 删特性后同样**整体错位**（实测 35/50/118/131/132/163 全串行）
+    const DESC_EN_OVERRIDE = {
+        35: 'This Pokemon has a 30% chance to move first in its priority bracket.',
+        50: 'Contact moves used by this Pokemon ignore the effects of protection moves (Protect, Detect, King\'s Shield, etc.).',
+        118: 'When this Pokemon enters the field, the stat stages of its allies are reset.',
+        131: 'Powers up Electric-type moves by 50%.',      // Gen8
+        132: 'Powers up Dragon-type moves by 50%.',        // Gen8
+        163: 'Combines Unnerve (opponents cannot eat Berries) with Chilling Neigh / Grim Neigh (raises Attack / Special Attack after knocking out a Pokemon).',
+        224: 'Doubles the power of this Pokemon\'s Water-type moves; halves the damage it takes from Fire-type moves and prevents it from being burned.'
     };
     // 手工补充的机制 tips（PO 数据缺失的机制细节）
     const DESC_TIPS = {
@@ -436,7 +451,7 @@ function buildAbilities() {
         if (idx < 0) continue;
         const num = parseInt(t.substring(0, idx), 10);
         const desc = t.substring(idx + 1).trim();
-        if (byNum[num]) byNum[num].desc_en = desc;
+        if (byNum[num]) byNum[num].desc_en = DESC_EN_OVERRIDE[num] || desc;
     }
 
     // 触发消息（ability_messages.txt）：特性英文名出现在消息文本里 → has_msg=true

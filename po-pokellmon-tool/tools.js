@@ -886,12 +886,15 @@ function modifierFieldsGiven(leg) {
     return given;
 }
 
-// 名称是否被官方计算器认识（拼错会静默不生效，所以显式提醒）
+// 名称是否被官方计算器认识（拼错会静默不生效，所以显式提醒）。
+// 注意：用 Gen8 dex 的 get(id)，不要用 SMOGON.ABILITIES / SMOGON.ITEMS —— 那两个是**数组**（key 是下标），
+// 直接按名字索引永远 miss（0.4.0 曾因此对每个特性/道具都误报「拼错、未生效」）。
+var GEN8DEX = SMOGON.Generations.get(PKLM_GEN);
 function psAbilityExists(name) {
-    try { return !!(SMOGON.ABILITIES && SMOGON.ABILITIES[SMOGON.toID(String(name))]); } catch (e) { return true; }
+    try { return !!GEN8DEX.abilities.get(SMOGON.toID(String(name))); } catch (e) { return true; }
 }
 function psItemExists(name) {
-    try { return !!(SMOGON.ITEMS && SMOGON.ITEMS[SMOGON.toID(String(name))]); } catch (e) { return true; }
+    try { return !!GEN8DEX.items.get(SMOGON.toID(String(name))); } catch (e) { return true; }
 }
 // 计算器 rawDesc 里「实际生效」的修正项（供 LLM 核对输入是否被识别）
 var RAWDESC_KEYS = ['attackerAbility', 'attackerItem', 'defenderAbility', 'defenderItem', 'weather', 'terrain', 'isReflect', 'isLightScreen', 'isAuroraVeil', 'isHelpingHand', 'isCritical', 'isBurned', 'attackBoost', 'defenseBoost', 'isSwitching'];
@@ -1109,6 +1112,21 @@ function calcOneLeg(leg, idx) {
         notes.push('no defender ability given — the calculator applied the species DEFAULT ability "' + applied.defenderAbility + '", which changed the damage; pass the real ability and recompute if it differs');
     }
 
+    // 招式同时给了 name 与 power：name 优先，power 会被忽略 —— 数值不同就提示，避免误以为手动指定生效
+    if (mv.name && leg.move.power !== undefined && leg.move.power !== null && Number(leg.move.power) !== mv.power) {
+        notes.push('move.power (' + leg.move.power + ') was IGNORED because `name` is given — base power comes from the dex (' + mv.power + ' BP). For boost-scaling moves (Stored Power / Power Trip) the BP is computed from `boosts`, so pass `boosts`, not `power`.');
+    }
+    // 按「能力等级计数」算威力的招式：没传任何 boosts 会被严重低估（Stored Power 无强化就只有 20 BP）
+    var BP_SCALING_SELF = { 'Stored Power': 1, 'Power Trip': 1 };
+    var BP_SCALING_TARGET = { 'Punishment': 1 };
+    if (mv.name && (BP_SCALING_SELF[mv.name] || BP_SCALING_TARGET[mv.name])) {
+        var bSide = BP_SCALING_SELF[mv.name] ? leg.attacker : leg.defender;
+        var anyBoost = false;
+        if (bSide && bSide.boosts) { for (var bk in bSide.boosts) { if (parseInt(bSide.boosts[bk], 10)) { anyBoost = true; break; } } }
+        if (!anyBoost) {
+            notes.push(mv.name + ' scales its base power with ' + (BP_SCALING_SELF[mv.name] ? 'YOUR' : "the TARGET's") + ' stat stages (20 + 20 per positive stage) and you passed NO boosts, so it is computed at 20 BP. Pass `boosts` (e.g. {"def":3,"spd":3}) to get the real power.');
+        }
+    }
     if (mv.hit_range) notes.push('multi-hit move (2-5 times); damage below is PER HIT — pass hits to total it');
     if (hits > 1) notes.push('this is the TOTAL of ' + hits + ' hits');
 
