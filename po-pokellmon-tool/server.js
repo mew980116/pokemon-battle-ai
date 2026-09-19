@@ -36,7 +36,7 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.3.63';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.3.64';   // tool 分支版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
 // 对战主脑用 v4-pro（闭卷深想强，决策更深）；一键回 flash：POKELLMON_MODEL=deepseek-v4-flash
@@ -375,7 +375,10 @@ function buildPrompt(state, notes) {
         var meItem = me.item ? 'Item:' + me.item + ',' : '';
         p += 'Your current pokemon:' + me.name + ',Type:' + (me.types || []).join('&') + ',HP:' + (me.hpPct || 0) + '%,' + meAbi + meItem + meStatus + meBoosts + '\n';
         if (me.fainted) {
-            p += 'NOTE: Your current pokemon has fainted. You need to switch in a replacement pokemon this turn.\n';
+            p += 'NOTE: Your current pokemon has fainted — you MUST pick a replacement: only the switch options are legal (the move entries listed above belong to the fainted pokemon and cannot be used). ' +
+                'Choose by the CURRENT threat, not by freshness: work out the opponent\'s most likely move right now (and whether it is Choice-locked into it), then send in the pokemon that (a) survives that hit and (b) can act meaningfully on the very next turn. ' +
+                'Do NOT just send out your freshest or still-unrevealed pokemon and then switch it out again on the next turn — that throws away a whole turn and gives the opponent a free hit on your switch-in. ' +
+                'Still call save_strategy for this decision.\n';
         }
     }
 

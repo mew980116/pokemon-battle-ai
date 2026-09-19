@@ -990,7 +990,11 @@ var KNOWLEDGE_ALIASES = {
     '天气': 'weather', '雨天': 'weather', '晴天': 'weather', '沙暴': 'weather', '冰雹': 'weather', '雪天': 'weather', 'rain': 'weather', 'sun': 'weather', 'sand': 'weather', 'sandstorm': 'weather', 'hail': 'weather', 'snow': 'weather', 'weather': 'weather',
     '场地': 'terrain', '电气场地': 'terrain', '青草场地': 'terrain', '薄雾场地': 'terrain', '精神场地': 'terrain', 'terrain': 'terrain', 'electric terrain': 'terrain', 'grassy terrain': 'terrain', 'misty terrain': 'terrain', 'psychic terrain': 'terrain',
     '地面': 'grounded', '接触地面': 'grounded', 'grounded': 'grounded', '地面上的宝可梦': 'grounded', '飞行': 'grounded', '浮游': 'grounded', 'levitate': 'grounded', 'ground': 'grounded',
-    '替身': 'substitute', 'substitute': 'substitute', 'sub': 'substitute'
+    '替身': 'substitute', 'substitute': 'substitute', 'sub': 'substitute',
+    '速度': 'speed_read', '速度线': 'speed_read', '速度判断': 'speed_read', '行动顺序': 'speed_read', '出手顺序': 'speed_read',
+    '先手': 'speed_read', '先制': 'speed_read', '优先度': 'speed_read', 'speed': 'speed_read', 'speed read': 'speed_read',
+    'turn order': 'speed_read', 'priority': 'speed_read', '鳃咬': 'speed_read', '电喙': 'speed_read',
+    'fishious rend': 'speed_read', 'bolt beak': 'speed_read'
 };
 
 var KNOWLEDGE = buildKnowledgeIndex();
