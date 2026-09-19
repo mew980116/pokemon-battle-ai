@@ -380,7 +380,24 @@ const fOk = F.detail.inputs_used.defender_src.ev === 'your input (state cannot r
     F.detail.inputs_used.defender_src.ability === 'your input (no confirmed ability in state)';
 if (!fOk) fdiff++;
 console.log('[' + (fOk ? 'OK  ' : 'DIFF') + '] 对手手填 ev/nature/ability -> 保留：' + JSON.stringify({ ev: F.detail.inputs_used.defender_src.ev, nature: F.detail.inputs_used.defender_src.nature, ability: F.detail.inputs_used.defender_src.ability }));
-console.log('from_state：' + (6 - fdiff) + '/6 通过');
+// 只有一侧写 from_state 时的行为（回归 battle91 T1/T2 的「自己打自己」：
+// 旧代码把**没写 from_state 的一侧默认成 me**，于是 LLM 写的 {attacker:{poke:'Tapu Bulu'}, defender:{from_state:'me'}}
+// 被改成「Scizor 打 Scizor」，对手的伤害算得面目全非）
+const K = fsLeg({ poke: 'Clefable', ev: [0, 252, 0, 0, 0, 252], nature: 'Adamant' }, { from_state: 'me' }, 'Wood Hammer', fakeState);
+const kOk = K.detail.inputs_used.attacker_asked === false &&
+    K.detail.inputs_used.attacker_src.poke === 'state.opp.name' &&          // 缺失的一侧取「对侧」，不是 me
+    K.detail.inputs_used.attacker_src.nature === 'your input (state cannot read opponent nature)' &&
+    K.detail.inputs_used.defender_src.poke === 'state.me.name';
+if (!kOk) fdiff++;
+console.log('[' + (kOk ? 'OK  ' : 'DIFF') + '] 只给防守方 from_state -> 攻击方取对侧（' + K.detail.inputs_used.attacker_side + '）' + K.min + '-' + K.max);
+const L = fsLeg({ from_state: 'me' }, { poke: 'Hydreigon', ev: [0, 0, 0, 252, 0, 252], nature: 'Timid' }, 'Shadow Ball', fakeState);
+const lOk = L.detail.inputs_used.defender_asked === false &&
+    L.detail.inputs_used.defender_src.poke === 'your input (kept: names a different pokemon)' &&
+    L.detail.inputs_used.defender_src.ability === undefined &&               // 没被套上场上这人的特性候选
+    L.detail.applied.defenderAbility === undefined;
+if (!lOk) fdiff++;
+console.log('[' + (lOk ? 'OK  ' : 'DIFF') + '] 只给攻击方 from_state -> 另一侧别的宝可梦不被 state 覆盖（' + L.detail.inputs_used.defender_src.poke + '）');
+console.log('from_state：' + (8 - fdiff) + '/8 通过');
 
 // ===== from_state 场下（bench）：'me:<slot>' / 'opp:<slot>' =====
 // 场下与场上的关键差别：① 没有能力等级（换上即清零）→ boosts 取 0

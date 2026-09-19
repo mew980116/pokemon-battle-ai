@@ -180,7 +180,7 @@ var TOOL_DEFS = [
         type: 'function',
         function: {
             name: 'calc_damage',
-            description: 'Compute the damage range of up to 10 attacker/defender/move combinations. Uses the official Pokemon Showdown calculator (@smogon/calc, Gen 8) internally, so abilities / items / weather / terrain / screens / status / criticals / stat-substitution moves / multi-hit / Fishious Rend doubling are all handled automatically — just name them. **PREFER `from_state`**: pass attacker.from_state="me" / defender.from_state="opp" and the battle state fills the numbers for you (my side: level/EV/IV/nature/boosts/item/ability/HP%; opponent: boosts/HP%/status + only its revealed item and log-confirmed ability) — far safer than typing them. `detail.inputs_used` echoes exactly which values were used and where each came from. Returns min/max damage, % of the defender max HP, a PS-style one-line summary (e.g. "252+ Atk Urshifu Wicked Blow (80 BP) vs. 252 HP / 252+ Def Corviknight: 153-180 (38.2 - 45%) -- guaranteed 3HKO"), a KO verdict against the defender CURRENT HP, and `detail.applied` listing which modifiers the calculator actually recognised. TWO WAYS to describe extra effects, NEVER both at once: (1) PREFERRED — name them (`attacker.ability` / `attacker.item` / `attacker.status` / `defender.ability` / `defender.item` / `defender.status` / `field.*`, all of which `from_state` fills for you); (2) fallback `extra` = a single manual final multiplier for something the calculator cannot express. Passing `extra` together with any modifier input returns an error. IMPORTANT: if you type the numbers yourself, always include ev + nature for both sides — when omitted the calculator falls back to 0 EV / neutral nature and flags `assumed: true` (a wrong default once made a 44% hit look like 13%).',
+            description: 'Compute the damage range of up to 10 attacker/defender/move combinations. Uses the official Pokemon Showdown calculator (@smogon/calc, Gen 8) internally, so abilities / items / weather / terrain / screens / status / criticals / stat-substitution moves / multi-hit / Fishious Rend doubling are all handled automatically — just name them. **PREFER `from_state`**: pass attacker.from_state="me" / defender.from_state="opp" and the battle state fills the numbers for you (my side: level/EV/IV/nature/boosts/item/ability/HP%; opponent: boosts/HP%/status + only its revealed item and log-confirmed ability) — far safer than typing them. `detail.inputs_used` echoes exactly which values were used and where each came from. If you use `from_state` on only ONE side, the OTHER side keeps the values you wrote yourself (it is never silently swapped to your own pokemon) and is only topped up where you left a field empty — still, writing it on both sides (e.g. `attacker.from_state:"opp"` + `defender.from_state:"me"` to calc the opponent hitting you) is the cleanest and safest. Returns min/max damage, % of the defender max HP, a PS-style one-line summary (e.g. "252+ Atk Urshifu Wicked Blow (80 BP) vs. 252 HP / 252+ Def Corviknight: 153-180 (38.2 - 45%) -- guaranteed 3HKO"), a KO verdict against the defender CURRENT HP, and `detail.applied` listing which modifiers the calculator actually recognised. TWO WAYS to describe extra effects, NEVER both at once: (1) PREFERRED — name them (`attacker.ability` / `attacker.item` / `attacker.status` / `defender.ability` / `defender.item` / `defender.status` / `field.*`, all of which `from_state` fills for you); (2) fallback `extra` = a single manual final multiplier for something the calculator cannot express. Passing `extra` together with any modifier input returns an error. IMPORTANT: if you type the numbers yourself, always include ev + nature for both sides — when omitted the calculator falls back to 0 EV / neutral nature and flags `assumed: true` (a wrong default once made a 44% hit look like 13%).',
             parameters: {
                 type: 'object',
                 properties: {
@@ -952,9 +952,11 @@ function parseStateBoosts(b) {
 }
 
 // from_state 取值：'me' / 'opp'（场上）或 'me:<slot>' / 'opp:<slot>'（场下/指定队伍槽位 0-5）。
-// 返回 {who:'me'|'opp', slot:number|null}（slot=null 表示「当前场上」）。
+// 返回 {who:'me'|'opp'|null, slot:number|null}（slot=null 表示「当前场上」；who=null 表示**这一侧没写 from_state**，
+// 不等于 me —— 见 applyStateToLeg 里的「缺失一侧默认取对侧」规则）。
 function parseFromState(v, dfltWho) {
-    if (v === undefined || v === null || v === '' || v === true) return { who: dfltWho, slot: null };
+    if (v === true) return { who: dfltWho, slot: null };
+    if (v === undefined || v === null || v === '') return { who: null, slot: null };
     var s = String(v);
     var idx = s.indexOf(':');
     if (idx >= 0) {
@@ -1091,6 +1093,36 @@ function applyFromState(state, spec, who, slot) {
     return { spec: out, src: src };
 }
 
+// 「没写 from_state 的那一侧」：state 只补它没给的空缺，**不覆盖**它显式给的值。
+// （它可能是另一只宝可梦/假设配置，被 state 的当前场上这一只顶掉就成了「自己打自己」）
+function pklmNormName(x) {
+    return String(x === undefined || x === null ? '' : x).toLowerCase().replace(/[^a-z0-9\u4e00-\u9fff]/g, '');
+}
+function keepExplicitSide(res, orig) {
+    var origName = (orig.poke !== undefined && orig.poke !== null) ? orig.poke : orig.name;
+    var stName = (res.spec.poke !== undefined && res.spec.poke !== null) ? res.spec.poke : res.spec.name;
+    // 这一侧显式写的是**另一只**宝可梦 → 整侧不填（否则会把场上这只的道具/特性/HP% 安到它头上）
+    if (origName && stName && pklmNormName(origName) !== pklmNormName(stName)) {
+        var spec = {}, src = {};
+        for (var k0 in orig) { if (k0 !== 'from_state') spec[k0] = orig[k0]; }
+        src.__where = res.src.__where;
+        src.__note = 'NOT filled from state — this side did not ask for from_state and names a different pokemon than the state\'s active one';
+        for (var k1 in spec) src[k1] = 'your input (kept: names a different pokemon)';
+        return { spec: spec, src: src };
+    }
+    for (var k in orig) {
+        if (k === 'from_state') continue;
+        if (orig[k] === undefined || orig[k] === null) continue;
+        if (JSON.stringify(res.spec[k]) !== JSON.stringify(orig[k])) {
+            res.src[k] = 'your input (kept — this side did not ask for from_state)';
+        } else if (!res.src[k]) {
+            res.src[k] = 'state (matches your input)';
+        }
+        res.spec[k] = orig[k];
+    }
+    return res;
+}
+
 // 把 state 的场上参数填进 leg（返回新 leg；不适用时原样返回）。同时把天气/场地/防守方双墙填进 field。
 function applyStateToLeg(leg, ctx) {
     var st = (ctx && ctx.state) || null;
@@ -1104,9 +1136,19 @@ function applyStateToLeg(leg, ctx) {
         return miss;
     }
     var aReq = parseFromState(aSpec.from_state, 'me');
-    var dReq = parseFromState(dSpec.from_state, (aReq.who === 'me' ? 'opp' : 'me'));
+    var dReq = parseFromState(dSpec.from_state, 'opp');
+    // 只有一侧写了 from_state 时，另一侧默认取「对侧」。**绝不能默认成 me**：
+    // LLM 常写 {attacker:{poke:'Tapu Bulu'}, defender:{from_state:'me'}}（算「对手打我」），
+    // 旧代码把缺失的攻击侧默认成 me → 用 state.me 静默覆盖掉它显式写的对手，
+    // 结果算成「自己打自己」（实测 battle91 T1/T2：Tapu Bulu 木槌 → 变成 Scizor 木槌）。
+    if (aReq.who === null && dReq.who !== null) aReq.who = (dReq.who === 'me' ? 'opp' : 'me');
+    if (dReq.who === null && aReq.who !== null) dReq.who = (aReq.who === 'me' ? 'opp' : 'me');
     var a = applyFromState(st, aSpec, aReq.who, aReq.slot);
     var d = applyFromState(st, dSpec, dReq.who, dReq.slot);
+    // 没写 from_state 的那一侧（implied）：只补它没给的空缺，**不覆盖**它显式给的值
+    //（否则它可能指定的是另一只宝可梦，会被 state 的场上这一只顶掉）
+    if (aReq.who !== null && !aSpec.from_state) a = keepExplicitSide(a, aSpec);
+    if (dReq.who !== null && !dSpec.from_state) d = keepExplicitSide(d, dSpec);
 
     var field = {};
     if (st.weather) field.weather = st.weather;
@@ -1128,6 +1170,9 @@ function applyStateToLeg(leg, ctx) {
     out._fromState = {
         attacker_side: aReq.who + (aReq.slot === null ? ' (active)' : ':' + aReq.slot),
         defender_side: dReq.who + (dReq.slot === null ? ' (active)' : ':' + dReq.slot),
+        attacker_asked: !!aSpec.from_state, defender_asked: !!dSpec.from_state,
+        note: (!!aSpec.from_state && !!dSpec.from_state) ? undefined
+            : ('the side without from_state was filled with the OPPOSITE side\'s state, and only where you left a field empty — your explicit values on it were kept'),
         attacker_src: a.src, defender_src: d.src,
         field_from_state: { weather: st.weather || null, terrain: st.terrain || null, defender_screens: dScr }
     };

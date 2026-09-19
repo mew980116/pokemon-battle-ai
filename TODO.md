@@ -141,6 +141,11 @@
 
 - [ ] **天气伤害判定 tool（来自 battle55 的 submit_feedback）**：LLM 想要一个能明确报告「对手某只宝可梦本回合是否吃到沙暴/冰雹等天气掉血」的 tool，用来从战报确认 Magic Guard / Unaware（是否免疫间接伤害）之类的特性。现状：只能靠 `get_battle_history` 逐回合扫天气/掉血行。方案：po-script 侧在回合末记录「天气伤害事件」（哪个 slot 掉了多少 HP），存进 history 或独立字段，供 tool 直接查询/汇总。
 
+- [ ] **battle91 复盘（进行中，LLM 自动打吧服 BOT；script 0.6.8 / tool 0.4.9）**：
+  - 已修（0.4.9，**实盘日志当场发现**）：**「只给一侧写 `from_state` 时，另一侧被静默当成 me」** —— LLM 用 `attacker:{poke:'Tapu Bulu', ev:…, nature:…}` + `defender:{from_state:'me'}` 算「对手打我」，旧代码把没写 from_state 的攻击侧默认成 `me` → 用 `state.me` 覆盖掉它写的 `Tapu Bulu`，算出「Scizor 木槌打 Scizor 14-17%」（真值 29-34%），而 `inputs_used` 里其实明写着 `OVERRIDES your value "Tapu Bulu"`（LLM 不读）。修：缺失的一侧取**对侧** + 只补空缺（`keepExplicitSide`），且显式命名的宝可梦与 state 当前这只不同时整侧不填。回归 from_state 8/8。
+  - 已确认（同批）：`Terrain:Grassy Terrain` 正确进 prompt 并生效（0.4.8 归一化）、青草场地回血以 `onMoveMessage move=205 part=2` 进 history、`state.terrain` 全程正确。
+  - 待复盘：这局（Tapu Bulu + 我方 Scizor/Zeraora…）打完后按老流程看——① 还有没有「一侧 from_state」的写法残留（若很多，考虑在 tool 描述里写明「要么两侧都写，要么把另一侧写全」）② `calc_stats` 用得多不多 ③ 换人/留场判断质量。
+
 - [ ] **battle71 复盘（LLM vs 用户，42 回合；tool 0.4.2 / script 0.6.4）**：
   - 已处理（0.4.1）：① **直传能力值被 @smogon/calc 的 `calculate()`→`clone()` 静默丢弃（真 bug）** ② **直传值 + `boosts` 的语义**（直传值按「未加成数值」处理，等级应照常生效；旧语义把等级清零 → Body Press 少算 2.5 倍）③ 知识库补 `mechanics.unaware`（天然 vs 辅助力量/扑击）。
   - 已处理（0.4.2）：④ **`psAbilityExists`/`psItemExists` 用错数据结构**（`SMOGON.ABILITIES`/`ITEMS` 是数组，按名字索引永远 miss）→ 0.4.0 起对**每个**特性/道具误报「拼错、未生效」，LLM 因此不信任 Unaware/Transistor；改用 `Generations.get(8).abilities/items.get(id)` ⑤ **特性描述 data bug**：`DESC_OVERRIDE` 把 Transistor/Dragon's Maw 写成 Gen9 的 30%（Gen8 是 50%）→ LLM 照着推出 1.3x 与计算器的 1.5x 打架；`ability_battledesc.txt` 按编号取、PO 删特性后**整体串行**（35/50/118/131/132/163 全张冠李戴）→ 新增 `DESC_EN_OVERRIDE`；补 Steelworker 数值、Water Bubble 漏的攻击向 ⑥ 新护栏：`move.name`+`move.power` 同时给且不一致 → 提示 power 被忽略；按等级算威力的招式没传 `boosts` → 提示会按 20 BP 算。
