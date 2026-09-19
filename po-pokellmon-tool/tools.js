@@ -360,13 +360,14 @@ var TOOL_DEFS = [
     {
         type: 'function',
         function: {
-            name: 'get_learnset',
-            description: 'Check which moves a species can legally learn (its movepool). Data source: pokemon-showdown (more accurate than PO). Two uses: (a) pass `moves` to test whether a species can learn specific moves — returns can_learn true/false per move; call this whenever the opponent uses a move that surprises you (e.g. a Fire-type move from a Pokemon you read as Entei but which cannot learn it), a false result strongly suggests a disguise or species misread (Illusion / Transform / Mimic / Ditto) — cross-check with your observations. (b) omit `moves` to list the full movepool of a species. NOTE: an empty/false result only means the move is NOT in this species legal movepool; always confirm the species is right AND no Illusion is in play before concluding.',
+            name: 'get_pokemon_info',
+            description: 'Pokedex lookup for a species: base stats (hp/atk/def/spa/spd/spe + total), type(s), possible abilities (static, so it does not depend on what has been revealed), and weight (kg — needed for weight-based moves: Grass Knot / Low Kick / Heavy Slam / Heat Crash). It also covers the movepool. This returns FACTS, so call it instead of relying on memory whenever a base stat, type, ability list or weight matters — e.g. to check speed/offense before a damage race, or to see which abilities an opponent species could still have. Movepool mode: pass `moves` to test whether the species can legally learn specific moves (returns can_learn per move) — use it whenever the opponent uses a move that surprises you, since a false result means the species is misread or disguised (Illusion / Transform / Mimic / Ditto); pass `full_movepool: true` to list the whole movepool (long — only when you actually need to scan it).',
             parameters: {
                 type: 'object',
                 properties: {
                     pokemon: { type: 'string', description: 'Pokemon name (English or Chinese) or number. E.g. "Entei", "炎帝", or "244".' },
-                    moves: { type: 'array', items: { type: 'string' }, description: 'Optional. Move names (English or Chinese) or numbers to test against this species movepool. E.g. ["Nasty Plot", "Night Daze"]. Omit to list the whole movepool.' }
+                    moves: { type: 'array', items: { type: 'string' }, description: 'Optional. Move names (English or Chinese) or numbers to test against this species movepool. E.g. ["Nasty Plot", "Night Daze"].' },
+                    full_movepool: { type: 'boolean', description: 'Optional. Set true to return the species entire movepool (may be ~90 moves). Default false.' }
                 },
                 required: ['pokemon']
             }
@@ -1117,16 +1118,16 @@ function getItemInfo(args) {
     };
 }
 
-// ===== get_learnset：查招式学习面（数据来自 knowledge/learnsets.json，源 pokemon-showdown）=====
-// 解析宝可梦输入 -> learnsets byKey（与 pokemon.byNum 同 key：基础形态 "num"，形态 "num:forme"）
-function resolveLearnsetKey(poke) {
+// ===== get_pokemon_info：宝可梦图鉴（种族值/属性/可能特性/体重 + 学习面）=====
+// 数据：pokemon.json（种族值/属性/体重/特性编号）+ abilities.json（特性编号->名称）+ learnsets.json（学习面，源 pokemon-showdown）
+function resolvePokemonKey(poke) {
     if (poke === undefined || poke === null || poke === '') return null;
     var s = String(poke).trim();
-    if (POKEMON.byNum[s] !== undefined && LEARNSETS.byKey[s] !== undefined) return s;
+    if (POKEMON.byNum[s] !== undefined) return s;
     var k1 = POKEMON.byName[s.toLowerCase()];   // 英文名（小写）
-    if (k1 !== undefined && LEARNSETS.byKey[k1] !== undefined) return k1;
+    if (k1 !== undefined && POKEMON.byNum[k1] !== undefined) return k1;
     var k2 = POKEMON.byName[s];                 // 中文名（原样）
-    if (k2 !== undefined && LEARNSETS.byKey[k2] !== undefined) return k2;
+    if (k2 !== undefined && POKEMON.byNum[k2] !== undefined) return k2;
     return null;
 }
 
@@ -1142,14 +1143,47 @@ function resolveMoveNum(mv) {
     return null;
 }
 
-function getLearnset(args) {
+function getPokemonInfo(args) {
     var poke = args.pokemon || args.poke;
     if (!poke) return { error: 'missing pokemon' };
-    var key = resolveLearnsetKey(poke);
-    if (!key) return { error: 'unknown pokemon (no learnset): ' + poke };
-    var list = LEARNSETS.byKey[key];
-    var p = POKEMON.byNum[key] || {};
-    var name = p.name_en || String(poke);
+    var key = resolvePokemonKey(poke);
+    if (!key) return { error: 'unknown pokemon: ' + poke };
+    var p = POKEMON.byNum[key];
+
+    // 种族值：数组 -> 具名对象，附总和
+    var baseStats = {};
+    var bst = 0;
+    for (var s = 0; s < STAT_NAMES.length; s++) {
+        var v = (p.baseStats && p.baseStats[s] !== undefined) ? p.baseStats[s] : null;
+        baseStats[STAT_NAMES[s]] = v;
+        if (v) bst += v;
+    }
+
+    // 可能特性：编号 -> {id, name, name_zh}
+    var abilities = [];
+    if (p.abilities && p.abilities.length) {
+        for (var a = 0; a < p.abilities.length; a++) {
+            var ab = ABILITIES.byNum[String(p.abilities[a])];
+            abilities.push({
+                id: p.abilities[a],
+                name: (ab && ab.name) || '(unknown)',
+                name_zh: (ab && ab.name_zh) || ''
+            });
+        }
+    }
+
+    var out = {
+        key: key,
+        name: p.name_en,
+        name_zh: p.name_zh || '',
+        types: p.types || [],
+        baseStats: baseStats,
+        baseStatTotal: bst,
+        weight: (p.weight !== undefined) ? p.weight : null,
+        abilities: abilities
+    };
+
+    var list = LEARNSETS.byKey[key] || null;
 
     // 模式 a：校验指定招式是否可学
     if (args.moves && args.moves.length) {
@@ -1160,19 +1194,28 @@ function getLearnset(args) {
             checks.push({
                 move: (known && known.name) || String(args.moves[i]),
                 move_num: num ? Number(num) : null,
-                can_learn: (num && list.indexOf(Number(num)) >= 0) ? true : false
+                can_learn: (num && list && list.indexOf(Number(num)) >= 0) ? true : false
             });
         }
-        return { pokemon: name, keys: key, checks: checks };
+        out.checks = checks;
+        return out;
     }
 
-    // 模式 b：列出全部可学招式
-    var moves = [];
-    for (var j = 0; j < list.length; j++) {
-        var mm = MOVES[String(list[j])];
-        if (mm) moves.push(mm.name);
+    // 模式 b：显式请求才吐整份招式池（~90 条，避免默认膨胀上下文）
+    if (args.full_movepool) {
+        if (!list) return out;
+        var movepool = [];
+        for (var j = 0; j < list.length; j++) {
+            var mm = MOVES[String(list[j])];
+            if (mm) movepool.push(mm.name);
+        }
+        out.movepool = movepool;
+        out.movepool_count = movepool.length;
+        return out;
     }
-    return { pokemon: name, keys: key, count: moves.length, moves: moves };
+
+    out.movepool_count = list ? list.length : 0;
+    return out;
 }
 
 // ===== update_worklog：本轮工作暂存（覆盖式）。内容由 server 注入回 system，实现「始终在上下文」=====
@@ -1202,7 +1245,7 @@ function runTool(name, args, ctx) {
     if (name === 'get_move_info') return getMoveInfo(args);
     if (name === 'get_ability_info') return getAbilityInfo(args);
     if (name === 'get_item_info') return getItemInfo(args);
-    if (name === 'get_learnset') return getLearnset(args);
+    if (name === 'get_pokemon_info') return getPokemonInfo(args);
     return { error: 'unknown tool: ' + name };
 }
 

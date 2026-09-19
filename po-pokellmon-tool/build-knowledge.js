@@ -84,51 +84,89 @@ function buildPokemon() {
         byNum[key].baseStats = parts.slice(1, 7).map(Number);
     }
 
-    // 3) 属性 type1（18 属性名；形态缺条目时继承基础形态）
-    const type1 = readText(path.join(DATA, 'pokes', 'type1.txt')).split('\n');
-    for (const line of type1) {
+    // 3) 属性 type1/type2（18 属性名）
+    // 先按 key 收集原始类型编号，再逐只合成：形态缺某槽位条目时**按槽位**继承基础形态
+    // （type1.txt/type2.txt 通常只给变化形态标变化的那一项；如 Landorus-Therian 两个槽位都无条目 → 全继承基础形态 Ground/Flying）
+    const type1Map = {};
+    const type2Map = {};
+    for (const line of readText(path.join(DATA, 'pokes', 'type1.txt')).split('\n')) {
         const t = line.trim();
         if (!t) continue;
         const parts = t.split(/\s+/);
         const id = parsePokeId(parts[0]);
-        const key = keyOf(id.num, id.forme);
-        if (!byNum[key]) continue;
-        const tn = parseInt(parts[1], 10);
-        byNum[key].types = [TYPE_NAMES[tn] || 'Normal'];
+        type1Map[keyOf(id.num, id.forme)] = parseInt(parts[1], 10);
     }
-    // 形态继承基础形态的 type1（type1.txt 通常只有 forme=0 条目）
+    for (const line of readText(path.join(DATA, 'pokes', 'type2.txt')).split('\n')) {
+        const t = line.trim();
+        if (!t) continue;
+        const parts = t.split(/\s+/);
+        const id = parsePokeId(parts[0]);
+        type2Map[keyOf(id.num, id.forme)] = parseInt(parts[1], 10);
+    }
     for (const key in byNum) {
         const p = byNum[key];
-        if (p.forme !== 0 && !p.types) {
-            const base = byNum[String(p.num)];
-            p.types = (base && base.types) ? [base.types[0]] : [];
-        }
+        const baseKey = String(p.num);
+        const t1 = (type1Map[key] !== undefined) ? type1Map[key] : type1Map[baseKey];
+        const t2 = (type2Map[key] !== undefined) ? type2Map[key] : type2Map[baseKey];
+        const types = [];
+        if (t1 !== undefined && TYPE_NAMES[t1]) types.push(TYPE_NAMES[t1]);
+        if (t2 !== undefined && t2 !== 18 && TYPE_NAMES[t2] && types.indexOf(TYPE_NAMES[t2]) < 0) types.push(TYPE_NAMES[t2]);
+        if (types.length) p.types = types;
     }
 
-    // 4) 属性 type2（18=无第二属性；各形态有各自条目）
-    const type2 = readText(path.join(DATA, 'pokes', 'type2.txt')).split('\n');
-    for (const line of type2) {
+    // 5) 体重（kg；供草绳/踢倒/重磅冲撞/高温重压等按体重算威力的招式）
+    const weightLines = readText(path.join(DATA, 'pokes', 'weight.txt')).split('\n');
+    for (const line of weightLines) {
         const t = line.trim();
         if (!t) continue;
         const parts = t.split(/\s+/);
         const id = parsePokeId(parts[0]);
         const key = keyOf(id.num, id.forme);
         if (!byNum[key]) continue;
-        const tn = parseInt(parts[1], 10);
-        if (tn !== 18) {
-            if (!byNum[key].types) byNum[key].types = [];
-            byNum[key].types.push(TYPE_NAMES[tn]);
+        const w = parseFloat(parts[1]);
+        if (!isNaN(w) && w > 0) byNum[key].weight = w;
+    }
+    // 形态缺体重条目时继承基础形态
+    for (const key in byNum) {
+        const p = byNum[key];
+        if (p.forme !== 0 && p.weight === undefined) {
+            const base = byNum[String(p.num)];
+            if (base && base.weight !== undefined) p.weight = base.weight;
         }
     }
 
-    // 5) 英文名写入 + byName
+    // 6) 可能特性（静态；ability1/2/3.txt，key "num:forme" -> 特性编号；存编号，名称由 tools.js 经 abilities.json 解析）
+    const abilityMap = {};   // "num:forme" -> [特性编号...]
+    const abilityFiles = ['ability1.txt', 'ability2.txt', 'ability3.txt'];
+    for (const af of abilityFiles) {
+        const lines = readText(path.join(DATA, 'pokes', af)).split('\n');
+        for (const line of lines) {
+            const t = line.trim();
+            if (!t) continue;
+            const parts = t.split(/\s+/);
+            const id = parsePokeId(parts[0]);
+            const aid = parseInt(parts[1], 10);
+            if (!aid) continue;   // 0 = 无
+            const k = id.num + ':' + id.forme;
+            if (!abilityMap[k]) abilityMap[k] = [];
+            if (abilityMap[k].indexOf(aid) < 0) abilityMap[k].push(aid);
+        }
+    }
+    for (const key in byNum) {
+        const p = byNum[key];
+        let list = abilityMap[p.num + ':' + p.forme];
+        if (!list && p.forme !== 0) list = abilityMap[p.num + ':0'];   // 形态缺条目时继承基础形态
+        if (list && list.length) p.abilities = list;
+    }
+
+    // 7) 英文名写入 + byName
     for (const key in nameEn) {
         if (!byNum[key]) continue;
         byNum[key].name_en = nameEn[key];
         byName[nameEn[key].toLowerCase()] = key;
     }
 
-    // 6) 中文名（zh-cn，同样跳过 Mega/Gmax）
+    // 8) 中文名（zh-cn，同样跳过 Mega/Gmax）
     const zhLines = readText(path.join(DATA, 'zh-cn', 'db', 'pokes', 'pokemons.txt')).split('\n');
     for (const line of zhLines) {
         const t = line.trim();

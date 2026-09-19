@@ -36,7 +36,7 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.3.56';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.3.57';   // tool 分支版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
 // 对战主脑用 v4-pro（闭卷深想强，决策更深）；一键回 flash：POKELLMON_MODEL=deepseek-v4-flash
@@ -58,11 +58,11 @@ var WORKFLOW = 'WORKFLOW — follow this order every turn: ' +
     '(1) OPEN WORKLOG — this must be your FIRST action every turn. Call update_worklog with a short scratchpad for THIS turn: the goal, the current situation, confirmed facts, open questions and your next action. Treat it as your working memory: the server injects the latest worklog back into your context on every following tool call, so it is what keeps your plan alive across a long tool-calling loop (reasoning is off, so nothing else preserves it). Overwrite the whole text whenever the plan changes or a fact is confirmed; keep it compact and never let it go stale, and update it again before you finish. ' +
     '(2) REVIEW: read the last turn(s) with get_battle_history and work out what they reveal about the opponent — the speed line (who moved first; any speed boost, paralysis, Tailwind or Choice Scarf clue), which moves / items / abilities are now EXPOSED or can be EXCLUDED, and back-calculate from the damage dealt and taken to infer their EV spread and any offensive boost (item or ability). Record all of it with save_observation, tagging every fact [proved] or [estimated]. ' +
     '(3) PLAN: re-read your previous save_strategy notes, look at the actions you are offered, and run the simulations you need (get_my_stats / calc_stats / calc_damage) plus the tactical guidance you need (battle_tips). ' +
-    '(4) VERIFY: never trust memory for a move / ability / item effect, power or accuracy — call get_move_info / get_ability_info / get_item_info unless that detail is already present in the context. Always call get_knowledge for the switch rules before switching unless they are already present in the context. Check the opponent against its legal movepool: if it has used a move it cannot learn (see the CAUTION line in the prompt, or verify with get_learnset), the species is either misread or disguised (Illusion / Transform / Mimic / Ditto) — stop assuming that species and re-read the battle log. ' +
+    '(4) VERIFY: never trust memory for a move / ability / item effect, power or accuracy — call get_move_info / get_ability_info / get_item_info unless that detail is already present in the context. Never trust memory for a species base stats / types / abilities / weight either — call get_pokemon_info. Always call get_knowledge for the switch rules before switching unless they are already present in the context. Check the opponent against its legal movepool: if it has used a move it cannot learn (see the CAUTION line in the prompt, or verify with get_pokemon_info), the species is either misread or disguised (Illusion / Transform / Mimic / Ditto) — stop assuming that species and re-read the battle log. ' +
     '(5) DECIDE: choose the action, then write your read + plan with save_strategy.';
 
 var SYSTEM_PROMPT = require('../po-pokellmon/prompts.js').BATTLE_TIPS +
-    ' You decide by calling the tools you have been given; every tool description states when to call it, so follow the workflow below and that guidance. get_learnset gives a species legal movepool (source: pokemon-showdown) — use it to validate a surprising opponent move, since a move outside that movepool means a disguise or a misread species.' +
+    ' You decide by calling the tools you have been given; every tool description states when to call it, so follow the workflow below and that guidance. get_pokemon_info is the pokedex lookup (base stats / types / abilities / weight + legal movepool) — use it instead of memory, and to validate a surprising opponent move, since a move outside that movepool means a disguise or a misread species.' +
     '\n\n' + WORKFLOW;
 
 // 复用 po-pokellmon 知识库
@@ -241,7 +241,7 @@ function learnsetCaution(state) {
     }
     if (!names.length) return '';
     var res;
-    try { res = tools.runTool('get_learnset', { pokemon: opp.name, moves: names }); } catch (e) { return ''; }
+    try { res = tools.runTool('get_pokemon_info', { pokemon: opp.name, moves: names }); } catch (e) { return ''; }
     if (!res || res.error || !res.checks) return '';
     var bad = [];
     for (var j = 0; j < res.checks.length; j++) {
@@ -255,7 +255,7 @@ function learnsetCaution(state) {
         '(the active pokemon is not really ' + opp.name + ' — Zoroark/Zorua), or a copied move (Transform / Mimic / Ditto). ' +
         'Illusion breaks when the pokemon takes damage from a move. Do not keep assuming ' + opp.name +
         '; re-read the battle log for a giveaway and treat the real identity / remaining moves as unknown until proven. ' +
-        'Use get_learnset to test more revealed moves.\n';
+        'Use get_pokemon_info to test more revealed moves.\n';
 }
 
 function buildPrompt(state, notes) {
