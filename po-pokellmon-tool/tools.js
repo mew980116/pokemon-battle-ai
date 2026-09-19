@@ -24,6 +24,20 @@ var CHART = TYPECHART.chart;        // 18x18 克制矩阵
 function typeIndex(name) {
     return TYPE_NAMES.indexOf(name);
 }
+// 招式属性对防御方类型的总倍率（0 = 真免疫，null = 查不到）。
+// 只用于区分「真的免疫」和「计算器算不出这类招的伤害（固定伤害/依赖当前 HP）」—— 两者都返回 0。
+function typeMultOf(mvType, defTypes) {
+    if (!mvType || !defTypes || !defTypes.length) return null;
+    var ai = typeIndex(mvType);
+    if (ai < 0) return null;
+    var m = 1;
+    for (var i = 0; i < defTypes.length; i++) {
+        var di = typeIndex(defTypes[i]);
+        if (di < 0) return null;
+        m *= CHART[ai][di];
+    }
+    return m;
+}
 
 // ===== 官方伤害计算器（@smogon/calc，内嵌于 vendor/，MIT）=====
 // calc_damage 的引擎：特性/道具/天气/场地/光墙/状态等修正全部由它算，避免手工移植遗漏。
@@ -677,6 +691,7 @@ function koChancePct(chance) {
 }
 function koVerdict(perHit, hits, hp) {
     if (!hp || hp <= 0) return null;
+    if (!perHit || !perHit.length) return null;   // 空分布（算不出伤害的招）绝不能返回「guaranteed OHKO」
     var counts = { 0: 1 };
     var total = 1;
     var maxUses = 4;
@@ -1352,9 +1367,16 @@ function calcOneLeg(leg, idx, ctx) {
     var min = range[0];
     var max = range[1];
 
-    // 逐档伤害：连击招在 res.damage 里是「每次命中一个子数组」（各命中完全相同）
+    // 逐档伤害：连击招在 res.damage 里是「每次命中一个子数组」（各命中完全相同）；
+    // **固定伤害招**（地球上投 Seismic Toss / 黑夜魔影 Night Shade = 使用者等级、龙之怒 Dragon Rage = 40、
+    // 音爆 Sonic Boom = 20）计算器直接给一个**数字** —— 旧代码按数组处理（`res.damage.length` 为 undefined）
+    // → perHit 空 → koVerdict 拿到空分布误报「guaranteed OHKO」（地球上投 100 伤害被判成必杀）
+    var fixedDamage = (typeof res.damage === 'number');
     var perHit = [], hits = 1;
-    if (res.damage && res.damage.length) {
+    if (fixedDamage) {
+        perHit = [res.damage];
+        hits = calcMove.move.hits || 1;
+    } else if (res.damage && res.damage.length) {
         if (Array.isArray(res.damage[0])) { perHit = res.damage[0]; hits = res.damage.length; }
         else { perHit = res.damage; hits = calcMove.move.hits || 1; }
     }
@@ -1411,6 +1433,25 @@ function calcOneLeg(leg, idx, ctx) {
 
     // ---- 免疫 / 无效果 ----
     if (max === 0) {
+        // 0 有两种含义：真的属性免疫，或**计算器算不出**这类招的伤害（固定伤害/依赖当前 HP）。
+        // 用我们自己的克制表区分（防御方类型查不到时按老口径显示「免疫」）。
+        var tmult = typeMultOf(mv.type, def.types);
+        if (tmult !== null && tmult > 0) {
+            notes.push('the calculator returned 0, but ' + (mv.name || 'this move') + ' is NOT type-immune against ' + defName + ' — its damage is fixed or depends on the current HP / on damage taken (Super Fang / Counter / Mirror Coat / Endeavor / Final Gambit / Psywave…), which the calculator cannot derive. Reason it manually from the current HP.');
+            return {
+                index: idx, min: 0, max: 0, percent_min: 0, percent_max: 0,
+                desc: (mv.name || 'move') + ' vs. ' + defName + ': CANNOT be computed (fixed / current-HP-dependent damage) — reason it manually',
+                ko: null,
+                detail: {
+                    attack_stat: aStat, defense_stat: dStat,
+                    attack_stat_name: aStatLabel, defense_stat_name: dStatLabel,
+                    defender_max_hp: defHp, type_mult: tmult, power: bpShown,
+                    is_crit: calcCrit, applied: applied, notes: notes,
+                    inputs_used: leg._fromState || undefined
+                }
+            };
+        }
+        if (mv.variable_power) notes.push('the calculator returned 0 for this fixed/HP-dependent move — a 0 here does NOT necessarily mean type immunity; reason it manually');
         return {
             index: idx, min: 0, max: 0, percent_min: 0, percent_max: 0,
             desc: (mv.name || 'move') + ' vs. ' + defName + ': no effect (immune, 0x)',
@@ -1436,15 +1477,22 @@ function calcOneLeg(leg, idx, ctx) {
         if (dAssumed.length) parts.push('defender ' + dAssumed.join('/'));
         notes.push('used DEFAULT values for ' + parts.join(', ') + ' (0 EV / neutral nature, IVs assumed 31) — if you know the real values, pass them and recompute');
     }
-    // power=1 的占位威力
+    // 图鉴里 power=1 的占位（48 招）：分三类说清楚，避免把**已经算对了的数**说成不可信
     if (mv.variable_power) {
-        notes.push('this move\'s listed power (1) is a PLACEHOLDER — it deals fixed or HP-dependent damage; do NOT use the number below as its real power');
+        if (fixedDamage) {
+            notes.push('FIXED-damage move: the calculator returned ' + min + ' directly (Seismic Toss / Night Shade = the USER LEVEL, Dragon Rage = 40, Sonic Boom = 20). Stats / EVs / boosts / ability / item do NOT change it — but type immunity still applies.');
+        } else if (Array.isArray(res.damage)) {
+            notes.push('this move\'s dex power is the placeholder 1; the calculator derived the real power from the situation (current HP / weight / stat stages), so the number above IS the computed result');
+        } else {
+            notes.push('this move\'s listed power (1) is a PLACEHOLDER and the calculator cannot derive it (depends on the current HP or on damage taken) — treat the number above as unreliable');
+        }
     }
 
     // ---- PS 风格描述串（伤害值 + 场景 + KO 结论）----
     var fmt = function (v) { return defHp > 0 ? (Math.floor(v * 1000 / defHp) / 10) : 0; };
+    var powerLabel = fixedDamage ? ('fixed ' + min + ' dmg') : ((bpShown !== undefined && bpShown !== null && bpShown !== 0) ? (bpShown + ' BP') : '? BP');
     var desc = evNatDesc(aEvSpec, aEvNature, aIdxUsed) + ' ' + aStatLabel + ' ' + atkName + ' ' + (mv.name || 'move') +
-        ' (' + bpShown + ' BP) vs. ' + evNatDesc(leg.defender, dNature, 0) + ' HP / ' +
+        ' (' + powerLabel + ') vs. ' + evNatDesc(leg.defender, dNature, 0) + ' HP / ' +
         evNatDesc(leg.defender, dNature, dIdxUsed) + ' ' + dStatLabel + ' ' + defName +
         ': ' + min + '-' + max + ' (' + fmt(min) + ' - ' + fmt(max) + '%)' + (ko ? ' -- ' + ko : '');
 
@@ -1472,6 +1520,8 @@ function calcOneLeg(leg, idx, ctx) {
             burn: burnApplied,
             assumed_fields: { attacker: aAssumed, defender: dAssumed },
             variable_power: !!mv.variable_power,
+            fixed_damage: fixedDamage || undefined,
+            per_hit_damage: perHit.slice(0, 4),
             applied: applied,
             inputs_used: leg._fromState || undefined
         }

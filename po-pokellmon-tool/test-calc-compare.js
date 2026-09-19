@@ -320,6 +320,37 @@ for (const w of ['Fog', 'bogus weather']) {
 }
 console.log('场地/天气名称归一化：' + (12 - ndiff) + '/12 通过');
 
+// ===== 固定伤害招 & 「计算器算不出」的招 =====
+// 回归背景：@smogon/calc 对固定伤害招（地球上投/黑夜魔影=等级、龙之怒 40、音爆 20）把 `res.damage` 返回成
+// **数字**而不是数组，旧代码按数组处理 → perHit 空 → koVerdict 拿到空分布返回「guaranteed OHKO」
+//（Chansey 地球上投打满血 Kommo-o 100/291 = 34%，却被标成必杀）。battle91 里 LLM 没调它，但风险真实存在。
+console.log('\n--- 固定伤害招 / 算不出的招 ---');
+let xdiff = 0;
+function xLeg(leg) { return tools.runTool('calc_damage', { legs: [leg] }, {}).legs[0]; }
+const tsp = xLeg({ attacker: { poke: 'Chansey', ev: [252, 0, 252, 0, 4, 0], nature: 'Bold', level: 100 }, defender: { poke: 'Kommo-o', ev: [0, 252, 0, 0, 0, 252], nature: 'Jolly' }, move: { name: 'Seismic Toss' } });
+const tspOk = tsp.min === 100 && tsp.max === 100 && tsp.ko === 'guaranteed 3HKO' &&
+    tsp.detail.fixed_damage === true && tsp.notes.join(' ').indexOf('FIXED-damage') >= 0;
+if (!tspOk) xdiff++;
+console.log('[' + (tspOk ? 'OK  ' : 'DIFF') + '] 地球上投(等级100) -> ' + tsp.min + '-' + tsp.max + ' ko=' + tsp.ko);
+console.log('    ' + tsp.desc);
+const dr = xLeg({ attacker: { poke: 'Salamence', ev: [0, 252, 0, 0, 0, 252], nature: 'Jolly' }, defender: { poke: 'Dragonite', ev: [0, 0, 0, 0, 0, 0], nature: 'Adamant' }, move: { name: 'Dragon Rage' } });
+const drOk = dr.min === 40 && dr.max === 40;
+if (!drOk) xdiff++;
+console.log('[' + (drOk ? 'OK  ' : 'DIFF') + '] 龙之怒 -> ' + dr.min + '-' + dr.max);
+const sf = xLeg({ attacker: { poke: 'Garchomp', ev: [0, 252, 0, 0, 0, 252], nature: 'Jolly' }, defender: { poke: 'Chansey', ev: [252, 0, 252, 0, 4, 0], nature: 'Bold' }, move: { name: 'Super Fang' } });
+const sfOk = sf.desc.indexOf('CANNOT be computed') >= 0 && sf.desc.indexOf('immune') < 0;
+if (!sfOk) xdiff++;
+console.log('[' + (sfOk ? 'OK  ' : 'DIFF') + '] 愤怒门牙(依赖当前 HP) -> ' + sf.desc.slice(0, 90));
+const ns = xLeg({ attacker: { poke: 'Gengar', ev: [0, 0, 0, 252, 0, 252], nature: 'Timid' }, defender: { poke: 'Chansey', ev: [252, 0, 252, 0, 4, 0], nature: 'Bold' }, move: { name: 'Night Shade' } });
+const nsOk = ns.desc.indexOf('no effect (immune') >= 0;   // 幽灵打普通 = 真免疫，不能被写成「算不出」
+if (!nsOk) xdiff++;
+console.log('[' + (nsOk ? 'OK  ' : 'DIFF') + '] 黑夜魔影 vs 普通系（真免疫）-> ' + ns.desc.slice(0, 70));
+const fl = xLeg({ attacker: { poke: 'Snorlax', ev: [252, 0, 0, 0, 0, 0], nature: 'Adamant' }, defender: { poke: 'Blissey', ev: [252, 0, 252, 0, 0, 0], nature: 'Bold' }, move: { name: 'Flail' } });
+const flOk = fl.notes.join(' ').indexOf('derived the real power') >= 0 && fl.notes.join(' ').indexOf('FIXED-damage') < 0;
+if (!flOk) xdiff++;
+console.log('[' + (flOk ? 'OK  ' : 'DIFF') + '] 抓狂（按 HP 算威力，计算器能算）-> ' + fl.min + '-' + fl.max);
+console.log('固定伤害招：' + (5 - xdiff) + '/5 通过');
+
 // ===== 特性描述数据（Gen8 口径）=====
 console.log('\n--- 特性描述（Gen8 数值口径）---');
 let adiff = 0;

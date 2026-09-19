@@ -141,9 +141,10 @@
 
 - [ ] **天气伤害判定 tool（来自 battle55 的 submit_feedback）**：LLM 想要一个能明确报告「对手某只宝可梦本回合是否吃到沙暴/冰雹等天气掉血」的 tool，用来从战报确认 Magic Guard / Unaware（是否免疫间接伤害）之类的特性。现状：只能靠 `get_battle_history` 逐回合扫天气/掉血行。方案：po-script 侧在回合末记录「天气伤害事件」（哪个 slot 掉了多少 HP），存进 history 或独立字段，供 tool 直接查询/汇总。
 
-- [ ] **battle91 复盘（进行中，LLM 自动打吧服 BOT；script 0.6.8 / tool 0.4.9）**：
+- [ ] **battle91 复盘（进行中，LLM 自动打吧服 BOT；script 0.6.8 / tool 0.4.10）**：
   - 已修（0.4.9，**实盘日志当场发现**）：**「只给一侧写 `from_state` 时，另一侧被静默当成 me」** —— LLM 用 `attacker:{poke:'Tapu Bulu', ev:…, nature:…}` + `defender:{from_state:'me'}` 算「对手打我」，旧代码把没写 from_state 的攻击侧默认成 `me` → 用 `state.me` 覆盖掉它写的 `Tapu Bulu`，算出「Scizor 木槌打 Scizor 14-17%」（真值 29-34%），而 `inputs_used` 里其实明写着 `OVERRIDES your value "Tapu Bulu"`（LLM 不读）。修：缺失的一侧取**对侧** + 只补空缺（`keepExplicitSide`），且显式命名的宝可梦与 state 当前这只不同时整侧不填。回归 from_state 8/8。
   - 已确认（同批）：`Terrain:Grassy Terrain` 正确进 prompt 并生效（0.4.8 归一化）、青草场地回血以 `onMoveMessage move=205 part=2` 进 history、`state.terrain` 全程正确。
+  - 已修（0.4.10，观战核对「打小蛋」时发现）：**固定伤害招 KO 误报** —— 地球上投/黑夜魔影（=等级）、龙之怒 40、音爆 20 这类招，@smogon/calc 的 `res.damage` 是**数字**不是数组 → 旧代码 `perHit` 成空数组 → `koVerdict` 里 `0 === 0` 命中 → 一律返回「guaranteed OHKO」（地球上投 100 打 291 血=34% 被说成必杀）。同时把「返回 0」拆成**真免疫** vs **算不出**（Super Fang/Counter/Endeavor…），并把 `variable_power` 提示按三类分说（固定伤害/计算器能推导/确实算不出）—— 旧的「别信下面这个数」对前两类是误导。**核对结论（用户提问）**：① **进化辉石它算对了**（自己填 `item:"Eviolite"` + 252HP/252Def 大胆 + `hp:704`，`applied.defenderItem:"Eviolite"`，并标注「item unrevealed but standard」）② **地球上投它没调计算器**，靠自己的知识写「~100 fixed」（本例正确）—— 但它要是调了，旧代码会回一个错到离谱的「必杀」。
   - 待复盘：这局（Tapu Bulu + 我方 Scizor/Zeraora…）打完后按老流程看——① 还有没有「一侧 from_state」的写法残留（若很多，考虑在 tool 描述里写明「要么两侧都写，要么把另一侧写全」）② `calc_stats` 用得多不多 ③ 换人/留场判断质量。
 
 - [ ] **battle71 复盘（LLM vs 用户，42 回合；tool 0.4.2 / script 0.6.4）**：
