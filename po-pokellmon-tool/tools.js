@@ -279,7 +279,7 @@ var TOOL_DEFS = [
         type: 'function',
         function: {
             name: 'get_my_stats',
-            description: 'Get the final unboosted stats (HP/Atk/Def/SpA/SpD/Spe) of MY pokemon from the actual battle data (real EVs, IVs, nature, and level). Call it to read your own exact stats before a speed or damage comparison, instead of assuming a spread. Specify a pokemon name or slot to get one, or omit to get all six of my team.',
+            description: 'Get the current state and final unboosted stats (HP/Atk/Def/SpA/SpD/Spe) of MY pokemon from the actual battle data (real EVs, IVs, nature, level). Each entry also carries `hpPct`, `ko` and `status`, so this is also how you check which of my pokemon are still alive, who has fainted, and how much HP the bench has left. Call it to read your own exact stats before a speed or damage comparison instead of assuming a spread. Specify a pokemon name or slot to get one, or omit to get all six of my team.',
             parameters: {
                 type: 'object',
                 properties: {
@@ -783,6 +783,12 @@ function getMyStats(args, ctx) {
     var myStats = state && state.myStats;
     if (!myStats || !myStats.length) return { error: 'no myStats in state (PO script too old? update po-script.js)' };
     var wanted = args.poke ? String(args.poke) : null;
+    // 队伍当前状态（含已倒下）：myStats 只有数值，这里按 slot 补上 HP%/是否 KO，LLM 才知道自己还剩几只、谁已阵亡
+    var teamBySlot = {};
+    var myTeam = (state && state.myTeam) || [];
+    for (var t = 0; t < myTeam.length; t++) {
+        if (myTeam[t] && myTeam[t].slot !== undefined) teamBySlot[String(myTeam[t].slot)] = myTeam[t];
+    }
     var out = [];
     for (var i = 0; i < myStats.length; i++) {
         var m = myStats[i];
@@ -805,7 +811,14 @@ function getMyStats(args, ctx) {
         for (var s = 0; s < 6; s++) {
             stats[STAT_NAMES[s]] = effectiveStat(p.baseStats, m.level, m.ev, m.iv, nat, null, s);
         }
-        out.push({ slot: m.slot, name: m.name, level: m.level, nature: m.nature, stats: stats });
+        var entry = { slot: m.slot, name: m.name, level: m.level, nature: m.nature, stats: stats };
+        var tm = teamBySlot[String(m.slot)];
+        if (tm) {
+            entry.hpPct = tm.hpPct;
+            entry.ko = !!tm.ko;
+            if (tm.status) entry.status = tm.status;
+        }
+        out.push(entry);
     }
     if (wanted && out.length === 0) return { error: 'pokemon not found: ' + wanted };
     return { pokemon: out };
