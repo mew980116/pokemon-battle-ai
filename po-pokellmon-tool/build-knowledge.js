@@ -524,6 +524,20 @@ function buildLearnsets(pokemon, moves) {
         if (nm) poNumById[toId(nm)] = Number(num);
     }
 
+    // 学习面条目的「世代来源」判断：PS 数据是 Gen9 的，条目形如 {"8M":..., "9L90":...}。
+    // 只有带 Gen8 及更早来源（如 "8M"/"7T"/"3E"）的招式在 Gen8 里才学得到；
+    // 仅 "9x" 来源的是 Gen9 新增途径（实测 13552 条会误判为可学），必须剔除。
+    // 注：PS 的 mods/gen8/learnsets.js 只有 1 个条目（vivillonfancy），说明 PS 认为 Gen8/Gen9 学习面基本一致，
+    //     世代差异全靠这些来源标记区分。
+    const hasGen8OrEarlier = function (srcs) {
+        if (!srcs) return false;
+        for (const s of srcs) {
+            const g = parseInt(String(s).replace(/[^0-9].*$/, ''), 10);
+            if (g && g <= 8) return true;
+        }
+        return false;
+    };
+
     // PO 与 PS 的拼写差异
     const ALIAS = { blacephelon: 'blacephalon' };
     // 招式名拼写差异（PS id -> PO 招式名 toId）：PO 叫 Vice Grip，PS 叫 Vise Grip
@@ -543,6 +557,7 @@ function buildLearnsets(pokemon, moves) {
     const byKey = {};
     const missed = [];
     const unmappedMoves = {};   // PS 招式 id -> 出现次数（PO 没有 / 名字对不上的招式，便于排查）
+    let gen9Only = 0;           // 因仅 Gen9 来源被剔除的条目数
     for (const key in pokemon.byNum) {
         const p = pokemon.byNum[key];
         const nm = String(p.name_en);
@@ -554,13 +569,14 @@ function buildLearnsets(pokemon, moves) {
         if (!ls) { missed.push(key + ' ' + nm); continue; }
         const nums = [];
         for (const mid in ls.learnset) {
+            if (!hasGen8OrEarlier(ls.learnset[mid])) { gen9Only++; continue; }   // Gen9 新增途径，Gen8 学不到
             const n = poNumById[MOVE_ID_ALIAS[mid] || mid];
             if (n) { if (nums.indexOf(n) < 0) nums.push(n); }
             else unmappedMoves[mid] = (unmappedMoves[mid] || 0) + 1;
         }
         if (nums.length) byKey[key] = nums.sort(function (a, b) { return a - b; });
     }
-    return { byKey: byKey, missed: missed, unmappedMoves: unmappedMoves };
+    return { byKey: byKey, missed: missed, unmappedMoves: unmappedMoves, gen9Only: gen9Only };
 }
 
 function main() {
@@ -603,7 +619,7 @@ function main() {
     console.log('abilities.json: ' + Object.keys(abilities.byNum).length + ' abilities');
     console.log('items.json: ' + Object.keys(items.byNum).length + ' items');
     console.log('learnsets.json: ' + Object.keys(learnsets.byKey).length + ' pokemon (missed ' + learnsets.missed.length +
-        ', unmapped moves ' + unmapped.length + ')');
+        ', unmapped moves ' + unmapped.length + ', dropped Gen9-only ' + learnsets.gen9Only + ')');
 }
 
 main();
