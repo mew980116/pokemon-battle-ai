@@ -14,7 +14,7 @@
 //   2. 找一局会出现**沙暴/冰雹/晴天/雨天**的对战（带 Sand Stream / Snow Warning / 沙暴招式都行）
 //   3. 至少打到天气生效后的 2-3 个回合末，然后把 PO 窗口里所有 [PROBE] 行贴回来
 //   4. 关注点：回合末有没有出现任何 onXXX 行；以及同一只宝可梦在两个 onBeginTurn / onOfferChoice
-//      之间的 life 差值是否等于「招式伤害 ± 剩饭」（差出来的那一份就是天气伤害）
+//      之间的 life 差值（dump 里直接打 `Δ-21`）是否等于「招式伤害 ± 剩饭」（差出来的那一份就是天气伤害）
 //   5. 现场排查用（聊天框里发）：`/probe` 立刻 dump 一次；`/eval <表达式>` 现场求值，例如
 //      /eval battle.data.team(battle.opp).poke(0).item   → 对手道具（PO 客户端是否直接可见）
 //      /eval battle.data.field.zone(battle.opp,0)       → 对手场地陷阱
@@ -51,19 +51,26 @@ function pProbePoke(tag, i, tp) {
     return s;
 }
 
-// 打印天气/场地 + 双方全队 HP/状态/道具/特性（含后备，用于观察回合末的间接伤害）
+// 上次 dump 的 HP 快照（用于打印回合间 Δ —— 天气扣血若没有回调，就只能靠这个差值看出来）
+var pProbePrev = {};
+
+// 打印天气/场地 + 双方全队 HP/状态/道具/特性 + 相对上次 dump 的 Δ（含后备）
 function pProbeDump(tag) {
     var out = tag + ' weather=' + battle.data.field.weather + ' terrain=' + battle.data.field.terrain;
-    try {
+    var sides = [['ME', battle.me], ['OPP', battle.opp]];
+    for (var s = 0; s < sides.length; s++) {
         for (var i = 0; i < 6; i++) {
-            try { out += ' | ' + pProbePoke('ME', i, battle.data.team(battle.me).poke(i)); } catch (e) {}
+            try {
+                var tp = battle.data.team(sides[s][1]).poke(i);
+                var key = sides[s][0] + i;
+                var str = pProbePoke(sides[s][0], i, tp);
+                var prev = pProbePrev[key];
+                if (prev !== undefined && prev !== tp.life) str += ' Δ' + (tp.life - prev);
+                pProbePrev[key] = tp.life;
+                out += ' | ' + str;
+            } catch (e) {}
         }
-    } catch (e) {}
-    try {
-        for (var j = 0; j < 6; j++) {
-            try { out += ' | ' + pProbePoke('OPP', j, battle.data.team(battle.opp).poke(j)); } catch (e) {}
-        }
-    } catch (e) {}
+    }
     pProbe(out);
 }
 
