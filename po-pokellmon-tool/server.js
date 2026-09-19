@@ -17,6 +17,19 @@ var url = require('url');
 var fs = require('fs');
 var path = require('path');
 var tools = require('./tools.js');
+var ABILITIES = require('./knowledge/abilities.json');
+var ABILITY_SIGNALS = require('./knowledge/ability_signals.json');
+
+// 某个特性的「触发条件 + 日志消息」提示（按名称 → 编号查 ability_signals.json，可自动排除的依据）
+// 例：Download → Download(入场: logs "X's Download activates!")；无消息的特性写成 no log message
+function abilitySignalHint(name) {
+    var num = ABILITIES.byName[String(name).toLowerCase()];
+    var s = (num !== undefined && ABILITY_SIGNALS[String(num)]) ? ABILITY_SIGNALS[String(num)] : null;
+    if (!s) return String(name);
+    var trigger = s.trigger ? String(s.trigger) : '';
+    var how = s.msg ? ('logs "' + s.msg + '"') : 'no log message (infer from its effect)';
+    return String(name) + '(' + (trigger ? trigger + ': ' : '') + how + ')';
+}
 
 // crash 日志：未捕获异常/未处理拒绝写 crash.log（含堆栈），便于定位服务器崩溃导致的断联
 function appendCrashLog(msg) {
@@ -36,7 +49,7 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.3.67';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.3.68';   // tool 分支版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
 // 对战主脑用 v4-pro（闭卷深想强，决策更深）；一键回 flash：POKELLMON_MODEL=deepseek-v4-flash
@@ -357,6 +370,14 @@ function buildPrompt(state, notes) {
             oppPossible = 'PossibleAbilities:[' + opp.possibleAbilities.join('/') + '],';
         }
         p += 'Opponent current pokemon:' + opp.name + ':Type:' + oppTypes.join('&') + ',HP:' + (opp.hpPct || 0) + '%,' + oppAbi + oppPossible + oppStatus + oppBoosts + '\n';
+        // 特性解析提示：这只还没确定特性时，显式列出候选特性各自的「触发条件 + 消息」，
+        // 便于用「该出消息却没出」来反向排除（如 Porygon-Z 入场没出 Download 消息 → 排除 Download）
+        if (!opp.abilityInferred && opp.possibleAbilities && opp.possibleAbilities.length) {
+            var abBits = [];
+            for (var pi = 0; pi < opp.possibleAbilities.length; pi++) abBits.push(abilitySignalHint(opp.possibleAbilities[pi]));
+            p += 'AbilityAnalysis (unresolved) — ' + abBits.join(' / ') +
+                '. EXCLUDE a candidate whose trigger clearly happened but whose message never appeared in the log (record the exclusion with save_observation).\n';
+        }
         if (opp.fainted) {
             p += 'NOTE: The opponent current pokemon has fainted and will send out a replacement this turn.\n';
         }
