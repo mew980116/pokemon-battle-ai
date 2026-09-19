@@ -15,6 +15,9 @@
 //   3. 至少打到天气生效后的 2-3 个回合末，然后把 PO 窗口里所有 [PROBE] 行贴回来
 //   4. 关注点：回合末有没有出现任何 onXXX 行；以及同一只宝可梦在两个 onBeginTurn / onOfferChoice
 //      之间的 life 差值是否等于「招式伤害 ± 剩饭」（差出来的那一份就是天气伤害）
+//   5. 现场排查用（聊天框里发）：`/probe` 立刻 dump 一次；`/eval <表达式>` 现场求值，例如
+//      /eval battle.data.team(battle.opp).poke(0).item   → 对手道具（PO 客户端是否直接可见）
+//      /eval battle.data.field.zone(battle.opp,0)       → 对手场地陷阱
 //
 // 自检：贴好后开一局，只要看到 [PROBE] === onOfferChoice (heartbeat) === 就说明绑定成功。
 // =====================================================================
@@ -29,23 +32,30 @@ function pProbeSpot(spot) {
     try { return (spot === battle.me) ? 'ME' : ((spot === battle.opp) ? 'OPP' : '?'); } catch (e) { return '?'; }
 }
 
-// 打印天气/场地 + 双方全队 HP（含后备，用于观察回合末的间接伤害）
+function pklmSafe(fn, v) {
+    try { var r = fn(v); return (r === undefined || r === null || r === '') ? ('#' + v) : r; } catch (e) { return 'ERR'; }
+}
+
+// 单只：HP + 状态 + 道具 + 特性（道具/特性都 try/catch —— 用来确认 PO 客户端能不能直接读到对手的道具/特性）
+function pProbePoke(tag, i, tp) {
+    var s = tag + i + '(' + sys.pokemon(tp.numRef) + ')=' + tp.life + '/' + tp.totalLife;
+    try { s += ' st=' + tp.status; } catch (e) {}
+    try { s += ' item=' + pklmSafe(sys.item, tp.item); } catch (e) {}
+    try { s += ' ab=' + pklmSafe(sys.ability, tp.ability); } catch (e) {}
+    return s;
+}
+
+// 打印天气/场地 + 双方全队 HP/状态/道具/特性（含后备，用于观察回合末的间接伤害）
 function pProbeDump(tag) {
     var out = tag + ' weather=' + battle.data.field.weather + ' terrain=' + battle.data.field.terrain;
     try {
         for (var i = 0; i < 6; i++) {
-            try {
-                var t = battle.data.team(battle.me).poke(i);
-                out += ' | ME' + i + '(' + sys.pokemon(t.numRef) + ')=' + t.life + '/' + t.totalLife;
-            } catch (e) {}
+            try { out += ' | ' + pProbePoke('ME', i, battle.data.team(battle.me).poke(i)); } catch (e) {}
         }
     } catch (e) {}
     try {
         for (var j = 0; j < 6; j++) {
-            try {
-                var o = battle.data.team(battle.opp).poke(j);
-                out += ' | OPP' + j + '(' + sys.pokemon(o.numRef) + ')=' + o.life + '/' + o.totalLife;
-            } catch (e) {}
+            try { out += ' | ' + pProbePoke('OPP', j, battle.data.team(battle.opp).poke(j)); } catch (e) {}
         }
     } catch (e) {}
     pProbe(out);
@@ -55,6 +65,18 @@ print('[PROBE] installed — 开一局有天气的对战（沙暴/冰雹最好�
 
 // !! 下面这条裸对象字面量必须是本文件的**最后一条语句**：PO 取它的值当回调表。
 ({
+    // 交互命令（在 PO 聊天框里发）：/probe 立刻 dump 一次；/eval <表达式> 现场求值（如
+    //   /eval battle.data.team(battle.opp).poke(0).item   或   /eval battle.data.field.zone(battle.opp,0)
+    onPlayerMessage: function (player, message) {
+        try {
+            if (player !== battle.me) return;
+            if (message.indexOf('/probe') === 0) { pProbe('=== manual dump ==='); pProbeDump('MANUAL'); return; }
+            if (message.indexOf('/eval ') === 0) {
+                try { pProbe('eval => ' + eval(message.substring(6))); } catch (e) { pProbe('eval error: ' + e); }
+                return;
+            }
+        } catch (e) { pProbe('onPlayerMessage error: ' + e); }
+    },
     // 每回合必然触发的「心跳」：PO 每次要我方决策都会调它 —— 只要看到这条，就说明探针绑定成功。
     // 它同时也是最有用的 HP 快照点：决策时 = 上回合结算完后，正好用来算回合间的 HP 差。
     onOfferChoice: function (player, choice) { pProbe('=== onOfferChoice (heartbeat) ==='); pProbeDump('CHOICE'); },
