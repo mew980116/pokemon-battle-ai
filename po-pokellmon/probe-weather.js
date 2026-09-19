@@ -6,11 +6,14 @@
 //      但我们的战报**根本不记录天气伤害**（我方超能系宝可梦在沙暴下同样没有掉血行）。
 //
 // 用法：
-//   1. 把本文件全文贴进 PO 的 battle script 窗口（**替换** po-script.js，测完再贴回去）
+//   1. **先把本文件全文贴进 PO 的 battle script 窗口（替换 po-script.js），然后再开一局**（!!）
+//      PO 在开战时就把回调绑好了：**中途贴对当前这一局无效**（表现为整局没有任何 [PROBE] 行）。
 //   2. 找一局会出现**沙暴/冰雹/晴天/雨天**的对战（带 Sand Stream / Snow Warning / 沙暴招式都行）
 //   3. 至少打到天气生效后的 2-3 个回合末，然后把 PO 窗口里所有 [PROBE] 行贴回来
-//   4. 关注点：回合末有没有出现任何 onXXX 行；以及同一只宝可梦在两个 onBeginTurn 之间的
-//      life 差值是否等于「招式伤害 ± 剩饭」（差出来的那一份就是天气伤害）
+//   4. 关注点：回合末有没有出现任何 onXXX 行；以及同一只宝可梦在两个 onBeginTurn / onOfferChoice
+//      之间的 life 差值是否等于「招式伤害 ± 剩饭」（差出来的那一份就是天气伤害）
+//
+// 自检：贴好后**先开一局空打**，只要能看到 [PROBE] onOfferChoice / onBeginTurn 的打点，就说明绑定成功。
 // =====================================================================
 
 function pProbe() {
@@ -46,6 +49,10 @@ function pProbeDump(tag) {
 }
 
 var script = {
+    // 每回合必然触发的「心跳」：PO 每次要我方决策都会调它 —— 只要看到这两条之一，就说明探针绑定成功。
+    // 它同时也是最有用的 HP 快照点：决策时 = 上回合结算完后，正好用来算回合间的 HP 差。
+    onOfferChoice: function (player, choice) { pProbe('=== onOfferChoice (heartbeat) ==='); pProbeDump('CHOICE'); },
+    onChoiceSelection: function (player) { pProbe('=== onChoiceSelection (heartbeat) ==='); },
     onBeginTurn: function (turn) { pProbe('=== onBeginTurn turn=' + turn + ' ==='); pProbeDump('T' + turn); },
     onEndTurn: function () { pProbe('=== onEndTurn ==='); pProbeDump('END'); },
     onTurnEnd: function () { pProbe('=== onTurnEnd ==='); pProbeDump('TURNEND'); },
@@ -78,4 +85,4 @@ var script = {
 };
 
 // 若 PO 支持「每回合自动调用」的钩子，这里再补一个手动面板：/probe 命令打印当前 dump
-print('[PROBE] installed — 打一局有天气的对战，把 [PROBE] 行贴回来');
+print('[PROBE] installed — 现在**开一局新对战**（若上一局是中途贴的请重开），打有天气的把 [PROBE] 行贴回来');
