@@ -543,15 +543,65 @@ function buildLearnsets(pokemon, moves) {
     // 招式名拼写差异（PS id -> PO 招式名 toId）：PO 叫 Vice Grip，PS 叫 Vise Grip
     const MOVE_ID_ALIAS = { visegrip: 'vicegrip' };
     const numOf = function (k) { const i = k.indexOf(':'); return i < 0 ? k : k.substring(0, i); };
+    const psDex = require(path.join(PS_DIST, 'pokedex.js')).Pokedex;
     // 取有效学习面：PS 里部分形态条目存在但无 learnset（靠 baseSpecies 继承），这类要往下回退
     const tryLs = function (id) { const e = psLearn[id]; return (e && e.learnset) ? e : null; };
+    // PO 名 -> PS id（名称归一化；含 PO/PS 拼写差异与「去掉形态后缀」回退）
+    const resolvePsId = function (nm) {
+        const cands = [toId(nm), ALIAS[toId(nm)], toId(String(nm).split('-')[0])];
+        for (const c of cands) { if (c && tryLs(c)) return c; }
+        return null;
+    };
+    // 合并「自身 + 进化前(prevo) + 基础种(baseSpecies)」的 learnset，来源数组做并集。
+    // 三种 PS 数据形态都要处理：
+    //  ① 进化前：蛋招/进化前才学的招记在 prevo 上（阿罗拉九尾的 Freeze-Dry 来自阿罗拉六尾 "8E"）
+    //  ② 同种形态：PS 只记增量（rotommow 只有 leafstorm），其余靠 baseSpecies 合并
+    //  ③ 地区形态（Alola/Galar/Hisui/Paldea）在 PS 里是**完整**条目，**不能**再并原种，否则会混入原种招式
+    //     （例：阿罗拉九尾不能学九尾的 Fire Blast）
+    // 另：同一招自身可能只有 "9L1"（Gen9 才有），而 prevo 的蛋招是 "8E" → 必须并集而不是取首个。
+    const REGIONAL_FORMES = { Alola: 1, Galar: 1, Hisui: 1, Paldea: 1 };
+    const mergeLearnset = function (psId) {
+        const merged = {};
+        const seen = {};
+        const queue = [psId];
+        while (queue.length) {
+            const id = queue.shift();
+            if (!id || seen[id]) continue;
+            seen[id] = 1;
+            const e = psLearn[id];
+            if (e && e.learnset) {
+                for (const mid in e.learnset) {
+                    merged[mid] = merged[mid] ? merged[mid].concat(e.learnset[mid]) : e.learnset[mid].slice();
+                }
+            }
+            const pd = psDex[id];
+            if (pd) {
+                if (pd.prevo) queue.push(toId(pd.prevo));
+                const bs = pd.baseSpecies ? toId(pd.baseSpecies) : null;
+                if (bs && bs !== id && !REGIONAL_FORMES[pd.forme]) queue.push(bs);
+            }
+        }
+        return merged;
+    };
 
-    // 先建立「基础形态 num -> 学习面」，供战斗中临时形态（Deoxys-Attack / Aegislash-Blade 等）回退
-    const baseLs = {};
+    // PO 自己的 Gen8 学习面（po-data/pokes/all_moves.txt，key "num:forme"，基础形态是 ":0"）。
+    // 并进结果的原因：PS 数据是 **Gen9** 的，缺少数 Gen8 专属途径（实测阿罗拉九尾的 Freeze-Dry
+    // 在 PS 里只有 "9L1"、自身条目无 Gen8 来源）；PO 的 Gen8 数据在这里是对的，两边取并集
+    // 可以避免「合法招式被判非法」的假 CAUTION（假警报比漏报更有害）。
+    const poMoves = {};
+    for (const line of readText(path.join(DATA, 'pokes', 'all_moves.txt')).split('\n')) {
+        const t = line.trim();
+        if (!t) continue;
+        const sp = t.split(/\s+/);
+        poMoves[sp[0]] = sp.slice(1).map(Number);
+    }
+
+    // 先建立「基础形态 num -> PS id」，供战斗中临时形态（Deoxys-Attack / Aegislash-Blade 等）回退
+    const baseId = {};
     for (const key in pokemon.byNum) {
         if (key.indexOf(':') >= 0) continue;
-        const ls = tryLs(toId(pokemon.byNum[key].name_en));
-        if (ls) baseLs[numOf(key)] = ls;
+        const id = resolvePsId(pokemon.byNum[key].name_en);
+        if (id) baseId[numOf(key)] = id;
     }
 
     const byKey = {};
@@ -561,20 +611,25 @@ function buildLearnsets(pokemon, moves) {
     for (const key in pokemon.byNum) {
         const p = pokemon.byNum[key];
         const nm = String(p.name_en);
-        const ls = tryLs(toId(nm))
-            || tryLs(ALIAS[toId(nm)])          // PO 拼写差异
-            || tryLs(toId(nm.split('-')[0]))   // 去掉形态后缀
-            || baseLs[numOf(key)]              // 回退到同编号基础形态
-            || null;
-        if (!ls) { missed.push(key + ' ' + nm); continue; }
         const nums = [];
-        for (const mid in ls.learnset) {
-            if (!hasGen8OrEarlier(ls.learnset[mid])) { gen9Only++; continue; }   // Gen9 新增途径，Gen8 学不到
-            const n = poNumById[MOVE_ID_ALIAS[mid] || mid];
-            if (n) { if (nums.indexOf(n) < 0) nums.push(n); }
-            else unmappedMoves[mid] = (unmappedMoves[mid] || 0) + 1;
+        // ① PS 分支（数据源 Gen9，按「Gen8 及更早来源」过滤）
+        const psId = resolvePsId(nm) || baseId[numOf(key)] || null;
+        if (psId) {
+            const merged = mergeLearnset(psId);
+            for (const mid in merged) {
+                if (!hasGen8OrEarlier(merged[mid])) { gen9Only++; continue; }   // Gen9 新增途径，Gen8 学不到
+                const n = poNumById[MOVE_ID_ALIAS[mid] || mid];
+                if (n) { if (nums.indexOf(n) < 0) nums.push(n); }
+                else unmappedMoves[mid] = (unmappedMoves[mid] || 0) + 1;
+            }
+        }
+        // ② PO 自己的 Gen8 学习面分支（并集；PO 基础形态 key 是 "num:0"）
+        const poList = poMoves[key.indexOf(':') < 0 ? key + ':0' : key] || [];
+        for (const n of poList) {
+            if (moves[n] && nums.indexOf(n) < 0) nums.push(n);
         }
         if (nums.length) byKey[key] = nums.sort(function (a, b) { return a - b; });
+        else missed.push(key + ' ' + nm);
     }
     return { byKey: byKey, missed: missed, unmappedMoves: unmappedMoves, gen9Only: gen9Only };
 }
@@ -600,7 +655,7 @@ function main() {
     fs.writeFileSync(path.join(KNOWLEDGE, 'items.json'), JSON.stringify(items, null, 2));
 
     const learnsets = buildLearnsets(pokemon, moves);
-    fs.writeFileSync(path.join(KNOWLEDGE, 'learnsets.json'), JSON.stringify({ source: 'pokemon-showdown', byKey: learnsets.byKey }));
+    fs.writeFileSync(path.join(KNOWLEDGE, 'learnsets.json'), JSON.stringify({ source: 'pokemon-showdown(Gen8-filtered, prevo+baseSpecies merged) + PO Gen8 all_moves.txt', byKey: learnsets.byKey }));
     if (learnsets.missed.length) {
         fs.writeFileSync(path.join(KNOWLEDGE, 'learnsets.missed.txt'), learnsets.missed.join('\n'));
     }

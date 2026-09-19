@@ -66,7 +66,7 @@
 | `moves.json` | `movedata.json` + `po-data/moves/8G/*.txt` + `zh-cn/db/moves/moves.txt` | `num → {name, name_zh, power, accuracy, category, type, priority, tags, desc(精简对战效果), effect_chance, flinch_chance, healing, crit_rate}` |
 | `abilities.json` | `po-data/abilities/*` + `zh-cn/.../abilities.txt` | `num → {name, name_zh, desc_zh, desc_en, has_msg, merged}` + 反向索引 + `deleted`（PO 已删特性） |
 | `items.json` | `po-data/items/*` + zh-cn 中文名 | `num → {name, name_zh, desc_zh, desc_en, has_msg}` + 反向索引 |
-| `learnsets.json` | `pokemon-showdown/dist/data/learnsets.js`（+ `moves.js` 取编号） | `{byKey: key → [招式编号...]}`，key 与 `pokemon.json` 一致；源用 PS（比 PO 准），missed 0 |
+| `learnsets.json` | `pokemon-showdown` 的 learnsets+pokedex（**按 Gen8 及更早来源过滤**、并合并 prevo/baseSpecies）**∪** `po-data/pokes/all_moves.txt` | `{byKey: key → [招式编号...]}`，key 与 `pokemon.json` 一致；**两边取并集**（PS 是 Gen9 数据、缺 Gen8 专属途径如蛋招；PO 文件有缺项），missed 0 |
 
 收录基础形态 + 合法形态（排除 Mega `M` / 极巨化 `G`）：key 为 `num`（基础）或 `num:forme`（形态）；形态缺属性/体重/特性条目时**按槽位继承**基础形态。
 
