@@ -92,13 +92,14 @@ var TOOL_DEFS = [
         type: 'function',
         function: {
             name: 'save_strategy',
-            description: 'Record this turn\'s strategy note (read -> plan -> next-turn sequence -> final call). This is REQUIRED every turn: write it as six labeled lines and answer ALL of them, do not omit any. (1) ATTACK? — is the opponent likely to attack, and with what? Consider their revealed moves plus moves they plausibly carry but have not shown. (2) SWITCH? — are they likely to switch, and to whom? Infer only from the pokemon they have revealed plus current HP/status. (3) THEIR READ OF ME — what do they know about my team, and will they treat what they have not seen as a threat or ignore it? (4) MOST LIKELY ACTION + MY RESPONSE — their single most likely action, my best response to it, whether being wrong leaves me badly off, and what would falsify the read. (5) ACTION SEQUENCE UNTIL MY NEXT DECISION — if both sides act as you just predicted, list, IN ORDER, every action that happens from now until your next decision point (this usually spans two turns), respecting the speed/priority order rules (who moves first — use your speed estimate for the opponent; note priority moves, switch timing, faints, hazards/weather/leftovers/status ticks). Then state concretely what the board looks like at your next decision (both HP%, any faint, boosts). This is where you catch a plan that quietly assumes the opponent does nothing. (6) FINAL CALL — the action you actually choose. Two heuristics: when several moves could KO, prefer the one that also covers a likely switch-in over the single highest damage; when you hard-counter the pokemon in front but know little about their bench, consider setting hazards / boosting / Substitute instead of attacking into a switch. Keep each line short.',
+            description: 'Record this turn\'s strategy note. Two parts, BOTH required. PART A — write `text` as six labeled lines, answering ALL of them: (1) ATTACK? — is the opponent likely to attack, and with what? Consider their revealed moves plus moves they plausibly carry but have not shown. (2) SWITCH? — are they likely to switch, and to whom? Infer only from the pokemon they have revealed plus current HP/status. (3) THEIR READ OF ME — what do they know about my team, and will they treat what they have not seen as a threat or ignore it? (4) MOST LIKELY ACTION + MY RESPONSE — their single most likely action, my best response to it, whether being wrong leaves me badly off, and what would falsify the read. (5) ACTION SEQUENCE UNTIL MY NEXT DECISION — if both sides act as you just predicted, list, IN ORDER, every action that happens from now until your next decision point (this usually spans two turns), respecting the speed/priority order rules (who moves first — use your speed estimate for the opponent; note priority moves, switch timing, faints, hazards/weather/leftovers/status ticks). Then state concretely what the board looks like at your next decision (both HP%, any faint, boosts). This is where you catch a plan that quietly assumes the opponent does nothing. (6) FINAL CALL — the action you actually choose. PART B — fill `advice`: what you want to leave for your LATER decisions. NOTE: only the `advice` field is carried forward — your most recent TWO turns\' advice is merged into the prompt on later turns, while the `text` above is NOT carried over. So put in `advice` the few things a future turn still needs: your read on the opponent so far, the plan you are committing to, the speed line, what would change your mind. Write it short, current and self-contained (a later turn should be able to act on it without the read above); if nothing is worth carrying over, still write the single most useful sentence. Two heuristics for (4)/(6): when several moves could KO, prefer the one that also covers a likely switch-in over the single highest damage; when you hard-counter the pokemon in front but know little about their bench, consider setting hazards / boosting / Substitute instead of attacking into a switch. Keep every line short.',
             parameters: {
                 type: 'object',
                 properties: {
-                    text: { type: 'string', description: 'Six labeled lines "(1) ATTACK: ... (2) SWITCH: ... (3) THEIR READ OF ME: ... (4) MOST LIKELY ACTION + MY RESPONSE: ... (5) ACTION SEQUENCE UNTIL MY NEXT DECISION: ... (6) FINAL CALL: ..." — all six required.' }
+                    text: { type: 'string', description: 'Six labeled lines "(1) ATTACK: ... (2) SWITCH: ... (3) THEIR READ OF ME: ... (4) MOST LIKELY ACTION + MY RESPONSE: ... (5) ACTION SEQUENCE UNTIL MY NEXT DECISION: ... (6) FINAL CALL: ..." — all six required. Not carried over to later turns.' },
+                    advice: { type: 'string', description: 'Short self-contained note for your LATER decisions (your read so far, the plan you are committing to, the speed line, what would change your mind). The most recent TWO turns\' advice is merged into later prompts; keep it current.' }
                 },
-                required: ['text']
+                required: ['text', 'advice']
             }
         }
     },
@@ -435,13 +436,16 @@ function saveObservation(args, ctx) {
 }
 
 // 记录当前回合的战略思路（默认用当前 turn；可显式指定 turn）
+// 存成 {text, advice}：text = 本回合的先读/推演（只用于本回合，不回灌）；
+// advice = 留给后续决策的建议（server 只把最近 2 条 advice 注入后续 prompt）
 function saveStrategy(args, ctx) {
     if (!args.text) return { error: 'text required' };
+    if (!args.advice) return { error: 'advice required (what to leave for your later decisions)' };
     var notes = ctx && ctx.notes;
     if (!notes) return { error: 'no notes store' };
     if (!notes.turns) notes.turns = {};
     var t = (args.turn !== undefined && args.turn !== null) ? parseInt(args.turn, 10) : (ctx.turn || 0);
-    notes.turns[String(t)] = String(args.text);
+    notes.turns[String(t)] = { text: String(args.text), advice: String(args.advice) };
     return { ok: true, turn: t };
 }
 
