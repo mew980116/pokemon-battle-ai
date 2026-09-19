@@ -92,14 +92,14 @@ var TOOL_DEFS = [
         type: 'function',
         function: {
             name: 'save_strategy',
-            description: 'Record this turn\'s strategy note. Two parts, BOTH required. PART A — write `text` as six labeled lines, answering ALL of them: (1) ATTACK? — is the opponent likely to attack, and with what? Consider their revealed moves plus moves they plausibly carry but have not shown. (2) SWITCH? — are they likely to switch, and to whom? Infer only from the pokemon they have revealed plus current HP/status. (3) THEIR READ OF ME — what do they know about my team, and will they treat what they have not seen as a threat or ignore it? (4) MOST LIKELY ACTION + MY RESPONSE — their single most likely action, my best response to it, whether being wrong leaves me badly off, and what would falsify the read. (5) ACTION SEQUENCE UNTIL MY NEXT DECISION — if both sides act as you just predicted, list, IN ORDER, every action that happens from now until your next decision point (this usually spans two turns), respecting the speed/priority order rules (who moves first — use your speed estimate for the opponent; note priority moves, switch timing, faints, hazards/weather/leftovers/status ticks). Then state concretely what the board looks like at your next decision (both HP%, any faint, boosts). This is where you catch a plan that quietly assumes the opponent does nothing. (6) FINAL CALL — the action you actually choose. PART B — fill `advice`: the checks your LATER turns must run against the battle log. This is NOT advice about what to play — it is a list of your current assumptions that you are unsure about, phrased as things to VERIFY next time you read the log. Think "you watch whether X hits harder than I assumed", "check whether X is actually faster than I thought", "confirm whether it can really learn that move", "see whether it stayed in or switched". Each check should name what you assumed, what would confirm it, and what would refute it. NOTE: only `advice` is carried forward — your most recent TWO turns\' advice is merged into later prompts, while the `text` above is not — so keep it to the few checks that matter most and drop the ones already resolved. If nothing is uncertain, say so in one short line. Two heuristics for (4)/(6): when several moves could KO, prefer the one that also covers a likely switch-in over the single highest damage; when you hard-counter the pokemon in front but know little about their bench, consider setting hazards / boosting / Substitute instead of attacking into a switch. Keep every line short.',
+            description: 'Record this turn\'s strategy note. Two parts, BOTH required. PART A — write `text` as six labeled lines, answering ALL of them: (1) ATTACK? — is the opponent likely to attack, and with what? Consider their revealed moves plus moves they plausibly carry but have not shown. (2) SWITCH? — are they likely to switch, and to whom? Infer only from the pokemon they have revealed plus current HP/status. (3) THEIR READ OF ME — what do they know about my team, and will they treat what they have not seen as a threat or ignore it? (4) MOST LIKELY ACTION + MY RESPONSE — their single most likely action, my best response to it, whether being wrong leaves me badly off, and what would falsify the read. (5) ACTION SEQUENCE UNTIL MY NEXT DECISION — if both sides act as you just predicted, list, IN ORDER, every action that happens from now until your next decision point (this usually spans two turns), respecting the speed/priority order rules (who moves first — use your speed estimate for the opponent; note priority moves, switch timing, faints, hazards/weather/leftovers/status ticks). Then state concretely what the board looks like at your next decision (both HP%, any faint, boosts). This is where you catch a plan that quietly assumes the opponent does nothing. (6) FINAL CALL — the action you actually choose. PART B — fill `checks`: the checks your LATER turns must run against the battle log. This is NOT advice about what to play — it is a list of your current assumptions that you are unsure about, phrased as things to VERIFY next time you read the log. Think "you watch whether X hits harder than I assumed", "check whether X is actually faster than I thought", "confirm whether it can really learn that move", "see whether it stayed in or switched". Each check should name what you assumed, what would confirm it, and what would refute it. NOTE: only `checks` is carried forward — your most recent TWO turns\' checks are merged into later prompts, while the `text` above is not — so keep it to the few checks that matter most and drop the ones already resolved. If nothing is uncertain, say so in one short line. Two heuristics for (4)/(6): when several moves could KO, prefer the one that also covers a likely switch-in over the single highest damage; when you hard-counter the pokemon in front but know little about their bench, consider setting hazards / boosting / Substitute instead of attacking into a switch. Keep every line short.',
             parameters: {
                 type: 'object',
                 properties: {
                     text: { type: 'string', description: 'Six labeled lines "(1) ATTACK: ... (2) SWITCH: ... (3) THEIR READ OF ME: ... (4) MOST LIKELY ACTION + MY RESPONSE: ... (5) ACTION SEQUENCE UNTIL MY NEXT DECISION: ... (6) FINAL CALL: ..." — all six required. Not carried over to later turns.' },
-                    advice: { type: 'string', description: 'Checks for your LATER turns to run against the battle log — your current assumptions stated as things to verify next time (e.g. "verify whether X hits harder than I assumed, refuted if it does <40%"; "check whether X is really faster than Y"). The most recent TWO turns\' advice is merged into later prompts; drop checks already resolved.' }
+                    checks: { type: 'string', description: 'Checks for your LATER turns to run against the battle log — your current assumptions stated as things to verify next time (e.g. "verify whether X hits harder than I assumed, refuted if it does <40%"; "check whether X is really faster than Y"). The most recent TWO turns\' checks are merged into later prompts; drop checks already resolved.' }
                 },
-                required: ['text', 'advice']
+                required: ['text', 'checks']
             }
         }
     },
@@ -436,16 +436,16 @@ function saveObservation(args, ctx) {
 }
 
 // 记录当前回合的战略思路（默认用当前 turn；可显式指定 turn）
-// 存成 {text, advice}：text = 本回合的先读/推演（只用于本回合，不回灌）；
-// advice = 留给后续决策的建议（server 只把最近 2 条 advice 注入后续 prompt）
+// 存成 {text, checks}：text = 本回合的先读/推演（只用于本回合，不回灌）；
+// checks = 留给后续回合核对的待验证假设（server 只把最近 2 条 checks 注入后续 prompt）
 function saveStrategy(args, ctx) {
     if (!args.text) return { error: 'text required' };
-    if (!args.advice) return { error: 'advice required (what to leave for your later decisions)' };
+    if (!args.checks) return { error: 'checks required (the assumptions your later turns should verify against the battle log)' };
     var notes = ctx && ctx.notes;
     if (!notes) return { error: 'no notes store' };
     if (!notes.turns) notes.turns = {};
     var t = (args.turn !== undefined && args.turn !== null) ? parseInt(args.turn, 10) : (ctx.turn || 0);
-    notes.turns[String(t)] = { text: String(args.text), advice: String(args.advice) };
+    notes.turns[String(t)] = { text: String(args.text), checks: String(args.checks) };
     return { ok: true, turn: t };
 }
 
