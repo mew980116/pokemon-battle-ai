@@ -82,9 +82,10 @@ var TOOL_DEFS = [
                 properties: {
                     pokemon: { type: 'string', description: 'Opposing pokemon name' },
                     text: { type: 'string', description: 'Your observation text. Tag each fact as [proved] (directly observed) or [estimated] (inferred).' },
+                    threat: { type: 'string', enum: ['High', 'Medium', 'Low'], description: 'Your current read of how dangerous this pokemon is TO ME (High/Medium/Low). Always include it and revise it whenever new information changes how much it threatens my team — a new revealed move, item or set can move it up or down.' },
                     append: { type: 'boolean', description: 'If true, append to the existing note instead of overwriting. Default false.' }
                 },
-                required: ['pokemon', 'text']
+                required: ['pokemon', 'text', 'threat']
             }
         }
     },
@@ -92,7 +93,7 @@ var TOOL_DEFS = [
         type: 'function',
         function: {
             name: 'save_strategy',
-            description: 'Record this turn\'s strategy note. All three fields are required. `text` — answer these labeled lines, short: (1) ATTACK? — is the opponent likely to attack, with what? Give 2-3 candidate moves with rough likelihood. DO NOT assume it uses the highest-damage move against your active pokemon — especially when you know little about its set (a safe/utility move, or coverage it has not shown, is often just as likely). (2) SWITCH? — is it likely to switch, to whom (only from revealed pokemon + their HP/status)? (3) THEIR READ OF ME — what does it know about my team, what will it treat as a threat or ignore? (4) MY OPTIONS & THE COST OF SWITCHING — go through your own candidate actions; for any VOLUNTARY switch spell out (a) the cost: you forfeit this turn AND the switch-in eats the opponent\'s move AND may also take entry-hazard damage coming in; (b) the benefit; (c) does the switch still gain under SEVERAL plausible opponent actions, or does it leave you much worse off against some of them? Only skip this enumeration when the opponent\'s action is genuinely forced (e.g. it is Choice-locked into a move you already know). (5) MOST LIKELY ACTION + MY RESPONSE — the single most likely opponent action, my best reply, and what would falsify the read. (6) ACTION SEQUENCE UNTIL MY NEXT DECISION — in order, everything that happens from now until your next decision, respecting speed/priority. PURPOSE: this step exists to SPOT DANGER, not to avoid losing pokemon. If every option gets your active pokemon killed anyway, pick the most valuable one (fire off its last hit, trade it for a kill) — never drag the team into a worse position just to keep it alive. `scene` — the board you EXPECT at your next decision (both active pokemon with HP ranges, who is fainted, and any relevant item / ability / boost / hazard / weather state). It is carried into your next prompt and compared against what actually happened. `checks` — what your later turns must VERIFY against the battle log: your uncertain assumptions, written as tests with what would confirm or refute each. REPLACEMENT MODE: if the prompt NOTE says your pokemon has fainted and you are only choosing a replacement, do NOT answer (1)(2)(5)(6); instead answer (R1) what the replacement must survive (a forced replacement happens in the end-of-turn phase, so the opponent gets NO extra action), (R2) each candidate: can it take that hit plus entry hazards, and what can it do on the very next turn, (R3) your pick. Still fill `scene` and `checks`.',
+            description: 'Record this turn\'s strategy note. All three fields are required. `text` — answer these labeled lines, short: (1) ATTACK? — is the opponent likely to attack, with what? Name 2-3 candidate moves, say which you expect, how confident you are and on what that confidence rests. Two things must shape it: (a) DO NOT assume it uses the highest-damage move against your active pokemon — especially when you know little about its set (a safe/utility move or unshown coverage is often just as likely); (b) it is playing against what it expects YOU to do, so a move that punishes your planned action (e.g. a Dark move aimed at the Ghost you are about to switch in) is likelier than its raw frequency in its movepool suggests. (2) SWITCH? — is it likely to switch, to whom (only from revealed pokemon + their HP/status)? (3) THEIR READ OF ME — what does it know about my team, what will it treat as a threat or ignore? (4) MY OPTIONS & THE COST OF SWITCHING — for any VOLUNTARY switch, work through all of it: (a) the cost — you forfeit this turn, the switch-in eats the opponent\'s move, and it may ALSO take entry-hazard damage coming in; (b) how much do you actually GAIN — does the switch-in force a kill, start a setup, or chunk/KO a dangerous threat, or can it only chip? (c) how confident are you in your read of their action this turn, and on what basis (their set, what they think you will do, their revealed habits)? (d) are you already behind — do you only win if they play exactly what you predicted, or by assuming an unrevealed high-threat move is not carried, or by hoping they make a mistake? (e) is there a steadier line — a switch-in that takes little (or heals / can stall), or simply attacking? Only skip this when the opponent\'s action is genuinely forced (e.g. it is Choice-locked into a move you already know). (5) MOST LIKELY ACTION + MY RESPONSE — the single most likely opponent action, my best reply, and what would falsify the read. (6) ACTION SEQUENCE UNTIL MY NEXT DECISION — in order, everything that happens from now until your next decision, respecting speed/priority. PURPOSE: this step exists to SPOT DANGER, not to avoid losing pokemon. If every option gets your active pokemon killed anyway, pick the most valuable one (fire off its last hit, trade it for a kill) — never drag the team into a worse position just to keep it alive. `scene` — the board you EXPECT at your next decision (both active pokemon with HP ranges, who is fainted, and any relevant item / ability / boost / hazard / weather state). It is carried into your next prompt and compared against what actually happened. `checks` — what your later turns must VERIFY against the battle log: your uncertain assumptions, written as tests with what would confirm or refute each. REPLACEMENT MODE: if the prompt NOTE says your pokemon has fainted and you are only choosing a replacement, do NOT answer (1)(2)(5)(6); instead answer (R1) what the replacement must survive (a forced replacement happens in the end-of-turn phase, so the opponent gets NO extra action), (R2) each candidate: can it take that hit plus entry hazards, and what can it do on the very next turn, (R3) your pick. Still fill `scene` and `checks`.',
             parameters: {
                 type: 'object',
                 properties: {
@@ -424,16 +425,19 @@ function getBattleHistory(args, state) {
 // 记录对某只对手宝可梦的观察（默认覆盖同名旧笔记；append=true 时追加）
 function saveObservation(args, ctx) {
     if (!args.pokemon || !args.text) return { error: 'pokemon and text required' };
+    if (!args.threat) return { error: 'threat required (High / Medium / Low — how dangerous this pokemon is to my team)' };
     var notes = ctx && ctx.notes;
     if (!notes) return { error: 'no notes store' };
     if (!notes.pokemon) notes.pokemon = {};
+    if (!notes.threat) notes.threat = {};
     var key = String(args.pokemon);
     if (args.append && notes.pokemon[key]) {
         notes.pokemon[key] = notes.pokemon[key] + ' | ' + String(args.text);
     } else {
         notes.pokemon[key] = String(args.text);
     }
-    return { ok: true, pokemon: args.pokemon, mode: (args.append ? 'append' : 'overwrite') };
+    notes.threat[key] = String(args.threat);
+    return { ok: true, pokemon: args.pokemon, threat: String(args.threat), mode: (args.append ? 'append' : 'overwrite') };
 }
 
 // 记录当前回合的战略思路（默认用当前 turn；可显式指定 turn）
@@ -455,10 +459,16 @@ function saveStrategy(args, ctx) {
 function getObservation(args, ctx) {
     var notes = ctx && ctx.notes;
     var p = (notes && notes.pokemon) || {};
+    var th = (notes && notes.threat) || {};
     if (args.pokemon) {
-        return { pokemon: args.pokemon, observation: p[String(args.pokemon)] || null };
+        var k = String(args.pokemon);
+        return { pokemon: args.pokemon, observation: p[k] || null, threat: th[k] || null };
     }
-    return { observations: p };
+    var out = {};
+    for (var key in p) {
+        out[key] = { threat: th[key] || null, observation: p[key] };   // 带威胁等级（高中低）一起返回
+    }
+    return { observations: out };
 }
 
 // 读取战略思路（不传 turn 返回全部）
