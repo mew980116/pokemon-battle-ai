@@ -65,7 +65,7 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.4.2';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
+var SERVER_VERSION = '0.4.3';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
 
 // ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
 // 对战主脑用 v4-pro（闭卷深想强，决策更深）；一键回 flash：POKELLMON_MODEL=deepseek-v4-flash
@@ -710,7 +710,9 @@ function handleChoice(res, state) {
     }
 
     // 最后兜底：关思考（no-think）快速要一个答案，不再继续 tool loop
-    function finalizeNoThink() {
+    // reasonTag 用于区分触发路径（超时 / 工具轮次用尽），写进 fallback 的 reason 便于复盘
+    function finalizeNoThink(reasonTag) {
+        var tag = reasonTag || 'timeout';
         callDS(true, function (err, statusCode, data) {
             var reply = '';
             if (!err && statusCode === 200) {
@@ -718,7 +720,7 @@ function handleChoice(res, state) {
                 reply = msg2.content || '';
             }
             var action = parseAction(reply, state);
-            if (!action) action = fallbackAction(state, err ? 'timeout_noThink_error' : 'timeout_parse_failed');
+            if (!action) action = fallbackAction(state, err ? (tag + '_noThink_error') : (tag + '_parse_failed'));
             respond(action, reply);
         });
     }
@@ -773,8 +775,14 @@ function handleChoice(res, state) {
                 pushProgress(state, { phase: 'tool', round: rounds, ms: ms, calls: liveCalls });
 
                 if (rounds >= MAX_TOOL_ROUNDS) {
-                    var fa2 = fallbackAction(state, 'tool_rounds_exceeded');
-                    respond(fa2, reply);
+                    // 工具轮次用尽：不直接硬兜底（旧行为 = 返回招式列表第 1 项，会覆盖掉 LLM 已写下的结论），
+                    // 而是追加一条指令让它用 no-think 收敛成最终 JSON（不再执行任何 tool）；解析失败才 fallback。
+                    console.log('[choice] turn=' + state.turn + ' tool rounds ' + MAX_TOOL_ROUNDS + ' used up -> finalize no-think');
+                    messages.push({
+                        role: 'user',
+                        content: 'Tool rounds are exhausted — you can NOT call any more tools. Using everything you already gathered, output ONLY the final JSON object {"choice": <number>} now. No explanation, no preamble.'
+                    });
+                    finalizeNoThink('tool_rounds_exceeded');
                     return;
                 }
                 loop();

@@ -1577,7 +1577,10 @@ var KNOWLEDGE_ALIASES = {
     '天然': 'unaware', 'unaware': 'unaware', '无视能力等级': 'unaware', '无视强化': 'unaware', '无视能力变化': 'unaware',
     '辅助力量': 'unaware', 'stored power': 'unaware', 'storedpower': 'unaware',
     '嚣张': 'unaware', 'power trip': 'unaware', 'powertrip': 'unaware',
-    '惩罚': 'unaware', 'punishment': 'unaware', 'boost scaling': 'unaware'
+    '惩罚': 'unaware', 'punishment': 'unaware', 'boost scaling': 'unaware',
+    '天气扣血': 'weather_chip', '沙暴伤害': 'weather_chip', '沙暴掉血': 'weather_chip', '天气伤害': 'weather_chip',
+    '间接伤害': 'weather_chip', '魔法守护': 'weather_chip', '魔法防守': 'weather_chip',
+    'magic guard': 'weather_chip', 'magicguard': 'weather_chip', 'weather chip': 'weather_chip'
 };
 
 var KNOWLEDGE = buildKnowledgeIndex();
