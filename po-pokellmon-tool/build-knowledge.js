@@ -219,6 +219,24 @@ function buildNatures() {
 function buildMoves() {
     const movedata = JSON.parse(readText(MOVEDATA));
 
+    // 招式最大 PP：PO 的 movedata.json 没有 PP 字段（853 条 0 命中），改用 PS 的 moves.js（954/954 覆盖）。
+    // 用途：给 LLM 展示「对手这只已经点过 N 次 / 该招总 PP M」，**不当作剩余 PP**
+    //（压力特性会一次扣 2、PP Up 会提高上限，都算不准）。
+    const PS_DIST = process.env.PS_DIST || 'C:/temp-calc/node_modules/pokemon-showdown/dist/data';
+    const psMoves = require(path.join(PS_DIST, 'moves.js')).Moves;
+    // PS 的 id 规则：小写、去重音、去掉所有非字母数字
+    function psId(s) {
+        return String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase().replace(/[^a-z0-9]/g, '');
+    }
+    const MOVE_ALIAS = { vicegrip: 'visegrip' };   // PO 叫 Vice Grip、PS 叫 Vise Grip（此处是 PO id -> PS id）
+    function maxPP(name) {
+        const id = psId(name);
+        const cands = [id, MOVE_ALIAS[id]];
+        for (const c of cands) { if (c && psMoves[c] && psMoves[c].pp) return psMoves[c].pp; }
+        return null;
+    }
+
     // 招式属性：movenum type编号（稀疏文件，缺省=Normal 0）
     const typeMap = {};
     const typeLines = readText(path.join(DATA, 'moves', '8G', 'type.txt')).split('\n');
@@ -312,7 +330,8 @@ function buildMoves() {
             effect_chance: effectChanceMap[m.num] || 0,
             flinch_chance: flinchMap[m.num] || 0,
             healing: healingMap[m.num] || 0,
-            crit_rate: critMap[m.num] || 0
+            crit_rate: critMap[m.num] || 0,
+            pp: maxPP(m.name)
         };
     }
     return result;

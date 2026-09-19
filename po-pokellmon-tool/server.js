@@ -19,6 +19,22 @@ var path = require('path');
 var tools = require('./tools.js');
 var ABILITIES = require('./knowledge/abilities.json');
 var ABILITY_SIGNALS = require('./knowledge/ability_signals.json');
+var MOVES = require('./knowledge/moves.json');
+
+// 对手某招的「已点过次数 / 该招总 PP」标注。
+// PO 不给对手的招式数据（实测 team(opp).poke(i).move(j) 返回 num=0/PP=0），所以次数是 po-script 自己数的，
+// 总 PP 来自 knowledge/moves.json（PS 数据）。**这不是剩余 PP**（压力特性一次扣 2、PP Up 提高上限），只用来判断「它在这招上投入了多少」。
+function movePPLabel(mv) {
+    if (!mv) return '';
+    var used = mv.used || 0;
+    var maxPP = null;
+    if (mv.num !== undefined && mv.num !== null) {
+        var k = MOVES.byNum ? MOVES.byNum[String(mv.num)] : MOVES[String(mv.num)];
+        if (k && k.pp) maxPP = k.pp;
+    }
+    if (!used && !maxPP) return '';
+    return ',used ' + used + (maxPP ? '/' + maxPP : '');
+}
 
 // 某个特性的「触发条件 + 日志消息」提示（按名称 → 编号查 ability_signals.json，可自动排除的依据）
 // 例：Download → Download(入场: logs "X's Download activates!")；无消息的特性写成 no log message
@@ -49,7 +65,7 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.3.69';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.3.70';   // tool 分支版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
 // 对战主脑用 v4-pro（闭卷深想强，决策更深）；一键回 flash：POKELLMON_MODEL=deepseek-v4-flash
@@ -389,12 +405,12 @@ function buildPrompt(state, notes) {
         var oppMoves = opp.moves || [];
         for (var i = 0; i < 4; i++) {
             if (i < oppMoves.length) {
-                om += '[' + oppMoves[i].name + ',' + oppMoves[i].type + '],';
+                om += '[' + oppMoves[i].name + ',' + oppMoves[i].type + movePPLabel(oppMoves[i]) + '],';
             } else {
                 om += '[未知,?],';
             }
         }
-        p += 'Opponent revealed moves: ' + om + '\n';
+        p += 'Opponent revealed moves (usedN/maxPP = how many times it has clicked that move out of its PP pool — NOT its remaining PP): ' + om + '\n';
         p += learnsetCaution(state);
         // 对手后备（bench）槽位详情
         var ob = buildOppBench(state);

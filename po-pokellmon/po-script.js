@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8092";
-var PKLM_VERSION = "0.6.4";       // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.6.5";       // 脚本版本（改动时 bump，随日志记录）
 var pklmLastWebFailTime = 0;       // 上次 webCall 失败时间戳（ms），用于断线时节流重发
 var pklmSilent = false;            // 静默模式：清分少女等无人值守 BOT 账号不向 PO 窗口 print 任何脚本输出
 var pklmFailCount = 0;             // 连续 webCall 失败次数（成功即归零）
@@ -75,7 +75,8 @@ var pklmHistory = [];
 var pklmFullHistory = [];          // 完整战报（不限长度，供 tool 的 get_battle_history 读取）
 var pklmTurnLog = "";
 var pklmCurrentTurn = 0;
-var pklmOppMoves = [[], [], [], [], [], []];  // 对手每只宝可梦（按记录 slot 区分）已暴露招式 [slot]: [{name,type}]
+var pklmOppMoves = [[], [], [], [], [], []];  // 对手每只宝可梦（按记录 slot 区分）已暴露招式 [slot]: [{name,type,num}]
+var pklmOppMoveUse = [{}, {}, {}, {}, {}, {}];  // 对手每只（记录 slot）每招已使用次数 [slot]: {招式编号: 次数}（PO 不给对手 PP，只能自己记）
 var pklmOppSlots = [0, 1, 2, 3, 4, 5];        // 记录 slot i 当前在哪个队伍槽位（0=场上，1-5=后备；初始 i→i）
 var pklmCurrentOppSlot = 0;                    // 当前场上对手宝可梦对应的记录 slot
 var pklmOppAbility = [-1, -1, -1, -1, -1, -1]; // 记录 slot → 已确定特性 ID（-1 未知）
@@ -518,7 +519,21 @@ function pklmCollectMyActive() {
     return o;
 }
 
-// 采集对手场上宝可梦
+// 某只（记录 slot）已暴露招式列表，带使用次数：[{name,type,num,used}]
+function pklmOppMoveList(recSlot) {
+    var raw = pklmOppMoves[recSlot] || [];
+    var useMap = pklmOppMoveUse[recSlot] || {};
+    var out = [];
+    for (var i = 0; i < raw.length; i++) {
+        var e = { name: raw[i].name, type: raw[i].type };
+        if (raw[i].num) e.num = raw[i].num;
+        e.used = useMap[raw[i].num] || 0;
+        out.push(e);
+    }
+    return out;
+}
+
+// 采集对手场上
 function pklmCollectOppActive() {
     var o = { name: "?", types: [], hpPct: 0, status: null, moves: [] };
     try {
@@ -533,7 +548,7 @@ function pklmCollectOppActive() {
         o.hpPct = (t > 0) ? Math.floor(l / t * 100) : 0;
         o.status = pklmStatusName(fp.pokemon.status);
         o.fainted = (fp.pokemon.status === 31);   // 对手场上是否濒死（供 prompt 提示「会换人」）
-        o.moves = pklmOppMoves[pklmCurrentOppSlot] || [];   // 只取当前场上这只（记录 slot）已暴露的招式
+        o.moves = pklmOppMoveList(pklmCurrentOppSlot);   // 只取当前场上这只（记录 slot）已暴露的招式（含使用次数）
         // 特性解析结果（从战报正向解析 + possible 反向排除）
         var abId = pklmOppAbility[pklmCurrentOppSlot];
         o.abilityInferred = (abId > 0) ? pklmAbilityName(abId) : null;
@@ -640,6 +655,7 @@ function pklmCollectOppTeam() {
             var abId = pklmOppAbility[recSlot];
             o.abilityInferred = (abId > 0) ? pklmAbilityName(abId) : null;
             o.possibleAbilities = pklmAbilityNames(pklmOppPossible[recSlot]);
+            o.moves = pklmOppMoveList(recSlot);   // 该只已暴露招式 + 使用次数（供 tool/run_js 查询，prompt 不直接展示）
         } catch (e) {}
         arr.push(o);
     }
@@ -954,7 +970,7 @@ function pklmSpotLabel(spot) {
             pklmTurnLog += pklmSpotLabel(spot) + " used " + sys.move(attack) + ". ";
             pklmLastMove[spot] = sys.move(attack);   // 记录最后招式名（供 %m 占位符）
             if (spot === battle.opp) {
-                var mv = { name: sys.move(attack), type: pklmTypeName(sys.moveType(attack)) };
+                var mv = { name: sys.move(attack), type: pklmTypeName(sys.moveType(attack)), num: attack };
                 // 记到「当前场上这只」名下（按记录 slot 区分），换人后招式不串
                 var list = pklmOppMoves[pklmCurrentOppSlot] || [];
                 var dup = false;
@@ -963,6 +979,10 @@ function pklmSpotLabel(spot) {
                 }
                 if (!dup) list.push(mv);
                 pklmOppMoves[pklmCurrentOppSlot] = list;
+                // 使用次数计数（PO 不给对手招式数据 —— 实测 .move(j) 返回 num=0/PP=0，只能自己记）
+                var useMap = pklmOppMoveUse[pklmCurrentOppSlot] || {};
+                useMap[attack] = (useMap[attack] || 0) + 1;
+                pklmOppMoveUse[pklmCurrentOppSlot] = useMap;
             }
         } catch (e) {}
     },
@@ -1078,6 +1098,7 @@ function pklmSpotLabel(spot) {
         pklmCheckMsgFiles();   // 对战启动扫描消息表文件依赖，缺失则提示
         // 重置对手记录（slot 追踪 + 特性解析）
         pklmOppMoves = [[], [], [], [], [], []];
+        pklmOppMoveUse = [{}, {}, {}, {}, {}, {}];
         pklmOppSlots = [0, 1, 2, 3, 4, 5];
         pklmCurrentOppSlot = 0;
         pklmOppAbility = [-1, -1, -1, -1, -1, -1];

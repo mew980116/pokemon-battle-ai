@@ -235,7 +235,7 @@ var TOOL_DEFS = [
         type: 'function',
         function: {
             name: 'run_js',
-            description: 'Run a small JavaScript snippet in a sandbox to compute something no built-in tool covers (e.g. speed comparison, batch damage over a set of pokemon, custom scoring). Sandbox exposes: data.pokemon/data.moves/data.natures/data.types/data.typechart, typeMul(attackType, defendTypes), effStat(baseStat, boost?, level?), resolvePokemon(nameOrNum), resolveMove(name), calcDamage(attackerObj, defenderObj, moveObj), and print/console.log for output. The last expression value is returned. Call it only as a last resort, when a computation you need is genuinely not covered by any built-in tool — prefer the built-in tools.',
+            description: 'Run a small JavaScript snippet in a sandbox to compute something no built-in tool covers (e.g. speed comparison, batch damage over a set of pokemon, custom scoring). Sandbox exposes: data.pokemon/data.moves/data.natures/data.types/data.typechart, typeMul(attackType, defendTypes), effStat(baseStat, boost?, level?), resolvePokemon(nameOrNum), resolveMove(name), calcDamage(attackerObj, defenderObj, moveObj), movePP(moveName) (the move\'s max PP), oppMoves(pokeName) (that opposing pokemon\'s revealed moves as [{name,type,num,used}]), oppUsed(pokeName, moveName) (how many times it has clicked that move — PO does NOT expose the opponent\'s PP, so this counter is all we have; it is a usage count, not remaining PP), and print/console.log for output. The last expression value is returned. Call it only as a last resort, when a computation you need is genuinely not covered by any built-in tool — prefer the built-in tools.',
             parameters: {
                 type: 'object',
                 properties: {
@@ -686,7 +686,7 @@ function calcDamage(args) {
 // 沙箱内可用：data（pokemon/moves/natures/typechart）、typeMul/effStat/resolvePokemon/resolveMove/calcDamage、print/console.log
 // 限制：同步、无 require/process/fs、2s 超时、结果/输出各截 2000 字符。
 
-function runJs(args) {
+function runJs(args, ctx) {
     if (!args.code) return { error: 'code required' };
     var code = String(args.code);
     if (code.length > 20000) return { error: 'code too long (' + code.length + ' chars, max 20000)' };
@@ -725,6 +725,28 @@ function runJs(args) {
         return calcOneLeg({ attacker: attacker, defender: defender, move: move }, 0);
     }
 
+    // PP 相关 helper（PO 不提供对手的招式数据 —— 实测 team(opp).poke(i).move(j) 返回 num=0/PP=0，
+    // 所以对手的「用过几次」由 po-script 计数、招式总 PP 来自 knowledge/moves.json）
+    var oppTeam = (ctx && ctx.state && ctx.state.oppTeam) || [];
+    function sbOppMoves(pokeName) {
+        for (var i = 0; i < oppTeam.length; i++) {
+            if (oppTeam[i] && oppTeam[i].name === pokeName) return oppTeam[i].moves || [];
+        }
+        return null;
+    }
+    function sbOppUsed(pokeName, moveName) {
+        var ms = sbOppMoves(pokeName);
+        if (!ms) return null;
+        for (var i = 0; i < ms.length; i++) {
+            if (ms[i].name === moveName) return ms[i].used || 0;
+        }
+        return null;
+    }
+    function sbMovePP(moveName) {
+        var f = findMove(moveName);
+        return (f && f.move && f.move.pp) ? f.move.pp : null;
+    }
+
     var sandbox = {
         data: {
             pokemon: POKEMON.byNum,
@@ -738,6 +760,9 @@ function runJs(args) {
         resolvePokemon: sbResolvePokemon,
         resolveMove: sbResolveMove,
         calcDamage: sbCalcDamage,
+        movePP: sbMovePP,
+        oppMoves: sbOppMoves,
+        oppUsed: sbOppUsed,
         print: function () { printed.push(Array.prototype.slice.call(arguments).map(String).join(' ')); },
         console: { log: function () { printed.push(Array.prototype.slice.call(arguments).map(String).join(' ')); } }
     };
@@ -1083,6 +1108,8 @@ function getMoveInfo(args) {
         tags: mv.tags,
         tag_meanings: tagMeanings
     };
+    // 最大 PP（PS 数据；用于判断对手还能点几次这招——注意这不是剩余 PP，压力特性/PP Up 会让它偏）
+    if (mv.pp) out.pp = mv.pp;
     // 附加效果数值（为 0 的字段不输出，避免噪音）
     if (mv.effect_chance) out.effect_chance = mv.effect_chance;   // 附加效果触发概率 %
     if (mv.flinch_chance) out.flinch_chance = mv.flinch_chance;   // 畏缩概率 %
@@ -1271,7 +1298,7 @@ function runTool(name, args, ctx) {
     if (name === 'get_strategy') return getStrategy(args, ctx);
     if (name === 'submit_feedback') return submitFeedback(args, ctx);
     if (name === 'calc_damage') return calcDamage(args);
-    if (name === 'run_js') return runJs(args);
+    if (name === 'run_js') return runJs(args, ctx);
     if (name === 'calc_stats') return calcStats(args);
     if (name === 'get_my_stats') return getMyStats(args, ctx);
     if (name === 'battle_tips') return battleTips(args);
