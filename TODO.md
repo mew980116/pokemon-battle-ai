@@ -151,7 +151,7 @@
 
 - [ ] **calc_damage 补全特性/道具/天气/场地等修正（对齐 @smogon，后续做）**：当前已对齐基础公式 + 能力等级 + extra（0.3.38，20 用例）。尚未自动算：① 特性/道具能力值修正（大力士/瑜伽之力/专爱头带/眼镜/太阳之力/毅力/活力/蹲守/水泡等）——现靠 LLM 用 atk/spa 直接值绕过 ② 天气/场地加成（晴火×1.5、电场×1.3 等）③ 光墙/反射壁/极光幕 ④ 击中要害 ⑤ 防守减伤特性（厚脂肪/毛茸茸/多重鳞片/坚硬岩石等）。方向：先评估哪些 LLM 常用且 extra 补不准，再决定补进 calc_damage 还是继续靠 extra/直接值。可参考 @smogon/calc 的 calculateAtModsSMSSSV / calculateFinalModsSMSSSV（已装 C:\temp-calc\node_modules）。
 
-- [ ] 🟡 **【优先级：中高 —— 与上面「calc_damage 补全特性/道具/天气」合并成一轮「伤害计算全面对齐 @smogon/calc」；同时它也是 learnsets 之外另一处「PO 数据与 PS 口径不一致」的地方】** calc_damage 特殊属性克制招式未处理（实测算错）：`calcOneLeg` 的 typeMult 只做 `CHART[move.type][defType]`，以下 3 个招式的特殊属性克制全错（2026-09-17 实测 vs @smogon/calc）：
+- [x] ✅ **已修（0.3.72）** 🟡 **【优先级：中高 —— 与上面「calc_damage 补全特性/道具/天气」合并成一轮「伤害计算全面对齐 @smogon/calc」；同时它也是 learnsets 之外另一处「PO 数据与 PS 口径不一致」的地方】** calc_damage 特殊属性克制招式未处理（实测算错）：（**本轮只修了「特殊属性克制招式」；「特性/道具/天气/场地」那条即上面 L152，仍未做**）`calcOneLeg` 的 typeMult 只做 `CHART[move.type][defType]`，以下 3 个招式的特殊属性克制全错（2026-09-17 实测 vs @smogon/calc）：
   - **Freeze-Dry 冷冻干燥**：对 Water 固定 2x（覆盖正常冰→水 0.5x）。实测 Vaporeon（水）：我们 34-41（0.5x）vs smogon 138-164（2x），**少 4 倍**；Swampert（水/地）：我们 72-85（1x）vs smogon 288-340（4x），少 4 倍；Flygon（地/龙）无差异 ✅。
   - **Flying Press 飞身重压**：type=Fighting 但实为格斗+飞行双属性，倍率 = Fighting 倍率 × Flying 倍率。实测 Venusaur（草/毒）：我们 0.5x vs smogon 1x（**少 2 倍**）；Tyranitar（岩/恶）：我们 4x vs smogon 2x（**多 2 倍**）。
   - **Thousand Arrows 千箭齐发**：Ground 系但整体倍率算完若为 0 则改成 1（可打飞行系/浮游）。实测 Tornadus（飞行）：我们 **0（免疫）** vs smogon 180-213（1x）。

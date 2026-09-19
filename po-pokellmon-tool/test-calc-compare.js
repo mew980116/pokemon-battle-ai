@@ -60,6 +60,15 @@ const cases = [
     { name: 'd Fishious Rend(先手翻倍)', attacker: { poke: 'Dracovish', ev: [0, 252, 0, 0, 0, 252], nature: 'Jolly' }, defender: { poke: 'Snorlax', ev: [252, 0, 0, 0, 0, 0], nature: 'Adamant' }, move: 'Fishious Rend' },
     { name: 'd Fishious Rend(后手不翻倍)', attacker: { poke: 'Dracovish', ev: [0, 252, 0, 0, 0, 0], nature: 'Adamant' }, defender: { poke: 'Regieleki', ev: [0, 0, 0, 0, 0, 252], nature: 'Timid' }, move: 'Fishious Rend' },
     { name: 'd Bolt Beak(先手翻倍)', attacker: { poke: 'Dracozolt', ev: [0, 252, 0, 0, 0, 252], nature: 'Jolly' }, defender: { poke: 'Corviknight', ev: [252, 0, 252, 0, 0, 0], nature: 'Impish' }, move: 'Bolt Beak' },
+
+    // ===== (g) 特殊属性克制招式 =====
+    { name: 'g Freeze-Dry vs 纯水(2x)', attacker: { poke: 'Ninetales-Alola', ev: [0, 0, 0, 252, 0, 252], nature: 'Timid' }, defender: { poke: 'Vaporeon', ev: [252, 0, 0, 0, 252, 0], nature: 'Calm' }, move: 'Freeze-Dry' },
+    { name: 'g Freeze-Dry vs 水/地(4x)', attacker: { poke: 'Ninetales-Alola', ev: [0, 0, 0, 252, 0, 252], nature: 'Timid' }, defender: { poke: 'Swampert', ev: [252, 0, 252, 0, 0, 0], nature: 'Relaxed' }, move: 'Freeze-Dry' },
+    { name: 'g Freeze-Dry vs 非水(照常)', attacker: { poke: 'Ninetales-Alola', ev: [0, 0, 0, 252, 0, 252], nature: 'Timid' }, defender: { poke: 'Flygon', ev: [0, 252, 0, 0, 0, 252], nature: 'Jolly' }, move: 'Freeze-Dry' },
+    { name: 'g Flying Press vs 草/毒(1x)', attacker: { poke: 'Hawlucha', ev: [0, 252, 0, 0, 0, 252], nature: 'Jolly' }, defender: { poke: 'Venusaur', ev: [252, 0, 0, 0, 0, 0], nature: 'Bold' }, move: 'Flying Press' },
+    { name: 'g Flying Press vs 岩/恶(2x)', attacker: { poke: 'Hawlucha', ev: [0, 252, 0, 0, 0, 252], nature: 'Jolly' }, defender: { poke: 'Tyranitar', ev: [252, 0, 0, 0, 0, 0], nature: 'Adamant' }, move: 'Flying Press' },
+    { name: 'g Thousand Arrows vs 飞行(0->1x)', attacker: { poke: 'Zygarde', ev: [0, 252, 0, 0, 0, 252], nature: 'Adamant' }, defender: { poke: 'Tornadus', ev: [0, 0, 0, 252, 0, 252], nature: 'Timid' }, move: 'Thousand Arrows' },
+    { name: 'g Thousand Arrows vs 钢/飞(0->1x)', attacker: { poke: 'Zygarde', ev: [0, 252, 0, 0, 0, 252], nature: 'Adamant' }, defender: { poke: 'Skarmory', ev: [252, 0, 252, 0, 0, 0], nature: 'Impish' }, move: 'Thousand Arrows' },
 ];
 
 let diff = 0;

@@ -165,7 +165,7 @@ var TOOL_DEFS = [
         type: 'function',
         function: {
             name: 'calc_damage',
-            description: 'Compute the damage range of up to 10 attacker/defender/move combinations with the standard Pokemon damage formula, aligned with the PS calculator (@smogon/calc). Returns min/max damage, % of the defender max HP, a PS-style one-line summary (e.g. "252+ Atk Dracovish Fishious Rend (170 BP) vs. 0 HP / 0 Def Snorlax: 337-397 (73.1 - 86.1%) -- guaranteed 2HKO"), and a KO verdict against the defender CURRENT HP. Auto-handled: stat-substitution moves (Body Press uses the user\'s Def; Foul Play uses the target\'s Atk; Psyshock/Psystrike/Secret Sword use the target\'s Def), always-critical moves (Wicked Blow / Surging Strikes / Storm Throw / Frost Breath), and Fishious Rend / Bolt Beak doubling when you outspeed (pass attackerMovesFirst / targetSwitchedIn to control it). Still NOT auto-applied: item / ability / weather / terrain / screens / STAB-removal — pass those as `extra` (e.g. 1.2 for Expert Belt, 0.5 for Reflect/Light Screen); burn has its own `burn` flag. IMPORTANT: always pass ev + nature for both sides when you know them — when omitted the calculator falls back to 0 EV / neutral nature and flags `assumed: true` (a wrong default once made a 44% hit look like 13%).',
+            description: 'Compute the damage range of up to 10 attacker/defender/move combinations with the standard Pokemon damage formula, aligned with the PS calculator (@smogon/calc). Returns min/max damage, % of the defender max HP, a PS-style one-line summary (e.g. "252+ Atk Dracovish Fishious Rend (170 BP) vs. 0 HP / 0 Def Snorlax: 337-397 (73.1 - 86.1%) -- guaranteed 2HKO"), and a KO verdict against the defender CURRENT HP. Auto-handled: stat-substitution moves (Body Press uses the user\'s Def; Foul Play uses the target\'s Atk; Psyshock/Psystrike/Secret Sword use the target\'s Def), always-critical moves (Wicked Blow / Surging Strikes / Storm Throw / Frost Breath), special type-effectiveness moves (Freeze-Dry vs Water, Flying Press, Thousand Arrows), and Fishious Rend / Bolt Beak doubling when you outspeed (pass attackerMovesFirst / targetSwitchedIn to control it). These auto-behaviours all key off the move NAME, so pass the move as `name` (not as raw power/category/type) whenever the move is one of them. Still NOT auto-applied: item / ability / weather / terrain / screens / STAB-removal — pass those as `extra` (e.g. 1.2 for Expert Belt, 0.5 for Reflect/Light Screen); burn has its own `burn` flag. IMPORTANT: always pass ev + nature for both sides when you know them — when omitted the calculator falls back to 0 EV / neutral nature and flags `assumed: true` (a wrong default once made a 44% hit look like 13%).',
             parameters: {
                 type: 'object',
                 properties: {
@@ -682,6 +682,18 @@ function evNatDesc(spec, nature, statIdx) {
     return String(e);
 }
 
+// 单属性克制系数（含特殊招式；对齐 @smogon/calc mechanics/util.ts getMoveEffectiveness）。
+// 只在「按招式名传入」时才能识别 —— 手传 power+category+type 的招式没有名字，走普通矩阵。
+function moveTypeEff(moveName, ai, di, defTypeName) {
+    if (moveName === 'Freeze-Dry' && defTypeName === 'Water') return 2;
+    var eff = CHART[ai][di];
+    if (moveName === 'Flying Press') {
+        var fi = typeIndex('Flying');
+        if (fi >= 0) eff *= CHART[fi][di];
+    }
+    return eff;
+}
+
 // 单组伤害计算（取值与运算顺序对齐 @smogon/calc mechanics/gen789.ts + util.getFinalDamage）
 function calcOneLeg(leg, idx) {
     var atk = resolvePokemonInput(leg.attacker);
@@ -806,16 +818,21 @@ function calcOneLeg(leg, idx) {
     if (mv.type && atk.types && atk.types.indexOf(mv.type) !== -1) stab = 1.5;
 
     // 属性克制（纯克制系数，不含 STAB/extra）
+    // 特殊属性克制招式（对齐 @smogon/calc mechanics/util.ts getMoveEffectiveness）：
+    //   Freeze-Dry 冷冻干燥  -> 对 Water 固定 2x（覆盖正常 冰→水 0.5x）
+    //   Flying Press 飞身重压 -> 额外乘飞行系倍率（实为格斗+飞行双属性）
+    //   Thousand Arrows 千箭齐发 -> 整体倍率算完为 0 时改成 1（可打飞行系/浮空）
     var typeMult = 1;
     if (mv.type && def.types && def.types.length) {
         var ai = typeIndex(mv.type);
         if (ai >= 0) {
             for (var t = 0; t < def.types.length; t++) {
                 var di = typeIndex(def.types[t]);
-                if (di >= 0) typeMult *= CHART[ai][di];
+                if (di >= 0) typeMult *= moveTypeEff(mv.name, ai, di, def.types[t]);
             }
         }
     }
+    if (typeMult === 0 && mv.name === 'Thousand Arrows') typeMult = 1;
 
     // extra 系数（默认 1.0，对应 @smogon 的 finalMod）
     var extra = (leg.extra !== undefined && leg.extra !== null) ? leg.extra : 1.0;
