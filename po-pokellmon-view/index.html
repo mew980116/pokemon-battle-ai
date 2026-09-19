@@ -133,7 +133,7 @@ body{font-family:"Segoe UI","Microsoft YaHei",sans-serif;color:var(--text);font-
     <div class="panel llm-panel" id="llmPanel">
       <h3>LLM 交互（当前这条决策）</h3>
       <div id="liveBox" style="display:none">
-        <div class="kv"><span class="k">实时</span><span class="v"><span id="liveTimer">0.0s</span> <span id="livePhase"></span></span></div>
+        <div class="kv"><span class="k">实时</span><span class="v"><span id="liveTimer">0s</span> <span id="livePhase"></span></span></div>
         <div id="liveTools"></div>
       </div>
       <div class="llm" id="llmInfo"></div>
@@ -320,7 +320,7 @@ var liveStartTs=0, liveTimerId=null, liveBid=null;
 function liveTick(){
   if(!liveStartTs) return;
   var el=document.getElementById('liveTimer');
-  if(el) el.textContent=((Date.now()-liveStartTs)/1000).toFixed(1)+'s';
+  if(el) el.textContent=Math.floor((Date.now()-liveStartTs)/1000)+'s';
 }
 function renderProgress(d){
   var box=document.getElementById('liveBox');

@@ -36,7 +36,7 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.3.64';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.3.65';   // tool 分支版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
 // 对战主脑用 v4-pro（闭卷深想强，决策更深）；一键回 flash：POKELLMON_MODEL=deepseek-v4-flash
@@ -351,10 +351,7 @@ function buildPrompt(state, notes) {
         if (opp.fainted) {
             p += 'NOTE: The opponent current pokemon has fainted and will send out a replacement this turn.\n';
         }
-        // 对手后备（bench）槽位详情
-        var ob = buildOppBench(state);
-        if (ob) p += 'Opponent bench: ' + ob + '\n';
-        // 对手已暴露招式（未露的写「未知」，始终补满 4 个槽位）
+        // 对手已暴露招式（未露的写「未知」，始终补满 4 个槽位）——紧跟当前宝可梦，再往后才是 bench
         var om = '';
         var oppMoves = opp.moves || [];
         for (var i = 0; i < 4; i++) {
@@ -366,6 +363,9 @@ function buildPrompt(state, notes) {
         }
         p += 'Opponent revealed moves: ' + om + '\n';
         p += learnsetCaution(state);
+        // 对手后备（bench）槽位详情
+        var ob = buildOppBench(state);
+        if (ob) p += 'Opponent bench: ' + ob + '\n';
     }
 
     if (me.name) {

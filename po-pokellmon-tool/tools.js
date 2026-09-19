@@ -334,7 +334,7 @@ var TOOL_DEFS = [
         type: 'function',
         function: {
             name: 'get_ability_info',
-            description: 'Look up an ability details: description, whether it triggers a visible message in the battle log (and when), and how to infer/exclude it from the battle log (e.g. via status/type/effect changes). Call it when an opponent ability matters (to check its mechanics) or when the battle log shows — or lacks — a trigger and you want to narrow down which ability it is.',
+            description: 'Look up an ability details: description, whether it triggers a visible message in the battle log (and when), and how to infer/exclude it from the battle log (e.g. via status/type/effect changes). Both `desc` (PO Chinese) and `desc_en` are returned — the Chinese text is sometimes vague, so read `desc_en` for the exact specifics (e.g. Magic Bounce\'s full reflect list: stat/hazard moves, Defog, Roar, Whirlwind, Spite). Call this BEFORE committing to a plan that a single ability could blank (phazing into Magic Bounce, status into an immunity ability, hazards into a bounce/absorb ability), and when the battle log shows — or lacks — a trigger and you want to narrow down which ability it is.',
             parameters: {
                 type: 'object',
                 properties: {
@@ -1100,6 +1100,7 @@ function getAbilityInfo(args) {
         name: a.name,
         name_zh: a.name_zh || '',
         desc: a.desc_zh || a.desc_en || '',
+        desc_en: a.desc_en || '',   // PO 中文描述有时较笼统（如魔法镜只写「随时处于魔装反射状态」），英文对战描述更具体（明确列出 Defog/Roar/Whirlwind 等）
         merged: a.merged || null,
         signal: ABILITY_SIGNALS[num] || null
     };
