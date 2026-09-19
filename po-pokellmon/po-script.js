@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8092";
-var PKLM_VERSION = "0.6.8";       // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.6.9";       // 脚本版本（改动时 bump，随日志记录）
 var pklmLastWebFailTime = 0;       // 上次 webCall 失败时间戳（ms），用于断线时节流重发
 var pklmSilent = false;            // 静默模式：清分少女等无人值守 BOT 账号不向 PO 窗口 print 任何脚本输出
 var pklmFailCount = 0;             // 连续 webCall 失败次数（成功即归零）
@@ -85,6 +85,8 @@ var pklmOppItem = [null, null, null, null, null, null]; // 记录 slot → 已�
 // 73: part 0/2=反射壁开, 1/3=光墙开, 4=反射壁关, 5=光墙关；236: part 0=极光幕开, 1=关。
 // 值 = 设置时的回合数（超过 8 回合未收到「wore off」就自动过期，兜底光之黏土上限）。
 var pklmScreens = { me: {}, opp: {} };
+// 换人当回合 PO 的 field.poke().statBoost() 会残留换下那只的能力等级（battle92 T11 实锤）→ 置位期间报 0
+var pklmBoostsReset = { me: false, opp: false };
 var pklmOppPossible = [[], [], [], [], [], []]; // 记录 slot → 可能特性列表（sys.pokeAbility 3 个）
 var pklmOppJustSwitched = false;               // 换入后待反向排除入场特性的标记
 var pklmOppAbilityTriggered = false;           // 换入后是否已触发过特性消息
@@ -513,7 +515,13 @@ function pklmCollectMoves(tp, withNum, isActive) {
 
 // 采集场上宝可梦的能力等级变化（statBoost，非 0 才记录）
 // 索引：1=Atk 2=Def 3=SpA 4=SpD 5=Spe 6=Acc 7=Eva
+// 坑（battle92 T11 实测）：换人当回合 PO 的 `field.poke(spot).statBoost()` 会**残留换下那只的能力等级**
+// —— 对手 Silvally-Fairy 剑舞到 Atk+2 后被换下，换上来的 Duraludon 读到 `Boosts:[Atk+2]`（假的），
+// 而我们把这个值同时喂给 prompt 和 `calc_damage` 的 from_state（会把对手伤害高估 ~1.5 倍）。
+// 对策：`pklmBoostsReset[侧]` 在本侧 onSendOut 时置位、下一回合 onBeginTurn 清除，置位期间一律报 0。
+// 已知例外：接力棒（Baton Pass）**合法传递**能力等级，这一回合会被我们误报成 0（罕见，暂不建模）。
 function pklmCollectBoosts(spot) {
+    if (pklmBoostsReset[spot === battle.opp ? 'opp' : 'me']) return [];
     var b = [];
     try {
         var fp = pklmFpoke(spot);
@@ -1005,6 +1013,7 @@ function pklmSpotLabel(spot) {
         pklmBannedSlots = [];        // 新回合清空 ban 列表
         pklmBannedSwitch = [];       // 新回合清空换人 ban 列表（踩影可能下回合解除）
         pklmFinalAttack = false;     // 新回合重置保底标志
+        pklmBoostsReset = { me: false, opp: false };   // 新回合能力等级数据可信（换人残留只影响换人当回合）
         // 反向排除：上一回合换入后若没触发任何入场特性消息，排除入场必触发特性
         if (pklmOppJustSwitched && !pklmOppAbilityTriggered) {
             pklmExcludeEntryAbilities();
@@ -1055,6 +1064,8 @@ function pklmSpotLabel(spot) {
         try {
             var nm = sys.pokemon(pklmFpoke(spot).pokemon.numRef);
             pklmTurnLog += pklmSpotLabel(spot) + " sent out " + nm + ". ";
+            // 换人当回合 PO 的 statBoost() 会残留换下那只的等级 → 本回合该侧一律报 0（见 pklmCollectBoosts）
+            pklmBoostsReset[spot === battle.opp ? 'opp' : 'me'] = true;
             if (spot === battle.opp) {
                 pklmOppSwap(prevIndex);        // 更新当前场上记录 slot（prevIndex=上场前所在槽位）
                 pklmLoadOppPossible();         // 加载可能特性列表（首次出场）
