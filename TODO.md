@@ -92,6 +92,14 @@
 
 - [x] **先读推演只用于「当次决策」，跨回合只带「待核对判断」**（2026-09-19 提出并已实施）：`save_strategy` 拆成两部分并存成 `{text, checks}`——`text` = 本回合的 6 步先读/推演（含新增的「到下次决策前的行动序列」），**不回灌**；`checks` = **留给后续回合去战报里核对的待验证判断**（不是行动提示）——写成「我假设 X 的力度/速度是…，若…则被证伪」这种可核对形式，例：`verify whether X hits harder than I assumed, refuted if it does <40%`、`check whether X is really faster than Y`。（参数名 0.3.63 由 `advice` 改为 `checks`，语义更直白。）server **只把最近 2 条 `checks` 注入后续 prompt**，label 为 `PENDING CHECKS you left for yourself — verify each one against the new battle log BEFORE deciding`；WORKFLOW 的 REVIEW 步也要求先逐条 confirm/refute 再往下走。tool 描述里明确告知 LLM「只有 checks 会被带到后续、text 不会」。起因：先读是对**本回合**的即时推演，整段带回去既占上下文（实测 turn 15 的 `Your notes` 已 1.9KB 且随对战增长），也可能把过时预判当既定事实；同时 battle66 中 LLM 的计划默认「对手下回合不行动」，故在 text 里加第 (5) 步强制按行动顺序推演到下次决策。
 
+- [ ] **精简 system prompt 里的 `BATTLE_TIPS`（评估「何时」去掉「哪几条」）**：`BATTLE_TIPS` 是移植 PokeLLMon 的 always-on 提示（[prompts.js](po-pokellmon/prompts.js)，约 1.1KB，每回合都发），其中多条现在已被 tool / 知识库覆盖，属于重复的常驻上下文（systemPrompt 实测 ~3.8KB，而 tool 定义 ~19KB）。逐条候选 —— **去掉前必须先确认对应 tool 真被调用、且行为没退化**：
+  - 「boost 换人清空」「换人当回合失去行动 + 对手先手 + 换入太慢会连吃两下」→ 已被 `get_knowledge` 的 `switch` 条目覆盖，且 WORKFLOW 要求换人前必查 `get_knowledge`（**优先候选，可先删这两句**）
+  - 「撒钉策略（stickyweb/spikes/toxicspikes/stealthrock）」→ 已被 `get_move_info`（效果/威力）+ `get_knowledge`（毒菱等）+ `battle_tips`（下钉逼换）+ 0.3.58 新增的 may-fail 提示覆盖
+  - 「你可以选择出招或换人」→ 行动列表本身已经说明
+  - 条款（Sleep Clause / Self-KO Clause / Species Clause）→ 可考虑搬进 `get_knowledge` 新增的「条款」条目后再从 system prompt 去掉；注意 0.4.17 记录过「客户端拿不到 clause 掩码，所以固定写死」，搬走时要保证 LLM 真会查
+  - **建议保留**：「对手强化时尽快 KO，必要时牺牲」——PokeLLMon 论文验证有效的核心启发（正对我们战报里「强化后误换人」），且不属于任何确定性知识、tool 推不出来；环境声明（Gen8 单打、无 Mega/Z/极巨化/钛晶）也保留（很短且每回合都要用）
+  - **评估时机**：先跑若干局，看 LLM 是否稳定「先查 `get_knowledge`/`battle_tips` 再行动」；确认后**一次只删一条**，对比战报质量再决定继续删还是回滚。
+
 - [x] **战术思路 tool（可无限扩充的战术知识库，避免 system prompt 膨胀）**（已做 battle_tips 基础：10 组队战术 + random_battle_playbook，可继续扩充条目）：把宝可梦对战的战术思路/打法套路做成可调用 tool，LLM 决策前按需查，而不是全塞进 system prompt（prompt 太长会稀释重点、增加 token 成本）。设计方向：一个 `get_tactic(name)` 或分类的 `list_tactics()` + `get_tactic(name)`，内容用结构化文本描述「触发条件 + 做法 + 目的 + 风险」。可塞的战术清单（持续扩充）：
   - 多换一击杀高威胁（牺牲换人节奏，换取先手击杀对手核心威胁）
   - 炮灰（送掉无用/低价值宝可梦，换取无伤换入王牌）
