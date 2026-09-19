@@ -90,7 +90,7 @@
   - 若我方场上完全 counter 对方、但对手后备信息太少，可考虑撒钉/强化/替身等（利用对手信息不足做铺垫，而非直接输出）。
   已写入 `save_strategy` 的 tool description（要求 LLM 按这 5 步写 read→plan 笔记，并含两条启发）。
 
-- [x] **先读推演只用于「当次决策」，跨回合只带「建议」**（2026-09-19 提出并已实施）：`save_strategy` 拆成两部分并存成 `{text, advice}`——`text` = 本回合的 6 步先读/推演（含新增的「到下次决策前的行动序列」），**不回灌**；`advice` = 留给后续决策的建议，server **只把最近 2 条的 `advice` 注入后续 prompt**（`Advice for later (turn N): ...`）。tool 描述里明确告知 LLM「只有 advice 会被带到后续、text 不会」，并要求 advice 写成自包含、简短、随时间更新的内容（对手读到的信息/已承诺的计划/速度线/什么会推翻判断）。起因：先读是对**本回合**的即时推演，整段带回去既占上下文（实测 turn 15 的 `Your notes` 已 1.9KB 且随对战增长），也可能把过时预判当既定事实；同时 battle66 中 LLM 的计划默认「对手下回合不行动」，故在 text 里加第 (5) 步强制按行动顺序推演到下次决策。
+- [x] **先读推演只用于「当次决策」，跨回合只带「待核对判断」**（2026-09-19 提出并已实施）：`save_strategy` 拆成两部分并存成 `{text, advice}`——`text` = 本回合的 6 步先读/推演（含新增的「到下次决策前的行动序列」），**不回灌**；`advice` = **留给后续回合去战报里核对的待验证判断**（不是行动提示）——写成「我假设 X 的力度/速度是…，若…则被证伪」这种可核对形式，例：`verify whether X hits harder than I assumed, refuted if it does <40%`、`check whether X is really faster than Y`。server **只把最近 2 条的 `advice` 注入后续 prompt**，label 为 `PENDING CHECKS you left for yourself — verify each one against the new battle log BEFORE deciding`；WORKFLOW 的 REVIEW 步也要求先逐条 confirm/refute 再往下走。tool 描述里明确告知 LLM「只有 advice 会被带到后续、text 不会」。起因：先读是对**本回合**的即时推演，整段带回去既占上下文（实测 turn 15 的 `Your notes` 已 1.9KB 且随对战增长），也可能把过时预判当既定事实；同时 battle66 中 LLM 的计划默认「对手下回合不行动」，故在 text 里加第 (5) 步强制按行动顺序推演到下次决策。
 
 - [x] **战术思路 tool（可无限扩充的战术知识库，避免 system prompt 膨胀）**（已做 battle_tips 基础：10 组队战术 + random_battle_playbook，可继续扩充条目）：把宝可梦对战的战术思路/打法套路做成可调用 tool，LLM 决策前按需查，而不是全塞进 system prompt（prompt 太长会稀释重点、增加 token 成本）。设计方向：一个 `get_tactic(name)` 或分类的 `list_tactics()` + `get_tactic(name)`，内容用结构化文本描述「触发条件 + 做法 + 目的 + 风险」。可塞的战术清单（持续扩充）：
   - 多换一击杀高威胁（牺牲换人节奏，换取先手击杀对手核心威胁）
