@@ -31,8 +31,14 @@ function typeIndex(name) {
 var SMOGON = require('./vendor/smogon-calc/index.js');
 var PKLM_GEN = 8;   // PO 环境 = Gen8 单打
 var STAT_KEYS = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
-var PS_WEATHER_ALIAS = { 'sunny': 'Sun', 'sun': 'Sun', 'rain': 'Rain', 'rainy': 'Rain', 'sand': 'Sand', 'sandstorm': 'Sand', 'snow': 'Snow', 'hail': 'Snow', 'harsh sunshine': 'Harsh Sunshine', 'heavy rain': 'Heavy Rain' };
-var PS_TERRAIN_ALIAS = { 'electric': 'Electric', 'grassy': 'Grassy', 'misty': 'Misty', 'psychic': 'Psychic', '电气': 'Electric', '青草': 'Grassy', '薄雾': 'Misty', '精神': 'Psychic' };
+// 计算器只认 PS 的短名（'Sun' / 'Grassy' / 'Harsh Sunshine'），不认识 'Grassy Terrain'、'Harsh Sunlight' 这类
+// 「带后缀的全名」——传错会**静默不生效**（伤害照常返回、只是少了那一份）。po-script 的 state.weather/terrain
+// 恰好是全名（'Grassy Terrain' / 'Harsh Sunlight'），所以别名表必须覆盖它们。
+var PS_WEATHER_ALIAS = { 'sunny': 'Sun', 'sun': 'Sun', 'rain': 'Rain', 'rainy': 'Rain', 'sand': 'Sand', 'sandstorm': 'Sand', 'snow': 'Snow', 'hail': 'Snow', 'harsh sunshine': 'Harsh Sunshine', 'harsh sunlight': 'Harsh Sunshine', 'heavy rain': 'Heavy Rain', 'strong winds': 'Strong Winds', '晴天': 'Sun', '日照': 'Sun', '雨天': 'Rain', '下雨': 'Rain', '沙暴': 'Sand', '冰雹': 'Snow', '下雪': 'Snow', '大晴天': 'Harsh Sunshine', '大雨': 'Heavy Rain' };
+var PS_TERRAIN_ALIAS = { 'electric': 'Electric', 'grassy': 'Grassy', 'misty': 'Misty', 'psychic': 'Psychic', 'electric terrain': 'Electric', 'grassy terrain': 'Grassy', 'misty terrain': 'Misty', 'psychic terrain': 'Psychic', '电气': 'Electric', '青草': 'Grassy', '薄雾': 'Misty', '精神': 'Psychic', '电气场地': 'Electric', '青草场地': 'Grassy', '薄雾场地': 'Misty', '精神场地': 'Psychic' };
+// 计算器真正认得的取值（用于「传了却没被识别」的提示）
+var PS_WEATHER_NAMES = ['Sand', 'Sun', 'Rain', 'Hail', 'Snow', 'Harsh Sunshine', 'Heavy Rain', 'Strong Winds'];
+var PS_TERRAIN_NAMES = ['Electric', 'Grassy', 'Misty', 'Psychic'];
 
 // ===== tool 定义（OpenAI 兼容 function calling 格式）=====
 var TOOL_DEFS = [
@@ -249,8 +255,8 @@ var TOOL_DEFS = [
                                     type: 'object',
                                     description: 'Field conditions (weather / terrain / screens). All computed automatically by the calculator.',
                                     properties: {
-                                        weather: { type: 'string', description: '"Sun" (Sunny Day), "Rain", "Sand" (Sandstorm), "Snow" (Hail). Also accepts "Harsh Sunshine" / "Heavy Rain".' },
-                                        terrain: { type: 'string', description: '"Electric", "Grassy", "Misty", "Psychic".' },
+                                        weather: { type: 'string', description: '"Sun" (Sunny Day), "Rain", "Sand" (Sandstorm), "Snow" (Hail). Also accepts "Harsh Sunshine" / "Heavy Rain" and the long/Chinese forms ("Sandstorm", "Harsh Sunlight", "沙暴" / "晴天" ...).' },
+                                        terrain: { type: 'string', description: '"Electric", "Grassy", "Misty", "Psychic" (also accepts the long/Chinese forms: "Grassy Terrain", "青草场地" ...).' },
                                         reflect: { type: 'boolean', description: 'Reflect is up on the DEFENDER side (halves incoming Physical damage unless the attacker crits).' },
                                         lightScreen: { type: 'boolean', description: 'Light Screen on the DEFENDER side (halves incoming Special damage unless the attacker crits).' },
                                         auroraVeil: { type: 'boolean', description: 'Aurora Veil on the DEFENDER side (halves both, unless the attacker crits).' },
@@ -1267,6 +1273,15 @@ function calcOneLeg(leg, idx, ctx) {
     if (leg.defender && leg.defender.ability && !psAbilityExists(leg.defender.ability)) notes.push('defender ability "' + leg.defender.ability + '" not recognised by the calculator — check the spelling (nothing applied)');
     if (leg.attacker && leg.attacker.item && !psItemExists(leg.attacker.item)) notes.push('attacker item "' + leg.attacker.item + '" not recognised by the calculator — check the spelling (nothing applied)');
     if (leg.defender && leg.defender.item && !psItemExists(leg.defender.item)) notes.push('defender item "' + leg.defender.item + '" not recognised by the calculator — check the spelling (nothing applied)');
+    // 天气/场地：名字不被识别时同样**静默不生效**（伤害照常返回，只是少了那一份修正）
+    if (leg.field && leg.field.weather) {
+        var normW = normalizeWeather(leg.field.weather);
+        if (PS_WEATHER_NAMES.indexOf(normW) < 0) notes.push('field.weather "' + leg.field.weather + '" not recognised by the calculator (nothing applied) — use ' + PS_WEATHER_NAMES.join(' / '));
+    }
+    if (leg.field && leg.field.terrain) {
+        var normT = normalizeTerrain(leg.field.terrain);
+        if (PS_TERRAIN_NAMES.indexOf(normT) < 0) notes.push('field.terrain "' + leg.field.terrain + '" not recognised by the calculator (nothing applied) — use ' + PS_TERRAIN_NAMES.join(' / '));
+    }
 
     // 防守方最大 HP 由计算器按种族值/EV 得出；没给 EV 就算「用了默认词条」
     if (leg.defender.hp === undefined || leg.defender.hp === null) markAssumed(dAssumed, leg.defender, false);

@@ -270,6 +270,56 @@ if (!pwOk) gdiff++;
 console.log('[' + (pwOk ? 'OK  ' : 'DIFF') + '] name+power 不一致应提示 power 被忽略');
 console.log('护栏检查：' + (8 - gdiff) + '/8 通过');
 
+// ===== 场地/天气名称归一化（带后缀全名 vs PS 短名）=====
+// 回归背景：计算器只认 'Grassy' / 'Harsh Sunshine' 这类 PS 短名；传 'Grassy Terrain' / 'Harsh Sunlight'
+// 会**静默不生效**（伤害照常返回、只是少了那一份修正）。而 po-script 的 state.terrain / state.weather
+// 产的正是全名 → from_state 自动填的场地/天气曾经整个失效（2026-09-20 实测发现）。
+console.log('\n--- 场地/天气名称归一化 ---');
+let ndiff = 0;
+function fieldDmg(field) {
+  const r = tools.runTool('calc_damage', { legs: [{
+    attacker: { poke: 'Tapu Bulu', ev: [0, 252, 0, 0, 0, 252], nature: 'Adamant', ability: 'Grassy Surge' },
+    defender: { poke: 'Politoed', ev: [252, 0, 0, 0, 252, 0] },
+    move: { name: 'Wood Hammer' }, field: field
+  }] }, {}).legs[0];
+  return r;
+}
+const tShort = fieldDmg({ terrain: 'Grassy' });
+for (const t of ['grassy', 'Grassy Terrain', 'grassy terrain', '青草', '青草场地']) {
+  const r = fieldDmg({ terrain: t });
+  const ok = r.min === tShort.min && r.max === tShort.max;
+  if (!ok) ndiff++;
+  console.log('[' + (ok ? 'OK  ' : 'DIFF') + '] terrain "' + t + '" -> ' + r.min + '-' + r.max + '（应 = Grassy ' + tShort.min + '-' + tShort.max + '）');
+}
+for (const t of ['Grass Terrain', 'bogus', 'plains']) {
+  const r = fieldDmg({ terrain: t });
+  const ok = r.notes.some(n => n.indexOf('field.terrain') >= 0 && n.indexOf('not recognised') >= 0);
+  if (!ok) ndiff++;
+  console.log('[' + (ok ? 'OK  ' : 'DIFF') + '] terrain "' + t + '" 应报「not recognised」');
+}
+function fireDmg(weather) {
+  const r = tools.runTool('calc_damage', { legs: [{
+    attacker: { poke: 'Charizard', ev: [0, 0, 0, 252, 0, 252], nature: 'Timid', ability: 'Blaze' },
+    defender: { poke: 'Blissey', ev: [252, 0, 252, 0, 0, 0], nature: 'Bold' },
+    move: { name: 'Fire Blast' }, field: { weather: weather }
+  }] }, {}).legs[0];
+  return r;
+}
+const wShort = fireDmg('Sun');
+for (const w of ['sunny', '晴天', 'Harsh Sunshine', 'Harsh Sunlight', '大晴天']) {
+  const r = fireDmg(w);
+  const ok = r.min === wShort.min && r.max === wShort.max;
+  if (!ok) ndiff++;
+  console.log('[' + (ok ? 'OK  ' : 'DIFF') + '] weather "' + w + '" -> ' + r.min + '-' + r.max + '（应 = Sun ' + wShort.min + '-' + wShort.max + '）');
+}
+for (const w of ['Fog', 'bogus weather']) {
+  const r = fireDmg(w);
+  const ok = r.notes.some(n => n.indexOf('field.weather') >= 0 && n.indexOf('not recognised') >= 0);
+  if (!ok) ndiff++;
+  console.log('[' + (ok ? 'OK  ' : 'DIFF') + '] weather "' + w + '" 应报「not recognised」');
+}
+console.log('场地/天气名称归一化：' + (12 - ndiff) + '/12 通过');
+
 // ===== 特性描述数据（Gen8 口径）=====
 console.log('\n--- 特性描述（Gen8 数值口径）---');
 let adiff = 0;
