@@ -230,11 +230,24 @@ function buildMoves() {
             .toLowerCase().replace(/[^a-z0-9]/g, '');
     }
     const MOVE_ALIAS = { vicegrip: 'visegrip' };   // PO 叫 Vice Grip、PS 叫 Vise Grip（此处是 PO id -> PS id）
-    function maxPP(name) {
+    // 按招式名取 PS 的 moves.js 条目（先试原名 id，再试别名）
+    function psMove(name) {
         const id = psId(name);
         const cands = [id, MOVE_ALIAS[id]];
-        for (const c of cands) { if (c && psMoves[c] && psMoves[c].pp) return psMoves[c].pp; }
+        for (const c of cands) { if (c && psMoves[c]) return psMoves[c]; }
         return null;
+    }
+    function maxPP(name) {
+        const m = psMove(name);
+        return (m && m.pp) ? m.pp : null;
+    }
+    // 连续攻击次数。PS 的 multihit：数字=固定次数（Surging Strikes 3、Double Kick 2），数组=[min,max] 浮动次数。
+    // 固定次数的由 calc_damage 自动乘算总数；浮动次数只回显区间（不把上限当期望）。
+    function psHits(name) {
+        const m = psMove(name);
+        if (!m || !m.multihit) return { hits: null, range: null };
+        if (typeof m.multihit === 'number') return { hits: m.multihit, range: null };
+        return { hits: null, range: m.multihit };
     }
 
     // 招式属性：movenum type编号（稀疏文件，缺省=Normal 0）
@@ -317,7 +330,9 @@ function buildMoves() {
             if (m[TAG_FIELDS[i][0]]) tags.push(TAG_FIELDS[i][1]);
         }
         if (touchMap[m.num]) tags.push('touch');
+        const h = psHits(m.name);
         result[m.num] = {
+            num: m.num,
             name: m.name,
             name_zh: zhMap[m.num] || '',
             power: m.power || 0,
@@ -331,7 +346,14 @@ function buildMoves() {
             flinch_chance: flinchMap[m.num] || 0,
             healing: healingMap[m.num] || 0,
             crit_rate: critMap[m.num] || 0,
-            pp: maxPP(m.name)
+            pp: maxPP(m.name),
+            // 固定次数连续攻击（1 = 单发；calc_damage 会乘算总数）
+            hits: h.hits || 1,
+            // 浮动次数（如 2-5 次）：只回显区间，不自动乘算
+            hit_range: h.range || undefined,
+            // power=1 的 48 招：威力不是真实数值（固定伤害/浮动威力/Z 招占位），
+            // calc_damage 不能直接用它算，需在输出里标出来让 LLM 别照搬
+            variable_power: (m.power === 1) ? true : undefined
         };
     }
     return result;

@@ -165,7 +165,7 @@ var TOOL_DEFS = [
         type: 'function',
         function: {
             name: 'calc_damage',
-            description: 'Compute the damage range of up to 10 attacker/defender/move combinations using the standard Pokemon damage formula. Returns the minimum (0.85x roll) and maximum (1.0x roll) damage, plus the percentage of the defender max HP. NOTE: this is a SIMPLIFIED calculator — it does NOT auto-apply item/ability/weather/terrain/burn/critical-hit/STAB-removal etc.; pass an extra multiplier (e.g. 1.5 for critical hit, 0.5 for burn) if needed. Call it before committing to a move whenever a KO threshold or the expected damage actually matters; then compare the result with the damage you observe in the battle log (call submit_feedback if they disagree by a large factor).',
+            description: 'Compute the damage range of up to 10 attacker/defender/move combinations with the standard Pokemon damage formula, aligned with the PS calculator (@smogon/calc). Returns min/max damage, % of the defender max HP, a PS-style one-line summary (e.g. "252+ Atk Dracovish Fishious Rend (170 BP) vs. 0 HP / 0 Def Snorlax: 337-397 (73.1 - 86.1%) -- guaranteed 2HKO"), and a KO verdict against the defender CURRENT HP. Auto-handled: stat-substitution moves (Body Press uses the user\'s Def; Foul Play uses the target\'s Atk; Psyshock/Psystrike/Secret Sword use the target\'s Def), always-critical moves (Wicked Blow / Surging Strikes / Storm Throw / Frost Breath), and Fishious Rend / Bolt Beak doubling when you outspeed (pass attackerMovesFirst / targetSwitchedIn to control it). Still NOT auto-applied: item / ability / weather / terrain / screens / STAB-removal — pass those as `extra` (e.g. 1.2 for Expert Belt, 0.5 for Reflect/Light Screen); burn has its own `burn` flag. IMPORTANT: always pass ev + nature for both sides when you know them — when omitted the calculator falls back to 0 EV / neutral nature and flags `assumed: true` (a wrong default once made a 44% hit look like 13%).',
             parameters: {
                 type: 'object',
                 properties: {
@@ -187,6 +187,8 @@ var TOOL_DEFS = [
                                         boosts: { type: 'object', description: 'Stat stages, e.g. {"atk":1,"spa":-1}', additionalProperties: { type: 'integer' } },
                                         atk: { type: 'number', description: 'Direct final Attack stat (bypasses base-stats/EV/IV/nature calculation). Use if you already know the value.' },
                                         spa: { type: 'number', description: 'Direct final Special Attack stat (bypasses calculation).' },
+                                        def: { type: 'number', description: 'Direct final Defense stat (bypasses calculation); also used as the offensive stat of Body Press.' },
+                                        spe: { type: 'number', description: 'Direct final Speed stat (bypasses calculation); only used by Fishious Rend / Bolt Beak doubling.' },
                                         base_stats: { type: 'array', items: { type: 'number' }, description: 'Explicit base stats [HP,Atk,Def,SpA,SpD,Spe] (alternative to poke name)' },
                                         types: { type: 'array', items: { type: 'string' }, description: 'Types (required if base_stats given, for STAB check)' }
                                     },
@@ -202,9 +204,13 @@ var TOOL_DEFS = [
                                         iv: { type: 'array', items: { type: 'number' }, description: 'IVs [HP,Atk,Def,SpA,SpD,Spe], default all 31' },
                                         nature: { type: 'string', description: 'Nature name or number, default neutral' },
                                         boosts: { type: 'object', description: 'Stat stages, e.g. {"def":1}', additionalProperties: { type: 'integer' } },
+                                        atk: { type: 'number', description: 'Direct final Attack stat (bypasses calculation); also used as the offensive stat of Foul Play.' },
                                         def: { type: 'number', description: 'Direct final Defense stat (bypasses calculation).' },
                                         spd: { type: 'number', description: 'Direct final Special Defense stat (bypasses calculation).' },
-                                        hp: { type: 'number', description: 'Direct max HP (bypasses calculation), used for the damage %. ' },
+                                        spe: { type: 'number', description: 'Direct final Speed stat (bypasses calculation); only used by Fishious Rend / Bolt Beak doubling.' },
+                                        hp: { type: 'number', description: 'Direct max HP (bypasses calculation), used for the damage %.' },
+                                        curHp: { type: 'number', description: 'Current remaining HP (absolute). Give it to get a KO verdict against the remaining HP instead of full HP.' },
+                                        hpPct: { type: 'number', description: 'Current remaining HP as a percentage (0-100); used if curHp is not given.' },
                                         base_stats: { type: 'array', items: { type: 'number' }, description: 'Explicit base stats [HP,Atk,Def,SpA,SpD,Spe]' },
                                         types: { type: 'array', items: { type: 'string' }, description: 'Types (required if base_stats given)' }
                                     },
@@ -221,7 +227,13 @@ var TOOL_DEFS = [
                                     },
                                     required: []
                                 },
-                                extra: { type: 'number', description: 'Extra fixed multiplier to apply (critical hit 1.5, burn 0.5, etc.), default 1.0' }
+                                extra: { type: 'number', description: 'Extra fixed multiplier for item/ability/screen etc. (e.g. 1.2 Expert Belt, 1.3 Life Orb, 0.5 Reflect / Light Screen), default 1.0. Do NOT use it for critical hit or burn — use isCrit / burn.' },
+                                isCrit: { type: 'boolean', description: 'Force / forbid a critical hit. Omit to let the calculator auto-detect always-critical moves (Wicked Blow, Surging Strikes, Storm Throw, Frost Breath).' },
+                                burn: { type: 'boolean', description: 'Attacker is burned (halves Physical damage; still applies even on a critical hit in Gen 3+).' },
+                                hits: { type: 'integer', description: 'Number of hits to total (e.g. 3 for Surging Strikes). Defaults to the move\'s fixed hit count; multi-hit 2-5 moves are shown per hit unless you pass hits.' },
+                                attackerMovesFirst: { type: 'boolean', description: 'For Fishious Rend / Bolt Beak only: whether the attacker moves first. If omitted, the calculator compares effective Speed like @smogon/calc.' },
+                                targetSwitchedIn: { type: 'boolean', description: 'For Fishious Rend / Bolt Beak only: the target switched in this turn (the game engine doubles the power regardless of Speed; @smogon/calc cannot model this).' },
+                                power_multiplier: { type: 'number', description: 'Manual multiplier on the final base power (e.g. 2 for a scenario the calculator cannot infer).' }
                             },
                             required: ['attacker', 'defender', 'move']
                         }
@@ -518,6 +530,7 @@ function resolvePokemonInput(spec) {
 }
 
 // 解析招式输入：支持 {name}（英文或中文）或 {power, category, type}
+// 按名字查表时一并带回 num/crit_rate/hits/variable_power/pp，供 calcOneLeg 做属性替换/暴击/连击判断
 function resolveMoveInput(spec) {
     if (!spec) return { error: 'move missing' };
     if (spec.name) {
@@ -526,13 +539,17 @@ function resolveMoveInput(spec) {
         for (var k in MOVES) {
             var m = MOVES[k];
             if ((m.name && m.name.toLowerCase() === lower) || (m.name_zh && m.name_zh === name)) {
-                return { name: m.name, power: m.power, category: m.category, type: m.type };
+                return {
+                    name: m.name, num: m.num, power: m.power, category: m.category, type: m.type,
+                    crit_rate: m.crit_rate || 0, hits: m.hits || 1,
+                    variable_power: !!m.variable_power, pp: m.pp
+                };
             }
         }
         return { error: 'unknown move: ' + spec.name };
     }
     if (spec.power !== undefined && spec.category && spec.type) {
-        return { name: null, power: spec.power, category: spec.category, type: spec.type };
+        return { name: null, num: null, power: spec.power, category: spec.category, type: spec.type, crit_rate: 0, hits: 1, variable_power: false };
     }
     return { error: 'move needs name, or power+category+type' };
 }
@@ -590,7 +607,82 @@ function effectiveStat(baseStats, level, ev, iv, nature, boosts, statIdx) {
     return val;
 }
 
-// 单组伤害计算
+// ===== 特殊招式（对齐 @smogon/calc mechanics/gen789.ts）=====
+//   776 Body Press                                -> 攻击值改用「使用者 Def」（含使用者 def 等级）
+//   492 Foul Play                                 -> 攻击值改用「目标 Atk」（含目标 atk 等级）
+//   473/540/548 Psyshock/Psystrike/Secret Sword   -> 防御值改用「目标 Def」（攻击仍是特攻）
+//   755/754 Fishious Rend/Bolt Beak               -> 先手（或目标本回合换入）时威力翻倍 85->170
+//   crit_rate >= 6 的 4 招 = 必定暴击：Wicked Blow 843 / Surging Strikes 844 / Storm Throw 480 / Frost Breath 524
+var MV_BODY_PRESS = 776;
+var MV_FOUL_PLAY = 492;
+var MV_DEF_OVERRIDE = { 473: 1, 540: 1, 548: 1 };
+var MV_FIRST_DOUBLE = { 755: 1, 754: 1 };
+var CRIT_ALWAYS_RATE = 6;
+
+// 某一侧是否用了默认词条（没传 EV/性格）——用了就必须警示（battle69 T50 因漏传 ev/nature 把 44% 估成 13%）
+// 注：IV 默认 31 是通用前提，不算「未知词条」（只有极少数非 31 IV 配置），所以不列入
+function assumedFields(spec, needNature) {
+    var miss = [];
+    if (spec.ev === undefined || spec.ev === null) miss.push('ev');
+    if (needNature && (spec.nature === undefined || spec.nature === null || spec.nature === '')) miss.push('nature');
+    return miss;
+}
+function markAssumed(arr, spec, needNature) {
+    var m = assumedFields(spec, needNature);
+    for (var i = 0; i < m.length; i++) { if (arr.indexOf(m[i]) === -1) arr.push(m[i]); }
+}
+
+// KO 判定：把「单次命中」的伤害分布做卷积，看第 n 次「使用本招」（= n*hits 次命中）的累计伤害能否打掉 hp。
+// 返回 PS 风格结论文本（guaranteed OHKO / 99.9% chance to 3HKO / not a 4HKO）。
+// 百分比按 PS 的 roundChance 处理：四舍五入到 0.1% 并夹在 [0.1, 99.9]，避免出现误导性的 100%/0%
+function koName(n) { return n <= 1 ? 'OHKO' : (n + 'HKO'); }
+function koChancePct(chance) {
+    return Math.max(Math.min(Math.round(chance * 1000), 999), 1) / 10;
+}
+function koVerdict(perHit, hits, hp) {
+    if (!hp || hp <= 0) return null;
+    var counts = { 0: 1 };
+    var total = 1;
+    var maxUses = 4;
+    for (var n = 1; n <= maxUses * hits; n++) {
+        var next = {};
+        for (var k in counts) {
+            var dmg = parseInt(k, 10);
+            var c = counts[k];
+            for (var r = 0; r < perHit.length; r++) {
+                var nd = dmg + perHit[r];
+                next[nd] = (next[nd] || 0) + c;
+            }
+        }
+        counts = next;
+        total = total * perHit.length;
+        if (n % hits !== 0) continue;   // 只在整次「使用」后判定
+        var ko = 0;
+        for (var k2 in counts) { if (parseInt(k2, 10) >= hp) ko += counts[k2]; }
+        if (ko === total) return 'guaranteed ' + koName(n / hits);
+        if (ko > 0) return koChancePct(ko / total) + '% chance to ' + koName(n / hits);
+    }
+    // 5 次及以上：组合数太大，改用保守外推（对齐 PS 的 predictTotal 写法）：
+    // 最低伤害×n 达标 -> guaranteed；最高伤害×n 达标 -> possible（不给具体概率）
+    var perUseMin = perHit[0] * hits;
+    var perUseMax = perHit[perHit.length - 1] * hits;
+    for (var u = maxUses + 1; u <= 9; u++) {
+        if (perUseMin * u >= hp) return 'guaranteed ' + koName(u);
+        if (perUseMax * u >= hp) return 'possible ' + koName(u);
+    }
+    return 'not a 9HKO';
+}
+
+// EV/性格 前缀（PS 风格，如 "252+ Atk" / "0 Def" / "?"），statIdx 0-5
+function evNatDesc(spec, nature, statIdx) {
+    if (spec.ev === undefined || spec.ev === null) return '?';
+    var e = arrAt(spec.ev, statIdx, 0);
+    if (nature.buff === statIdx) return e + '+';
+    if (nature.debuff === statIdx) return e + '-';
+    return String(e);
+}
+
+// 单组伤害计算（取值与运算顺序对齐 @smogon/calc mechanics/gen789.ts + util.getFinalDamage）
 function calcOneLeg(leg, idx) {
     var atk = resolvePokemonInput(leg.attacker);
     if (atk.error) return { index: idx, error: atk.error };
@@ -604,18 +696,110 @@ function calcOneLeg(leg, idx) {
     }
 
     var lv = leg.attacker.level || 100;
+    var defLv = leg.defender.level || lv;
     var aNature = resolveNature(leg.attacker);
     var dNature = resolveNature(leg.defender);
-    var aStat, dStat;
-    if (mv.category === 'Physical') {
-        aStat = (leg.attacker.atk !== undefined && leg.attacker.atk !== null) ? leg.attacker.atk : effectiveStat(atk.baseStats, lv, leg.attacker.ev, leg.attacker.iv, aNature, leg.attacker.boosts, 1);
-        dStat = (leg.defender.def !== undefined && leg.defender.def !== null) ? leg.defender.def : effectiveStat(def.baseStats, leg.defender.level || lv, leg.defender.ev, leg.defender.iv, dNature, leg.defender.boosts, 2);
-    } else {
-        aStat = (leg.attacker.spa !== undefined && leg.attacker.spa !== null) ? leg.attacker.spa : effectiveStat(atk.baseStats, lv, leg.attacker.ev, leg.attacker.iv, aNature, leg.attacker.boosts, 3);
-        dStat = (leg.defender.spd !== undefined && leg.defender.spd !== null) ? leg.defender.spd : effectiveStat(def.baseStats, leg.defender.level || lv, leg.defender.ev, leg.defender.iv, dNature, leg.defender.boosts, 4);
+    var notes = [];
+
+    // ---- 暴击 ----
+    // 调用方显式给 isCrit 优先；否则按数据自动判定「必定 CT」招式（crit_rate >= 6）
+    var isCrit;
+    if (leg.isCrit === true) { isCrit = true; notes.push('critical hit (explicit)'); }
+    else if (leg.isCrit === false) { isCrit = false; }
+    else if (mv.crit_rate >= CRIT_ALWAYS_RATE) { isCrit = true; notes.push('always-critical move (auto)'); }
+    else { isCrit = false; }
+    if (!isCrit && leg.isCrit === undefined && mv.crit_rate >= 1) notes.push('high critical-hit ratio (crit NOT assumed in this calc)');
+
+    // ---- 实际威力：鳃咬/电喙先手翻倍 ----
+    var power = mv.power;
+    if (MV_FIRST_DOUBLE[mv.num]) {
+        var dbl;
+        if (leg.targetSwitchedIn === true) { dbl = true; notes.push('BP doubled: target switched in this turn'); }
+        else if (leg.attackerMovesFirst === true) { dbl = true; notes.push('BP doubled: attacker moves first'); }
+        else if (leg.attackerMovesFirst === false) { dbl = false; notes.push('BP not doubled: attacker moves last'); }
+        else {
+            // 未显式给顺序时，与 @smogon/calc 一致：用有效速度比较（同速不翻倍）
+            var aSpe = (leg.attacker.spe !== undefined && leg.attacker.spe !== null) ? leg.attacker.spe
+                : effectiveStat(atk.baseStats, lv, leg.attacker.ev, leg.attacker.iv, aNature, leg.attacker.boosts, 5);
+            var dSpe = (leg.defender.spe !== undefined && leg.defender.spe !== null) ? leg.defender.spe
+                : effectiveStat(def.baseStats, defLv, leg.defender.ev, leg.defender.iv, dNature, leg.defender.boosts, 5);
+            dbl = aSpe > dSpe;
+            notes.push('BP ' + (dbl ? 'doubled' : 'not doubled') + ' (effective Speed ' + aSpe + ' vs ' + dSpe + '; must outspeed to double)');
+        }
+        if (dbl) power = power * 2;
+    }
+    if (leg.power_multiplier !== undefined && leg.power_multiplier !== null) {
+        power = power * leg.power_multiplier;
+        notes.push('BP x' + leg.power_multiplier + ' (manual)');
     }
 
-    var base = Math.floor(Math.floor(Math.floor((2 * lv / 5 + 2) * mv.power * aStat) / dStat) / 50) + 2;
+    // ---- 攻/防能力值（含属性替换招式；暴击时忽略攻击方负向 / 防御方正向等级）----
+    var aStat, dStat;
+    var aStatLabel, dStatLabel;
+    var aAssumed = [], dAssumed = [];
+    var aIdxUsed, dIdxUsed;
+    var aEvSpec = leg.attacker, aEvNature = aNature;
+
+    if (mv.num === MV_BODY_PRESS) {
+        // 使用者 Def 当攻击值
+        aStatLabel = 'Def'; aIdxUsed = 2;
+        if (leg.attacker.def !== undefined && leg.attacker.def !== null) aStat = leg.attacker.def;
+        else {
+            var aBoP = (isCrit && boostOf(leg.attacker.boosts, 'def') > 0) ? null : leg.attacker.boosts;
+            aStat = effectiveStat(atk.baseStats, lv, leg.attacker.ev, leg.attacker.iv, aNature, aBoP, 2);
+            markAssumed(aAssumed, leg.attacker, true);
+        }
+    } else if (mv.num === MV_FOUL_PLAY) {
+        // 目标 Atk 当攻击值
+        aStatLabel = 'Atk'; aIdxUsed = 1;
+        aEvSpec = leg.defender; aEvNature = dNature;
+        if (leg.defender.atk !== undefined && leg.defender.atk !== null) aStat = leg.defender.atk;
+        else {
+            var aBoF = (isCrit && boostOf(leg.defender.boosts, 'atk') < 0) ? null : leg.defender.boosts;
+            aStat = effectiveStat(def.baseStats, defLv, leg.defender.ev, leg.defender.iv, dNature, aBoF, 1);
+            markAssumed(dAssumed, leg.defender, true);
+        }
+    } else if (mv.category === 'Special') {
+        aStatLabel = 'SpA'; aIdxUsed = 3;
+        if (leg.attacker.spa !== undefined && leg.attacker.spa !== null) aStat = leg.attacker.spa;
+        else {
+            var aBoS = (isCrit && boostOf(leg.attacker.boosts, 'spa') < 0) ? null : leg.attacker.boosts;
+            aStat = effectiveStat(atk.baseStats, lv, leg.attacker.ev, leg.attacker.iv, aNature, aBoS, 3);
+            markAssumed(aAssumed, leg.attacker, true);
+        }
+    } else {
+        aStatLabel = 'Atk'; aIdxUsed = 1;
+        if (leg.attacker.atk !== undefined && leg.attacker.atk !== null) aStat = leg.attacker.atk;
+        else {
+            var aBoA = (isCrit && boostOf(leg.attacker.boosts, 'atk') < 0) ? null : leg.attacker.boosts;
+            aStat = effectiveStat(atk.baseStats, lv, leg.attacker.ev, leg.attacker.iv, aNature, aBoA, 1);
+            markAssumed(aAssumed, leg.attacker, true);
+        }
+    }
+
+    // 防御值：Psyshock/Psystrike/Secret Sword 走 Def
+    var hitsPhysical = !!MV_DEF_OVERRIDE[mv.num] || mv.category === 'Physical';
+    if (hitsPhysical) {
+        dStatLabel = 'Def'; dIdxUsed = 2;
+        if (leg.defender.def !== undefined && leg.defender.def !== null) dStat = leg.defender.def;
+        else {
+            var dBoP = (isCrit && boostOf(leg.defender.boosts, 'def') > 0) ? null : leg.defender.boosts;
+            dStat = effectiveStat(def.baseStats, defLv, leg.defender.ev, leg.defender.iv, dNature, dBoP, 2);
+            markAssumed(dAssumed, leg.defender, true);
+        }
+    } else {
+        dStatLabel = 'SpD'; dIdxUsed = 4;
+        if (leg.defender.spd !== undefined && leg.defender.spd !== null) dStat = leg.defender.spd;
+        else {
+            var dBoS = (isCrit && boostOf(leg.defender.boosts, 'spd') > 0) ? null : leg.defender.boosts;
+            dStat = effectiveStat(def.baseStats, defLv, leg.defender.ev, leg.defender.iv, dNature, dBoS, 4);
+            markAssumed(dAssumed, leg.defender, true);
+        }
+    }
+
+    // ---- 基础伤害（暴击在基础伤害阶段 ×1.5，与 @smogon 一致）----
+    var base = Math.floor(Math.floor(Math.floor((2 * lv / 5 + 2) * power * aStat) / dStat) / 50) + 2;
+    if (isCrit) base = Math.floor(base * 1.5);
 
     // STAB：攻击方属性含招式属性 -> 1.5
     var stab = 1;
@@ -633,26 +817,77 @@ function calcOneLeg(leg, idx) {
         }
     }
 
-    // extra 系数（默认 1.0）
+    // extra 系数（默认 1.0，对应 @smogon 的 finalMod）
     var extra = (leg.extra !== undefined && leg.extra !== null) ? leg.extra : 1.0;
-
-    // 对齐 @smogon/calc getFinalDamage 的顺序：随机系数 → STAB(4096定点) → 克制(pokeRound) → extra
-    var min = Math.floor(base * 85 / 100);
-    var max = Math.floor(base * 100 / 100);
-    if (stab === 1.5) {
-        min = min * 6144 / 4096;
-        max = max * 6144 / 4096;
-    }
-    min = Math.floor(pokeRound(min) * typeMult);
-    max = Math.floor(pokeRound(max) * typeMult);
-    // extra 对应 @smogon 的 finalMod，用 pokeRound（四舍五入），对齐 finalMods 应用
-    min = pokeRound(min * extra);
-    max = pokeRound(max * extra);
+    // 灼伤：@smogon 在 finalMod 之前 floor(x/2)，单独建模以免与 extra 的取整互相干扰
+    var burn = (leg.burn === true);
 
     // 防守方最大 HP（用于百分比）
-    var defHp = (leg.defender.hp !== undefined && leg.defender.hp !== null) ? leg.defender.hp : effectiveStat(def.baseStats, leg.defender.level || lv, leg.defender.ev, leg.defender.iv, dNature, leg.defender.boosts, 0);
+    var defHp = (leg.defender.hp !== undefined && leg.defender.hp !== null) ? leg.defender.hp : effectiveStat(def.baseStats, defLv, leg.defender.ev, leg.defender.iv, dNature, leg.defender.boosts, 0);
+    if (leg.defender.hp === undefined || leg.defender.hp === null) markAssumed(dAssumed, leg.defender, false);
+
+    // 连击次数（固定次数自动乘算；浮动次数只回显区间）
+    var hits = (leg.hits !== undefined && leg.hits !== null) ? parseInt(leg.hits, 10) : (mv.hits || 1);
+    if (!hits || hits < 1) hits = 1;
+    if (mv.hit_range) notes.push('multi-hit move (2-5 times); damage below is PER HIT — pass hits to total it');
+    if (hits > 1) notes.push('hits ' + hits + ' times; damage below is the TOTAL of all hits');
+
+    // ---- 免疫 ----
+    if (typeMult === 0) {
+        return {
+            index: idx, min: 0, max: 0, percent_min: 0, percent_max: 0,
+            desc: (mv.name || 'move') + ' vs. ' + (def.name || '?') + ': no effect (immune, 0x)',
+            detail: { attack_stat: aStat, defense_stat: dStat, attack_stat_name: aStatLabel, defense_stat_name: dStatLabel, defender_max_hp: defHp, stab: stab, type_mult: 0, extra: extra, power: power, isCrit: isCrit, notes: notes }
+        };
+    }
+
+    // ---- 16 档随机（85%..100%）逐个套用：STAB(定点) → 克制(pokeRound) → 灼伤 → extra(pokeRound) ----
+    // 完全对齐 @smogon/calc util.getFinalDamage
+    var perHit = [];
+    for (var r = 0; r < 16; r++) {
+        var d = Math.floor(base * (85 + r) / 100);
+        if (stab === 1.5) d = d * 6144 / 4096;     // 定点修正，先不取整
+        d = Math.floor(pokeRound(d) * typeMult);
+        if (burn) d = Math.floor(d / 2);
+        d = pokeRound(Math.max(1, d * extra));
+        perHit.push(d);
+    }
+    var min = perHit[0] * hits;
+    var max = perHit[perHit.length - 1] * hits;
+
     var pctMin = defHp > 0 ? Math.floor(min * 100 / defHp) : 0;
     var pctMax = defHp > 0 ? Math.floor(max * 100 / defHp) : 0;
+
+    // ---- KO 判定（对「当前剩余 HP」；没给就按满血）----
+    var curHp = null;
+    if (leg.defender.curHp !== undefined && leg.defender.curHp !== null) curHp = leg.defender.curHp;
+    else if (leg.defender.hpPct !== undefined && leg.defender.hpPct !== null && defHp > 0) {
+        curHp = Math.max(1, Math.round(defHp * leg.defender.hpPct / 100));
+    }
+    var hpForKo = curHp || defHp;
+    var ko = koVerdict(perHit, hits, hpForKo);
+
+    // ---- 默认词条警示（item e）----
+    var assumed = (aAssumed.length > 0 || dAssumed.length > 0);
+    if (assumed) {
+        var parts = [];
+        if (aAssumed.length) parts.push('attacker ' + aAssumed.join('/'));
+        if (dAssumed.length) parts.push('defender ' + dAssumed.join('/'));
+        notes.push('used DEFAULT values for ' + parts.join(', ') + ' (0 EV / neutral nature, IVs assumed 31) — if you know the real values, pass them and recompute');
+    }
+    // power=1 的占位威力（item f）
+    if (mv.variable_power) {
+        notes.push('this move\'s listed power (1) is a PLACEHOLDER — it deals fixed or HP-dependent damage; do NOT use the number below as its real power');
+    }
+
+    // ---- PS 风格描述串（item b：伤害值 + 场景 + KO 结论）----
+    var atkName = atk.name || String(leg.attacker.poke || '?');
+    var defName = def.name || String(leg.defender.poke || '?');
+    var fmt = function (v) { return defHp > 0 ? (Math.floor(v * 1000 / defHp) / 10) : 0; };
+    var desc = evNatDesc(aEvSpec, aEvNature, aIdxUsed) + ' ' + aStatLabel + ' ' + atkName + ' ' + (mv.name || 'move') +
+        ' (' + power + ' BP) vs. ' + evNatDesc(leg.defender, dNature, 0) + ' HP / ' +
+        evNatDesc(leg.defender, dNature, dIdxUsed) + ' ' + dStatLabel + ' ' + defName +
+        ': ' + min + '-' + max + ' (' + fmt(min) + ' - ' + fmt(max) + '%)' + (ko ? ' -- ' + ko : '');
 
     return {
         index: idx,
@@ -660,13 +895,26 @@ function calcOneLeg(leg, idx) {
         max: max,
         percent_min: pctMin,
         percent_max: pctMax,
+        desc: desc,
+        ko: ko,
+        assumed: assumed,
+        notes: notes,
         detail: {
             attack_stat: aStat,
             defense_stat: dStat,
+            attack_stat_name: aStatLabel,
+            defense_stat_name: dStatLabel,
             defender_max_hp: defHp,
+            defender_current_hp: hpForKo,
             stab: stab,
             type_mult: typeMult,
-            extra: extra
+            extra: extra,
+            power: power,
+            hits: hits,
+            is_crit: isCrit,
+            burn: burn,
+            assumed_fields: { attacker: aAssumed, defender: dAssumed },
+            variable_power: !!mv.variable_power
         }
     };
 }
@@ -1114,7 +1362,13 @@ function getMoveInfo(args) {
     if (mv.effect_chance) out.effect_chance = mv.effect_chance;   // 附加效果触发概率 %
     if (mv.flinch_chance) out.flinch_chance = mv.flinch_chance;   // 畏缩概率 %
     if (mv.healing) out.healing = mv.healing;                     // 回复/自损 %（负值=自损）
-    if (mv.crit_rate) out.crit_rate = mv.crit_rate;               // 暴击等级（>=1 为高暴击）
+    if (mv.crit_rate) out.crit_rate = mv.crit_rate;               // 暴击等级（>=1 高暴击；6 = 必定暴击）
+    if (mv.hits && mv.hits > 1) out.hits = mv.hits;               // 固定连击次数（伤害需乘算）
+    if (mv.hit_range) out.hit_range = mv.hit_range;               // 浮动连击次数 [min,max]
+    if (mv.variable_power) {                                      // power=1 占位（固定伤害/浮动威力/Z 招）
+        out.variable_power = true;
+        out.power_note = 'the listed power (1) is a PLACEHOLDER — this move deals fixed or HP-dependent damage; do not treat it as a real base power';
+    }
     return out;
 }
 
