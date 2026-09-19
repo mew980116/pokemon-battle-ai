@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8092";
-var PKLM_VERSION = "0.6.7";       // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.6.8";       // 脚本版本（改动时 bump，随日志记录）
 var pklmLastWebFailTime = 0;       // 上次 webCall 失败时间戳（ms），用于断线时节流重发
 var pklmSilent = false;            // 静默模式：清分少女等无人值守 BOT 账号不向 PO 窗口 print 任何脚本输出
 var pklmFailCount = 0;             // 连续 webCall 失败次数（成功即归零）
@@ -409,6 +409,13 @@ function pklmActiveName(spot) {
     try { return sys.pokemon(pklmFpoke(spot).pokemon.numRef); } catch (e) { return "?"; }
 }
 
+// 对手道具推断用的受控清单（英文名）。来源：PO 的 item_messages.txt / berry_messages.txt 里
+// **文本直接写着道具名**的那些道具（由 po-data 统计得到，31 项，改数据后需重新统计）。
+// 用途：PO 不给脚本读对手道具（poke.item 恒 0 → sys.item() 返回 "(No Item)"），
+// 但道具消息（"…restored a little HP using its Leftovers!"）和部分招式消息（吹落/戏法类）文本里有道具名。
+var PKLM_ITEM_HINTS = ["Adrenaline Orb", "Air Balloon", "Berry Juice", "Berserk Gene", "Black Sludge", "Blunder Policy", "Destiny Knot", "Eject Button", "Eject Pack", "Flame Orb", "Focus Band", "Focus Sash", "Leftovers", "Life Orb", "Mental Herb", "Power Herb", "Protective Pads", "Quick Claw", "Red Card", "Rocky Helmet", "Room Service", "Safety Goggles", "Shell Bell", "Sticky Barb", "Throat Spray", "Toxic Orb", "Utility Umbrella", "Weakness Policy", "White Herb", "Stick"];
+PKLM_ITEM_HINTS.sort(function (a, b) { return b.length - a.length; });   // 长的优先，避免 "Berry Juice" 被 "Stick" 之类的短名抢先
+
 function pklmItemName(n) {
     if (!n) return '';
     try { return sys.item(n); } catch (e) { return ''; }
@@ -420,12 +427,29 @@ function pklmAbilityName(n) {
 }
 
 // 构建消息替换上下文（%i/%a 用当前宝可梦持有的道具/特性，未知时为空——尽力而为）
+// 从消息文本里认对手道具（认不到返回 null）
+function pklmInferItem(txt) {
+    if (!txt) return null;
+    for (var i = 0; i < PKLM_ITEM_HINTS.length; i++) {
+        if (txt.indexOf(PKLM_ITEM_HINTS[i]) >= 0) return PKLM_ITEM_HINTS[i];
+    }
+    return null;
+}
+
+// 消息里的 %i（道具名）：对手道具 PO 不给脚本读（恒 "(No Item)"），直接写 "(No Item)" 会误导
+// （LLM 会读成「对手没道具」）→ 明确标成「PO 隐藏」。
+function pklmItemLabel(spot) {
+    var n = pklmItemName(pklmPoke(spot).item);
+    if ((n === "(No Item)" || n === "") && spot === battle.opp) return "[item hidden by PO]";
+    return n;
+}
+
 function pklmMsgCtx(spot, type, other, q, abilityId) {
     return {
         s: pklmActiveName(spot),
         f: pklmActiveName(pklmOtherSpot(spot)),
         m: pklmLastMove[spot] || '',
-        i: pklmItemName(pklmPoke(spot).item),
+        i: pklmItemLabel(spot),
         t: pklmTypeName(type) || '',
         a: pklmAbilityName((abilityId !== undefined && abilityId !== null && abilityId !== 0) ? abilityId : pklmPoke(spot).ability),
         q: (q !== undefined && q !== null && q !== 0) ? String(q) : '',
@@ -1095,10 +1119,12 @@ function pklmSpotLabel(spot) {
             var msgNum = (kind === 'berry') ? berry : item;
             var txt = pklmRenderMsg(kind, file, msgNum, part, pklmMsgCtx(spot, undefined, other, undefined));
             if (txt) pklmTurnLog += txt + ". ";
-            // 对手道具：道具消息一旦触发，说明该道具已被「公开暴露」→ 记下来供 use_state 用
+            // 对手道具：道具消息一旦触发，说明该道具已被「公开暴露」→ 记下来供 use_state 用。
+            // 注意：**不能**用 pklmPoke(battle.opp).item —— 实测 PO 对对手恒返回 0（sys.item(0)="(No Item)"），
+            // 会把 "(No Item)" 当成推断结果喂给 LLM/计算器。改为从消息文本里认道具名（受控清单）。
             if (spot === battle.opp) {
-                var revealedItem = pklmItemName(pklmPoke(battle.opp).item);
-                if (revealedItem) pklmOppItem[pklmCurrentOppSlot] = revealedItem;
+                var infItem = pklmInferItem(txt);
+                if (infItem) pklmOppItem[pklmCurrentOppSlot] = infItem;
             }
         } catch (e) {}
     },
@@ -1107,6 +1133,11 @@ function pklmSpotLabel(spot) {
             pklmCb("onMoveMessage", "move=" + move + " part=" + part + " type=" + type + " foe=" + foe + " other=" + other + " q=" + q);
             var txt = pklmRenderMsg('move', 'move_message.txt', move, part, pklmMsgCtx(spot, type, other, q));
             if (txt) pklmTurnLog += txt + ". ";
+            // 招式消息里也可能暴露对手道具（如吹落："X knocked off the foe's Y's Choice Specs!"）
+            if ((foe || spot === battle.opp) && txt) {
+                var infItem2 = pklmInferItem(txt);
+                if (infItem2) pklmOppItem[pklmCurrentOppSlot] = infItem2;
+            }
             // 双墙/极光幕：PO 用消息编号 73（反射壁/光墙）与 236（极光幕）通知开关，受益方 = 使用者这一侧
             if (move === 73 || move === 236) {
                 var side = (spot === battle.opp) ? 'opp' : 'me';
