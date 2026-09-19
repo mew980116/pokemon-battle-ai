@@ -16,6 +16,7 @@ var MECHANICS = require('./knowledge/mechanics.json');
 var ABILITIES = require('./knowledge/abilities.json');
 var ABILITY_SIGNALS = require('./knowledge/ability_signals.json');
 var ITEMS = require('./knowledge/items.json');
+var LEARNSETS = require('./knowledge/learnsets.json');   // 招式学习面（数据源 pokemon-showdown，比 PO 准）
 
 var TYPE_NAMES = TYPECHART.types;   // 18 个属性名，与主脚本 sys.type 顺序对齐
 var CHART = TYPECHART.chart;        // 18x18 克制矩阵
@@ -353,6 +354,21 @@ var TOOL_DEFS = [
                     item: { type: 'string', description: 'Item name (English or Chinese) or PO item number. E.g. "Choice Band", "讲究头带", or "4".' }
                 },
                 required: ['item']
+            }
+        }
+    },
+    {
+        type: 'function',
+        function: {
+            name: 'get_learnset',
+            description: 'Check which moves a species can legally learn (its movepool). Data source: pokemon-showdown (more accurate than PO). Two uses: (a) pass `moves` to test whether a species can learn specific moves — returns can_learn true/false per move; call this whenever the opponent uses a move that surprises you (e.g. a Fire-type move from a Pokemon you read as Entei but which cannot learn it), a false result strongly suggests a disguise or species misread (Illusion / Transform / Mimic / Ditto) — cross-check with your observations. (b) omit `moves` to list the full movepool of a species. NOTE: an empty/false result only means the move is NOT in this species legal movepool; always confirm the species is right AND no Illusion is in play before concluding.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    pokemon: { type: 'string', description: 'Pokemon name (English or Chinese) or number. E.g. "Entei", "炎帝", or "244".' },
+                    moves: { type: 'array', items: { type: 'string' }, description: 'Optional. Move names (English or Chinese) or numbers to test against this species movepool. E.g. ["Nasty Plot", "Night Daze"]. Omit to list the whole movepool.' }
+                },
+                required: ['pokemon']
             }
         }
     }
@@ -1101,6 +1117,64 @@ function getItemInfo(args) {
     };
 }
 
+// ===== get_learnset：查招式学习面（数据来自 knowledge/learnsets.json，源 pokemon-showdown）=====
+// 解析宝可梦输入 -> learnsets byKey（与 pokemon.byNum 同 key：基础形态 "num"，形态 "num:forme"）
+function resolveLearnsetKey(poke) {
+    if (poke === undefined || poke === null || poke === '') return null;
+    var s = String(poke).trim();
+    if (POKEMON.byNum[s] !== undefined && LEARNSETS.byKey[s] !== undefined) return s;
+    var k1 = POKEMON.byName[s.toLowerCase()];   // 英文名（小写）
+    if (k1 !== undefined && LEARNSETS.byKey[k1] !== undefined) return k1;
+    var k2 = POKEMON.byName[s];                 // 中文名（原样）
+    if (k2 !== undefined && LEARNSETS.byKey[k2] !== undefined) return k2;
+    return null;
+}
+
+// 招式名/编号 -> MOVES 的 key（编号字符串）
+function resolveMoveNum(mv) {
+    var s = String(mv).trim();
+    if (/^\d+$/.test(s) && MOVES[s]) return s;
+    var lower = s.toLowerCase();
+    for (var k in MOVES) {
+        var m = MOVES[k];
+        if ((m.name && m.name.toLowerCase() === lower) || (m.name_zh && m.name_zh === s)) return k;
+    }
+    return null;
+}
+
+function getLearnset(args) {
+    var poke = args.pokemon || args.poke;
+    if (!poke) return { error: 'missing pokemon' };
+    var key = resolveLearnsetKey(poke);
+    if (!key) return { error: 'unknown pokemon (no learnset): ' + poke };
+    var list = LEARNSETS.byKey[key];
+    var p = POKEMON.byNum[key] || {};
+    var name = p.name_en || String(poke);
+
+    // 模式 a：校验指定招式是否可学
+    if (args.moves && args.moves.length) {
+        var checks = [];
+        for (var i = 0; i < args.moves.length; i++) {
+            var num = resolveMoveNum(args.moves[i]);
+            var known = num ? MOVES[num] : null;
+            checks.push({
+                move: (known && known.name) || String(args.moves[i]),
+                move_num: num ? Number(num) : null,
+                can_learn: (num && list.indexOf(Number(num)) >= 0) ? true : false
+            });
+        }
+        return { pokemon: name, keys: key, checks: checks };
+    }
+
+    // 模式 b：列出全部可学招式
+    var moves = [];
+    for (var j = 0; j < list.length; j++) {
+        var mm = MOVES[String(list[j])];
+        if (mm) moves.push(mm.name);
+    }
+    return { pokemon: name, keys: key, count: moves.length, moves: moves };
+}
+
 // ===== update_worklog：本轮工作暂存（覆盖式）。内容由 server 注入回 system，实现「始终在上下文」=====
 function updateWorklog(args, ctx) {
     var text = (args && args.text) ? String(args.text) : '';
@@ -1128,6 +1202,7 @@ function runTool(name, args, ctx) {
     if (name === 'get_move_info') return getMoveInfo(args);
     if (name === 'get_ability_info') return getAbilityInfo(args);
     if (name === 'get_item_info') return getItemInfo(args);
+    if (name === 'get_learnset') return getLearnset(args);
     return { error: 'unknown tool: ' + name };
 }
 

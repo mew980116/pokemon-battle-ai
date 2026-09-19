@@ -462,6 +462,60 @@ function buildItems() {
     return { byNum, byName };
 }
 
+// 构建 learnsets.json：招式学习面（数据源 = pokemon-showdown，比 PO 的更准确）
+// 输出：{ source, byKey: { "244": [招式num...], "26:1": [...] } }，key 与 pokemon.json 的 byNum 一致
+function buildLearnsets(pokemon) {
+    const PS_DIST = process.env.PS_DIST || 'C:/temp-calc/node_modules/pokemon-showdown/dist/data';
+    const psLearn = require(path.join(PS_DIST, 'learnsets.js')).Learnsets;
+    const psMoves = require(path.join(PS_DIST, 'moves.js')).Moves;
+
+    const moveNumById = {};
+    for (const id in psMoves) {
+        const m = psMoves[id];
+        if (m && m.num > 0) moveNumById[id] = m.num;
+    }
+
+    // PS 的 id 规则：转小写、去重音（é->e）、去掉所有非字母数字（"Raichu-Alola" -> "raichualola"）
+    function toId(s) {
+        return String(s)
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase().replace(/[^a-z0-9]/g, '');
+    }
+    // PO 与 PS 的拼写差异
+    const ALIAS = { blacephelon: 'blacephalon' };
+    const numOf = function (k) { const i = k.indexOf(':'); return i < 0 ? k : k.substring(0, i); };
+    // 取有效学习面：PS 里部分形态条目存在但无 learnset（靠 baseSpecies 继承），这类要往下回退
+    const tryLs = function (id) { const e = psLearn[id]; return (e && e.learnset) ? e : null; };
+
+    // 先建立「基础形态 num -> 学习面」，供战斗中临时形态（Deoxys-Attack / Aegislash-Blade 等）回退
+    const baseLs = {};
+    for (const key in pokemon.byNum) {
+        if (key.indexOf(':') >= 0) continue;
+        const ls = tryLs(toId(pokemon.byNum[key].name_en));
+        if (ls) baseLs[numOf(key)] = ls;
+    }
+
+    const byKey = {};
+    const missed = [];
+    for (const key in pokemon.byNum) {
+        const p = pokemon.byNum[key];
+        const nm = String(p.name_en);
+        const ls = tryLs(toId(nm))
+            || tryLs(ALIAS[toId(nm)])          // PO 拼写差异
+            || tryLs(toId(nm.split('-')[0]))   // 去掉形态后缀
+            || baseLs[numOf(key)]              // 回退到同编号基础形态
+            || null;
+        if (!ls) { missed.push(key + ' ' + nm); continue; }
+        const nums = [];
+        for (const mid in ls.learnset) {
+            const n = moveNumById[mid];
+            if (n) nums.push(n);
+        }
+        if (nums.length) byKey[key] = nums.sort(function (a, b) { return a - b; });
+    }
+    return { byKey: byKey, missed: missed };
+}
+
 function main() {
     fs.mkdirSync(KNOWLEDGE, { recursive: true });
 
@@ -482,11 +536,18 @@ function main() {
     const items = buildItems();
     fs.writeFileSync(path.join(KNOWLEDGE, 'items.json'), JSON.stringify(items, null, 2));
 
+    const learnsets = buildLearnsets(pokemon);
+    fs.writeFileSync(path.join(KNOWLEDGE, 'learnsets.json'), JSON.stringify({ source: 'pokemon-showdown', byKey: learnsets.byKey }));
+    if (learnsets.missed.length) {
+        fs.writeFileSync(path.join(KNOWLEDGE, 'learnsets.missed.txt'), learnsets.missed.join('\n'));
+    }
+
     console.log('pokemon.json: ' + pn + ' pokemon, ' + pnn + ' name index entries');
     console.log('natures.json: ' + Object.keys(natures.byNum).length + ' natures');
     console.log('moves.json: ' + Object.keys(moves).length + ' moves (with type)');
     console.log('abilities.json: ' + Object.keys(abilities.byNum).length + ' abilities');
     console.log('items.json: ' + Object.keys(items.byNum).length + ' items');
+    console.log('learnsets.json: ' + Object.keys(learnsets.byKey).length + ' pokemon (missed ' + learnsets.missed.length + ')');
 }
 
 main();
