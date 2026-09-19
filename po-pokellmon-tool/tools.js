@@ -319,7 +319,7 @@ var TOOL_DEFS = [
         type: 'function',
         function: {
             name: 'get_move_info',
-            description: 'Look up a move mechanics: power, accuracy, category, type, priority, its battle effect (desc — what it actually does on hit, e.g. "可能引起烧伤" = may burn, "自身物攻提升两级" = raises own Attack by 2), secondary-effect chance (effect_chance %), flinch chance (%), healing/recoil (% of max HP; negative = self-damage), crit rate (>=1 = high crit), and tags (contact/sound/punch/bite/pulse/recoil) with meanings. Call this when a move decision hinges on its side effects or tags — e.g. to see what a status move actually does, how reliable a secondary effect is, whether contact triggers recoil abilities (Rough Skin/Static/Flame Body), or whether sound immunity blocks it.',
+            description: 'Look up a move mechanics: power, accuracy, category, type, priority, its battle effect (desc — the concise in-battle effect, e.g. "Burns the target." or "Raises the user\'s Attack by 2 stages."), secondary-effect chance (effect_chance %), flinch chance (%), healing/recoil (% of max HP; negative = self-damage), crit rate (>=1 = high crit), and tags (contact/sound/punch/bite/pulse/recoil) with meanings. Call this when a move decision hinges on its side effects or tags — e.g. to see what a status move actually does, how reliable a secondary effect is, whether contact triggers recoil abilities (Rough Skin/Static/Flame Body), or whether sound immunity blocks it.',
             parameters: {
                 type: 'object',
                 properties: {

@@ -214,12 +214,13 @@ function buildMoves() {
         if ((parseInt(parts[1], 10) & 1) === 1) touchMap[parseInt(parts[0], 10)] = true;
     }
 
-    // 对战效果描述：zh-cn/db/moves/8G/effect.txt（UTF-8，num -> 中文对战效果 + 图鉴口吻）
-    // 覆盖到 Gen8 全部招式（852），比 po-data/moves/move_effect.txt（只到 466、仅特殊效果）全得多；
-    // 中文文本描述附加效果但不含数值，概率/等级由下面的 8G 数值表补齐。
-    // 注：po-data/moves/move_description.txt 是纯图鉴风味文本（"用长长的尾巴拍打对手"），对决策无价值，不使用。
+    // 对战效果描述：po-data/moves/8G/effect.txt（英文，num -> 精简对战效果，含数值）
+    // 例：403 "Has a 30% chance to cause the target to flinch." / 14 "Raises the user's Attack by 2 stages."
+    // 覆盖到 Gen8（763 条），描述对战实际效果且带数值，适合 LLM 决策。
+    // 注：zh-cn/db/moves/8G/effect.txt 是游戏内展示文本（图鉴口吻，如「用连天空也能劈开的空气之刃进行攻击。有时会使对手畏缩。」），
+    //     不含数值、偏图鉴，故不采用；po-data/moves/move_description.txt 同理（纯风味文本）。
     const effectMap = {};
-    const effRaw = readText(path.join(DATA, 'zh-cn', 'db', 'moves', '8G', 'effect.txt'));
+    const effRaw = readText(path.join(DATA, 'moves', '8G', 'effect.txt'));
     for (const line of effRaw.split('\n')) {
         const t = line.trim();
         if (!t) continue;
