@@ -113,7 +113,7 @@ body{font-family:"Segoe UI","Microsoft YaHei",sans-serif;color:var(--text);font-
     <div class="panel">
       <h3>对战界面 · 我方</h3>
       <div id="meActive"></div>
-      <div class="row-label">我方后备（含招式）</div>
+      <div class="row-label">我方队伍（含招式；倒下显示 KO）</div>
       <div id="meBench"></div>
     </div>
   </div>
@@ -190,6 +190,23 @@ function renderBench(el, bench){
   }).join('');
 }
 
+// 我方队伍（槽位 1-5）：用 myTeam（含已倒下）保证倒下后不消失；招式/属性从 bench 按名字补齐
+function renderMyTeam(el, st){
+  var team=(st.myTeam||[]).slice(1);                 // slot 0 = 场上，已在 meActive 展示
+  if(!team.length){ renderBench(el, st.bench||[]); return; }   // 兼容无 myTeam 的旧日志
+  var byName={}; (st.bench||[]).forEach(function(b){ byName[b.name]=b; });
+  el.innerHTML=team.map(function(p){
+    if(p.ko) return '<div class="poke ko"><span class="name">'+esc(p.name)+'</span><span class="pct" style="color:var(--faint)">KO</span></div>';
+    var b=byName[p.name]||{};
+    return '<div class="poke"><span class="name">'+esc(p.name)+'</span>'+
+      (b.types||[]).map(typeChip).join('')+
+      statusChip(p.status)+
+      hpBarHtml(p.hpPct||0)+
+    '</div>'+
+    (b.moves&&b.moves.length?'<div class="moves" style="margin:-2px 0 5px 20px">'+b.moves.map(moveHtml).join('')+'</div>':'');
+  }).join('');
+}
+
 function renderBattle(st){
   if(!st){ return; }
   renderActive(document.getElementById('oppActive'), st.opp||{}, false);
@@ -203,7 +220,7 @@ function renderBattle(st){
       return '<div class="poke"><span class="name" style="color:var(--faint)">???</span></div>';
     }).join('');
   renderActive(document.getElementById('meActive'), st.me||{}, true);
-  renderBench(document.getElementById('meBench'), st.bench||[]);
+  renderMyTeam(document.getElementById('meBench'), st);
 }
 
 function renderLLM(d){
@@ -247,28 +264,6 @@ function renderLLM(d){
   }
 }
 
-// ===== 自动滚动（直播姬插件无法手动滚动，内容需自动展示）=====
-function followBottom(id){
-  var el=document.getElementById(id);
-  if(el) el.scrollTop=el.scrollHeight;
-}
-var promptHold=0;
-function resetPromptScroll(){
-  var el=document.getElementById('promptPanel');
-  if(el) el.scrollTop=0;
-  promptHold=60;                       // 新内容先停约 3.6s 再开始滚
-}
-function promptScrollStep(){
-  var el=document.getElementById('promptPanel');
-  if(!el) return;
-  var max=el.scrollHeight-el.clientHeight;
-  if(max<=4) return;                   // 内容没超出，无需滚动
-  if(promptHold>0){ promptHold--; return; }
-  if(el.scrollTop>=max-1){ el.scrollTop=0; promptHold=60; return; }   // 到底：停一下再回顶
-  el.scrollTop += Math.max(1, Math.ceil(max/500));                    // 约 30s 滚完一屏
-}
-setInterval(promptScrollStep, 60);
-
 function render(d){
   renderBattle(d.state);
   renderLLM(d);
@@ -278,9 +273,6 @@ function render(d){
   document.getElementById('prompt').textContent='[SYSTEM]\n'+(d.systemPrompt||'(未记录)')+'\n\n[USER]\n'+(d.prompt||'');
   document.getElementById('slider').value=cur;
   document.getElementById('stepInfo').textContent='第 '+(cur+1)+' / '+BATTLE.length+' 条 · turn '+(d.turn!=null?d.turn:'?');
-  followBottom('histPanel');            // 战报：自动滚到最新回合
-  followBottom('llmPanel');             // LLM 交互：自动滚到最新 tool 调用
-  resetPromptScroll();                  // Prompt：从头开始慢滚
 }
 
 function navTo(i){

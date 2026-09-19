@@ -502,17 +502,13 @@ function buildItems() {
 }
 
 // 构建 learnsets.json：招式学习面（数据源 = pokemon-showdown，比 PO 的更准确）
-// 输出：{ source, byKey: { "244": [招式num...], "26:1": [...] } }，key 与 pokemon.json 的 byNum 一致
-function buildLearnsets(pokemon) {
+// 输出：{ source, byKey: { "244": [招式num...], "26:1": [...] } }，key 与 pokemon.json 的 byNum 一致；
+// 招式编号一律用 **PO 编号**（与 moves.json / get_move_info / calc_damage 一致）。
+// 注意：PS 的招式编号与 PO 并不一致（954 个 PS 招式中 175 个编号不同、164 个 PO 没有），
+//       所以必须按「招式名（toId 归一化）」映射回 PO 编号，不能直接用 PS 的 num。
+function buildLearnsets(pokemon, moves) {
     const PS_DIST = process.env.PS_DIST || 'C:/temp-calc/node_modules/pokemon-showdown/dist/data';
     const psLearn = require(path.join(PS_DIST, 'learnsets.js')).Learnsets;
-    const psMoves = require(path.join(PS_DIST, 'moves.js')).Moves;
-
-    const moveNumById = {};
-    for (const id in psMoves) {
-        const m = psMoves[id];
-        if (m && m.num > 0) moveNumById[id] = m.num;
-    }
 
     // PS 的 id 规则：转小写、去重音（é->e）、去掉所有非字母数字（"Raichu-Alola" -> "raichualola"）
     function toId(s) {
@@ -520,8 +516,18 @@ function buildLearnsets(pokemon) {
             .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
             .toLowerCase().replace(/[^a-z0-9]/g, '');
     }
+
+    // PO 招式名（toId）-> PO 编号；PS 的 learnset key 本身就是招式 id（=toId(name)），两边同名即可对上
+    const poNumById = {};
+    for (const num in moves) {
+        const nm = moves[num] && moves[num].name;
+        if (nm) poNumById[toId(nm)] = Number(num);
+    }
+
     // PO 与 PS 的拼写差异
     const ALIAS = { blacephelon: 'blacephalon' };
+    // 招式名拼写差异（PS id -> PO 招式名 toId）：PO 叫 Vice Grip，PS 叫 Vise Grip
+    const MOVE_ID_ALIAS = { visegrip: 'vicegrip' };
     const numOf = function (k) { const i = k.indexOf(':'); return i < 0 ? k : k.substring(0, i); };
     // 取有效学习面：PS 里部分形态条目存在但无 learnset（靠 baseSpecies 继承），这类要往下回退
     const tryLs = function (id) { const e = psLearn[id]; return (e && e.learnset) ? e : null; };
@@ -536,6 +542,7 @@ function buildLearnsets(pokemon) {
 
     const byKey = {};
     const missed = [];
+    const unmappedMoves = {};   // PS 招式 id -> 出现次数（PO 没有 / 名字对不上的招式，便于排查）
     for (const key in pokemon.byNum) {
         const p = pokemon.byNum[key];
         const nm = String(p.name_en);
@@ -547,12 +554,13 @@ function buildLearnsets(pokemon) {
         if (!ls) { missed.push(key + ' ' + nm); continue; }
         const nums = [];
         for (const mid in ls.learnset) {
-            const n = moveNumById[mid];
-            if (n) nums.push(n);
+            const n = poNumById[MOVE_ID_ALIAS[mid] || mid];
+            if (n) { if (nums.indexOf(n) < 0) nums.push(n); }
+            else unmappedMoves[mid] = (unmappedMoves[mid] || 0) + 1;
         }
         if (nums.length) byKey[key] = nums.sort(function (a, b) { return a - b; });
     }
-    return { byKey: byKey, missed: missed };
+    return { byKey: byKey, missed: missed, unmappedMoves: unmappedMoves };
 }
 
 function main() {
@@ -575,10 +583,18 @@ function main() {
     const items = buildItems();
     fs.writeFileSync(path.join(KNOWLEDGE, 'items.json'), JSON.stringify(items, null, 2));
 
-    const learnsets = buildLearnsets(pokemon);
+    const learnsets = buildLearnsets(pokemon, moves);
     fs.writeFileSync(path.join(KNOWLEDGE, 'learnsets.json'), JSON.stringify({ source: 'pokemon-showdown', byKey: learnsets.byKey }));
     if (learnsets.missed.length) {
         fs.writeFileSync(path.join(KNOWLEDGE, 'learnsets.missed.txt'), learnsets.missed.join('\n'));
+    }
+    const unmapped = Object.keys(learnsets.unmappedMoves);
+    if (unmapped.length) {
+        // PO 招式表里没有（或名字对不上）的 PS 招式，多半是 Gen9/未收录招式；写出来便于排查
+        const lines = unmapped
+            .sort(function (a, b) { return learnsets.unmappedMoves[b] - learnsets.unmappedMoves[a]; })
+            .map(function (id) { return id + '\t' + learnsets.unmappedMoves[id]; });
+        fs.writeFileSync(path.join(KNOWLEDGE, 'learnsets.unmapped.txt'), lines.join('\n'));
     }
 
     console.log('pokemon.json: ' + pn + ' pokemon, ' + pnn + ' name index entries');
@@ -586,7 +602,8 @@ function main() {
     console.log('moves.json: ' + Object.keys(moves).length + ' moves (with type)');
     console.log('abilities.json: ' + Object.keys(abilities.byNum).length + ' abilities');
     console.log('items.json: ' + Object.keys(items.byNum).length + ' items');
-    console.log('learnsets.json: ' + Object.keys(learnsets.byKey).length + ' pokemon (missed ' + learnsets.missed.length + ')');
+    console.log('learnsets.json: ' + Object.keys(learnsets.byKey).length + ' pokemon (missed ' + learnsets.missed.length +
+        ', unmapped moves ' + unmapped.length + ')');
 }
 
 main();

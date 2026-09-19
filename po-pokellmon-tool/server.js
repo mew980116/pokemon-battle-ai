@@ -36,7 +36,7 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.3.57';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.3.58';   // tool 分支版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
 // 对战主脑用 v4-pro（闭卷深想强，决策更深）；一键回 flash：POKELLMON_MODEL=deepseek-v4-flash
@@ -59,7 +59,7 @@ var WORKFLOW = 'WORKFLOW — follow this order every turn: ' +
     '(2) REVIEW: read the last turn(s) with get_battle_history and work out what they reveal about the opponent — the speed line (who moved first; any speed boost, paralysis, Tailwind or Choice Scarf clue), which moves / items / abilities are now EXPOSED or can be EXCLUDED, and back-calculate from the damage dealt and taken to infer their EV spread and any offensive boost (item or ability). Record all of it with save_observation, tagging every fact [proved] or [estimated]. ' +
     '(3) PLAN: re-read your previous save_strategy notes, look at the actions you are offered, and run the simulations you need (get_my_stats / calc_stats / calc_damage) plus the tactical guidance you need (battle_tips). ' +
     '(4) VERIFY: never trust memory for a move / ability / item effect, power or accuracy — call get_move_info / get_ability_info / get_item_info unless that detail is already present in the context. Never trust memory for a species base stats / types / abilities / weight either — call get_pokemon_info. Always call get_knowledge for the switch rules before switching unless they are already present in the context. Check the opponent against its legal movepool: if it has used a move it cannot learn (see the CAUTION line in the prompt, or verify with get_pokemon_info), the species is either misread or disguised (Illusion / Transform / Mimic / Ditto) — stop assuming that species and re-read the battle log. ' +
-    '(5) DECIDE: choose the action, then write your read + plan with save_strategy.';
+    '(5) DECIDE: choose the action, then record it with save_strategy as five labeled lines — (1) likely attack, (2) likely switch, (3) their read of my team, (4) their most likely action + my response + falsifier, (5) final call. Answer every line; never skip save_strategy.';
 
 var SYSTEM_PROMPT = require('../po-pokellmon/prompts.js').BATTLE_TIPS +
     ' You decide by calling the tools you have been given; every tool description states when to call it, so follow the workflow below and that guidance. get_pokemon_info is the pokedex lookup (base stats / types / abilities / weight + legal movepool) — use it instead of memory, and to validate a surprising opponent move, since a move outside that movepool means a disguise or a misread species.' +
@@ -258,6 +258,32 @@ function learnsetCaution(state) {
         'Use get_pokemon_info to test more revealed moves.\n';
 }
 
+// 明知会失败的招式提示（目前只覆盖「入场陷阱已满/已在对方场上」这一确定性情形）。
+// 例：对方场上已有隐形岩时再点隐形岩 = 失败（实战中确实发生过）。
+function moveFailHint(moveName, state) {
+    var n = String(moveName || '').toLowerCase();
+    var oh = (state && state.oppHazards) || [];
+    function startsWith(prefix) {
+        for (var i = 0; i < oh.length; i++) {
+            if (String(oh[i]).toLowerCase().indexOf(prefix) === 0) return true;
+        }
+        return false;
+    }
+    if (n === 'stealth rock' && startsWith('stealth rock')) {
+        return ' [will FAIL: Stealth Rock is already up on the opponent\'s side]';
+    }
+    if (n === 'spikes' && startsWith('spikes x3')) {
+        return ' [will FAIL: Spikes is already at the max 3 layers on the opponent\'s side]';
+    }
+    if (n === 'toxic spikes' && startsWith('toxic spikes x2')) {
+        return ' [will FAIL: Toxic Spikes is already at the max 2 layers on the opponent\'s side]';
+    }
+    if (n === 'sticky web' && startsWith('sticky web')) {
+        return ' [will FAIL: Sticky Web is already up on the opponent\'s side]';
+    }
+    return '';
+}
+
 function buildPrompt(state, notes) {
     var p = '';
     var opp = state.opp || {};
@@ -359,6 +385,7 @@ function buildPrompt(state, notes) {
                 p += ',vs opponent ' + multStr;
             }
             if (mi.effect) p += ',Effect:' + mi.effect;
+            p += moveFailHint(mi.name, state);
             p += '\n';
         }
     }
