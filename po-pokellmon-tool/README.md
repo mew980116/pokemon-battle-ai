@@ -7,23 +7,35 @@
 
 | | po-pokellmon（无思考） | po-pokellmon-tool（本目录） |
 |---|---|---|
-| 思考模式 | `thinking:disabled` | `thinking:enabled`（reasoning_effort:low） |
-| 超时 | 20s | 180s（放宽，tool 多轮往返慢） |
-| max_tokens | null | null（不限制，思考链 + 最终答案） |
-| tool | 无 | 有（function calling） |
+| 思考模式 | `thinking:disabled` | 默认 `disabled`；仅首回合（turn 0）单独开 `reasoning_effort:low` |
+| 超时 | 20s | 240s（放宽，tool 多轮往返慢） |
+| max_tokens | null | null（不限制） |
+| tool | 无 | 有（function calling，19 个） |
 | 端口 | 8091 | 8092 |
 | 定位 | 服务（快、稳） | 实验（测 LLM 能力上限，需 no timeout） |
 
-## 当前最小实现
+## 当前实现
 
 **harness**（[server.js](server.js)）已跑通 function calling 多轮 loop：
 
 1. 接收 PO 采集的 `state` → 拼 prompt + `tools` 定义
-2. 调 DeepSeek（思考 low + tool）
-3. 若返回 `tool_calls` → 执行 tool → 结果追加进 messages → 再调（最多 `MAX_TOOL_ROUNDS=5` 轮）
+2. 调 DeepSeek（默认无思考；首回合开 low 思考 + tool）
+3. 若返回 `tool_calls` → 执行 tool → 结果追加进 messages → 再调（最多 `MAX_TOOL_ROUNDS=25` 轮）；每轮把最新 `update_worklog` 注入回 system prompt
 4. 直到返回最终 `{"choice":N}` → 解析成 slot 动作
 
-**tool**（[tools.js](tools.js)）：
+**tool**（[tools.js](tools.js)，19 个）：
+
+*战场 / 笔记*
+
+- `get_battle_history(start_turn?, end_turn?)` —— 读取过往战报（按回合范围，不传则全文；数据来自 PO 侧 `state.fullHistory`）
+- `save_observation(pokemon, text, append?)` —— 记录/覆盖（append=true 追加）对某只对手宝可梦的观察
+- `save_strategy(text, turn?)` —— 记录当前回合的战略思路
+- `get_observation(pokemon?)` —— 读观察（不传返回全部）
+- `get_strategy(turn?)` —— 读思路（不传返回全部）
+- `update_worklog(text)` —— **本轮工作暂存（覆盖式）**：LLM 写任务分解/中间确认/计划，server 每轮注入回 system，跨 tool 轮次保持上下文且不累积
+- `submit_feedback(text)` —— 反馈「想要的 tool」/ 报告伤害计算异常
+
+*确定计算*
 
 - `get_type_matchup(attack_type, defend_types)` —— 类型克制倍率（移植 `typechart`）
 - `calc_stat_boost(base_stat, boost)` —— 能力等级修正（移植 `calcStatWhenBoost`）
@@ -31,12 +43,15 @@
 - `calc_stats(legs)` —— 能力值计算：最多 10 组（名/种族值 + ev/iv/nature/boosts），返回指定项（或全六维）能力值，含性格与能力等级修正。用于速度评估/能力估算
 - `get_my_stats(poke?)` —— 读我方实际宝可梦的无加成六维（真实 ev/iv/nature/level，PO 侧采集进 state.myStats）；不传 poke 返回全队
 - `run_js(code)` —— 逃生舱：LLM 在 `vm` 沙箱跑一段同步 JS，覆盖无现成 tool 的计算（如速度对比、批量伤害、自定义评分）。沙箱暴露 `data`（pokemon/moves/natures/typechart）、`typeMul`/`effStat`/`resolvePokemon`/`resolveMove`/`calcDamage` helper、`print`/`console.log` 输出；最后表达式值作为 `result` 返回。限制：同步、无 require/process/fs、2s 超时、结果/输出各截 2000 字符
-- `get_battle_history(start_turn?, end_turn?)` —— 读取过往战报（按回合范围，不传则全文；数据来自 PO 侧 `state.fullHistory`）
-- `save_observation(pokemon, text)` —— 记录/覆盖对某只对手宝可梦的观察
-- `save_strategy(text)` —— 记录当前回合的战略思路
-- `get_observation(pokemon?)` —— 读观察（不传返回全部）
-- `get_strategy(turn?)` —— 读思路（不传返回全部）
-- `submit_feedback(text)` —— 反馈「想要的 tool」/ 报告伤害计算异常
+
+*知识查询*
+
+- `battle_tips(names)` —— 查战术/策略 tips（组队战术 + 决策方法论 + 通用单打战略层，summary/detail 双层；一次最多 10 个名称）
+- `get_knowledge(topics)` —— 查客观对战机制与规则（换人/异常状态/天气/场地/地面/替身/毒菱等）
+- `get_move_info(move)` —— 招式详情：威力/命中/分类/属性/先制度 + 精简对战效果 desc + 附加概率/畏缩/回复自损/暴击等级 + tag（接触/声音/拳/咬/波导/反伤）
+- `get_ability_info(ability)` —— 特性描述 + 战报触发提示（时机/是否有消息/如何从战报推断）+ 合并特性提示
+- `get_item_info(item)` —— 道具描述与效果
+- `get_pokemon_info(pokemon, moves?, full_movepool?)` —— **图鉴**：种族值（具名 + 总和）/ 属性 / 可能特性（静态）/ 体重；传 `moves` 逐条校验 `can_learn`（对手用出学习面外招式 = 伪装/误判），`full_movepool:true` 才返回整份招式池
 
 最后 2 回合战报显式贴进 prompt；更早的战报由 DS 按需调 `get_battle_history` 读取（省 token）。
 
@@ -46,19 +61,23 @@
 
 | 产物 | 来源 | 内容 |
 |---|---|---|
-| `pokemon.json` | `po-data/pokes/*.txt` + `zh-cn/db/pokes/pokemons.txt` | `num → {baseStats, types, name_en, name_zh}` + 中英文名反向索引 |
+| `pokemon.json` | `po-data/pokes/{pokemons,stats,type1,type2,weight,ability1-3}.txt` + `zh-cn/db/pokes/pokemons.txt` | `num` / `num:forme` → `{baseStats, types, weight, abilities(编号), name_en, name_zh}` + 中英文名反向索引 |
 | `natures.json` | `zh-cn/db/natures/nature.txt` + 硬编码 buff/debuff | `num → {name_en, name_zh, buff, debuff}` + 中英文名反向索引 |
-| `moves.json` | `movedata.json` + `po-data/moves/8G/type.txt` + `zh-cn/db/moves/moves.txt` | `num → {name, name_zh, power, accuracy, category, type}` |
+| `moves.json` | `movedata.json` + `po-data/moves/8G/*.txt` + `zh-cn/db/moves/moves.txt` | `num → {name, name_zh, power, accuracy, category, type, priority, tags, desc(精简对战效果), effect_chance, flinch_chance, healing, crit_rate}` |
+| `abilities.json` | `po-data/abilities/*` + `zh-cn/.../abilities.txt` | `num → {name, name_zh, desc_zh, desc_en, has_msg, merged}` + 反向索引 + `deleted`（PO 已删特性） |
+| `items.json` | `po-data/items/*` + zh-cn 中文名 | `num → {name, name_zh, desc_zh, desc_en, has_msg}` + 反向索引 |
+| `learnsets.json` | `pokemon-showdown/dist/data/learnsets.js`（+ `moves.js` 取编号） | `{byKey: key → [招式编号...]}`，key 与 `pokemon.json` 一致；源用 PS（比 PO 准），missed 0 |
 
-只收录基础形态（forme=0），因为当前环境为 Gen 8 单打、无 Mega/Z/极巨化。
+收录基础形态 + 合法形态（排除 Mega `M` / 极巨化 `G`）：key 为 `num`（基础）或 `num:forme`（形态）；形态缺属性/体重/特性条目时**按槽位继承**基础形态。
+
+另：`ability_signals.json`（特性触发提示）、`tactics.json`（战术 tips）、`mechanics.json`（客观机制）为**手工维护**，不由 build-knowledge.js 生成。
 
 ## 下一步（未实现）
 
-`calc_damage` 已实现（基础伤害计算器）。后续可扩展：
+`calc_damage` 仍是基础计算器，后续可扩展：
 
 1. **自动加成**：道具/特性/天气/场地/烧伤/暴击等目前需 LLM 手动填 `extra` 系数，后续可逐个自动识别（读 state 里的 ability/item/weather/terrain）。
-2. **速度/先后手评估 tool**：判断先后手、提示先制招与改速度特性/状态。
-3. **换人/变化招评估 tool**：见 [TODO.md](../TODO.md) 的「评估依据 tool」清单。
+2. **换人/变化招评估 tool**：见 [TODO.md](../TODO.md) 的「评估依据 tool」清单。
 
 ## 使用方法
 
