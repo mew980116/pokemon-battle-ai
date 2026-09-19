@@ -65,7 +65,7 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.4.3';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
+var SERVER_VERSION = '0.4.4';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
 
 // ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
 // 对战主脑用 v4-pro（闭卷深想强，决策更深）；一键回 flash：POKELLMON_MODEL=deepseek-v4-flash
@@ -334,11 +334,15 @@ function buildPrompt(state, notes) {
         p += 'Earlier battle history (' + histN + ' turns) is available via the get_battle_history tool.\n';
     }
 
-    // 天气/场地/入场陷阱：固定加载，无则写 None（避免 LLM 误以为信息缺失）
+    // 天气/场地/入场陷阱/双墙：固定加载，无则写 None（避免 LLM 误以为信息缺失）
     var mh = state.myHazards || [];
     var oh = state.oppHazards || [];
+    var scr = state.screens || {};
+    var scrMe = (scr.me || []), scrOpp = (scr.opp || []);
     p += 'Weather:' + (state.weather || 'None') +
         ' | Terrain:' + (state.terrain || 'None') +
+        ' | Screens MY side (halve damage when THEY attack me):' + (scrMe.length ? '[' + scrMe.join(',') + ']' : 'None') +
+        ' | Screens OPP side (halve damage when I attack them):' + (scrOpp.length ? '[' + scrOpp.join(',') + ']' : 'None') +
         ' | Hazards on MY side (damage MY switch-ins):' + (mh.length ? '[' + mh.join(',') + ']' : 'None') +
         ' | Hazards on OPP side (damage THEIR switch-ins):' + (oh.length ? '[' + oh.join(',') + ']' : 'None') + '\n';
 

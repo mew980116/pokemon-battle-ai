@@ -287,3 +287,36 @@ for (const [nm, num] of [['Transistor', 131], ["Dragon's Maw", 132], ['Unseen Fi
   console.log('[' + (ok ? 'OK  ' : 'DIFF') + '] ' + nm + ' desc_en 不应是串行的别的特性文案 -> ' + String(a.desc_en).slice(0, 70));
 }
 console.log('特性描述：' + (8 - adiff) + '/8 通过');
+
+// ===== from_state（系统直接塞场上参数）=====
+// 回归背景：state.me.boosts 是**人类可读数组**（["Def+3","SpA-3"]），必须先转成 {def:3,spa:-3}
+// 再交给计算器；否则会静默变成「没有强化」（辅助力量按 20 BP 算）。
+console.log('\n--- from_state（系统填参）---');
+const fakeState = {
+  me: { name: 'Mew', hpPct: 72, status: null, boosts: ['Def+3', 'SpA-3', 'SpD+3'], ability: 'Synchronize', item: 'Leftovers', types: ['Psychic'] },
+  myStats: [{ slot: 0, name: 'Mew', numRef: 151, level: 100, ev: [252, 0, 4, 0, 252, 0], iv: [31, 31, 31, 31, 31, 31], nature: 20 }],
+  opp: { name: 'Clefable', hpPct: 100, status: null, boosts: [], abilityInferred: null, possibleAbilities: ['Cute Charm', 'Magic Guard', 'Unaware'], types: ['Fairy'] },
+  weather: null, terrain: null, screens: { me: [], opp: [] }
+};
+let fdiff = 0;
+const fsLeg = (atk, def, mv, st) => tools.runTool('calc_damage', { legs: [{ attacker: atk, defender: def, move: { name: mv } }] }, st === null ? {} : { state: st }).legs[0];
+const A = fsLeg({ from_state: 'me' }, { from_state: 'opp' }, 'Stored Power', fakeState);
+const aOk = A.detail && A.detail.power === 140 && A.detail.inputs_used && A.detail.inputs_used.attacker_src.ev === 'state.myStats.ev';
+if (!aOk) fdiff++;
+console.log('[' + (aOk ? 'OK  ' : 'DIFF') + '] from_state 解析 boosts 数组 -> BP=' + (A.detail && A.detail.power) + '（应 140）' + '  ' + A.min + '-' + A.max);
+console.log('    inputs_used 攻击方来源: ' + JSON.stringify(A.detail.inputs_used.attacker_src));
+console.log('    inputs_used 防守方来源: ' + JSON.stringify(A.detail.inputs_used.defender_src));
+const B = fsLeg({ from_state: 'me' }, { from_state: 'opp', ability: 'Unaware' }, 'Stored Power', fakeState);
+const bOk = B.min > A.min;   // 天然会忽略我方 SpA-3 → 伤害更高
+if (!bOk) fdiff++;
+console.log('[' + (bOk ? 'OK  ' : 'DIFF') + '] 显式覆盖 ability=Unaware -> ' + B.min + '-' + B.max + '（应 > ' + A.min + '-' + A.max + '，因为忽略 SpA-3）');
+const st2 = Object.assign({}, fakeState, { screens: { me: ['Reflect'], opp: ['Aurora Veil'] } });
+const C = fsLeg({ from_state: 'me' }, { from_state: 'opp' }, 'Body Press', st2);
+const cOk = !!(C.detail.applied && C.detail.applied.isAuroraVeil);
+if (!cOk) fdiff++;
+console.log('[' + (cOk ? 'OK  ' : 'DIFF') + '] 对手侧极光幕 -> applied=' + JSON.stringify(C.detail.applied));
+const D = fsLeg({ from_state: 'me' }, { from_state: 'opp' }, 'Stored Power', null);
+const dOk = !!(D.error && D.error.indexOf('from_state needs the live battle state') >= 0);
+if (!dOk) fdiff++;
+console.log('[' + (dOk ? 'OK  ' : 'DIFF') + '] 无 state 时 -> ' + D.error);
+console.log('from_state：' + (4 - fdiff) + '/4 通过');

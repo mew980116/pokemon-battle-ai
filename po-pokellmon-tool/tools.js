@@ -174,7 +174,7 @@ var TOOL_DEFS = [
         type: 'function',
         function: {
             name: 'calc_damage',
-            description: 'Compute the damage range of up to 10 attacker/defender/move combinations. Uses the official Pokemon Showdown calculator (@smogon/calc, Gen 8) internally, so abilities / items / weather / terrain / screens / status / criticals / stat-substitution moves / multi-hit / Fishious Rend doubling are all handled automatically — just name them. Returns min/max damage, % of the defender max HP, a PS-style one-line summary (e.g. "252+ Atk Urshifu Wicked Blow (80 BP) vs. 252 HP / 252+ Def Corviknight: 153-180 (38.2 - 45%) -- guaranteed 3HKO"), a KO verdict against the defender CURRENT HP, and `detail.applied` listing which modifiers the calculator actually recognised (if you named an ability/item and it is NOT in `applied`, the name was misspelled — fix it and recompute). TWO WAYS to describe extra effects, NEVER both at once: (1) PREFERRED — name them (`attacker.ability` / `attacker.item` / `attacker.status` / `defender.ability` / `defender.item` / `defender.status` / `field.*`); (2) fallback `extra` = a single manual final multiplier for something the calculator cannot express. Passing `extra` together with any modifier input returns an error. IMPORTANT: always pass ev + nature for both sides when you know them — when omitted the calculator falls back to 0 EV / neutral nature and flags `assumed: true` (a wrong default once made a 44% hit look like 13%).',
+            description: 'Compute the damage range of up to 10 attacker/defender/move combinations. Uses the official Pokemon Showdown calculator (@smogon/calc, Gen 8) internally, so abilities / items / weather / terrain / screens / status / criticals / stat-substitution moves / multi-hit / Fishious Rend doubling are all handled automatically — just name them. **PREFER `from_state`**: pass attacker.from_state="me" / defender.from_state="opp" and the battle state fills the numbers for you (my side: level/EV/IV/nature/boosts/item/ability/HP%; opponent: boosts/HP%/status + only its revealed item and log-confirmed ability) — far safer than typing them. `detail.inputs_used` echoes exactly which values were used and where each came from. Returns min/max damage, % of the defender max HP, a PS-style one-line summary (e.g. "252+ Atk Urshifu Wicked Blow (80 BP) vs. 252 HP / 252+ Def Corviknight: 153-180 (38.2 - 45%) -- guaranteed 3HKO"), a KO verdict against the defender CURRENT HP, and `detail.applied` listing which modifiers the calculator actually recognised. TWO WAYS to describe extra effects, NEVER both at once: (1) PREFERRED — name them (`attacker.ability` / `attacker.item` / `attacker.status` / `defender.ability` / `defender.item` / `defender.status` / `field.*`, all of which `from_state` fills for you); (2) fallback `extra` = a single manual final multiplier for something the calculator cannot express. Passing `extra` together with any modifier input returns an error. IMPORTANT: if you type the numbers yourself, always include ev + nature for both sides — when omitted the calculator falls back to 0 EV / neutral nature and flags `assumed: true` (a wrong default once made a 44% hit look like 13%).',
             parameters: {
                 type: 'object',
                 properties: {
@@ -189,6 +189,7 @@ var TOOL_DEFS = [
                                     description: 'Attacking pokemon. Either give its name/number, or give explicit base stats.',
                                     properties: {
                                         poke: { type: 'string', description: 'Pokemon name (English or Chinese) or Pokedex number, e.g. "Garchomp" or "445"' },
+                                        from_state: { type: 'string', enum: ['me', 'opp'], description: 'RECOMMENDED: take this side straight from the live battle state instead of typing the numbers. "me" = my active pokemon (level/EV/IV/nature + boosts/item/ability/HP% read from the battle), "opp" = the opponent active (boosts/HP%/status + its revealed item and confirmed ability only — EV/nature stay unknown). Anything you also pass explicitly overrides the state value. The result echoes exactly what was used in detail.inputs_used.' },
                                         level: { type: 'integer', description: 'Level, default 100' },
                                         ev: { type: 'array', items: { type: 'number' }, description: 'EVs [HP,Atk,Def,SpA,SpD,Spe], default all 0' },
                                         iv: { type: 'array', items: { type: 'number' }, description: 'IVs [HP,Atk,Def,SpA,SpD,Spe], default all 31' },
@@ -211,6 +212,7 @@ var TOOL_DEFS = [
                                     description: 'Defending pokemon, same structure as attacker.',
                                     properties: {
                                         poke: { type: 'string', description: 'Pokemon name (English or Chinese) or Pokedex number' },
+                                        from_state: { type: 'string', enum: ['me', 'opp'], description: 'RECOMMENDED: take this side straight from the live battle state. "me" = my active pokemon (full data: level/EV/IV/nature/boosts/item/ability/HP%), "opp" = the opponent active (only what has been revealed: boosts/HP%/status/item/confirmed ability). Explicitly passed fields override the state value. See detail.inputs_used for what was actually used.' },
                                         level: { type: 'integer', description: 'Level, default 100' },
                                         ev: { type: 'array', items: { type: 'number' }, description: 'EVs [HP,Atk,Def,SpA,SpD,Spe], default all 0' },
                                         iv: { type: 'array', items: { type: 'number' }, description: 'IVs [HP,Atk,Def,SpA,SpD,Spe], default all 31' },
@@ -772,7 +774,7 @@ function toCalcPokemon(spec) {
     opts.evs = evArrToObj(spec.ev);
     opts.ivs = ivArrToObj(spec.iv);
     opts.nature = natureNameOf(spec);
-    if (spec.boosts) opts.boosts = spec.boosts;
+    if (spec.boosts) opts.boosts = parseStateBoosts(spec.boosts);   // 兼容 ["Def+3"] 数组写法
     if (spec.ability) opts.ability = String(spec.ability);
     if (spec.item) opts.item = String(spec.item);
     if (spec.status) opts.status = String(spec.status);
@@ -923,10 +925,121 @@ function critBoost(b, side, isCrit) {
     return b;
 }
 
+// ===== from_state：直接用「系统读到的场上参数」算，避免 LLM 手抄出错 =====
+// 我方 = 硬数据（state.me 的 boosts/道具/特性/HP% + state.myStats 的等级/EV/IV/性格）；
+// 对手 = 只能填「已暴露」的信息（特性 = 战报已证实的 abilityInferred、道具 = 道具消息暴露的 itemInferred），
+//        EV/性格/等级不可知 → 留空并让 assumed 提示兜底。
+// 显式传入的字段优先级最高（可以只覆盖某一项，例如 from_state 之外再点明 ability）。
+var STATE_STATUS_MAP = { paralysis: 'par', sleep: 'slp', freeze: 'frz', burn: 'brn', poison: 'psn', toxic: 'tox', confusion: '' };
+// state 里的 boosts 是**人类可读数组**（如 ["Def+3","SpA-3","SpD+3"]），要转成计算器要的 {def:3,spa:-3,spd:3}。
+// （不转就会静默变成「没有强化」——辅助力量会按 20 BP 算。）
+var STATE_BOOST_KEY = { Atk: 'atk', Def: 'def', SpA: 'spa', SpD: 'spd', Spe: 'spe' };
+function parseStateBoosts(b) {
+    if (!b) return null;
+    if (!Array.isArray(b)) return b;          // 已经是对象就直接用
+    var o = {};
+    for (var i = 0; i < b.length; i++) {
+        var m = String(b[i]).match(/^(Atk|Def|SpA|SpD|Spe)\s*([+-]\d+)$/);
+        if (m) o[STATE_BOOST_KEY[m[1]]] = parseInt(m[2], 10);
+    }
+    return o;
+}
+
+function resolveStateSide(v, dflt) {
+    if (v === 'opp') return 'opp';
+    if (v === 'me') return 'me';
+    return dflt;
+}
+
+function applyFromState(state, spec, side) {
+    var out = {}, src = {};
+    for (var k in spec) { if (k !== 'from_state') out[k] = spec[k]; }
+    if (side === 'opp') {
+        var o = state.opp || {};
+        if (out.poke === undefined && o.name) { out.poke = o.name; src.poke = 'state.opp.name'; }
+        if (out.boosts === undefined && o.boosts) { out.boosts = parseStateBoosts(o.boosts); src.boosts = 'state.opp.boosts'; }
+        if (out.hpPct === undefined && o.hpPct !== undefined && o.hpPct !== null) { out.hpPct = o.hpPct; src.hpPct = 'state.opp.hpPct'; }
+        if (out.status === undefined && o.status && STATE_STATUS_MAP[o.status]) { out.status = STATE_STATUS_MAP[o.status]; src.status = 'state.opp.status'; }
+        if (out.ability === undefined && o.abilityInferred) { out.ability = o.abilityInferred; src.ability = 'state.opp.abilityInferred (proved by log)'; }
+        if (out.item === undefined && o.itemInferred) { out.item = o.itemInferred; src.item = 'state.opp.itemInferred (revealed)'; }
+        // 没解析出来就要说清楚「没应用」，否则 LLM 会以为 from_state 已经把它自己推断的特性带进去了
+        if (out.ability === undefined) {
+            var pa = o.possibleAbilities || [];
+            src.ability = 'NOT applied — still unresolved' + (pa.length ? (', candidates: ' + pa.join(' / ') + '. Pass `ability` explicitly if you have narrowed it down.') : '. Pass `ability` explicitly if you know it.');
+        }
+        if (out.item === undefined) src.item = 'NOT applied — item not revealed yet (pass `item` explicitly if known)';
+        src.ev = 'unknown for opponent (assumed 0/neutral)';
+        src.nature = 'unknown for opponent (assumed neutral)';
+    } else {
+        var me = state.me || {};
+        var ms = null, arr = state.myStats || [];
+        for (var i = 0; i < arr.length; i++) { if (String(arr[i].slot) === '0') ms = arr[i]; }
+        if (!ms && arr.length) ms = arr[0];
+        if (out.poke === undefined && me.name) { out.poke = me.name; src.poke = 'state.me.name'; }
+        if (ms) {
+            if (out.level === undefined && ms.level) { out.level = ms.level; src.level = 'state.myStats.level'; }
+            if (out.ev === undefined && ms.ev) { out.ev = ms.ev; src.ev = 'state.myStats.ev'; }
+            if (out.iv === undefined && ms.iv) { out.iv = ms.iv; src.iv = 'state.myStats.iv'; }
+            if (out.nature === undefined && ms.nature !== undefined && ms.nature !== null) { out.nature = ms.nature; src.nature = 'state.myStats.nature'; }
+        }
+        if (out.boosts === undefined && me.boosts) { out.boosts = parseStateBoosts(me.boosts); src.boosts = 'state.me.boosts'; }
+        if (out.hpPct === undefined && me.hpPct !== undefined && me.hpPct !== null) { out.hpPct = me.hpPct; src.hpPct = 'state.me.hpPct'; }
+        if (out.status === undefined && me.status && STATE_STATUS_MAP[me.status]) { out.status = STATE_STATUS_MAP[me.status]; src.status = 'state.me.status'; }
+        if (out.ability === undefined && me.ability) { out.ability = me.ability; src.ability = 'state.me.ability'; }
+        if (out.item === undefined && me.item) { out.item = me.item; src.item = 'state.me.item'; }
+        if (out.ability === undefined) src.ability = 'NOT applied — state has no ability for my active pokemon';
+        if (out.item === undefined) src.item = 'NOT applied — state has no item (none held?)';
+    }
+    return { spec: out, src: src };
+}
+
+// 把 state 的场上参数填进 leg（返回新 leg；不适用时原样返回）。同时把天气/场地/防守方双墙填进 field。
+function applyStateToLeg(leg, ctx) {
+    var st = (ctx && ctx.state) || null;
+    var aSpec = (leg && leg.attacker) || {};
+    var dSpec = (leg && leg.defender) || {};
+    if (!aSpec.from_state && !dSpec.from_state) return leg;
+    if (!st) {   // 没有 state（例如 run_js 沙箱里调用）→ 标记出来，让上层给明确报错
+        var miss = {};
+        for (var mk in leg) miss[mk] = leg[mk];
+        miss._fromStateMissing = true;
+        return miss;
+    }
+    var aSide = resolveStateSide(aSpec.from_state, 'me');
+    var dSide = resolveStateSide(dSpec.from_state, aSide === 'me' ? 'opp' : 'me');
+    var a = applyFromState(st, aSpec, aSide);
+    var d = applyFromState(st, dSpec, dSide);
+
+    var field = {};
+    if (st.weather) field.weather = st.weather;
+    if (st.terrain) field.terrain = st.terrain;
+    var dScr = (st.screens && st.screens[dSide]) || [];
+    for (var i = 0; i < dScr.length; i++) {
+        if (dScr[i] === 'Reflect') field.reflect = true;
+        else if (dScr[i] === 'Light Screen') field.lightScreen = true;
+        else if (dScr[i] === 'Aurora Veil') field.auroraVeil = true;
+    }
+    if (leg.field) { for (var fk in leg.field) field[fk] = leg.field[fk]; }   // 显式给的优先
+
+    var out = {};
+    for (var k in leg) out[k] = leg[k];
+    out.attacker = a.spec;
+    out.defender = d.spec;
+    out.field = field;
+    out._fromState = {
+        attacker_side: aSide, defender_side: dSide,
+        attacker_src: a.src, defender_src: d.src,
+        field_from_state: { weather: st.weather || null, terrain: st.terrain || null, defender_screens: dScr }
+    };
+    return out;
+}
+
 // 单组伤害计算。
 // 引擎 = 内嵌的官方计算器 @smogon/calc（vendor/，gen8），特性/道具/天气/场地/光墙/状态等修正全部由它算；
 // 我们负责：入参解析（名字/编号/种族值/直接能力值）→ 填进计算器 → 把结果整成 PS 风格输出（desc/KO/notes）。
-function calcOneLeg(leg, idx) {
+function calcOneLeg(leg, idx, ctx) {
+    leg = applyStateToLeg(leg, ctx);
+    if (leg._fromStateMissing) return { index: idx, error: 'from_state needs the live battle state, which is not available on this call path (e.g. run_js) — pass the pokemon/params explicitly instead' };
     var atk = resolvePokemonInput(leg.attacker);
     if (atk.error) return { index: idx, error: atk.error };
     var def = resolvePokemonInput(leg.defender);
@@ -1143,7 +1256,8 @@ function calcOneLeg(leg, idx) {
                 attack_stat: aStat, defense_stat: dStat,
                 attack_stat_name: aStatLabel, defense_stat_name: dStatLabel,
                 defender_max_hp: defHp, type_mult: 0, power: bpShown,
-                is_crit: calcCrit, applied: applied, notes: notes
+                is_crit: calcCrit, applied: applied, notes: notes,
+                inputs_used: leg._fromState || undefined
             }
         };
     }
@@ -1195,18 +1309,19 @@ function calcOneLeg(leg, idx) {
             burn: burnApplied,
             assumed_fields: { attacker: aAssumed, defender: dAssumed },
             variable_power: !!mv.variable_power,
-            applied: applied
+            applied: applied,
+            inputs_used: leg._fromState || undefined
         }
     };
 }
 
 // calc_damage：最多 10 组，一次算完
-function calcDamage(args) {
+function calcDamage(args, ctx) {
     if (!args.legs || !args.legs.length) return { error: 'legs required' };
     if (args.legs.length > 10) return { error: 'at most 10 legs allowed, got ' + args.legs.length };
     var out = [];
     for (var i = 0; i < args.legs.length; i++) {
-        out.push(calcOneLeg(args.legs[i], i));
+        out.push(calcOneLeg(args.legs[i], i, ctx));
     }
     return { legs: out };
 }
@@ -1839,7 +1954,7 @@ function runTool(name, args, ctx) {
     if (name === 'get_observation') return getObservation(args, ctx);
     if (name === 'get_strategy') return getStrategy(args, ctx);
     if (name === 'submit_feedback') return submitFeedback(args, ctx);
-    if (name === 'calc_damage') return calcDamage(args);
+    if (name === 'calc_damage') return calcDamage(args, ctx);
     if (name === 'run_js') return runJs(args, ctx);
     if (name === 'calc_stats') return calcStats(args);
     if (name === 'get_my_stats') return getMyStats(args, ctx);

@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8092";
-var PKLM_VERSION = "0.6.5";       // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.6.6";       // 脚本版本（改动时 bump，随日志记录）
 var pklmLastWebFailTime = 0;       // 上次 webCall 失败时间戳（ms），用于断线时节流重发
 var pklmSilent = false;            // 静默模式：清分少女等无人值守 BOT 账号不向 PO 窗口 print 任何脚本输出
 var pklmFailCount = 0;             // 连续 webCall 失败次数（成功即归零）
@@ -80,6 +80,11 @@ var pklmOppMoveUse = [{}, {}, {}, {}, {}, {}];  // 对手每只（记录 slot）
 var pklmOppSlots = [0, 1, 2, 3, 4, 5];        // 记录 slot i 当前在哪个队伍槽位（0=场上，1-5=后备；初始 i→i）
 var pklmCurrentOppSlot = 0;                    // 当前场上对手宝可梦对应的记录 slot
 var pklmOppAbility = [-1, -1, -1, -1, -1, -1]; // 记录 slot → 已确定特性 ID（-1 未知）
+var pklmOppItem = [null, null, null, null, null, null]; // 记录 slot → 已暴露的道具名（从 item 消息得到）
+// 双墙（反射壁/光墙/极光幕）：PO 不放在 field.zone，靠 move_message 的 73/236 号「%ts 队伍」消息跟踪。
+// 73: part 0/2=反射壁开, 1/3=光墙开, 4=反射壁关, 5=光墙关；236: part 0=极光幕开, 1=关。
+// 值 = 设置时的回合数（超过 8 回合未收到「wore off」就自动过期，兜底光之黏土上限）。
+var pklmScreens = { me: {}, opp: {} };
 var pklmOppPossible = [[], [], [], [], [], []]; // 记录 slot → 可能特性列表（sys.pokeAbility 3 个）
 var pklmOppJustSwitched = false;               // 换入后待反向排除入场特性的标记
 var pklmOppAbilityTriggered = false;           // 换入后是否已触发过特性消息
@@ -552,6 +557,7 @@ function pklmCollectOppActive() {
         // 特性解析结果（从战报正向解析 + possible 反向排除）
         var abId = pklmOppAbility[pklmCurrentOppSlot];
         o.abilityInferred = (abId > 0) ? pklmAbilityName(abId) : null;
+        o.itemInferred = pklmOppItem[pklmCurrentOppSlot] || null;   // 已被道具消息暴露的道具（如剩饭/树果）
         o.possibleAbilities = pklmAbilityNames(pklmOppPossible[pklmCurrentOppSlot]);
         o.boosts = pklmCollectBoosts(battle.opp);
     } catch (e) {}
@@ -697,6 +703,23 @@ function pklmCollectHazards(spot) {
     return parts;
 }
 
+// 双墙名称表（key 与 pklmScreens 内部字段一致）
+var PKLM_SCREEN_LABEL = { reflect: 'Reflect', lightScreen: 'Light Screen', auroraVeil: 'Aurora Veil' };
+
+// 取某方当前生效的双墙（文本数组）。超过 8 回合没收到「wore off」消息就自动过期（光之黏土上限）。
+function pklmScreensOf(spot) {
+    var side = (spot === battle.opp) ? 'opp' : 'me';
+    var s = pklmScreens[side] || {};
+    var out = [];
+    for (var k in PKLM_SCREEN_LABEL) {
+        var setTurn = s[k];
+        if (setTurn === undefined || setTurn === null) continue;
+        if (pklmCurrentTurn - setTurn > 8) { delete s[k]; continue; }
+        out.push(PKLM_SCREEN_LABEL[k]);
+    }
+    return out;
+}
+
 // 检测是否 team preview（首次决策时缓存）。
 // 判定：对战开始时对手已亮相（numRef>0）的宝可梦数量 >1 则是 team preview；只有 1 只（当前场上）则不是。
 function pklmDetectTeamPreview() {
@@ -771,6 +794,7 @@ function pklmCollectState() {
         terrain: pklmTerrainName(battle.data.field.terrain) || null,
         myHazards: pklmCollectHazards(battle.me),
         oppHazards: pklmCollectHazards(battle.opp),
+        screens: { me: pklmScreensOf(battle.me), opp: pklmScreensOf(battle.opp) },
         opp: pklmCollectOppActive(),
         oppTeam: pklmCollectOppTeam(),
         oppSeen: pklmOppSeen.slice(),
@@ -1070,6 +1094,11 @@ function pklmSpotLabel(spot) {
             var msgNum = (kind === 'berry') ? berry : item;
             var txt = pklmRenderMsg(kind, file, msgNum, part, pklmMsgCtx(spot, undefined, other, undefined));
             if (txt) pklmTurnLog += txt + ". ";
+            // 对手道具：道具消息一旦触发，说明该道具已被「公开暴露」→ 记下来供 use_state 用
+            if (spot === battle.opp) {
+                var revealedItem = pklmItemName(pklmPoke(battle.opp).item);
+                if (revealedItem) pklmOppItem[pklmCurrentOppSlot] = revealedItem;
+            }
         } catch (e) {}
     },
     onMoveMessage: function (spot, move, part, type, foe, other, q) {
@@ -1077,6 +1106,20 @@ function pklmSpotLabel(spot) {
             pklmCb("onMoveMessage", "move=" + move + " part=" + part + " type=" + type + " foe=" + foe + " other=" + other + " q=" + q);
             var txt = pklmRenderMsg('move', 'move_message.txt', move, part, pklmMsgCtx(spot, type, other, q));
             if (txt) pklmTurnLog += txt + ". ";
+            // 双墙/极光幕：PO 用消息编号 73（反射壁/光墙）与 236（极光幕）通知开关，受益方 = 使用者这一侧
+            if (move === 73 || move === 236) {
+                var side = (spot === battle.opp) ? 'opp' : 'me';
+                if (!pklmScreens[side]) pklmScreens[side] = {};
+                if (move === 73) {
+                    if (part === 0 || part === 2) pklmScreens[side].reflect = pklmCurrentTurn;
+                    if (part === 1 || part === 3) pklmScreens[side].lightScreen = pklmCurrentTurn;
+                    if (part === 4) delete pklmScreens[side].reflect;
+                    if (part === 5) delete pklmScreens[side].lightScreen;
+                } else {
+                    if (part === 0) pklmScreens[side].auroraVeil = pklmCurrentTurn;
+                    if (part === 1) delete pklmScreens[side].auroraVeil;
+                }
+            }
         } catch (e) {}
     },
     onAbilityMessage: function (spot, ab, part, type, foe, other) {
@@ -1102,6 +1145,8 @@ function pklmSpotLabel(spot) {
         pklmOppSlots = [0, 1, 2, 3, 4, 5];
         pklmCurrentOppSlot = 0;
         pklmOppAbility = [-1, -1, -1, -1, -1, -1];
+        pklmOppItem = [null, null, null, null, null, null];
+        pklmScreens = { me: {}, opp: {} };
         pklmOppPossible = [[], [], [], [], [], []];
         pklmOppJustSwitched = false;
         pklmOppAbilityTriggered = false;
