@@ -51,6 +51,28 @@ function pProbePoke(tag, i, tp) {
     return s;
 }
 
+// 场地/陷阱原始值探测：
+//   weather 是普通数字（0=无 1=冰雹 2=雨 3=沙暴 4=晴）✓ 我们能读；
+//   ✗ terrain 打印出来是 6815860 / 1072064102 这种大数（≈指针），**不是 0-4** —— 生产脚本
+//     pklmTerrainName() 对它只能返回空 → state.terrain 恒为 null（静默丢数据）。这里打印候选读法找路子。
+function pProbeField() {
+    var f = battle.data.field;
+    var s = 'FIELD weather=' + f.weather + '(' + (typeof f.weather) + ')';
+    try { s += ' terrain=' + f.terrain + '(' + (typeof f.terrain) + ')'; } catch (e) { s += ' terrain=ERR'; }
+    try { s += ' .type=' + f.terrain.type; } catch (e) {}
+    try { s += ' .terrain=' + f.terrain.terrain; } catch (e) {}
+    try { s += ' str=' + f.terrain.toString(); } catch (e) {}
+    try {
+        var z = f.zone(battle.me);
+        s += ' zoneME{sp=' + z.spikesLevel + ',tsp=' + z.toxicSpikesLevel + ',sr=' + z.stealthRocks + ',web=' + z.stickyWeb + '}';
+    } catch (e) {}
+    try {
+        var zo = f.zone(battle.opp);
+        s += ' zoneOPP{sp=' + zo.spikesLevel + ',tsp=' + zo.toxicSpikesLevel + ',sr=' + zo.stealthRocks + ',web=' + zo.stickyWeb + '}';
+    } catch (e) {}
+    pProbe(s);
+}
+
 // 上次 dump 的 HP 快照（用于打印回合间 Δ —— 天气扣血若没有回调，就只能靠这个差值看出来）
 var pProbePrev = {};
 
@@ -72,6 +94,7 @@ function pProbeDump(tag) {
         }
     }
     pProbe(out);
+    pProbeField();
 }
 
 print('[PROBE] installed — 开一局有天气的对战（沙暴/冰雹最好），把 [PROBE] 行贴回来');
@@ -92,8 +115,8 @@ print('[PROBE] installed — 开一局有天气的对战（沙暴/冰雹最好�
     },
     // 每回合必然触发的「心跳」：PO 每次要我方决策都会调它 —— 只要看到这条，就说明探针绑定成功。
     // 它同时也是最有用的 HP 快照点：决策时 = 上回合结算完后，正好用来算回合间的 HP 差。
-    onOfferChoice: function (player, choice) { pProbe('=== onOfferChoice (heartbeat) ==='); pProbeDump('CHOICE'); },
-    onChoiceSelection: function (player) { pProbe('=== onChoiceSelection (heartbeat) ==='); },
+    onOfferChoice: function (player, choice) { pProbe('=== onOfferChoice player=' + pProbeSpot(player) + ' (heartbeat) ==='); pProbeDump('CHOICE'); },
+    onChoiceSelection: function (player) { pProbe('=== onChoiceSelection player=' + pProbeSpot(player) + ' (heartbeat) ==='); },
     onBeginTurn: function (turn) { pProbe('=== onBeginTurn turn=' + turn + ' ==='); pProbeDump('T' + turn); },
     onEndTurn: function () { pProbe('=== onEndTurn ==='); pProbeDump('END'); },
     onTurnEnd: function () { pProbe('=== onTurnEnd ==='); pProbeDump('TURNEND'); },
@@ -108,7 +131,16 @@ print('[PROBE] installed — 开一局有天气的对战（沙暴/冰雹最好�
     // 消息类（天气伤害若有文案，多半从这里出）
     onMoveMessage: function (spot, move, part, type, foe, other, q) { pProbe('onMoveMessage spot=' + pProbeSpot(spot) + ' move=' + move + ' part=' + part + ' type=' + type + ' foe=' + foe + ' other=' + other); },
     onAbilityMessage: function (spot, ab, part, type, foe, other) { pProbe('onAbilityMessage spot=' + pProbeSpot(spot) + ' ab=' + ab + ' part=' + part + ' type=' + type + ' foe=' + foe + ' other=' + other); },
-    onItemMessage: function (spot, item, part, foe, berry, other) { pProbe('onItemMessage spot=' + pProbeSpot(spot) + ' item=' + item + ' part=' + part + ' berry=' + berry + ' other=' + other); },
+    onItemMessage: function (spot, item, part, foe, berry, other) {
+        pProbe('onItemMessage spot=' + pProbeSpot(spot) + ' item=' + item + ' part=' + part + ' berry=' + berry + ' other=' + other);
+        // 对手道具：PO 平时给脚本的是 0（读不到），这里验证「道具消息触发后」是否变成真值
+        // （我们 po-script 的 onItemMessage 就是靠这个读对手道具 → 若永远 0 会记成 "(No Item)"）
+        if (spot === battle.opp || foe) {
+            var raw = 'ERR';
+            try { raw = battle.data.team(battle.opp).poke(0).item; } catch (e) {}
+            pProbe('   ^ OPP raw item id=' + raw + ' → ' + pklmSafe(sys.item, raw));
+        }
+    },
 
     // 其余回调一律打印（用于确认「天气回合末到底有没有任何回调触发」）
     onUseAttack: function (spot, attack) { pProbe('onUseAttack spot=' + pProbeSpot(spot) + ' attack=' + attack); },
