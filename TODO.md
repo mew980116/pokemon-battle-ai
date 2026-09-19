@@ -164,6 +164,9 @@
 
   - **输出形式也要对齐：做成「伤害值 + 场景」**（2026-09-19 提出，与上面同一轮做）。现在只回 `min-max + HP%`，应像 @smogon/calc 的 desc 那样带**判定结论 + 情境**，例如 `252+ Atk Dracovish Fishious Rend (170 BP) vs. 0 HP / 0 Def Snorlax: 337-397 (73.1-86.1%) -- guaranteed 2HKO`：一次给出 ① **实际威力 BP**（含翻倍/CT/天气等修正后的值，让 LLM 不用猜）② **对当前剩余 HP 的 KO 判定**（guaranteed OHKO / 2HKO / 概率 KO）③ **本次计算用到的关键假设**（道具、特性、天气/场地、能力等级、是否换入/先手、是否 CT）。LLM 才能直接拿去决策，而不是自己二次换算。
 
+  - **属性替换类招式没实现（battle69 feedback + 实测确认）**：`Body Press` 应把**使用者的 Def** 当攻击值（实测我们用的是 `atk`：传 atk167 → 76-90(22-27%)；真值用 Def337 应 ≈46-55%，实战 38-44%）；`Foul Play` 应把**目标的 Atk** 当攻击值（实测不传时用了使用者 Klefki 的 atk196 → 19-23%，应为目标 Arctozolt 的 328 → ~32-38%）。另外 `Psyshock / Psystrike / Secret Sword` 是用**目标 Def** 当防御值。要改：在 `calc_damage` 里按招式名自动替换（并回显 `stat_note`），或在 tool 描述里强制要求手传 + 举例。
+  - **`calc_damage` 静默回退默认词条的风险**（battle69 T50 的误判源头）：LLM 传 `{"attacker":{"poke":"Arctozolt"}}`（漏了 ev/nature/atk）→ 计算器用中性 0EV 的 **atk 236**（真实 328，少算 28%），它还把 Bolt Beak 的 170BP 翻倍也漏了（未传 power → 用 85）、并自行乘了 0.5（Reflect）→ 估出 13-15%，实际 211HP(≈44%) → 换上的 Snorlax 直接被送掉。要改：结果里当使用了默认词条时加 `assumed:true` + 提示「本次用了默认 EV/性格，若已知实际数值请重算」；并考虑在 tool 描述里写明「**不要省略 attacker 的 ev/nature/atk**」。
+
 - [ ] **锁招（专爱/挑衅）场景下我方招式列表与实际可用不一致**（battle68 T20 由 LLM 上报——`submit_feedback`）：同一回合第一次决策列出的招式是 `U-turn`、被 PO 拒绝后（`bannedMoves:["U-turn"]`）重试时列表变成 `Earthquake`。说明专爱锁招时 PO 给的活动招式会变，而我们把它原样当"可选招"展示，LLM 可能以为被锁的招还能点。要查：`po-script.js` 的 `pklmCollectMoves`（锁招时是否该只显示锁定招/标注 locked）＋ 被拒重试路径下 state 采集的一致性。
 
 - [x] **calc_damage/calc_stats 支持形态宝可梦（forme≠0）**（已修 0.3.41）：`resolvePokemonInput` 用 `POKEMON.byName[name.toLowerCase()]` 反查，`buildPokemon` 改为收录基础形态 + 合法形态（按 pokemons.txt 的 tag 排除 Mega 'M' / 极巨化 'G'），key 用 `num:forme`（基础形态仍 `num` 兼容），形态缺 type1 时继承基础形态。现已支持 Rotom-Wash / Landorus-Therian / Deoxys-Attack / Giratina-Origin / 洛托姆各形态等（真实种族值）。
