@@ -331,3 +331,39 @@ const fOk = F.detail.inputs_used.defender_src.ev === 'your input (state cannot r
 if (!fOk) fdiff++;
 console.log('[' + (fOk ? 'OK  ' : 'DIFF') + '] 对手手填 ev/nature/ability -> 保留：' + JSON.stringify({ ev: F.detail.inputs_used.defender_src.ev, nature: F.detail.inputs_used.defender_src.nature, ability: F.detail.inputs_used.defender_src.ability }));
 console.log('from_state：' + (6 - fdiff) + '/6 通过');
+
+// ===== from_state 场下（bench）：'me:<slot>' / 'opp:<slot>' =====
+// 场下与场上的关键差别：① 没有能力等级（换上即清零）→ boosts 取 0
+//                    ② 对手后备只有「已亮相」的才有名字/HP%
+fakeState.myStats.push({ slot: 2, name: 'Garchomp', numRef: 445, level: 100, ev: [0, 252, 0, 0, 0, 252], iv: [31, 31, 31, 31, 31, 31], nature: 13 });
+fakeState.bench = [{ slot: 2, name: 'Garchomp', numRef: 445, unrevealed: true, types: ['Dragon', 'Ground'], hpPct: 88, status: null, ability: 'Rough Skin', item: 'Rocky Helmet' }];
+fakeState.oppTeam = [];
+for (let i = 0; i < 6; i++) fakeState.oppTeam.push({ name: null, revealed: false, ko: false, hpPct: null, status: null, abilityInferred: null, possibleAbilities: [], itemInferred: null });
+fakeState.oppTeam[4] = { name: 'Dragapult', revealed: true, ko: false, hpPct: 74, status: null, abilityInferred: 'Clear Body', possibleAbilities: ['Clear Body', 'Infiltrator', 'Cursed Body'], itemInferred: 'Choice Specs' };
+let bdiff = 0;
+const G = fsLeg({ from_state: 'me' }, { from_state: 'me:2' }, 'Earthquake', fakeState);
+const gOk = G.detail.inputs_used.defender_side === 'me:2' &&
+    G.detail.inputs_used.defender_src.poke.indexOf('my bench') >= 0 &&
+    G.detail.inputs_used.defender_src.ev === 'state.myStats[2].ev' &&
+    G.detail.inputs_used.defender_src.boosts.indexOf('reset on switch-in') >= 0 &&
+    G.detail.inputs_used.defender_src.item === 'state.bench[2].item';
+if (!gOk) bdiff++;
+console.log('[' + (gOk ? 'OK  ' : 'DIFF') + '] 我方场下 me:2 -> ' + G.desc);
+console.log('    defender_src=' + JSON.stringify(G.detail.inputs_used.defender_src));
+const H = fsLeg({ from_state: 'opp:4' }, { from_state: 'me' }, 'Shadow Ball', fakeState);
+const hOk = H.detail.inputs_used.attacker_side === 'opp:4' &&
+    H.detail.inputs_used.attacker_src.poke.indexOf('oppTeam[4]') >= 0 &&
+    H.detail.inputs_used.attacker_src.ability.indexOf('abilityInferred') >= 0 &&
+    H.detail.applied.attackerItem === 'Choice Specs';   // 值真的生效了（来自 itemInferred）
+if (!hOk) bdiff++;
+console.log('[' + (hOk ? 'OK  ' : 'DIFF') + '] 对手场下 opp:4（已亮相）-> ' + H.desc);
+console.log('    attacker_src=' + JSON.stringify(H.detail.inputs_used.attacker_src));
+const I = fsLeg({ from_state: 'me' }, { from_state: 'opp:5' }, 'Stored Power', fakeState);
+const iOk = !!(I.error && I.error.indexOf('has not been revealed') >= 0);
+if (!iOk) bdiff++;
+console.log('[' + (iOk ? 'OK  ' : 'DIFF') + '] 对手场下 opp:5（未亮相）-> ' + (I.error || 'no error'));
+const J = fsLeg({ from_state: 'me:9' }, { from_state: 'opp' }, 'Earthquake', fakeState);
+const jOk = !!(J.error && J.error.indexOf('NOT found') >= 0);
+if (!jOk) bdiff++;
+console.log('[' + (jOk ? 'OK  ' : 'DIFF') + '] 越界槽位 me:9 -> ' + (J.error || 'no error'));
+console.log('from_state 场下：' + (4 - bdiff) + '/4 通过');

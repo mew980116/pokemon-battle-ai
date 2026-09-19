@@ -189,7 +189,7 @@ var TOOL_DEFS = [
                                     description: 'Attacking pokemon. Either give its name/number, or give explicit base stats.',
                                     properties: {
                                         poke: { type: 'string', description: 'Pokemon name (English or Chinese) or Pokedex number, e.g. "Garchomp" or "445"' },
-                                        from_state: { type: 'string', enum: ['me', 'opp'], description: 'RECOMMENDED: take this side straight from the live battle state instead of typing the numbers. "me" = my active pokemon (level/EV/IV/nature/boosts/item/ability/HP%), "opp" = the opponent active (boosts/HP%/status + its revealed item and log-confirmed ability). PRIORITY RULE: values the state KNOWS always win — if yours differs, detail.inputs_used marks it "OVERRIDES your value"; values the state CANNOT know (opponent EV/IV/nature/level, unresolved ability/item) keep whatever you pass, so you may hand-fill an opponent spread you deduced from damage rolls.' },
+                                        from_state: { type: 'string', description: 'RECOMMENDED: take this side straight from the live battle state instead of typing the numbers. Values: "me" / "opp" = the CURRENTLY ACTIVE pokemon; "me:3" / "opp:2" = a specific TEAM SLOT (0-5, slot 0 = my lead). Bench pokemon have no stat stages (reset on switch-in), so their boosts are taken as 0. What the state can supply: my side = full data (level/EV/IV/nature/boosts/item/ability/HP%); opponent = only what has been revealed (name once seen, HP%/status/boosts while active, log-confirmed ability, revealed item). PRIORITY RULE: values the state KNOWS always win (marked "OVERRIDES your value" in detail.inputs_used); values the state CANNOT know (opponent EV/IV/nature/level, unresolved ability/item) keep whatever you pass — so you may hand-fill an opponent spread you deduced from damage rolls.' },
                                         level: { type: 'integer', description: 'Level, default 100' },
                                         ev: { type: 'array', items: { type: 'number' }, description: 'EVs [HP,Atk,Def,SpA,SpD,Spe], default all 0' },
                                         iv: { type: 'array', items: { type: 'number' }, description: 'IVs [HP,Atk,Def,SpA,SpD,Spe], default all 31' },
@@ -212,7 +212,7 @@ var TOOL_DEFS = [
                                     description: 'Defending pokemon, same structure as attacker.',
                                     properties: {
                                         poke: { type: 'string', description: 'Pokemon name (English or Chinese) or Pokedex number' },
-                                        from_state: { type: 'string', enum: ['me', 'opp'], description: 'RECOMMENDED: take this side straight from the live battle state. "me" = my active pokemon (full data: level/EV/IV/nature/boosts/item/ability/HP%), "opp" = the opponent active (only what has been revealed: boosts/HP%/status/item/confirmed ability). Same PRIORITY RULE as the attacker: state-known values win (marked "OVERRIDES your value"); state-unknown values (opponent EV/IV/nature/level) keep your input. See detail.inputs_used.' },
+                                        from_state: { type: 'string', description: 'RECOMMENDED: take this side straight from the live battle state. Same values as the attacker: "me"/"opp" = active pokemon, "me:3"/"opp:2" = a team slot 0-5 (bench). Same PRIORITY RULE: state-known values win (marked "OVERRIDES your value"); state-unknown values (opponent EV/IV/nature/level, unresolved ability/item) keep your input. Also note the SCREENS in field are taken from the DEFENDER side. See detail.inputs_used.' },
                                         level: { type: 'integer', description: 'Level, default 100' },
                                         ev: { type: 'array', items: { type: 'number' }, description: 'EVs [HP,Atk,Def,SpA,SpD,Spe], default all 0' },
                                         iv: { type: 'array', items: { type: 'number' }, description: 'IVs [HP,Atk,Def,SpA,SpD,Spe], default all 31' },
@@ -945,10 +945,18 @@ function parseStateBoosts(b) {
     return o;
 }
 
-function resolveStateSide(v, dflt) {
-    if (v === 'opp') return 'opp';
-    if (v === 'me') return 'me';
-    return dflt;
+// from_state 取值：'me' / 'opp'（场上）或 'me:<slot>' / 'opp:<slot>'（场下/指定队伍槽位 0-5）。
+// 返回 {who:'me'|'opp', slot:number|null}（slot=null 表示「当前场上」）。
+function parseFromState(v, dfltWho) {
+    if (v === undefined || v === null || v === '' || v === true) return { who: dfltWho, slot: null };
+    var s = String(v);
+    var idx = s.indexOf(':');
+    if (idx >= 0) {
+        var who = (s.substring(0, idx) === 'opp') ? 'opp' : 'me';
+        var n = parseInt(s.substring(idx + 1), 10);
+        return { who: who, slot: isNaN(n) ? null : n };
+    }
+    return { who: (s === 'opp' ? 'opp' : (s === 'me' ? 'me' : dfltWho)), slot: null };
 }
 
 // 取值优先级规则（0.4.5 起）：
@@ -968,35 +976,91 @@ function keepExplicit(out, src, key, note) {
     if (out[key] !== undefined) src[key] = 'your input' + (note ? ' (' + note + ')' : '');
 }
 
-function applyFromState(state, spec, side) {
+// 对手「已暴露但未解析」时的提示文案
+function unresolvedAbilityNote(o) {
+    var pa = o.possibleAbilities || [];
+    return 'NOT applied — still unresolved' + (pa.length
+        ? ', candidates: ' + pa.join(' / ') + '. Pass `ability` explicitly if you have narrowed it down.'
+        : '. Pass `ability` explicitly if you know it.');
+}
+// 对手 EV/IV/性格/等级：系统读不到 → 保留 LLM 手填（常用于「从伤害反推配置」）
+function keepOppUnknown(out, src) {
+    keepExplicit(out, src, 'ev', 'state cannot read opponent EVs');
+    keepExplicit(out, src, 'iv', 'state cannot read opponent IVs');
+    keepExplicit(out, src, 'nature', 'state cannot read opponent nature');
+    keepExplicit(out, src, 'level', 'state cannot read opponent level');
+    if (out.ev === undefined) src.ev = 'unknown for opponent (assumed 0) — pass `ev` if you deduced the spread';
+    if (out.nature === undefined) src.nature = 'unknown for opponent (assumed neutral) — pass `nature` if you deduced it';
+}
+
+function applyFromState(state, spec, who, slot) {
     var out = {}, src = {};
     for (var k in spec) { if (k !== 'from_state') out[k] = spec[k]; }
-    if (side === 'opp') {
-        var o = state.opp || {};
-        takeFromState(out, src, 'poke', o.name, 'state.opp.name');
-        takeFromState(out, src, 'boosts', o.boosts ? parseStateBoosts(o.boosts) : null, 'state.opp.boosts');
-        if (o.hpPct !== undefined && o.hpPct !== null) takeFromState(out, src, 'hpPct', o.hpPct, 'state.opp.hpPct');
-        if (o.status && STATE_STATUS_MAP[o.status]) takeFromState(out, src, 'status', STATE_STATUS_MAP[o.status], 'state.opp.status');
-        if (o.abilityInferred) takeFromState(out, src, 'ability', o.abilityInferred, 'state.opp.abilityInferred (proved by log)');
-        if (o.itemInferred) takeFromState(out, src, 'item', o.itemInferred, 'state.opp.itemInferred (revealed)');
-        // 系统读不到的：说明「没应用」或「用了你填的」
-        if (out.ability === undefined) {
-            var pa = o.possibleAbilities || [];
-            src.ability = 'NOT applied — still unresolved' + (pa.length
-                ? ', candidates: ' + pa.join(' / ') + '. Pass `ability` explicitly if you have narrowed it down.'
-                : '. Pass `ability` explicitly if you know it.');
-        } else if (!o.abilityInferred) {
-            src.ability = 'your input (no confirmed ability in state)';
+    // 「场下」= 指定了非 0 的队伍槽位；场下宝可梦**没有能力等级**（换上即清零）
+    var isBench = (slot !== null && !(who === 'me' && slot === 0));
+    var where = who + (slot === null ? ' (active)' : ':' + slot + (isBench ? ' (bench)' : ' (active)'));
+
+    if (who === 'opp') {
+        if (isBench) {
+            var oe = (state.oppTeam || [])[slot];
+            if (!oe) {
+                src.poke = 'NOT found — opponent team slot ' + slot + ' is out of range (0-5)';
+            } else if (!oe.revealed || !oe.name) {
+                src.poke = 'NOT applied — opponent slot ' + slot + ' has not been revealed yet';
+                src.hpPct = 'NOT applied — unrevealed';
+                src.ability = 'NOT applied — unrevealed';
+                src.item = 'NOT applied — unrevealed';
+            } else {
+                takeFromState(out, src, 'poke', oe.name, 'state.oppTeam[' + slot + '].name (revealed bench)');
+                if (oe.hpPct !== null && oe.hpPct !== undefined) takeFromState(out, src, 'hpPct', oe.hpPct, 'state.oppTeam[' + slot + '].hpPct');
+                if (oe.status && STATE_STATUS_MAP[oe.status]) takeFromState(out, src, 'status', STATE_STATUS_MAP[oe.status], 'state.oppTeam[' + slot + '].status');
+                if (oe.abilityInferred) takeFromState(out, src, 'ability', oe.abilityInferred, 'state.oppTeam[' + slot + '].abilityInferred (proved by log)');
+                if (oe.itemInferred) takeFromState(out, src, 'item', oe.itemInferred, 'state.oppTeam[' + slot + '].itemInferred (revealed)');
+                if (out.ability === undefined) src.ability = unresolvedAbilityNote(oe);
+                if (out.item === undefined) src.item = 'NOT applied — item not revealed yet (pass `item` explicitly if known)';
+                else if (!oe.itemInferred) src.item = 'your input (item not revealed yet)';
+            }
+            takeFromState(out, src, 'boosts', {}, 'bench pokemon: stat stages reset on switch-in');
+            keepOppUnknown(out, src);
+        } else {
+            var o = state.opp || {};
+            takeFromState(out, src, 'poke', o.name, 'state.opp.name');
+            takeFromState(out, src, 'boosts', o.boosts ? parseStateBoosts(o.boosts) : null, 'state.opp.boosts');
+            if (o.hpPct !== undefined && o.hpPct !== null) takeFromState(out, src, 'hpPct', o.hpPct, 'state.opp.hpPct');
+            if (o.status && STATE_STATUS_MAP[o.status]) takeFromState(out, src, 'status', STATE_STATUS_MAP[o.status], 'state.opp.status');
+            if (o.abilityInferred) takeFromState(out, src, 'ability', o.abilityInferred, 'state.opp.abilityInferred (proved by log)');
+            if (o.itemInferred) takeFromState(out, src, 'item', o.itemInferred, 'state.opp.itemInferred (revealed)');
+            if (out.ability === undefined) src.ability = unresolvedAbilityNote(o);
+            else if (!o.abilityInferred) src.ability = 'your input (no confirmed ability in state)';
+            if (out.item === undefined) src.item = 'NOT applied — item not revealed yet (pass `item` explicitly if known)';
+            else if (!o.itemInferred) src.item = 'your input (item not revealed yet)';
+            keepOppUnknown(out, src);
         }
-        if (out.item === undefined) src.item = 'NOT applied — item not revealed yet (pass `item` explicitly if known)';
-        else if (!o.itemInferred) src.item = 'your input (item not revealed yet)';
-        // 对手的 EV/IV/性格/等级：系统读不到 → 保留 LLM 手填（常用于「从伤害反推配置」）
-        keepExplicit(out, src, 'ev', 'state cannot read opponent EVs');
-        keepExplicit(out, src, 'iv', 'state cannot read opponent IVs');
-        keepExplicit(out, src, 'nature', 'state cannot read opponent nature');
-        keepExplicit(out, src, 'level', 'state cannot read opponent level');
-        if (out.ev === undefined) src.ev = 'unknown for opponent (assumed 0) — pass `ev` if you deduced the spread';
-        if (out.nature === undefined) src.nature = 'unknown for opponent (assumed neutral) — pass `nature` if you deduced it';
+    } else if (isBench) {
+        var ms2 = null, arr2 = state.myStats || [];
+        for (var i2 = 0; i2 < arr2.length; i2++) { if (Number(arr2[i2].slot) === slot) ms2 = arr2[i2]; }
+        var be = null, bArr = state.bench || [];
+        for (var b2 = 0; b2 < bArr.length; b2++) { if (Number(bArr[b2].slot) === slot) be = bArr[b2]; }
+        if (ms2) {
+            takeFromState(out, src, 'poke', ms2.name, 'state.myStats[' + slot + '].name (my bench)');
+            if (ms2.level) takeFromState(out, src, 'level', ms2.level, 'state.myStats[' + slot + '].level');
+            if (ms2.ev) takeFromState(out, src, 'ev', ms2.ev, 'state.myStats[' + slot + '].ev');
+            if (ms2.iv) takeFromState(out, src, 'iv', ms2.iv, 'state.myStats[' + slot + '].iv');
+            if (ms2.nature !== undefined && ms2.nature !== null) takeFromState(out, src, 'nature', ms2.nature, 'state.myStats[' + slot + '].nature');
+        } else {
+            src.poke = 'NOT found — no myStats entry for team slot ' + slot + ' (0-5; slot 0 is the active one)';
+        }
+        if (be) {
+            if (be.hpPct !== null && be.hpPct !== undefined) takeFromState(out, src, 'hpPct', be.hpPct, 'state.bench[' + slot + '].hpPct');
+            if (be.status && STATE_STATUS_MAP[be.status]) takeFromState(out, src, 'status', STATE_STATUS_MAP[be.status], 'state.bench[' + slot + '].status');
+            if (be.ability) takeFromState(out, src, 'ability', be.ability, 'state.bench[' + slot + '].ability');
+            if (be.item) takeFromState(out, src, 'item', be.item, 'state.bench[' + slot + '].item');
+        } else {
+            src.hpPct = 'NOT applied — this slot is not in state.bench (fainted/KO-ed or switch banned)';
+            src.ability = out.ability === undefined ? 'NOT applied — not in state.bench' : 'your input';
+            src.item = out.item === undefined ? 'NOT applied — not in state.bench' : 'your input';
+        }
+        takeFromState(out, src, 'boosts', {}, 'bench pokemon: stat stages reset on switch-in');
     } else {
         var me = state.me || {};
         var ms = null, arr = state.myStats || [];
@@ -1017,6 +1081,7 @@ function applyFromState(state, spec, side) {
         if (out.ability === undefined) src.ability = 'NOT applied — state has no ability for my active pokemon';
         if (out.item === undefined) src.item = 'NOT applied — state has no item (none held?)';
     }
+    src.__where = where;
     return { spec: out, src: src };
 }
 
@@ -1032,15 +1097,16 @@ function applyStateToLeg(leg, ctx) {
         miss._fromStateMissing = true;
         return miss;
     }
-    var aSide = resolveStateSide(aSpec.from_state, 'me');
-    var dSide = resolveStateSide(dSpec.from_state, aSide === 'me' ? 'opp' : 'me');
-    var a = applyFromState(st, aSpec, aSide);
-    var d = applyFromState(st, dSpec, dSide);
+    var aReq = parseFromState(aSpec.from_state, 'me');
+    var dReq = parseFromState(dSpec.from_state, (aReq.who === 'me' ? 'opp' : 'me'));
+    var a = applyFromState(st, aSpec, aReq.who, aReq.slot);
+    var d = applyFromState(st, dSpec, dReq.who, dReq.slot);
 
     var field = {};
     if (st.weather) field.weather = st.weather;
     if (st.terrain) field.terrain = st.terrain;
-    var dScr = (st.screens && st.screens[dSide]) || [];
+    // 减伤看的是「防守方那一侧」的双墙（防守方是场下也只是同一侧，看 side 不看 slot）
+    var dScr = (st.screens && st.screens[dReq.who]) || [];
     for (var i = 0; i < dScr.length; i++) {
         if (dScr[i] === 'Reflect') field.reflect = true;
         else if (dScr[i] === 'Light Screen') field.lightScreen = true;
@@ -1054,11 +1120,21 @@ function applyStateToLeg(leg, ctx) {
     out.defender = d.spec;
     out.field = field;
     out._fromState = {
-        attacker_side: aSide, defender_side: dSide,
+        attacker_side: aReq.who + (aReq.slot === null ? ' (active)' : ':' + aReq.slot),
+        defender_side: dReq.who + (dReq.slot === null ? ' (active)' : ':' + dReq.slot),
         attacker_src: a.src, defender_src: d.src,
         field_from_state: { weather: st.weather || null, terrain: st.terrain || null, defender_screens: dScr }
     };
     return out;
+}
+
+// from_state 填不出这一侧时（例如对手后备未亮相/槽位越界），把原因拼进错误里，避免只报 "unknown pokemon"
+function fromStateHint(leg, side) {
+    if (!leg || !leg._fromState) return '';
+    var src = (side === 'attacker') ? leg._fromState.attacker_src : leg._fromState.defender_src;
+    var where = (side === 'attacker') ? leg._fromState.attacker_side : leg._fromState.defender_side;
+    if (!src || !src.poke) return '';
+    return ' — from_state "' + where + '" could not fill this side: ' + src.poke + ' (pass the pokemon explicitly instead)';
 }
 
 // 单组伤害计算。
@@ -1068,9 +1144,9 @@ function calcOneLeg(leg, idx, ctx) {
     leg = applyStateToLeg(leg, ctx);
     if (leg._fromStateMissing) return { index: idx, error: 'from_state needs the live battle state, which is not available on this call path (e.g. run_js) — pass the pokemon/params explicitly instead' };
     var atk = resolvePokemonInput(leg.attacker);
-    if (atk.error) return { index: idx, error: atk.error };
+    if (atk.error) return { index: idx, error: atk.error + fromStateHint(leg, 'attacker') };
     var def = resolvePokemonInput(leg.defender);
-    if (def.error) return { index: idx, error: def.error };
+    if (def.error) return { index: idx, error: def.error + fromStateHint(leg, 'defender') };
     var mv = resolveMoveInput(leg.move);
     if (mv.error) return { index: idx, error: mv.error };
 
