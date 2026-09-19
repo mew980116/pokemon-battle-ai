@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8092";
-var PKLM_VERSION = "0.6.3";       // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.6.4";       // 脚本版本（改动时 bump，随日志记录）
 var pklmLastWebFailTime = 0;       // 上次 webCall 失败时间戳（ms），用于断线时节流重发
 var pklmSilent = false;            // 静默模式：清分少女等无人值守 BOT 账号不向 PO 窗口 print 任何脚本输出
 var pklmFailCount = 0;             // 连续 webCall 失败次数（成功即归零）
@@ -86,6 +86,7 @@ var pklmOppSeen = [];             // 对手已暴露的后备宝可梦名列表�
 var pklmMyRevealed = [];          // 我方已出场过的宝可梦 numRef 列表（非 team preview 时用于标记对方未知的宝可梦）
 var pklmTeamPreview = null;       // null=未检测, true=有 team preview, false=无（首次决策时检测并缓存）
 var pklmLastAttackSlot = -1;      // 上一回合使用的攻击槽位（-1 表示未攻击）
+var pklmPrevAttackSlot = -1;      // 本次决策发送前的 pklmLastAttackSlot（被 PO 拒绝时回滚，避免锁招槽漂移）
 var pklmLockedSlot = -1;          // 当前被锁定的招式槽位（Choice 道具锁招）
 var pklmBannedSlots = [];         // 本轮被 PO 拒绝的招式槽位（拒绝后 ban 掉重新决策）
 var pklmLastSwitchSlot = -1;      // 上一回合尝试的换人槽位（-1 表示未换人）
@@ -258,11 +259,11 @@ function pklmAbilityNames(ids) {
     return names;
 }
 
-// 招式是否不可用（锁招 + 被 ban）
+// 招式是否不可用（仅：被 PO 拒绝过的槽位）
+// 注意：专爱锁招**不能**在这里剔除 —— 锁招时那一招是唯一能点的攻击，把它藏起来反而把 3 个非法招摆给 LLM，
+// 导致每回合都先被 PO 拒绝一次、再重试（还让锁定槽漂移）。锁招改为在招式对象上打 `locked` 标记，由 prompt 明示。
 function pklmIsMoveDisabled(m) {
-    if (m === pklmLockedSlot) return true;
-    if (pklmBannedSlots.indexOf(m) !== -1) return true;
-    return false;
+    return pklmBannedSlots.indexOf(m) !== -1;
 }
 
 // 是否还能换人（有未 KO 的后备宝可梦）
@@ -453,13 +454,13 @@ function pklmCb(name, args) {
     if (pklmCbLog && !pklmSilent) print("[CB] " + name + " " + args);
 }
 
-// 采集一个宝可梦的招式列表（我方含 num/pp/slot，对手只含 name/type）
-// skipLocked：过滤被 Choice 锁定的招式（仅我方场上生效）
-function pklmCollectMoves(tp, withNum, skipLocked) {
+// 采集一个宝可梦的招式列表（我方含 num/pp/slot/locked，对手只含 name/type）
+// isActive：仅我方场上生效 —— 过滤被 PO 拒绝过的槽位，并对专爱锁招打 locked 标记
+function pklmCollectMoves(tp, withNum, isActive) {
     var arr = [];
     for (var m = 0; m < 4; m++) {
         try {
-            if (skipLocked && pklmIsMoveDisabled(m)) continue;
+            if (isActive && pklmIsMoveDisabled(m)) continue;
             var mv = tp.move(m);
             if (mv && mv.num > 0) {
                 var o = {
@@ -471,6 +472,8 @@ function pklmCollectMoves(tp, withNum, skipLocked) {
                     o.num = mv.num;
                     o.pp = mv.PP;
                 }
+                // 专爱锁招标记：锁招生效时只有 locked=true 那一招能点（由 prompt 明示，避免 LLM 点非法招）
+                if (isActive && pklmLockedSlot >= 0) o.locked = (m === pklmLockedSlot);
                 arr.push(o);
             }
         } catch (e) {}
@@ -780,6 +783,7 @@ function pklmFallbackAttack() {
 // 主决策：采集状态 -> 调 /choice -> server.js 返回 slot 模式 -> 直接执行
 function pklmDecideAndAct() {
     pklmCheckLock();   // 先检测锁招（Choice 道具）
+    pklmPrevAttackSlot = pklmLastAttackSlot;   // 记录发送前的值：若本次指令被 PO 拒绝，回滚（否则锁招槽会漂移到被拒的那一招）
 
     // 断线节流：上次 webCall 失败后 2 秒内不再重发（避免断线时 onChoiceCancellation 快速循环刷屏 / 触发 antidos）
     var now = new Date().getTime();
@@ -1113,6 +1117,8 @@ function pklmSpotLabel(spot) {
         } else if (pklmLastAttackSlot >= 0 && pklmBannedSlots.indexOf(pklmLastAttackSlot) === -1) {
             pklmBannedSlots.push(pklmLastAttackSlot);
             pklmPrint("slot " + pklmLastAttackSlot + " rejected, banned, re-decide");
+            // 回滚：本次发送时乐观写入的 pklmLastAttackSlot 要还原，否则 pklmCheckLock 会把「被拒的那一招」误当成锁招
+            pklmLastAttackSlot = pklmPrevAttackSlot;
         } else {
             pklmPrint("choice cancelled, re-decide (no slot to ban)");
         }

@@ -36,7 +36,7 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.3.65';   // tool 分支版本（改动时 bump，随日志记录）
+var SERVER_VERSION = '0.3.66';   // tool 分支版本（改动时 bump，随日志记录）
 
 // ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
 // 对战主脑用 v4-pro（闭卷深想强，决策更深）；一键回 flash：POKELLMON_MODEL=deepseek-v4-flash
@@ -56,10 +56,10 @@ var RETRY_DELAYS = [2000, 5000, 10000]; // 单次请求失败后的重试延迟�
 // 工作流是流程性要求（不属于单个 tool 的用法），所以留在 system prompt。
 var WORKFLOW = 'WORKFLOW — follow this order every turn: ' +
     '(1) OPEN WORKLOG — this must be your FIRST action every turn. Call update_worklog with a short scratchpad for THIS turn: the goal, the current situation, confirmed facts, open questions and your next action. Treat it as your working memory: the server injects the latest worklog back into your context on every following tool call, so it is what keeps your plan alive across a long tool-calling loop (reasoning is off, so nothing else preserves it). Overwrite the whole text whenever the plan changes or a fact is confirmed; keep it compact and never let it go stale, and update it again before you finish. ' +
-    '(2) REVIEW: read the last turn(s) with get_battle_history and work out what they reveal about the opponent — the speed line (who moved first; any speed boost, paralysis, Tailwind or Choice Scarf clue), which moves / items / abilities are now EXPOSED or can be EXCLUDED, and back-calculate from the damage dealt and taken to infer their EV spread and any offensive boost (item or ability). Record all of it with save_observation, tagging every fact [proved] or [estimated]. Also RESOLVE the PENDING CHECKS you left for yourself last turn (listed in your notes): confirm or refute each one from the new log before you move on. ' +
+    '(2) REVIEW: read the last turn(s) with get_battle_history and work out what they reveal about the opponent — the speed line (who moved first; any speed boost, paralysis, Tailwind or Choice Scarf clue), which moves / items / abilities are now EXPOSED or can be EXCLUDED, and back-calculate from the damage dealt and taken to infer their EV spread and any offensive boost (item or ability). Record all of it with save_observation, tagging every fact [proved] or [estimated]. Also RESOLVE the PENDING CHECKS you left for yourself last turn (listed in your notes): confirm or refute each one from the new log, and compare LAST TURN\'S PREDICTION with what actually happened — if they differ, work out why (a newly revealed move or item? a behaviour preference worth recording? or your own miscalculation?) before you move on. ' +
     '(3) PLAN: re-read your previous save_strategy notes, look at the actions you are offered, and run the simulations you need (get_my_stats / calc_stats / calc_damage) plus the tactical guidance you need (battle_tips). ' +
     '(4) VERIFY: never trust memory for a move / ability / item effect, power or accuracy — call get_move_info / get_ability_info / get_item_info unless that detail is already present in the context. Never trust memory for a species base stats / types / abilities / weight either — call get_pokemon_info. Always call get_knowledge for the switch rules before switching unless they are already present in the context. Check the opponent against its legal movepool: if it has used a move it cannot learn (see the CAUTION line in the prompt, or verify with get_pokemon_info), the species is either misread or disguised (Illusion / Transform / Mimic / Ditto) — stop assuming that species and re-read the battle log. ' +
-    '(5) DECIDE: choose the action, then record it with save_strategy — its `text` is the six labeled lines (1) likely attack, (2) likely switch, (3) their read of my team, (4) their most likely action + my response + falsifier, (5) the action sequence from now until your next decision, in order and respecting speed/priority (this is what catches a plan that silently assumes the opponent does nothing), (6) final call; answer every line. Then fill its `checks` field with the checks your later turns must run against the battle log — your present uncertain assumptions phrased as things to verify (e.g. "verify whether X hits harder than I assumed, refuted if it does <40%"; "check whether X is really faster than Y"; "confirm whether it can really learn that move"), not tactics. Only `checks` is re-injected later (the most recent two turns\' worth), never the six lines above. Never skip save_strategy.';
+    '(5) DECIDE: choose the action, then record it with save_strategy. `text` = the labeled lines (1) likely attack, (2) likely switch, (3) their read of my team, (4) my own options AND the full cost of any voluntary switch (forfeit the turn + the switch-in eats the hit + may take entry hazards; does it still gain under several plausible opponent actions?), (5) their most likely action + my response + falsifier, (6) the action sequence until my next decision — that step is there to SPOT DANGER, not to avoid losing pokemon, so if every option loses the active pokemon anyway, take the most valuable line instead of dragging the team down to save it. In REPLACEMENT MODE (see the NOTE in the prompt) write `text` as (R1)-(R3) instead and skip the opponent-prediction lines. `scene` = the board you expect at your next decision. `checks` = your uncertain assumptions phrased as tests for later turns. Only `scene` (latest one) and `checks` (latest two) are re-injected later, never `text`. Never skip save_strategy.';
 
 var SYSTEM_PROMPT = require('../po-pokellmon/prompts.js').BATTLE_TIPS +
     ' You decide by calling the tools you have been given; every tool description states when to call it, so follow the workflow below and that guidance. get_pokemon_info is the pokedex lookup (base stats / types / abilities / weight + legal movepool) — use it instead of memory, and to validate a surprising opponent move, since a move outside that movepool means a disguise or a misread species.' +
@@ -322,13 +322,22 @@ function buildPrompt(state, notes) {
         }
         var tn = notes.turns || {};
         var tkeys = Object.keys(tn).sort(function (a, b) { return parseInt(a, 10) - parseInt(b, 10); });
-        var recentT = tkeys.slice(-2);   // 只回灌最近 2 条「待核对判断」（先读/推演过程不回灌，避免过时预判占上下文）
+        // 预设场面：只回灌最近 1 条（用于与实况对比）；待核对判断：最近 2 条
+        var scene = null, sceneTurn = null;
+        if (tkeys.length) {
+            var lastRec = tn[tkeys[tkeys.length - 1]];
+            if (lastRec && typeof lastRec === 'object' && lastRec.scene) { scene = lastRec.scene; sceneTurn = tkeys[tkeys.length - 1]; }
+        }
         var checks = [];
+        var recentT = tkeys.slice(-2);
         for (var ti = 0; ti < recentT.length; ti++) {
             var rec = tn[recentT[ti]];
             // 兼容早前版本：值可能是纯字符串，或 {text, advice}
             var adv = (rec && typeof rec === 'object') ? (rec.checks || rec.advice) : null;
             if (adv) checks.push('(turn ' + recentT[ti] + ') ' + adv);
+        }
+        if (scene) {
+            noteLines.push('LAST TURN\'S PREDICTION (turn ' + sceneTurn + ') — compare it with the actual battle log BEFORE deciding. If the board matches, your read held: continue with the plan you wrote. If it does NOT match, work out WHY first — did the opponent reveal a new move or item? is it showing a behaviour preference worth recording (save_observation)? or was your own calculation wrong? Then decide. Predicted board: ' + scene);
         }
         if (checks.length) {
             noteLines.push('PENDING CHECKS you left for yourself — verify each one against the new battle log BEFORE deciding (confirm or refute it, then update your notes): '
@@ -375,21 +384,32 @@ function buildPrompt(state, notes) {
         var meItem = me.item ? 'Item:' + me.item + ',' : '';
         p += 'Your current pokemon:' + me.name + ',Type:' + (me.types || []).join('&') + ',HP:' + (me.hpPct || 0) + '%,' + meAbi + meItem + meStatus + meBoosts + '\n';
         if (me.fainted) {
-            p += 'NOTE: Your current pokemon has fainted — you MUST pick a replacement: only the switch options are legal (the move entries listed above belong to the fainted pokemon and cannot be used). ' +
-                'Choose by the CURRENT threat, not by freshness: work out the opponent\'s most likely move right now (and whether it is Choice-locked into it), then send in the pokemon that (a) survives that hit and (b) can act meaningfully on the very next turn. ' +
-                'Do NOT just send out your freshest or still-unrevealed pokemon and then switch it out again on the next turn — that throws away a whole turn and gives the opponent a free hit on your switch-in. ' +
-                'Still call save_strategy for this decision.\n';
+            p += 'NOTE: Your current pokemon has fainted — REPLACEMENT MODE. Only the switch options are legal (the move entries listed above belong to the fainted pokemon and cannot be used). ' +
+                'This is a FORCED replacement in the end-of-turn phase, so the opponent gets NO extra action — do not predict its behaviour here. Answer only: ' +
+                '(R1) what hit must the replacement survive; ' +
+                '(R2) for each candidate: can it take that hit plus any entry hazards on the way in, and what can it do on the very next turn; ' +
+                '(R3) your pick. Do NOT simply send out your freshest / still-unrevealed pokemon and then switch it out again next turn — that throws away a whole turn. ' +
+                'In save_strategy write `text` as (R1)-(R3) (skip the normal lines), and still fill `scene` and `checks`.\n';
         }
     }
 
     p += '\nAvailable actions (choose one number):\n';
     var idx = 0;
+    // 专爱锁招：找出唯一可选的招式名，用于把其余招式标注成「不可选」（否则 LLM 会点非法招、被 PO 拒一次）
+    var lockedName = null;
+    if (me.moves) {
+        for (var lk = 0; lk < me.moves.length; lk++) {
+            if (me.moves[lk] && me.moves[lk].locked) { lockedName = me.moves[lk].name; break; }
+        }
+    }
     if (me.moves && me.moves.length) {
         for (var m = 0; m < me.moves.length; m++) {
             var mi = moveInfo(me.moves[m]);
             idx++;
             p += idx + '. ' + mi.name + ':Type:' + mi.type + ',Power:' + mi.power + ',Acc:' + mi.acc + '%';
             if (mi.pp !== undefined && mi.pp !== null) p += ',PP:' + mi.pp;
+            if (me.moves[m] && me.moves[m].locked) p += ' [CHOICE-LOCKED — the ONLY selectable move; switching is the only alternative]';
+            else if (lockedName) p += ' [NOT selectable: you are Choice-locked into ' + lockedName + ']';
             if (mi.power > 0) {   // 变化招式（Power:0）不写克制关系
                 var mult = damageMultiplier(mi.type, oppTypes);
                 var multStr = (mult === 0) ? 'no effect' : (mult + 'x');
