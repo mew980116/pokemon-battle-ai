@@ -212,3 +212,33 @@ console.log('默认特性提醒 -> ' + JSON.stringify(defLeg.notes) + ' applied=
 // 拼错特性名 -> 必须提醒
 const typoLeg = tools.runTool('calc_damage', { legs: [{ attacker: { poke: 'Azumarill', ev: [252, 252, 0, 0, 0, 0], nature: 'Adamant', ability: 'Huge Powr' }, defender: { poke: 'Blissey', ev: [252, 0, 252, 0, 0, 0], nature: 'Bold' }, move: { name: 'Aqua Jet' } }] }, {}).legs[0];
 console.log('拼错特性名 -> ' + JSON.stringify(typoLeg.notes));
+
+// ===== 直接能力值路径（get_my_stats 读数 + boosts）=====
+// 用 ev/nature 推导的真实数值，与「把该数值直传 + 同样的 boosts」必须一致。
+// 回归背景：0.4.0 的 @smogon/calc 引擎里 calculate() 会 clone() 两侧，而 Pokemon.clone() 会按
+// 种族值/EV/IV/性格重算 rawStats —— 直传的能力值被静默丢弃（实测 attacker.def=580 被当成 232）。
+console.log('\n--- 直接能力值路径（回归）---');
+const mewStats = tools.runTool('calc_stats', { legs: [{ poke: 'Mew', ev: [252, 0, 4, 0, 252, 0], nature: 'Calm', stats: ['def', 'spd', 'atk'] }] }, {}).legs[0].stats;
+console.log('Mew 未加成数值: ' + JSON.stringify(mewStats));
+const directCases = [
+  ['Body Press: def 直传(+3) vs 同 EV/性格(boosts def+3)', 'Body Press', { poke: 'Mew', def: mewStats.def, boosts: { def: 3 } }, { poke: 'Mew', ev: [252, 0, 4, 0, 252, 0], nature: 'Calm', boosts: { def: 3 } }],
+  ['Body Press: def 直传(无 boost) vs 同 EV/性格', 'Body Press', { poke: 'Mew', def: mewStats.def }, { poke: 'Mew', ev: [252, 0, 4, 0, 252, 0], nature: 'Calm' }],
+  ['普通物攻: atk 直传(+1) vs 同 EV/性格(atk+1)', 'Double-Edge', { poke: 'Mew', atk: mewStats.atk, boosts: { atk: 1 } }, { poke: 'Mew', ev: [252, 0, 4, 0, 252, 0], nature: 'Calm', boosts: { atk: 1 } }],
+  ['Foul Play: 目标 atk 直传 vs 同 EV/性格', 'Foul Play', { poke: 'Mew', atk: mewStats.atk }, { poke: 'Mew', ev: [252, 0, 4, 0, 252, 0], nature: 'Calm' }],
+];
+let ddiff = 0;
+for (const [name, moveName, directSpec, derivedSpec] of directCases) {
+  const defSpec = { poke: 'Cinccino', ev: [4, 0, 0, 0, 0, 252], nature: 'Jolly' };
+  const mk = (att) => ({ attacker: att, defender: defSpec, move: { name: moveName } });
+  const a = tools.runTool('calc_damage', { legs: [mk(directSpec)] }, {}).legs[0];
+  const b = tools.runTool('calc_damage', { legs: [mk(derivedSpec)] }, {}).legs[0];
+  const ok = !a.error && !b.error && a.min === b.min && a.max === b.max;
+  if (!ok) ddiff++;
+  console.log('[' + (ok ? 'OK  ' : 'DIFF') + '] ' + name + ' -> 直传 ' + a.min + '-' + a.max + ' / 推导 ' + b.min + '-' + b.max + ' (attack_stat 直传=' + a.detail.attack_stat + ' 推导=' + b.detail.attack_stat + ')');
+}
+// defender.hp 直传（最大 HP 覆盖）
+const hpLeg = tools.runTool('calc_damage', { legs: [{ attacker: { poke: 'Garchomp', ev: [0, 252, 0, 0, 0, 252], nature: 'Jolly' }, defender: { poke: 'Blissey', hp: 400 }, move: { name: 'Earthquake' } }] }, {}).legs[0];
+const hpOk = hpLeg.detail.defender_max_hp === 400;
+if (!hpOk) ddiff++;
+console.log('[' + (hpOk ? 'OK  ' : 'DIFF') + '] defender.hp 直传=400 -> defender_max_hp=' + hpLeg.detail.defender_max_hp + ' percent=' + hpLeg.percent_min + '-' + hpLeg.percent_max);
+console.log('直接能力值路径：' + (directCases.length + 1 - ddiff) + '/' + (directCases.length + 1) + ' 一致');

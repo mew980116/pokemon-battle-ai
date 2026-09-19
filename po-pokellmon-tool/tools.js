@@ -194,9 +194,9 @@ var TOOL_DEFS = [
                                         iv: { type: 'array', items: { type: 'number' }, description: 'IVs [HP,Atk,Def,SpA,SpD,Spe], default all 31' },
                                         nature: { type: 'string', description: 'Nature name (English or Chinese) or number, default neutral' },
                                         boosts: { type: 'object', description: 'Stat stages, e.g. {"atk":1,"spa":-1}', additionalProperties: { type: 'integer' } },
-                                        atk: { type: 'number', description: 'Direct final Attack stat (bypasses base-stats/EV/IV/nature calculation). Use if you already know the value.' },
-                                        spa: { type: 'number', description: 'Direct final Special Attack stat (bypasses calculation).' },
-                                        def: { type: 'number', description: 'Direct final Defense stat (bypasses calculation); also used as the offensive stat of Body Press.' },
+                                        atk: { type: 'number', description: 'Direct UNBOOSTED Attack stat (bypasses the base-stat/EV/IV/nature derivation). Existing stat-stage boosts in `boosts` are still applied on top. Use the number from get_my_stats.' },
+                                        spa: { type: 'number', description: 'Direct UNBOOSTED Special Attack stat (boosts still applied on top).' },
+                                        def: { type: 'number', description: 'Direct UNBOOSTED Defense stat (boosts still applied on top); also used as the offensive stat of Body Press.' },
                                         spe: { type: 'number', description: 'Direct final Speed stat (bypasses calculation); also used by Fishious Rend / Bolt Beak doubling.' },
                                         ability: { type: 'string', description: 'Ability name in English, e.g. "Huge Power", "Adaptability", "Guts". Applied automatically (attack/defence/base-power/final-damage chains).' },
                                         item: { type: 'string', description: 'Held item in English, e.g. "Choice Band", "Life Orb", "Expert Belt", "Choice Specs". Applied automatically. Do not pass an item together with a manual `extra`.' },
@@ -216,10 +216,10 @@ var TOOL_DEFS = [
                                         iv: { type: 'array', items: { type: 'number' }, description: 'IVs [HP,Atk,Def,SpA,SpD,Spe], default all 31' },
                                         nature: { type: 'string', description: 'Nature name or number, default neutral' },
                                         boosts: { type: 'object', description: 'Stat stages, e.g. {"def":1}', additionalProperties: { type: 'integer' } },
-                                        atk: { type: 'number', description: 'Direct final Attack stat (bypasses calculation); also used as the offensive stat of Foul Play.' },
-                                        def: { type: 'number', description: 'Direct final Defense stat (bypasses calculation).' },
-                                        spd: { type: 'number', description: 'Direct final Special Defense stat (bypasses calculation).' },
-                                        spe: { type: 'number', description: 'Direct final Speed stat (bypasses calculation); only used by Fishious Rend / Bolt Beak doubling.' },
+                                        atk: { type: 'number', description: 'Direct UNBOOSTED Attack stat (boosts still applied on top); also used as the offensive stat of Foul Play.' },
+                                        def: { type: 'number', description: 'Direct UNBOOSTED Defense stat (boosts still applied on top).' },
+                                        spd: { type: 'number', description: 'Direct UNBOOSTED Special Defense stat (boosts still applied on top).' },
+                                        spe: { type: 'number', description: 'Direct UNBOOSTED Speed stat (boosts still applied on top); also used by Fishious Rend / Bolt Beak doubling.' },
                                         hp: { type: 'number', description: 'Direct max HP (bypasses calculation), used for the damage %.' },
                                         curHp: { type: 'number', description: 'Current remaining HP (absolute). Give it to get a KO verdict against the remaining HP instead of full HP.' },
                                         hpPct: { type: 'number', description: 'Current remaining HP as a percentage (0-100); used if curHp is not given.' },
@@ -747,9 +747,25 @@ function normalizeTerrain(t) {
     return PS_TERRAIN_ALIAS[k] || String(t);
 }
 
+// @smogon/calc 的 calculate() 会 clone() 两侧，而 Pokemon.clone() 用「种族值 + EV/IV/性格」重建 rawStats，
+// 于是我们「直传能力值」的覆盖会被丢掉（实测：attacker.def=580 被当成未强化的 232）。
+// 这里包一层 clone，把被覆盖过的 rawStats 原样带到克隆体上。
+var _pkmClone = SMOGON.Pokemon.prototype.clone;
+SMOGON.Pokemon.prototype.clone = function () {
+    var c = _pkmClone.call(this);
+    if (this.__directKeys && this.__directKeys.length) {
+        for (var i = 0; i < this.__directKeys.length; i++) {
+            var k = this.__directKeys[i];
+            c.rawStats[k] = this.rawStats[k];
+            c.stats[k] = this.stats[k];
+        }
+    }
+    return c;
+};
+
 // 一个 leg 侧（attacker/defender）-> @smogon 的 Pokemon
 // 支持：poke 名/编号 或 base_stats+types；ev/iv/nature/boosts/level；ability/item/status；
-//       直接能力值（atk/def/spa/spd/hp/spe，当作最终值并清掉对应能力等级）；hpPct/curHp
+//       直接能力值（atk/def/spa/spd/hp/spe，当作**未计入能力等级**的数值，等级仍照常生效）；hpPct/curHp
 function toCalcPokemon(spec) {
     var opts = {};
     if (spec.level) opts.level = parseInt(spec.level, 10) || 100;
@@ -778,14 +794,15 @@ function toCalcPokemon(spec) {
 
     var pk = new SMOGON.Pokemon(PKLM_GEN, name, opts);
 
-    // 直接能力值：当作最终值（同时清掉该能力的等级修正，避免被重复应用）
+    // 直接能力值：当作「未计入能力等级的最终值」（如 get_my_stats 的读数），能力等级仍照常生效
+    pk.__directKeys = [];
     for (var s = 0; s < 6; s++) {
         var k = STAT_KEYS[s];
         var v = spec[k];
         if (v !== undefined && v !== null) {
             pk.rawStats[k] = v;
             pk.stats[k] = v;
-            pk.boosts[k] = 0;
+            pk.__directKeys.push(k);
         }
     }
     // 当前 HP（Defeatist/Multiscale 等要看剩余血量；KO 判定也用它）
@@ -889,6 +906,20 @@ function psPickRawDesc(rd) {
     return o;
 }
 
+// 能力等级修正（对齐 @smogon getModifiedStat；显示用）
+function modStat(v, b) {
+    if (!b) return v;
+    if (b > 0) return Math.floor(v * (2 + b) / 2);
+    return Math.floor(v * 2 / (2 - b));
+}
+// 暴击时忽略「攻击方负向 / 防御方正向」等级
+function critBoost(b, side, isCrit) {
+    if (!isCrit) return b;
+    if (side === 'atk' && b < 0) return 0;
+    if (side === 'def' && b > 0) return 0;
+    return b;
+}
+
 // 单组伤害计算。
 // 引擎 = 内嵌的官方计算器 @smogon/calc（vendor/，gen8），特性/道具/天气/场地/光墙/状态等修正全部由它算；
 // 我们负责：入参解析（名字/编号/种族值/直接能力值）→ 填进计算器 → 把结果整成 PS 风格输出（desc/KO/notes）。
@@ -941,7 +972,7 @@ function calcOneLeg(leg, idx) {
     if (mv.num === MV_BODY_PRESS) {
         // 使用者 Def 当攻击值
         aStatLabel = 'Def'; aIdxUsed = 2;
-        if (leg.attacker.def !== undefined && leg.attacker.def !== null) aStat = leg.attacker.def;
+        if (leg.attacker.def !== undefined && leg.attacker.def !== null) aStat = modStat(leg.attacker.def, critBoost(boostOf(leg.attacker.boosts, 'def'), 'def', isCrit));
         else {
             var aBoP = (isCrit && boostOf(leg.attacker.boosts, 'def') > 0) ? null : leg.attacker.boosts;
             aStat = effectiveStat(atk.baseStats, lv, leg.attacker.ev, leg.attacker.iv, aNature, aBoP, 2);
@@ -951,7 +982,7 @@ function calcOneLeg(leg, idx) {
         // 目标 Atk 当攻击值
         aStatLabel = 'Atk'; aIdxUsed = 1;
         aEvSpec = leg.defender; aEvNature = dNature;
-        if (leg.defender.atk !== undefined && leg.defender.atk !== null) aStat = leg.defender.atk;
+        if (leg.defender.atk !== undefined && leg.defender.atk !== null) aStat = modStat(leg.defender.atk, critBoost(boostOf(leg.defender.boosts, 'atk'), 'atk', isCrit));
         else {
             var aBoF = (isCrit && boostOf(leg.defender.boosts, 'atk') < 0) ? null : leg.defender.boosts;
             aStat = effectiveStat(def.baseStats, defLv, leg.defender.ev, leg.defender.iv, dNature, aBoF, 1);
@@ -959,7 +990,7 @@ function calcOneLeg(leg, idx) {
         }
     } else if (mv.category === 'Special') {
         aStatLabel = 'SpA'; aIdxUsed = 3;
-        if (leg.attacker.spa !== undefined && leg.attacker.spa !== null) aStat = leg.attacker.spa;
+        if (leg.attacker.spa !== undefined && leg.attacker.spa !== null) aStat = modStat(leg.attacker.spa, critBoost(boostOf(leg.attacker.boosts, 'spa'), 'atk', isCrit));
         else {
             var aBoS = (isCrit && boostOf(leg.attacker.boosts, 'spa') < 0) ? null : leg.attacker.boosts;
             aStat = effectiveStat(atk.baseStats, lv, leg.attacker.ev, leg.attacker.iv, aNature, aBoS, 3);
@@ -967,7 +998,7 @@ function calcOneLeg(leg, idx) {
         }
     } else {
         aStatLabel = 'Atk'; aIdxUsed = 1;
-        if (leg.attacker.atk !== undefined && leg.attacker.atk !== null) aStat = leg.attacker.atk;
+        if (leg.attacker.atk !== undefined && leg.attacker.atk !== null) aStat = modStat(leg.attacker.atk, critBoost(boostOf(leg.attacker.boosts, 'atk'), 'atk', isCrit));
         else {
             var aBoA = (isCrit && boostOf(leg.attacker.boosts, 'atk') < 0) ? null : leg.attacker.boosts;
             aStat = effectiveStat(atk.baseStats, lv, leg.attacker.ev, leg.attacker.iv, aNature, aBoA, 1);
@@ -979,7 +1010,7 @@ function calcOneLeg(leg, idx) {
     var hitsPhysical = !!MV_DEF_OVERRIDE[mv.num] || mv.category === 'Physical';
     if (hitsPhysical) {
         dStatLabel = 'Def'; dIdxUsed = 2;
-        if (leg.defender.def !== undefined && leg.defender.def !== null) dStat = leg.defender.def;
+        if (leg.defender.def !== undefined && leg.defender.def !== null) dStat = modStat(leg.defender.def, critBoost(boostOf(leg.defender.boosts, 'def'), 'def', isCrit));
         else {
             var dBoP = (isCrit && boostOf(leg.defender.boosts, 'def') > 0) ? null : leg.defender.boosts;
             dStat = effectiveStat(def.baseStats, defLv, leg.defender.ev, leg.defender.iv, dNature, dBoP, 2);
@@ -987,7 +1018,7 @@ function calcOneLeg(leg, idx) {
         }
     } else {
         dStatLabel = 'SpD'; dIdxUsed = 4;
-        if (leg.defender.spd !== undefined && leg.defender.spd !== null) dStat = leg.defender.spd;
+        if (leg.defender.spd !== undefined && leg.defender.spd !== null) dStat = modStat(leg.defender.spd, critBoost(boostOf(leg.defender.boosts, 'spd'), 'def', isCrit));
         else {
             var dBoS = (isCrit && boostOf(leg.defender.boosts, 'spd') > 0) ? null : leg.defender.boosts;
             dStat = effectiveStat(def.baseStats, defLv, leg.defender.ev, leg.defender.iv, dNature, dBoS, 4);
@@ -1524,7 +1555,11 @@ var KNOWLEDGE_ALIASES = {
     '速度': 'speed_read', '速度线': 'speed_read', '速度判断': 'speed_read', '行动顺序': 'speed_read', '出手顺序': 'speed_read',
     '先手': 'speed_read', '先制': 'speed_read', '优先度': 'speed_read', 'speed': 'speed_read', 'speed read': 'speed_read',
     'turn order': 'speed_read', 'priority': 'speed_read', '鳃咬': 'speed_read', '电喙': 'speed_read',
-    'fishious rend': 'speed_read', 'bolt beak': 'speed_read'
+    'fishious rend': 'speed_read', 'bolt beak': 'speed_read',
+    '天然': 'unaware', 'unaware': 'unaware', '无视能力等级': 'unaware', '无视强化': 'unaware', '无视能力变化': 'unaware',
+    '辅助力量': 'unaware', 'stored power': 'unaware', 'storedpower': 'unaware',
+    '嚣张': 'unaware', 'power trip': 'unaware', 'powertrip': 'unaware',
+    '惩罚': 'unaware', 'punishment': 'unaware', 'boost scaling': 'unaware'
 };
 
 var KNOWLEDGE = buildKnowledgeIndex();

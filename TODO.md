@@ -141,6 +141,13 @@
 
 - [ ] **天气伤害判定 tool（来自 battle55 的 submit_feedback）**：LLM 想要一个能明确报告「对手某只宝可梦本回合是否吃到沙暴/冰雹等天气掉血」的 tool，用来从战报确认 Magic Guard / Unaware（是否免疫间接伤害）之类的特性。现状：只能靠 `get_battle_history` 逐回合扫天气/掉血行。方案：po-script 侧在回合末记录「天气伤害事件」（哪个 slot 掉了多少 HP），存进 history 或独立字段，供 tool 直接查询/汇总。
 
+- [ ] **battle71 复盘（LLM vs 用户，42 回合；tool 0.4.0 / script 0.6.4）**：
+  - 已处理（0.4.1）：① **直传能力值被 @smogon/calc 的 `calculate()`→`clone()` 静默丢弃（真 bug）** ② **直传值 + `boosts` 的语义**（直传值按「未加成数值」处理，等级应照常生效；旧语义把等级清零 → Body Press 少算 2.5 倍）③ 知识库补 `mechanics.unaware`（天然 vs 辅助力量/扑击）。
+  - [ ] **决策摇摆（T11→T12 连续换人）**：T11 换 Hippowdon 时**明确否掉过「换 Mew」**（理由：更被动、不解决 Regieleki），T12 立刻以「Mew 是这只皮可西的硬解」为由又换 Mew —— 中间零新信息（只白吃一发月爆），白丢一回合 + Hippowdon 白吃 163 HP。strategy 回灌里已有上一回合的 scene/checks，LLM 仍推翻自己。方向：prompt 显式加一句「上回合你刚主动换人；本回合再换 = 连续两回合不行使主动权，除非出现新情报（新招/新道具/场面变化）」。
+  - [ ] **tool 轮次打满 → 强制 fallback，且动作与自述结论不一致**：T38 用满 25 轮（201s），被 `tool_rounds_exceeded` 强制收尾，最终 action 是 `attackSlot 0`（Cosmic Power），而它 reply 里写的是「Decision: Roost」—— 这类回合从外部看完全无法理解。方向：提高轮次上限 / 接近上限时提示「先落结论再验证」/ fallback 时对「自述结论」与「强制输出 choice」做一致性校验。
+  - [ ] **LLM 反馈必须逐条核对**：`submit_feedback` 两条 —— T36「Body Press 直传 def 被忽略」= **真 bug**（已修）；T38「辅助力量应按**净**等级算（+3 → 80 BP）」= **误报**（官方规则只数**正向**等级，BP 140 正确；它观测到 32% 是因为把 Regieleki 当 0 HP EV 而实际有血量投入）。不能把反馈直接当需求。
+  - 过程事实（用于后续 prompt 设计）：T12 用「沙暴无伤」推 Magic Guard 并**声称排除 Unaware**，T13 记成「Magic Guard confirmed [proved]」，直到 **T17 才靠「伤害随我方 SpD 上升反而变高」反推出 Unaware（这条推理是正确的）**，T19 才改判 proved —— 即前 6 回合建立在一个错误的能力结论上。T13→T29 的 ~12 回合反复「宇宙力量/生蛋/辅助力量」+ 多次换人，根因就是「天然让辅助力量变 20 威力」这个错误认知（真值：威力 140，41.9-49.5%）。
+
 - [ ] **招式观察对手配置的解析（打落/小偷/戏法 → 道具，烦恼种子/扮演/特性交换 → 特性）**：有些招式能主动暴露对手配置：打落（Knock Off）/小偷（Thief）/抢夺（Covet）拍落或偷取对手道具（move_message.txt `%s knocked off %f's %i`），戏法/掉包交换道具；烦恼种子（Worry Seed）/胃液（Gastro Acid）消除特性，扮演（Role Play）/特性交换（Skill Swap）复制/交换特性（走 onAbilityMessage）。价值：比被动等道具/特性自己触发更主动、确定。① 先修/确认 `%i` 道具名占位符替换方向（pklmMsgCtx 的 i 用 spot 的道具，但打落消息 %i 是目标 %f 的道具，方向可能反，需实测）② 后续做道具/特性正向解析存 state（opp.itemInferred，类似 ability 正向解析）。
 
 - [ ] **`get_my_stats` 的 `nature` 应给名字而非 PO 编号**：用户实测返回 `nature: 8`（PO 编号，例：Toxapex 8 / Barraskewda 3 / Mandibuzz 5 / Dracozolt 3 / Kartana 13 / Aegislash 15），编号对 LLM 不可读。应改成性格名（`po-pokellmon-tool/knowledge/natures.json` 的 `byNum` 已含 `name_zh`/`name_en`，如 8→淘气/Impish、13→爽朗/Jolly、15→内敛/Modest）或 buff/debuff 效果说明（如「+Def -Atk」），或直接去掉该字段。数据源：po-script.js 采集我方队伍时 `nature: tp.nature`（编号，[L611](po-pokellmon/po-script.js#L611)），[tools.js](po-pokellmon-tool/tools.js) 的 `getMyStats` 原样透传（L760）。顺带检查 `calc_stats` 返回、state 注入 prompt 处是否也有编号直出。
