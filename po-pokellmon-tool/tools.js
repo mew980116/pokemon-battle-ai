@@ -870,6 +870,46 @@ function statusConditionNote(label, status) {
     return label + ' is ' + what + ' — this is NOT applied to the numbers above';
 }
 
+// 「它没想到的」：从对手**学得到的攻击招**里，找出对「我行动后留在场上那只」威胁最大的几个。
+// 这是**可能性空间的上界**——只回答"若它带了会怎样"，**不声称它带了或会点**。
+// 与"建合理招表"不同：纯逻辑推导（学习面 ∩ 伤害计算），不含任何对配置频率的猜测，所以不需要使用率先验。
+function unlistedThreats(state, oppName, mySlot, myHpPct, listed, ctx) {
+    if (!oppName) return null;
+    var key = resolvePokemonKey(oppName);
+    var list = (key && LEARNSETS.byKey[key]) || null;
+    if (!list || !list.length) return null;
+    var listedLower = {};
+    for (var i = 0; i < (listed || []).length; i++) listedLower[String(listed[i]).toLowerCase()] = true;
+    var rows = [], checked = 0, skippedVar = 0;
+    for (var j = 0; j < list.length; j++) {
+        var num = Number(list[j]);
+        var me = MOVES[String(num)] || (MOVES.byNum ? MOVES.byNum[String(num)] : null);
+        if (!me || !me.name) continue;
+        if (String(me.category || '').toLowerCase() === 'status') continue;   // 本表只算伤害，变化招不在此列
+        if (listedLower[String(me.name).toLowerCase()]) continue;             // 已经列过的分支不重复
+        if (me.variable_power) skippedVar++;
+        checked++;
+        var r = calcOneLeg({ attacker: applyFromStateSpec(state, 'opp', null), defender: applyFromStateSpec(state, 'me', mySlot), move: { name: me.name } }, 0, ctx);
+        if (!r || r.percent_max === undefined) continue;
+        if (r.percent_max < 25) continue;   // 只报真有威胁的（≥25%），避免刷屏
+        var koTxt = r.ko_verdict || (r.percent_min >= 100 ? 'guaranteed OHKO' : (r.percent_max >= 100 ? 'possible OHKO' : ''));
+        rows.push({ move: me.name, type: me.type, dmg: r.percent_min + '-' + r.percent_max + '%', ko: koTxt, faints: (r.percent_min >= 100 ? true : (r.percent_max >= 100 ? 'possible' : false)), _sort: -r.percent_max });
+    }
+    if (!rows.length) {
+        return { attack_moves_checked: checked, note: 'No unlisted attack move from ' + oppName + "'s learnable pool reaches 25% on the pokemon your action leaves on the field." };
+    }
+    rows.sort(function (a, b) { return a._sort - b._sort; });
+    var top = rows.slice(0, 4);
+    for (var k = 0; k < top.length; k++) delete top[k]._sort;
+    return {
+        attack_moves_checked: checked,
+        total_reaching_25pct: rows.length,
+        unlisted_dangerous: top,
+        note: 'Moves ' + oppName + ' CAN LEARN that would do ≥25% to the pokemon your action leaves on the field BECAUSE YOU DID NOT LIST THEM AS BRANCHES. This is NOT a prediction that it carries or clicks them — it is the upper bound of the possibility space. But if any of them is plausibly in its set, your branch list is incomplete: the table above only covers the branches you declared, and so does the gate. Consider adding the plausible ones as branches.',
+        caveats: 'Variable-power moves (Grass Knot / Low Kick / Gyro Ball / Foul Play …) use one fixed assumption; ability / item / field modifiers are not applied.' + (skippedVar ? (' (' + skippedVar + ' variable-power moves checked this way.)') : '')
+    };
+}
+
 function simulateTurn(args, ctx) {
     var state = ctx && ctx.state;
     if (!state) return { error: 'no state' };
@@ -1108,6 +1148,11 @@ function simulateTurn(args, ctx) {
 
     out.model_scope = 'DAMAGE & SURVIVAL ONLY. MODELLED: damage, type effectiveness, weather/terrain, hazards/screens already on the field, switch-phase ordering, move priority, move accuracy (weather-adjusted), and YOUR exact stats. NOT MODELLED: status-move effects, status conditions (sleep / paralysis / burn / poison), stat stages, critical hits, secondary effects, end-of-turn residuals, hazards on switch-in, ability and item triggers. Each row repeats what it could not know — a 0% row is NOT evidence that a branch is harmless.';
     out.how_to_read = 'Each row is one opponent branch under YOUR action. `mine` describes the pokemon your action leaves on the field. Use these numbers, not your own estimates; save_strategy will check your stated outcome against them. Whenever a row marks something as not modelled (status_move_note / status_condition_note / crit_note / unknown[]), do NOT treat that branch as safe on the strength of its 0%.';
+    // 「它没想到的」：补出你没列进 opp_does、但它学得到且会重伤你的攻击招（可能性空间上界，不是预测）
+    var listedKeys = [];
+    for (var lb = 0; lb < branches.length; lb++) { if (branches[lb].kind === 'move') listedKeys.push(branches[lb].move); }
+    out.possibility_space = unlistedThreats(state, oppActive, mySlot, myHpPct, listedKeys, ctx);
+
     out.assumptions = args.assume || {};
     if (!args.assume || (!args.assume.opp_spread && !args.assume.opp_spread_off)) {
         out.assumptions_warning = 'You passed no opponent spread assumption — numbers for the OPPONENT\'s stats default to 0 EV / neutral. Pass assume.opp_spread (defensive) and/or assume.opp_spread_off (offensive) if you have a read on its set.';

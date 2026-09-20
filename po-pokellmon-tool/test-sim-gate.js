@@ -172,5 +172,18 @@ var r15 = tools.runTool('simulate_turn', { i_do: { move: 'Sludge Bomb' }, opp_do
 chk('我方麻痹 → 标 status_condition_note（速度未减半）', /paralysed/.test(r15.rows[0].status_condition_note || '') && /NOT applied/.test(r15.rows[0].status_condition_note || ''), String(r15.rows[0].status_condition_note));
 chk('unknown 声明状态/能力等级/残余均未算', ['status conditions are NOT applied', 'stat stages', 'end-of-turn residuals'].every(function (k) { return (r15.rows[0].unknown || []).some(function (x) { return x.indexOf(k) >= 0; }); }), JSON.stringify(r15.rows[0].unknown));
 
+console.log('可能性空间补全（「它没想到的」）');
+var c16 = ctx();
+var r16 = sim(c16, { switch: 4 }, [{ move: 'Hydro Pump' }, { move: 'Hurricane' }]);
+var ps = r16.possibility_space || {};
+chk('扫了对手学得到的一批攻击招', ps.attack_moves_checked > 20, String(ps.attack_moves_checked));
+chk('把未列出的致命水招补出来了', (ps.unlisted_dangerous || []).some(function (x) { return /Scald|Surf|Brine|Weather Ball|Water Pulse/.test(x.move); }), JSON.stringify((ps.unlisted_dangerous || []).map(function (x) { return x.move; })));
+chk('补出的项带 dmg + faints', (ps.unlisted_dangerous || []).every(function (x) { return x.dmg && x.faints !== undefined; }), JSON.stringify(ps.unlisted_dangerous));
+chk('note 明确「这不是预测它带了/会点」', /NOT a prediction/.test(ps.note || ''), String(ps.note).slice(0, 120));
+chk('已列过的分支不重复出现', (ps.unlisted_dangerous || []).every(function (x) { return x.move !== 'Hydro Pump' && x.move !== 'Hurricane'; }), JSON.stringify((ps.unlisted_dangerous || []).map(function (x) { return x.move; })));
+var c17 = ctx();
+var r17 = sim(c17, { switch: 4 }, [{ move: 'Hydro Pump' }, { move: 'Scald' }, { move: 'Hurricane' }, { move: 'U-turn' }, { move: 'Surf' }]);
+chk('把 Scald/Surf 也列进分支后，它们不再出现在补全里', (r17.possibility_space.unlisted_dangerous || []).every(function (x) { return x.move !== 'Scald' && x.move !== 'Surf'; }), JSON.stringify((r17.possibility_space.unlisted_dangerous || []).map(function (x) { return x.move; })));
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);
