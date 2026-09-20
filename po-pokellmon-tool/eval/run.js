@@ -64,7 +64,7 @@ function worstIncoming(state, targetSlot, threats) {
             continue;
         }
         if (leg.percent_max > worst.pctMax) {
-            worst = { pctMin: leg.percent_min, pctMax: leg.percent_max, ko: leg.ko_verdict || leg.ko || '', move: mv, error: null };
+            worst = { pctMin: leg.percent_min, pctMax: leg.percent_max, ko: leg.ko_verdict || leg.ko || '', move: mv, acc: tools.moveAccuracy(mv, state.weather), error: null };
         }
     }
     return worst;
@@ -196,8 +196,8 @@ async function run() {
             ' ' + Math.round(r.ms / 1000) + 's' +
             ' | inbound=' + r.proc.inbound.length +
             ' sims=' + (r.proc.simCalls || 0) +
-            ' | 最坏 ' + (v.worst ? (v.worst.move + ' ' + v.worst.pctMin + '-' + v.worst.pctMax + '%') : '-') +
-            ' | ' + v.verdict + (r.proc.fallback ? ' [FALLBACK ' + r.proc.reason + ']' : ''));
+            ' | 最坏 ' + (v.worst ? (v.worst.move + ' ' + v.worst.pctMin + '-' + v.worst.pctMax + '%' + (v.worst.acc != null && v.worst.acc < 100 ? '（命中' + v.worst.acc + '%）' : '')) : '-') +
+            ' | ' + v.verdict + (v.worst && v.worst.acc != null && v.worst.acc < 100 ? '*' : '') + (r.proc.fallback ? ' [FALLBACK ' + r.proc.reason + ']' : ''));
         const simList = (r.proc.sims || []).map(s => s.actionKey + '⟵[' + (s.opp_does || []).join(',') + ']').join(' ; ');
         console.log('      sims: ' + (simList || '(none)') +
             ' | 声明=' + (r.proc.declaredAction || '-') + ' / ' + (r.proc.declaredBranch || '-') + ' → ' + (r.proc.declaredOutcome || '-') +

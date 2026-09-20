@@ -170,7 +170,7 @@ var TOOL_DEFS = [
         type: 'function',
         function: {
             name: 'simulate_turn',
-            description: 'Simulate THIS turn for the branches YOU name: give your action and one or more candidate opponent actions, and get back what the engine computes for each branch (who acts first, damage both ways, resulting HP, who faints) plus an explicit list of what it could NOT know. Use it BEFORE you commit: save_strategy checks your stated outcome against this table, so a number you did not simulate is a number you cannot use. It only projects the current turn from the live board — for later turns, state assumptions in `assume`. The branch list is yours to provide: this tool never guesses what the opponent carries, and it never ranks your options.',
+            description: 'Simulate THIS turn for the branches YOU name: give your action and one or more candidate opponent actions, and get back what the engine computes for each branch (who acts first, damage both ways, resulting HP, who faints, each move\'s accuracy) plus an explicit list of what it could NOT know. Accuracy is weather-adjusted (Hurricane/Thunder are 100% in rain, 50% in sun; Blizzard never misses in hail/snow), and a move under 100% gets an explicit note that it can miss — a branch that only kills you because a low-accuracy move connects is NOT the same as a guaranteed kill. Use it BEFORE you commit: save_strategy checks your stated outcome against this table, so a number you did not simulate is a number you cannot use. It only projects the current turn from the live board — for later turns, state assumptions in `assume`. The branch list is yours to provide: this tool never guesses what the opponent carries, and it never ranks your options.',
             parameters: {
                 type: 'object',
                 properties: {
@@ -812,6 +812,28 @@ function simLeg(state, atkSpec, defSpec, moveName) {
     return r;
 }
 
+// 招式命中率（含天气修正）：返回 0-100 的数字；101/必中 视作 100；查不到返回 null。
+// 天气修正：雨 → Thunder/Hurricane 必中；晴 → Thunder/Hurricane 50%；冰雹/雪 → Blizzard 必中。
+// （Hustle / Compound Eyes / No Guard 等改变命中的特性**不建模**——对手特性未暴露，simulate_turn 的 unknown 里会说明。）
+function moveAccuracy(name, weather) {
+    var rm = resolveMoveInput({ name: name });
+    if (!rm || rm.error || rm.num === undefined || rm.num === null) return null;
+    var rec = MOVES[String(rm.num)] || (MOVES.byNum ? MOVES.byNum[String(rm.num)] : null) || {};
+    var acc = rec.accuracy;
+    if (acc === undefined || acc === null) return null;
+    acc = Number(acc);
+    if (isNaN(acc)) return null;
+    if (acc > 100 || acc <= 0) return 100;                       // 101 / 必中
+    var w = String(weather || '').toLowerCase();
+    var nm = String(rm.name || name).toLowerCase();
+    if (nm === 'thunder' || nm === 'hurricane') {
+        if (w.indexOf('rain') >= 0) return 100;
+        if (w.indexOf('sun') >= 0) return 50;
+    }
+    if (nm === 'blizzard' && (w.indexOf('snow') >= 0 || w.indexOf('hail') >= 0)) return 100;
+    return acc;
+}
+
 function simulateTurn(args, ctx) {
     var state = ctx && ctx.state;
     if (!state) return { error: 'no state' };
@@ -992,8 +1014,28 @@ function simulateTurn(args, ctx) {
                 row.unknown.push('the switch-in\'s defensive spread is unknown — number assumes the spread you passed / defaults');
             }
         }
+        // ---- 命中率（含天气修正）：低命中招必须写清"它有机会落空" ----
+        row.accuracy = {};
+        if (mine.kind === 'move') {
+            var myAcc = moveAccuracy(mine.move, state.weather);
+            if (myAcc !== null) row.accuracy.your_move = { move: mine.move, acc: myAcc };
+        }
+        if (br.kind === 'move') {
+            var theirAcc = moveAccuracy(br.move, state.weather);
+            if (theirAcc !== null) row.accuracy.their_move = { move: br.move, acc: theirAcc };
+        }
+        var accNotes = [];
+        if (row.accuracy.your_move && row.accuracy.your_move.acc < 100) {
+            accNotes.push('your ' + mine.move + ' connects ' + row.accuracy.your_move.acc + '% of the time → ' + (100 - row.accuracy.your_move.acc) + '% it misses and deals NOTHING');
+        }
+        if (row.accuracy.their_move && row.accuracy.their_move.acc < 100) {
+            accNotes.push('their ' + br.move + ' connects ' + row.accuracy.their_move.acc + '% of the time → ' + (100 - row.accuracy.their_move.acc) + '% it MISSES and you take 0% from it (the damage above assumes it connects)');
+        }
+        if (accNotes.length) row.accuracy_note = accNotes.join('; ') + '  [weather=' + (state.weather || 'None') + ']';
+
         if (row.legal !== 'ok') row.unknown.push('legality: ' + row.legal);
         row.unknown.push('unrevealed items/abilities are NOT modelled (no Leftovers/Rain Dish/Intimidate-on-entry/etc.)');
+        row.unknown.push('accuracy-changing abilities (Hustle / Compound Eyes / No Guard / Sand Veil …) are NOT modelled');
         out.rows.push(row);
     }
 
@@ -2948,5 +2990,6 @@ module.exports = {
     TOOL_DEFS: TOOL_DEFS,
     runTool: runTool,
     newLedger: newLedger,
-    actionGateCheck: actionGateCheck
+    actionGateCheck: actionGateCheck,
+    moveAccuracy: moveAccuracy
 };

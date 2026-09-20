@@ -73,6 +73,7 @@
 - **最坏分支强提醒**：`save_strategy` 若声明了一个**不是最坏**的分支，仍放行（允许赌），但在返回里把最坏分支的数字直接摆出来，要求 `text` 明说赌的是哪条。
 - **倍率词窄正则警告**：`text` 里出现「属性名 + 倍率词」而本回合**完全没查过** `get_type_matchup` → 返回 `warning`（不拦）+ `multiplierMentions` 计数（供统计命中率）。
 - **对手假设一致性（结构化，不碰文本）**：同一只对手在同一回合内用了不同的 `assume` → 标注 `assumption_conflict`（不拦）。这是"对想否掉的选项用进攻型、对想选的选项用防御型"的机械检出。
+- **命中率（0.5.2）**：`simulate_turn` 现在给每条分支标出双方招式的**命中率**（含天气修正：雨 → Hurricane/Thunder 必中；晴 → 50%；冰雹/雪 → Blizzard 必中），命中率 <100% 时额外写一条 **miss 分支**（"20% 落空 → 你吃 0%"）。`faints` 仍按"命中"取最坏情况（保守），落空只作为独立提示。改变命中的特性（Hustle / Compound Eyes / No Guard / Sand Veil…）**不建模**，写进 `unknown`。`moveAccuracy(name, weather)` 已导出供评测复用。
 - `simulate_turn` 还会校验 `i_do` 的招式**确实是当前场上这只会的**。
 
 **单测**（不花 LLM 费用，直接打账本逻辑，用 battle96 T1 的真实 state）：

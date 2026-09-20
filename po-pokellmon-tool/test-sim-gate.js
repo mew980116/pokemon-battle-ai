@@ -134,5 +134,19 @@ chk('同一对手用了两套假设 → 该次 sim 带 assumption_conflict', /in
 var s11 = save(c11, { action: 'switch 4', branch: 'Scald', outcome: 'faints' });
 chk('save_strategy 也把它作为提醒带出', /inconsistent assumptions/.test(s11.warning || ''), JSON.stringify(s11).slice(0, 240));
 
+console.log('命中率（含天气修正）');
+chk('Hydro Pump 80%', tools.moveAccuracy('Hydro Pump', 'Rain') === 80, String(tools.moveAccuracy('Hydro Pump', 'Rain')));
+chk('Scald 100%', tools.moveAccuracy('Scald', 'Rain') === 100, String(tools.moveAccuracy('Scald', 'Rain')));
+chk('Hurricane 平时 70%', tools.moveAccuracy('Hurricane', 'None') === 70, String(tools.moveAccuracy('Hurricane', 'None')));
+chk('Hurricane 雨天必中 100%', tools.moveAccuracy('Hurricane', 'Rain') === 100, String(tools.moveAccuracy('Hurricane', 'Rain')));
+chk('Thunder 晴天 50%', tools.moveAccuracy('Thunder', 'Sun') === 50, String(tools.moveAccuracy('Thunder', 'Sun')));
+chk('Blizzard 冰雹必中 100%', tools.moveAccuracy('Blizzard', 'Hail') === 100, String(tools.moveAccuracy('Blizzard', 'Hail')));
+var c12 = ctx();   // battle96 T1 = 雨天
+var r12 = sim(c12, { switch: 4 }, [{ move: 'Hydro Pump' }, { move: 'Scald' }]);
+var hp12 = r12.rows[0], sc12 = r12.rows[1];
+chk('Hydro Pump 行标出 80% 命中 + 落空分支', /connects 80% of the time/.test(hp12.accuracy_note || '') && /MISSES and you take 0%/.test(hp12.accuracy_note || ''), String(hp12.accuracy_note));
+chk('Scald 行（100%）不出命中率提醒', !sc12.accuracy_note, String(sc12.accuracy_note));
+chk('unknown 里声明不建模命中类特性', (hp12.unknown || []).some(function (x) { return /accuracy-changing abilities/.test(x); }), JSON.stringify(hp12.unknown));
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);
