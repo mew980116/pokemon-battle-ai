@@ -65,7 +65,7 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.4.12';  // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
+var SERVER_VERSION = '0.4.13';  // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
 
 // ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
 // 对战主脑用 v4-pro（闭卷深想强，决策更深）；一键回 flash：POKELLMON_MODEL=deepseek-v4-flash
@@ -83,16 +83,29 @@ var RETRY_DELAYS = [2000, 5000, 10000]; // 单次请求失败后的重试延迟�
 // system prompt 结构：战术底色（BATTLE_TIPS）+ 每回合工作流（WORKFLOW）+ 一句 tool 指引。
 // 各 tool 的「何时调用 / 怎么用」下沉到 tools.js 的 tool description（tool helper），避免 system prompt 膨胀。
 // 工作流是流程性要求（不属于单个 tool 的用法），所以留在 system prompt。
+// worklog 开关（暂时屏蔽）：false = 不暴露 update_worklog / WORKFLOW 不提 / system 不注入。
+// 依据（battle93/94/95 实测）：约 28% 的 tool 轮次被它独占一次往返；且 LLM 把它当思考通道的替代品，
+// 中段常写成千字内心独白，还夹带未清洗的 thinking / DSML 残留。改回 true 即恢复。
+var ENABLE_WORKLOG = false;
+
+var WORKLOG_STEP = '(1) OPEN WORKLOG — this must be your FIRST action every turn. Call update_worklog with a short scratchpad for THIS turn: the goal, the current situation, confirmed facts, open questions and your next action. Treat it as your working memory: the server injects the latest worklog back into your context on every following tool call, so it is what keeps your plan alive across a long tool-calling loop (reasoning is off, so nothing else preserves it). Overwrite the whole text whenever the plan changes or a fact is confirmed; keep it compact and never let it go stale, and update it again before you finish. ';
+// REVIEW 的序号：带 worklog 时是 (2)，屏蔽后是 (1)
+var WF_N = ENABLE_WORKLOG ? 2 : 1;
 var WORKFLOW = 'WORKFLOW — follow this order every turn: ' +
-    '(1) OPEN WORKLOG — this must be your FIRST action every turn. Call update_worklog with a short scratchpad for THIS turn: the goal, the current situation, confirmed facts, open questions and your next action. Treat it as your working memory: the server injects the latest worklog back into your context on every following tool call, so it is what keeps your plan alive across a long tool-calling loop (reasoning is off, so nothing else preserves it). Overwrite the whole text whenever the plan changes or a fact is confirmed; keep it compact and never let it go stale, and update it again before you finish. ' +
-    '(2) REVIEW: read the last turn(s) with get_battle_history and work out what they reveal about the opponent — the speed line (who moved first; any speed boost, paralysis, Tailwind or Choice Scarf clue), which moves / items / abilities are now EXPOSED or can be EXCLUDED, and back-calculate from the damage dealt and taken to infer their EV spread and any offensive boost (item or ability). Record all of it with save_observation, tagging every fact [proved] or [estimated] and setting each pokemon\'s threat level to my team (High/Medium/Low — revise it whenever new information changes it). Also RESOLVE the PENDING CHECKS you left for yourself last turn (listed in your notes): confirm or refute each one from the new log, and compare LAST TURN\'S PREDICTION with what actually happened — if they differ, work out why (a newly revealed move or item? a behaviour preference worth recording? or your own miscalculation?) before you move on. ' +
-    '(3) PLAN: re-read your previous save_strategy notes, look at the actions you are offered, and run the simulations you need (get_my_stats / calc_stats / calc_damage) plus the tactical guidance you need (battle_tips). ' +
-    '(4) VERIFY: never trust memory for a move / ability / item effect, power or accuracy — call get_move_info / get_ability_info / get_item_info unless that detail is already present in the context. Never trust memory for a species base stats / types / abilities / weight either — call get_pokemon_info. Always call get_knowledge for the switch rules before switching unless they are already present in the context. Check the opponent against its legal movepool: if it has used a move it cannot learn (see the CAUTION line in the prompt, or verify with get_pokemon_info), the species is either misread or disguised (Illusion / Transform / Mimic / Ditto) — stop assuming that species and re-read the battle log. ' +
-    '(5) DECIDE: choose the action, then record it with save_strategy. `text` = the labeled lines (1) likely attack, (2) likely switch, (3) their read of my team, (4) my own options AND, for any voluntary switch, the full cost (forfeit the turn + the switch-in eats the hit + may take entry hazards) together with how much it actually gains (forces a kill / starts a setup / chunks a threat, or only chips), how confident my read of their action is and why, whether I am already behind (only winning if they play exactly my prediction, or by assuming an unrevealed threat is not carried, or by hoping they err), and whether a steadier line exists (a switch-in that takes little or heals, or simply attacking), (5) their most likely action + my response + falsifier, (6) the action sequence until my next decision — that step is there to SPOT DANGER, not to avoid losing pokemon, so if every option loses the active pokemon anyway, take the most valuable line instead of dragging the team down to save it. In REPLACEMENT MODE (see the NOTE in the prompt) write `text` as (R1)-(R3) instead and skip the opponent-prediction lines. `scene` = the board you expect at your next decision. `checks` = your uncertain assumptions phrased as tests for later turns. Only `scene` (latest one) and `checks` (latest two) are re-injected later, never `text`. Never skip save_strategy.';
+    (ENABLE_WORKLOG ? WORKLOG_STEP : '') +
+    '(' + WF_N + ') REVIEW: read the last turn(s) with get_battle_history and work out what they reveal about the opponent — the speed line (who moved first; any speed boost, paralysis, Tailwind or Choice Scarf clue), which moves / items / abilities are now EXPOSED or can be EXCLUDED, and back-calculate from the damage dealt and taken to infer their EV spread and any offensive boost (item or ability). Record all of it with save_observation, tagging every fact [proved] or [estimated] and setting each pokemon\'s threat level to my team (High/Medium/Low — revise it whenever new information changes it). Also RESOLVE the PENDING CHECKS you left for yourself last turn (listed in your notes): confirm or refute each one from the new log, and compare LAST TURN\'S PREDICTION with what actually happened — if they differ, work out why (a newly revealed move or item? a behaviour preference worth recording? or your own miscalculation?) before you move on. ' +
+    '(' + (WF_N + 1) + ') PLAN: re-read your previous save_strategy notes, look at the actions you are offered, and run the simulations you need (get_my_stats / calc_stats / calc_damage) plus the tactical guidance you need (battle_tips). ' +
+    '(' + (WF_N + 2) + ') VERIFY: never trust memory for a move / ability / item effect, power or accuracy — call get_move_info / get_ability_info / get_item_info unless that detail is already present in the context. Never trust memory for a species base stats / types / abilities / weight either — call get_pokemon_info. Always call get_knowledge for the switch rules before switching unless they are already present in the context. Check the opponent against its legal movepool: if it has used a move it cannot learn (see the CAUTION line in the prompt, or verify with get_pokemon_info), the species is either misread or disguised (Illusion / Transform / Mimic / Ditto) — stop assuming that species and re-read the battle log. ' +
+    '(' + (WF_N + 3) + ') DECIDE: choose the action, then record it with save_strategy. `text` = the labeled lines (1) likely attack, (2) likely switch, (3) their read of my team, (4) my own options AND, for any voluntary switch, the full cost (forfeit the turn + the switch-in eats the hit + may take entry hazards) together with how much it actually gains (forces a kill / starts a setup / chunks a threat, or only chips), how confident my read of their action is and why, whether I am already behind (only winning if they play exactly my prediction, or by assuming an unrevealed threat is not carried, or by hoping they err), and whether a steadier line exists (a switch-in that takes little or heals, or simply attacking), (5) their most likely action + my response + falsifier, (6) the action sequence until my next decision — that step is there to SPOT DANGER, not to avoid losing pokemon, so if every option loses the active pokemon anyway, take the most valuable line instead of dragging the team down to save it. In REPLACEMENT MODE (see the NOTE in the prompt) write `text` as (R1)-(R3) instead and skip the opponent-prediction lines. `scene` = the board you expect at your next decision. `checks` = your uncertain assumptions phrased as tests for later turns. Only `scene` (latest one) and `checks` (latest two) are re-injected later, never `text`. Never skip save_strategy.';
 
 var SYSTEM_PROMPT = require('../po-pokellmon/prompts.js').BATTLE_TIPS +
     ' You decide by calling the tools you have been given; every tool description states when to call it, so follow the workflow below and that guidance. get_pokemon_info is the pokedex lookup (base stats / types / abilities / weight + legal movepool) — use it instead of memory, and to validate a surprising opponent move, since a move outside that movepool means a disguise or a misread species.' +
     '\n\n' + WORKFLOW;
+
+// 实际暴露给模型的 tool 列表（ENABLE_WORKLOG=false 时剔除 update_worklog；runTool 仍保留其分发，便于改回 true）
+var EXPOSED_TOOL_DEFS = ENABLE_WORKLOG ? tools.TOOL_DEFS : tools.TOOL_DEFS.filter(function (t) {
+    return t.function.name !== 'update_worklog';
+});
 
 // 复用 po-pokellmon 知识库
 var KNOWLEDGE_DIR = path.join(__dirname, '..', 'po-pokellmon', 'knowledge');
@@ -126,7 +139,7 @@ function callDeepSeek(messages, noThink, cb, opts) {
         model: MODEL,
         messages: messages,
         stream: false,
-        tools: tools.TOOL_DEFS
+        tools: EXPOSED_TOOL_DEFS
     };
     var mt = MAX_TOKENS;
     if (mt) payloadObj.max_tokens = mt;
@@ -703,7 +716,7 @@ function handleChoice(res, state) {
     var worklog = '';
     function callDS(noThink, cb) {
         var msgs = messages;
-        if (worklog) {
+        if (ENABLE_WORKLOG && worklog) {
             msgs = messages.slice();
             msgs[0] = {
                 role: 'system',
@@ -858,5 +871,5 @@ server.listen(PORT, HOST, function () {
     console.log('  thinking: ' + (THINKING_ENABLED ? 'enabled / ' + REASONING_EFFORT : 'disabled'));
     console.log('  timeout: ' + TIMEOUT_MS + 'ms, max_tool_rounds: ' + MAX_TOOL_ROUNDS);
     console.log('  apiKey : ' + (getApiKey() ? 'present' : 'MISSING'));
-    console.log('  tools  : ' + tools.TOOL_DEFS.map(function (t) { return t.function.name; }).join(', '));
+    console.log('  tools  : ' + EXPOSED_TOOL_DEFS.map(function (t) { return t.function.name; }).join(', ') + (ENABLE_WORKLOG ? '' : '  [worklog DISABLED]'));
 });

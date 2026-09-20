@@ -20,10 +20,10 @@
 
 1. 接收 PO 采集的 `state` → 拼 prompt + `tools` 定义
 2. 调 DeepSeek（默认无思考；首回合开 low 思考 + tool）
-3. 若返回 `tool_calls` → 执行 tool → 结果追加进 messages → 再调（最多 `MAX_TOOL_ROUNDS=25` 轮）；每轮把最新 `update_worklog` 注入回 system prompt
+3. 若返回 `tool_calls` → 执行 tool → 结果追加进 messages → 再调（最多 `MAX_TOOL_ROUNDS=25` 轮）
 4. 直到返回最终 `{"choice":N}` → 解析成 slot 动作
 
-**tool**（[tools.js](tools.js)，19 个）：
+**tool**（[tools.js](tools.js)，19 个；当前暴露 18 个）：
 
 *战场 / 笔记*
 
@@ -32,7 +32,7 @@
 - `save_strategy(text, turn?)` —— 记录当前回合的战略思路
 - `get_observation(pokemon?)` —— 读观察（不传返回全部）
 - `get_strategy(turn?)` —— 读思路（不传返回全部）
-- `update_worklog(text)` —— **本轮工作暂存（覆盖式）**：LLM 写任务分解/中间确认/计划，server 每轮注入回 system，跨 tool 轮次保持上下文且不累积
+- `update_worklog(text)` —— 本轮工作暂存（覆盖式），server 每轮注入回 system。**当前已屏蔽**（server.js `ENABLE_WORKLOG=false`：不暴露给模型、WORKFLOW 不提、system 不注入）。屏蔽依据（battle93/94/95 实测）：约 28% 的 tool 轮次被它独占一次 LLM 往返（从不与其他 tool 合并），且 LLM 把它当思考通道的替代品，中段常写成千字内心独白、夹带未清洗的 thinking / DSML 残留。改回 `true` 即恢复
 - `submit_feedback(text)` —— 反馈「想要的 tool」/ 报告伤害计算异常
 
 *确定计算*

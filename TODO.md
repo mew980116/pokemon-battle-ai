@@ -80,6 +80,13 @@
 
 **tool 模式长期 TODO**：
 
+- [ ] 🟡 **worklog（`update_worklog`）暂时屏蔽，待重新定义「写什么」**（2026-09-20，随 server 0.4.13）：
+  - **现状**：[server.js](po-pokellmon-tool/server.js) `ENABLE_WORKLOG=false` —— 不再暴露给模型（tool 19→18）、WORKFLOW 不提（原第 (1) 步整段撤掉、后续重编号为 REVIEW/PLAN/VERIFY/DECIDE）、system prompt 不再注入；代码保留，改回 `true` 即恢复。
+  - **实测依据**（battle93/94/95，均为胜局）：worklog 调用占 tool 轮数 ≈26%/28%/28%，且**从不与其他 tool 合并** → 平均每决策 1.6 次**独占**的 LLM 往返。内容只有约 1/3 是 WORKFLOW 想要的短结构化结论（如 battle93 T4 的 177 字 `Goal → 结论 → 一句理由`）；另有大量是把它当「思考通道替代品」的千字内心独白（battle94 T3 单次 **7821 字**，反复自我推翻、枚举全部分支），并出现**未清洗的泄漏**：`thinking 终结符 + 原生 tool-call 标记`（`<|end_of_thinking|>` / `DSML invoke`）被直接写进 `text` 参数。
+  - **根因**：`THINKING_ENABLED=false`（仅 turn 0 开），除首回合外没有思考通道，而调 tool 那几轮 assistant 的 `content` 又是 `null` → 模型的"当前计划"无处安放，就灌进了 worklog。
+  - **待办**：① 重新定义 worklog 只写「结论 + 假设」三行式（`DECISION` / `ASSUMED` / `TODO`，≤300 字）；② server 侧对 `text` 做清洗（剥 thinking / DSML 标记）+ 长度上限；③ 评估是否改为 **server 自动回灌**（不再让模型花一轮重写，直接省掉那 28% 往返）。
+  - **对比参照**：`save_strategy` 的 `scene` / `checks` 是**已结构化回灌**的（预测与实况不符会强制复盘、`checks` 回灌最近两条），worklog 若保留应向这套看齐，而不是纯文本拼回 system 首条。
+
 - [x] 🔴 **【高优先级】对战主脑切 `deepseek-v4-pro`（已切 0.3.46，待实测对比）**：实测（2026-09-16）确认 `deepseek-v4-pro` 端点可用、**未被路由到 flash**（响应 `model:deepseek-v4-pro`）；开 thinking + tool 多轮时**不回传 reasoning_content 不报错**（两场景均 200），故切换**无需**改 [server.js](po-pokellmon-tool/server.js) 的 reasoning_content 回传逻辑。附带发现：回传 reasoning_content 提升 prompt cache 命中（cached_tokens 384 vs 256、miss 41 vs 169），属可选优化。**已落地（0.3.46）**：`MODEL` 默认改 `deepseek-v4-pro`，提成 env `POKELLMON_MODEL`（一键回 flash：`POKELLMON_MODEL=deepseek-v4-flash`），thinking 仍 `low`。**待做**：实测对比 Flash/Pro 的决策质量 + 延迟；Pro-max 在多轮 tool（MAX_TOOL_ROUNDS=15）下可能逼近 240s 超时，若 low 稳定再考虑按「关键回合（换人/残局/强化手判断）升 high/max」分级。
   - 背景：Flash 强「工具/agent 执行」（DeepSWE 74.2 > Pro 62.7）弱「闭卷深想」（HLE 36.8 < Pro 42.7）；对战主脑瓶颈是「决策浅/缺全局意识」而非工具执行，故倾向 Pro。R1 无资源 + 工具调用弱，不作主脑。
 
