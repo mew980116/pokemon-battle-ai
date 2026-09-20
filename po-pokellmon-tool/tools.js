@@ -849,6 +849,27 @@ function moveCritStage(name) {
     return 'crit rate 1/24 (4.2%)';
 }
 
+// 变化招：本表只算伤害 → 变化招会退化成"0% 伤害"，**必须明确标注其真实效果未被建模**，
+// 否则那一行会读成"这一支很安全"（工具制造的安全感，比模型自己编更危险）。
+function statusMoveNote(name) {
+    var rm = resolveMoveInput({ name: name });
+    if (!rm || rm.error) return null;
+    if (String(rm.category || '').toLowerCase() !== 'status') return null;
+    var rec = MOVES[String(rm.num)] || (MOVES.byNum ? MOVES.byNum[String(rm.num)] : null) || {};
+    var eff = String(rec.effect || '').replace(/\s+/g, ' ').trim();
+    return name + ' is a STATUS move — its effect' + (eff ? ' ("' + eff.slice(0, 90) + '")' : '') +
+        ' is NOT modelled here. The row shows 0% damage, which does NOT mean the branch is harmless, and it is NOT a valid basis for declaring "survives": what it actually does (status / hazards / boost / heal) is unknown to this table.';
+}
+
+// 异常状态也会让本表的数字失真（睡眠不能动、麻痹速度×0.5、烧伤物攻×0.5、中毒回合末掉血）——
+// 现在是**标注**而不是建模（后续若换 PS 引擎会整体取代）。
+function statusConditionNote(label, status) {
+    if (!status) return null;
+    var map = { slp: 'asleep — it may not be able to move at all', par: 'paralysed — its Speed is halved', brn: 'burned — its physical Attack is halved and it loses HP each turn', psn: 'poisoned — it loses HP each turn', tox: 'badly poisoned — it loses increasing HP each turn', frz: 'frozen — it cannot move' };
+    var what = map[String(status).toLowerCase()] || String(status);
+    return label + ' is ' + what + ' — this is NOT applied to the numbers above';
+}
+
 function simulateTurn(args, ctx) {
     var state = ctx && ctx.state;
     if (!state) return { error: 'no state' };
@@ -1058,14 +1079,35 @@ function simulateTurn(args, ctx) {
             row.crit_note = 'critical hits are NOT included in the numbers above (' + critNotes.join('; ') + '). A crit only ever makes a branch MORE lethal, never less — so treat a thin margin as thinner.';
         }
 
+        // 变化招：本表只算伤害 → 必须标注它的效果完全没算（否则 0% 会被读成安全）
+        var smNotes = [];
+        if (br.kind === 'move') { var smn = statusMoveNote(br.move); if (smn) smNotes.push('THEIR ' + smn); }
+        if (mine.kind === 'move') { var smn2 = statusMoveNote(mine.move); if (smn2) smNotes.push('YOUR ' + smn2); }
+        if (smNotes.length) { row.status_move_note = smNotes.join(' | '); row.status_move = true; }
+
+        // 异常状态：数字会失真 → 标注（不建模）
+        var scNotes = [];
+        var myStatus = ((state.me || {}).status) || ((slotEntry(myTeam, 0) || {}).status) || null;
+        var oppStatus = ((state.opp || {}).status) || null;
+        var scMine = statusConditionNote('your ' + myName, myStatus);
+        if (scMine) scNotes.push(scMine);
+        var scOpp = statusConditionNote('the opponent ' + (oppActive || '?'), oppStatus);
+        if (scOpp) scNotes.push(scOpp);
+        if (scNotes.length) row.status_condition_note = scNotes.join('; ');
+
         if (row.legal !== 'ok') row.unknown.push('legality: ' + row.legal);
         row.unknown.push('unrevealed items/abilities are NOT modelled (no Leftovers/Rain Dish/Intimidate-on-entry/etc.)');
         row.unknown.push('accuracy-changing abilities (Hustle / Compound Eyes / No Guard / Sand Veil …) are NOT modelled');
         row.unknown.push('critical hits and secondary effects (burn/paralysis/flinch/drops) are NOT modelled — see crit_note');
+        row.unknown.push('status conditions are NOT applied (sleep = no move, paralysis = half Speed, burn = half Attack) — see status_condition_note');
+        row.unknown.push('stat stages (your boosts / the opponent\'s boosts) are NOT applied to these numbers');
+        row.unknown.push('end-of-turn residuals (poison/burn/sand/hail/Leftovers/Black Sludge) and hazards on switch-in are NOT applied');
+        row.unknown.push('ability triggers on switch-in (Intimidate / weather setters / etc.) are NOT modelled');
         out.rows.push(row);
     }
 
-    out.how_to_read = 'Each row is one opponent branch under YOUR action. `mine` describes the pokemon your action leaves on the field. Use these numbers, not your own estimates; save_strategy will check your stated outcome against them.';
+    out.model_scope = 'DAMAGE & SURVIVAL ONLY. MODELLED: damage, type effectiveness, weather/terrain, hazards/screens already on the field, switch-phase ordering, move priority, move accuracy (weather-adjusted), and YOUR exact stats. NOT MODELLED: status-move effects, status conditions (sleep / paralysis / burn / poison), stat stages, critical hits, secondary effects, end-of-turn residuals, hazards on switch-in, ability and item triggers. Each row repeats what it could not know — a 0% row is NOT evidence that a branch is harmless.';
+    out.how_to_read = 'Each row is one opponent branch under YOUR action. `mine` describes the pokemon your action leaves on the field. Use these numbers, not your own estimates; save_strategy will check your stated outcome against them. Whenever a row marks something as not modelled (status_move_note / status_condition_note / crit_note / unknown[]), do NOT treat that branch as safe on the strength of its 0%.';
     out.assumptions = args.assume || {};
     if (!args.assume || (!args.assume.opp_spread && !args.assume.opp_spread_off)) {
         out.assumptions_warning = 'You passed no opponent spread assumption — numbers for the OPPONENT\'s stats default to 0 EV / neutral. Pass assume.opp_spread (defensive) and/or assume.opp_spread_off (offensive) if you have a read on its set.';

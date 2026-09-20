@@ -157,5 +157,20 @@ var r13 = sim(c13, { move: 'Sludge Bomb' }, [{ move: 'Hydro Pump' }]);
 chk('行里带 crit_note（声明未计入）', /critical hits are NOT included/.test(r13.rows[0].crit_note || ''), String(r13.rows[0].crit_note).slice(0, 160));
 chk('unknown 也声明 crit/附加效果未建模', (r13.rows[0].unknown || []).some(function (x) { return /critical hits and secondary effects/.test(x); }), JSON.stringify(r13.rows[0].unknown));
 
+console.log('变化招 / 异常状态：只标注不建模（防"工具制造的安全感"）');
+var c14 = ctx();
+var r14 = sim(c14, { move: 'Sludge Bomb' }, [{ move: 'Toxic' }, { move: 'Recover' }]);
+chk('对手变化招 → 标 status_move + note 说明效果未建模', r14.rows[0].status_move === true && /STATUS move/.test(r14.rows[0].status_move_note || ''), String(r14.rows[0].status_move_note).slice(0, 160));
+chk('note 明确说 0% 不等于安全、不能据以声明 survives', /does NOT mean the branch is harmless/.test(r14.rows[0].status_move_note || '') && /NOT a valid basis for declaring/.test(r14.rows[0].status_move_note || ''), String(r14.rows[0].status_move_note).slice(0, 200));
+var r14b = sim(c14, { move: 'Sludge Bomb' }, [{ move: 'Hurricane' }]);
+chk('伤害招分支不触发 status_move', !r14b.rows[0].status_move, String(r14b.rows[0].status_move_note));
+chk('顶层带 model_scope 声明', /DAMAGE & SURVIVAL ONLY/.test(r14.model_scope || '') && /NOT MODELLED/.test(r14.model_scope || ''), String(r14.model_scope).slice(0, 120));
+var stPar = JSON.parse(JSON.stringify(state));
+stPar.me.status = 'par';
+var c15 = { state: stPar, notes: notes, turn: 1, ledger: tools.newLedger(), simGateOn: true };
+var r15 = tools.runTool('simulate_turn', { i_do: { move: 'Sludge Bomb' }, opp_does: [{ move: 'Hurricane' }] }, c15);
+chk('我方麻痹 → 标 status_condition_note（速度未减半）', /paralysed/.test(r15.rows[0].status_condition_note || '') && /NOT applied/.test(r15.rows[0].status_condition_note || ''), String(r15.rows[0].status_condition_note));
+chk('unknown 声明状态/能力等级/残余均未算', ['status conditions are NOT applied', 'stat stages', 'end-of-turn residuals'].every(function (k) { return (r15.rows[0].unknown || []).some(function (x) { return x.indexOf(k) >= 0; }); }), JSON.stringify(r15.rows[0].unknown));
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);
