@@ -188,5 +188,15 @@ var r17 = sim(c17, { switch: 4 }, [{ move: 'Hydro Pump' }, { move: 'Scald' }, { 
 var w17 = (r17.possibility_space.uncovered_threat_types || []).filter(function (g) { return g.move_type === 'Water'; })[0];
 chk('把水招都列进分支后，Water 这一类消失（或 how_many 变小）', !w17 || w17.how_many < (waterG ? waterG.how_many : 99), JSON.stringify(r17.possibility_space.uncovered_threat_types));
 
+console.log('图鉴层的「隐性威胁」提示（变化招不在伤害表里）');
+var giD = tools.runTool('get_pokemon_info', { pokemon: 'Diggersby' }, { state: {} });
+chk('Diggersby 列出 self_setup（含 Swords Dance）', !!(giD.notable_status_moves && giD.notable_status_moves.self_setup && giD.notable_status_moves.self_setup.indexOf('Swords Dance') >= 0), JSON.stringify(giD.notable_status_moves));
+var giA = tools.runTool('get_pokemon_info', { pokemon: 'Aromatisse' }, { state: {} });
+chk('Aromatisse 列出 Calm Mind（对手冥想）', !!(giA.notable_status_moves && giA.notable_status_moves.self_setup && giA.notable_status_moves.self_setup.indexOf('Calm Mind') >= 0), JSON.stringify(giA.notable_status_moves));
+chk('带解释 note（说明变化招在 sim 里看不见）', /invisible in simulate_turn/.test(giD.notable_status_moves_note || ''), String(giD.notable_status_moves_note).slice(0, 120));
+var giC = tools.runTool('get_pokemon_info', { pokemon: 'Claydol' }, { state: {} });
+chk('Claydol 列出 Cosmic Power / Iron Defense', !!(giC.notable_status_moves && giC.notable_status_moves.self_setup && giC.notable_status_moves.self_setup.indexOf('Cosmic Power') >= 0), JSON.stringify(giC.notable_status_moves));
+chk('只含 Status 招（不含伤害招）', !JSON.stringify(giD.notable_status_moves).match(/(Hydro Pump|Body Slam|Earthquake)/), JSON.stringify(giD.notable_status_moves));
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

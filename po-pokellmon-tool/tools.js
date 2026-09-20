@@ -474,7 +474,7 @@ var TOOL_DEFS = [
         type: 'function',
         function: {
             name: 'get_pokemon_info',
-            description: 'Pokedex lookup for a species: base stats (hp/atk/def/spa/spd/spe + total), type(s), possible abilities (static, so it does not depend on what has been revealed), and weight (kg — needed for weight-based moves: Grass Knot / Low Kick / Heavy Slam / Heat Crash). It also covers the movepool. This returns FACTS, so call it instead of relying on memory whenever a base stat, type, ability list or weight matters — e.g. to check speed/offense before a damage race, or to see which abilities an opponent species could still have. Movepool mode: pass `moves` to test whether the species can legally learn specific moves (returns can_learn per move) — use it whenever the opponent uses a move that surprises you, since a false result means the species is misread or disguised (Illusion / Transform / Mimic / Ditto); pass `full_movepool: true` to list the whole movepool (long — only when you actually need to scan it).',
+            description: 'Pokedex lookup for a species: base stats (hp/atk/def/spa/spd/spe + total), type(s), possible abilities (static, so it does not depend on what has been revealed), and weight (kg — needed for weight-based moves: Grass Knot / Low Kick / Heavy Slam / Heat Crash). It also covers the movepool. This returns FACTS, so call it instead of relying on memory whenever a base stat, type, ability list or weight matters — e.g. to check speed/offense before a damage race, or to see which abilities an opponent species could still have. Movepool mode: pass `moves` to test whether the species can legally learn specific moves (returns can_learn per move) — use it whenever the opponent uses a move that surprises you, since a false result means the species is misread or disguised (Illusion / Transform / Mimic / Ditto); pass `full_movepool: true` to list the whole movepool (long — only when you actually need to scan it). Every reply ALSO carries `notable_status_moves` — the STATUS moves this species can learn, grouped as self_setup / hazards / healing / blocking / status_inflict. Read that field whenever the opponent is the subject: status moves never appear in simulate_turn (a status move only ever reads 0% damage there), so a pure damage/survival table under-rates an opponent carrying a boost like Swords Dance or Calm Mind, and that boost is what changes every later turn.',
             parameters: {
                 type: 'object',
                 properties: {
@@ -3041,6 +3041,29 @@ function resolveMoveNum(mv) {
     return null;
 }
 
+// 物种级「隐性威胁」：变化招**不会出现在伤害表里**（simulate_turn 对它们只会显示 0%），
+// 所以这一类必须在**查图鉴**时提示，而不是塞进单回合仿真（用户 2026-09-20 定的分工）。
+// 归类完全按 moves.json 的 `desc` 文本自动做，不建人工配置表。
+function classifyStatusMoves(list) {
+    if (!list || !list.length) return null;
+    var roles = { self_setup: [], hazards: [], healing: [], blocking: [], status_inflict: [] };
+    var CAP = 6;
+    for (var i = 0; i < list.length; i++) {
+        var m = MOVES[String(Number(list[i]))] || (MOVES.byNum ? MOVES.byNum[String(Number(list[i]))] : null);
+        if (!m || !m.name) continue;
+        if (String(m.category || '').toLowerCase() !== 'status') continue;
+        var d = String(m.desc || '');
+        if (/raises the user.s (attack|defense|special attack|special defense|speed|accuracy|evasion)/i.test(d)) { if (roles.self_setup.length < CAP) roles.self_setup.push(m.name); }
+        else if (/as they switch in|switch in for/i.test(d)) { if (roles.hazards.length < CAP) roles.hazards.push(m.name); }
+        else if (/recovers|restores|heals/i.test(d) && /user/i.test(d)) { if (roles.healing.length < CAP) roles.healing.push(m.name); }
+        else if (/resets all stat stages|prevent(ed|s)?\b.{0,24}from using|reduces the target/i.test(d)) { if (roles.blocking.length < CAP) roles.blocking.push(m.name); }
+        else if (/(badly poisons|poisons|burns|paralyses|paralyzes|freezes|puts the target to sleep)/i.test(d)) { if (roles.status_inflict.length < CAP) roles.status_inflict.push(m.name); }
+    }
+    var out = {};
+    for (var k in roles) { if (roles[k].length) out[k] = roles[k]; }
+    return Object.keys(out).length ? out : null;
+}
+
 function getPokemonInfo(args) {
     var poke = args.pokemon || args.poke;
     if (!poke) return { error: 'missing pokemon' };
@@ -3082,6 +3105,13 @@ function getPokemonInfo(args) {
     };
 
     var list = LEARNSETS.byKey[key] || null;
+
+    // 隐性威胁：它学得到的变化招（自我强化 / 撒钉 / 回复 / 封锁 / 上状态）。
+    // 这些**不会出现在 simulate_turn 的伤害表里**（那里只会显示 0%），所以必须在查图鉴时看到。
+    out.notable_status_moves = classifyStatusMoves(list);
+    if (out.notable_status_moves) {
+        out.notable_status_moves_note = 'These are STATUS moves this species can learn — they are invisible in simulate_turn (a status move only ever shows 0% damage there), so a pure damage/survival table WILL under-rate an opponent that carries one. Especially self_setup: a boost it gets to keep changes every later turn.';
+    }
 
     // 模式 a：校验指定招式是否可学
     if (args.moves && args.moves.length) {
