@@ -151,6 +151,12 @@
 
 - [ ] **天气伤害判定 tool（来自 battle55 的 submit_feedback）**：LLM 想要一个能明确报告「对手某只宝可梦本回合是否吃到沙暴/冰雹等天气掉血」的 tool，用来从战报确认 Magic Guard / Unaware（是否免疫间接伤害）之类的特性。现状：只能靠 `get_battle_history` 逐回合扫天气/掉血行。方案：po-script 侧在回合末记录「天气伤害事件」（哪个 slot 掉了多少 HP），存进 history 或独立字段，供 tool 直接查询/汇总。
 
+- [x] **battle94 复盘（LLM 打吧服 BOT，胜；29 决策 / 25 分钟 / script 0.6.10 / server 0.4.11）**：
+  - 结果：**胜**（`09:16:04 started → 09:41:25 won against`）。`0 fallback`、`0 攻击方被覆盖`。**平均 47s / 最长 218s**（逼近 `TIMEOUT_MS=240s`，值得盯）；29 个决策里 4 个带 `bannedMoves`（=发生了 PO 拒绝→重决策）。
+  - 已修（**0.6.11，用户发现「T21 为什么点暗影球」**）：**被拒槽位跨宝可梦串味** —— `pklmBannedSlots` 存的是**槽位号**，而 `pklmIsMoveDisabled(m)` 只按槽位过滤**当前场上**这只的招。实测链路（T20）：Rotom-Wash 的 **Volt Switch（slot 0）**被 PO 拒（专爱锁招）→ ban 槽位 0 → 同回合换上 Oranguru，它的 **Psychic 也是 slot 0** → 被误过滤 → prompt 只剩 `Focus Blast / Trick / Shadow Ball` → LLM 只好打 **Shadow Ball（46-55，14%）**；而正解 **Psychic（78-93，23-28%）根本没出现在选项里**（CAUTION 还按当前宝可梦解析槽位号，把这次拒绝渲染成「Psychic 被拒」）。修：我方 `onSendOut`（换人）/`onKo`（倒下补位）时清空 ban 列表 —— 被拒本质是「这只宝可梦的这个槽位不可用」，换人后不适用。
+  - 已评估不改（T6：「围巾被 Trick 换走后点水炮/被拒」）：**Trick 换走道具后 `state.me.item` 读成空** → 专爱锁招的**正向**检测（`item ∈ {4,5,6}`）失效 → LLM 看到 4 个招都能点 → 点了被锁的 Volt Switch → 被 PO 拒 → 重决策（46s + 45s）。**用户判断：不修** —— ① 多烧一轮影响有限；② 跨回合保留 ban 列表反而会在道具被换走后变成错误信息；③ 现在这套（被拒→ban 该槽位→重决策）与主脚本 `disabledAttackSlot`（每回合 `resetCommandStatus` 清空 + `checkDisabled` 累积）语义一致，符合既定设计。
+  - 待观察：**218s 的单次决策**（29 个决策里最长）离 240s 上限只差 22s —— 是偶发还是「多轮 tool + 长思考」的常态？若常态需考虑压 `MAX_TOOL_ROUNDS` 或给关键回合单独设上限。
+
 - [x] **battle93 复盘（LLM 打吧服 BOT，胜 6-0；14 回合 / 8 分钟 / script 0.6.10 / server 0.4.10→0.4.11）**：
   - 结果：**胜且零封**（`08:37:45 started → 08:45:43 won`；我方 0 折、对手 6 折）。`0 fallback`；平均 28s / 最长 77s（比前两局快）。**这一局是「重贴 0.6.10 + 重启 8092」之后的第一次实战，日志逐回合确认 `script=0.6.10 / server=0.4.10`** ✓
   - 已修（0.4.11，本局发现）：① **`from_state:'me'` + 显式点名后备宝可梦 → 算错对象**（T1：它写 `{from_state:'me', poke:'Tapu Koko'}` 想算「换上 Tapu Koko 打」，而 'me' 是场上 Toxapex → 被「系统为准」覆盖成 Toxapex，算出 Toxapex 的招）→ 改为**按名字反查槽位**（我方 myStats/bench、对手已亮相 oppTeam），命中即解析成 `me:1`/`opp:4` 并记进 `inputs_used.slot_resolved_by_name`。② 特性写成 **`"Protean/Libero"`** → 计算器不认 → `normalizeDexName` 拆开取能识别的那个（特性/道具通用），真拼错仍报 not recognised。

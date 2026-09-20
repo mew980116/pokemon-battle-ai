@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8092";
-var PKLM_VERSION = "0.6.10";      // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.6.11";      // 脚本版本（改动时 bump，随日志记录）
 var pklmLastWebFailTime = 0;       // 上次 webCall 失败时间戳（ms），用于断线时节流重发
 var pklmSilent = false;            // 静默模式：清分少女等无人值守 BOT 账号不向 PO 窗口 print 任何脚本输出
 var pklmFailCount = 0;             // 连续 webCall 失败次数（成功即归零）
@@ -1058,6 +1058,8 @@ function pklmSpotLabel(spot) {
     onKo: function (spot) {
         try {
             pklmTurnLog += pklmSpotLabel(spot) + "'s pokemon fainted. ";
+            // 我方倒下 → 接下来的「补位」决策是新宝可梦，要清掉上一只留下的被拒槽位（同上，按槽位记会串味）
+            if (spot === battle.me) { pklmBannedSlots = []; pklmBannedSwitch = []; }
         } catch (e) {}
     },
     onSendOut: function (spot, prevIndex) {
@@ -1082,6 +1084,12 @@ function pklmSpotLabel(spot) {
                 if (myNum > 0 && pklmMyRevealed.indexOf(myNum) === -1) {
                     pklmMyRevealed.push(myNum);
                 }
+                // 被拒记录是「**这只宝可梦**的某个槽位不可用」→ 换人后不再适用，必须清空。
+                // 不清的后果（battle94 T20 实测）：Rotom 的 Volt Switch(slot 0) 被拒 → ban 槽位 0 →
+                // 同一回合换上 Oranguru 后，它的 Psychic **也是 slot 0** 被误过滤，prompt 里只剩
+                // Focus Blast/Trick/Shadow Ball → LLM 只能打 Shadow Ball(14%)，而正解 Psychic 有 23-28%。
+                pklmBannedSlots = [];
+                pklmBannedSwitch = [];
             }
         } catch (e) {}
     },
