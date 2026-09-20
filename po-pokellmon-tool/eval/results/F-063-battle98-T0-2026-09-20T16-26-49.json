@@ -1,0 +1,499 @@
+{
+ "fixture": "battle98-T0",
+ "arm": "F-063",
+ "url": "http://127.0.0.1:8092",
+ "n": 5,
+ "when": "2026-09-20T16-26-49",
+ "summary": {
+  "byAction": {
+   "ATK(stay)": 5
+  },
+  "byVerdict": {
+   "SAFE": 5
+  },
+  "inboundTotal": 12,
+  "simCalls": 5,
+  "branchTotal": 29,
+  "strategyRejections": 0,
+  "gateRejections": 0,
+  "gateUnmet": 0,
+  "gateBypassed": 0,
+  "honestFaints": 0,
+  "behaviorHits": 0,
+  "accident": 0,
+  "nOk": 5
+ },
+ "samples": [
+  {
+   "i": 1,
+   "battleId": "F-063-R1",
+   "ms": 52841,
+   "action": {
+    "type": "attack",
+    "attackSlot": 1
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Knock Off"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Sludge Wave"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me : Waterfall"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me : Power Whip"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me : Earthquake"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me : Bounce"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Knock Off\"} vs [\"Dragon Dance\",\"Waterfall\",\"Power Whip\",\"Bounce\",\"switch2\"]"
+     }
+    ],
+    "inbound": [
+     "opp -> me : Waterfall",
+     "opp -> me : Power Whip",
+     "opp -> me : Earthquake",
+     "opp -> me : Bounce"
+    ],
+    "outbound": [
+     "me -> opp : Knock Off",
+     "me -> opp : Sludge Wave"
+    ],
+    "strategy": {
+     "action": "move Knock Off",
+     "branch": "Dragon Dance",
+     "outcome": "survives",
+     "text": "(1) ATTACK? Likely yes from Gyarados. Candidates: Power Whip (best vs Crawdaunt, 2x, OHKOs), Waterfall (resisted 0.5x by me), Bounce (2HKO), or Dragon Dance (setup). Read: genuinely split between DD and an attack; Gyarados sees a slow Crawdaunt and may DD freely, but Power Whip also lines up as the clean KO. Confidence low (~50/50) — set barely known. (2) SWITCH? Unlikely; Gyarados is happy to pressure a lead Crawdaunt. (3) THEIR READ OF ME: they expect Crawdaunt to Knock Off / Crabhammer / Aqua Jet; they know Crawdaunt is slow (base 55) and may expect me to switch out to a Gyarados answer (they've seen none). (4) MY OPTIONS & SWITCH COST: Switching (Scizor resists Power Whip 0.5x; Conkeldurr/Bounce 2x risk; none of my team has a SE move vs Gyarados) forfeits the turn and hands Gyarados a FREE Dragon Dance — that is worse than trading: with no Electric/Rock attacker, letting Gyarados set up is losing. Stay and Knock Off: strong (Adaptability Dark STAB, removes item). Sim: vs DD branch Crawdaunt stays 100% and Gyarados takes 70-83% (105-124% if it holds an item = potential OHKO); vs Waterfall Crawdaunt 65-78%; vs Bounce 25-53%; vs Power Whip Crawdaunt FAINTS (89-105%, and 119-140% if 252+ Atk) but Power Whip is only 85% acc. (c) I am not behind; (d) no, I don't need them to err — Knock Off is my highest-value play either way; (e) no steadier line: no switch-in actually walls Gyarados, and switching just gives it a DD. (5) MOST LIKELY ACTION: Gyarados DDs (or Power Whips). Best reply = Knock Off, which OHKOs through the item boost if it DDs, or at worst removes Leftovers and chunks it. Falsifier: if it DDs and survives Knock Off at >25%, or if it reveals Power Whip and kills Crawdaunt for free. (6) SEQUENCE: Crawdaunt Knock Off → if Gyarados DDs it likely faints (huge win); if Gyarados attacks, Gyarados is left 17-30% (item gone) and Crawdaunt (25-78% HP) faces a +boosted or plain Gyarados next turn — I then likely lose Crawdaunt but it already did its job.",
+     "scene": "End of turn 1: Gyarados at 0% (KO'd, item removed) OR 17-30% HP with item removed; Crawdaunt at 25-100% HP (fainted if Gyarados used Power Whip at high Atk). No hazards, no weather. If Gyarados DD'd, it is at +1 Atk/+1 Spe.",
+     "checks": "1) Does Gyarados's item-boosted Knock Off actually OHKO (confirm Gyarados faints) — refuted if Gyarados survives above ~30%. 2) Confirm Gyarados's move: DD (status) vs Power Whip (85% acc) vs Waterfall — record revealed moves. 3) Confirm speed order (does Gyarados move before Crawdaunt?). 4) Did Knock Off remove an item (any Leftovers/berry message later)?"
+    },
+    "rounds": 7,
+    "ms": 52654,
+    "fallback": false,
+    "simCalls": 1,
+    "sims": [
+     {
+      "actionKey": "move Knock Off",
+      "opp_does": [
+       "Dragon Dance",
+       "Waterfall",
+       "Power Whip",
+       "Bounce",
+       "switch 2"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 1,
+    "lastWarning": "REMINDER (not blocking) — the branch you declared (Dragon Dance) is NOT the worst branch for that action. Worst is \"Power Whip\": ORDER UNRESOLVED (both simulated — do NOT assume you move first) you first → Crawdaunt: 70-83% out, 89-105% in → -5-11% left  [by order: you first = -5-11% (89-105% in) | ",
+    "multMentions": 2,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "move Knock Off",
+    "declaredBranch": "Dragon Dance",
+    "declaredOutcome": "survives",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 0,
+    "targetName": "Crawdaunt",
+    "worst": {
+     "pctMin": 47,
+     "pctMax": 56,
+     "ko": "84% chance to 2HKO",
+     "move": "Bounce",
+     "acc": 85,
+     "error": null
+    },
+    "isSwitch": false
+   }
+  },
+  {
+   "i": 2,
+   "battleId": "F-063-R2",
+   "ms": 30815,
+   "action": {
+    "type": "attack",
+    "attackSlot": 1
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Knock Off\"} vs [\"Dragon Dance\",\"Waterfall\",\"Bounce\",\"Earthquake\",\"Power Whip\"]"
+     }
+    ],
+    "inbound": [],
+    "outbound": [],
+    "strategy": {
+     "text": "(1) ATTACK? Believes he can attack: candidate moves Waterfall (resisted 0.5x by Crawdaunt, 22-35%), Bounce (neutral, 47-56% @0EV / 63-75% @252, 85% acc), Earthquake (neutral, 37-44% @0EV / 49-58% @252), Power Whip (89-140% — only real OHKO threat at 85% acc). Dragon Dance also plausible (status not modelled). Since it has Intimidate+DD access and is bulky, DD or Waterfall are the most likely non-committal plays. (2) SWITCH? Gyarados won't switch out turn 1 given Intimidate is already down and no bad matchup proven. (3) THEIR READ OF ME: sees Crawdaunt (Adaptability/Life Orb breaker). It may expect a switch to avoid the incoming hit; it may DD to punish a switch. (4) MY OPTIONS: staying and clicking Knock Off is the strongest single play — 70-83% no-item / 105-124% with item [sim], removes Gyarados's item, and is my best damage. Switching forfeits the turn and lets Gyarados act freely (likely DD), which is worse than chunking it now. No switch-in hard-walls Gyarados (Conkeldurr is 2x weak to Bounce; Scizor 2x weak to Flying; Politoed's Drizzle would only boost Gyarados's Waterfall). Staying is the steadier, more damaging line. (5) MOST LIKELY ACTION: Dragon Dance or Waterfall. My reply: Knock Off. Falsifier for 'safe': if it clicks a boosted/electric/super-effective move — but nothing revealed threatens a OHKO except Power Whip at 85% acc. (6) SEQUENCE: I click Knock Off, Gyarados takes heavy damage (70-124%); it may DD or hit me for 22-56%. Next turn reassess — finish with Knock Off/Aqua Jet priority or switch accordingly.",
+     "scene": "Crawdaunt ~44-78% (or fainted if Power Whip connects) vs Gyarados ~0-30% (Knock Off landed, item removed) with Gyarados possibly at +1 (Dragon Dance) if it set up. No hazards/weather up.",
+     "checks": "Confirm Knock Off damage: if Gyarados holds an item expect ~105-124% (near/at KO) vs 70-83% if itemless — a surviving Gyarados at very low HP implies 252 HP bulk. Verify whether Gyarados clicks Dragon Dance (setup sweeper read) or a direct attack. Check Gyarados speed vs Crawdaunt to confirm it moves first. Refute 'Power Whip' if it never shows or reveals a different coverage move.",
+     "action": "move Knock Off",
+     "branch": "Waterfall",
+     "outcome": "Crawdaunt survives (74-78% at 0EV, 65-71% at 252+ Atk)"
+    },
+    "rounds": 4,
+    "ms": 30594,
+    "fallback": false,
+    "simCalls": 1,
+    "sims": [
+     {
+      "actionKey": "move Knock Off",
+      "opp_does": [
+       "Dragon Dance",
+       "Waterfall",
+       "Bounce",
+       "Earthquake",
+       "Power Whip"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 1,
+    "lastWarning": "REMINDER (not blocking) — the branch you declared (Waterfall) is NOT the worst branch for that action. Worst is \"Power Whip\": ORDER UNRESOLVED (both simulated — do NOT assume you move first) you first → Crawdaunt: 70-83% out, 89-105% in → -5-11% left  [by order: you first = -5-11% (89-105% in) | the",
+    "multMentions": 3,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "move Knock Off",
+    "declaredBranch": "Waterfall",
+    "declaredOutcome": "Crawdaunt survives (74-78% at 0EV, 65-71% at 252+ Atk)",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 0,
+    "targetName": "Crawdaunt",
+    "worst": {
+     "pctMin": 47,
+     "pctMax": 56,
+     "ko": "84% chance to 2HKO",
+     "move": "Bounce",
+     "acc": 85,
+     "error": null
+    },
+    "isSwitch": false
+   }
+  },
+  {
+   "i": 3,
+   "battleId": "F-063-R3",
+   "ms": 38287,
+   "action": {
+    "type": "attack",
+    "attackSlot": 1
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Knock Off\"} vs [\"Dragon Dance\",\"Waterfall\",\"Bounce\",\"Earthquake\",\"Crunch\",\"Power Whip\"]"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Knock Off"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Crabhammer"
+     }
+    ],
+    "inbound": [],
+    "outbound": [
+     "me -> opp : Knock Off",
+     "me -> opp : Crabhammer"
+    ],
+    "strategy": {
+     "text": "(1) ATTACK? Opponent almost certainly attacks or sets up. Most likely Dragon Dance (turn 1, free setup vs a Crawdaunt that can't threaten it much) — it doesn't know Crawdaunt 2HKOs/OHKOs. Candidate attacks: Waterfall (22-26%), Bounce (47-56%), EQ (37-44%), Crunch (14-17%), Power Whip (89-105%, 85% acc — rare/coverage). (2) SWITCH? Unlikely on turn 1 with no revealed info. (3) THEIR READ OF ME: Gyarados sees a slow Water/Dark; it likely disrespects Crawdaunt and DDs or attacks. (4) MY OPTIONS: Knock Off is by far the best — Crawdaunt's effective 130 BP Adaptability STAB, and crucially Knock Off gets 1.5x vs an item holder: 105-124% => likely OHKO, and strips Leftovers/Life Orb either way. Crabhammer only 54-64% (0.5x). Aqua Jet/Sludge Wave far weaker. Switching forfeits a turn and gains nothing (no true Gyarados counter on team; no Electric/Rock STAB) — attacking is strictly better than a blind switch. Cost: only the Power Whip branch (85% acc) can KO Crawdaunt (89-105%), rare. (5) MOST LIKELY: Dragon Dance; my reply Knock Off -> likely OHKO. Falsifier: Gyarados reveals Power Whip or outspeeds+KOs. (6) SEQUENCE: Gyarados DDs/attacks, Crawdaunt Knock Off, Gyarados likely faints to Knock Off (esp. if item); if it survives (bulky 252 HP set), it is itemless at ~0-30% and we reassess next turn.",
+     "scene": "Crawdaunt 100% (or 44-78% if it ate Waterfall/EQ) vs Gyarados; Gyarados likely fainted to Knock Off (or itemless, low HP if bulky). No hazards either side. Opponent sends next pokemon after any faint.",
+     "checks": "Verify Knock Off damage roll on Gyarados confirms ~105-124% (item holder OHKO) — refuted if Gyarados survives >30%. Check whether Gyarados reveals Dragon Dance (confirms sweeper) vs an attack (Waterfall/Bounce/EQ/Crunch). Confirm Gyarados item presence via Knock Off boost.",
+     "action": "move Knock Off",
+     "branch": "Dragon Dance",
+     "outcome": "survives"
+    },
+    "rounds": 4,
+    "ms": 38077,
+    "fallback": false,
+    "simCalls": 1,
+    "sims": [
+     {
+      "actionKey": "move Knock Off",
+      "opp_does": [
+       "Dragon Dance",
+       "Waterfall",
+       "Bounce",
+       "Earthquake",
+       "Crunch",
+       "Power Whip"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 1,
+    "lastWarning": "REMINDER (not blocking) — the branch you declared (Dragon Dance) is NOT the worst branch for that action. Worst is \"Bounce\": ORDER UNRESOLVED (both simulated — do NOT assume you move first) you first → Crawdaunt: 70-83% out, 47-56% in → 44-53% left  [by order: you first = 44-53% (47-56% in) | they f",
+    "multMentions": 0,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "move Knock Off",
+    "declaredBranch": "Dragon Dance",
+    "declaredOutcome": "survives",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 0,
+    "targetName": "Crawdaunt",
+    "worst": {
+     "pctMin": 47,
+     "pctMax": 56,
+     "ko": "84% chance to 2HKO",
+     "move": "Bounce",
+     "acc": 85,
+     "error": null
+    },
+    "isSwitch": false
+   }
+  },
+  {
+   "i": 4,
+   "battleId": "F-063-R4",
+   "ms": 40783,
+   "action": {
+    "type": "attack",
+    "attackSlot": 1
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Knock Off"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Sludge Wave"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Crabhammer"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me : Waterfall"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me : Bounce"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me : Earthquake"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Knock Off\"} vs [\"Dragon Dance\",\"Waterfall\",\"Bounce\",\"Earthquake\",\"Ice Fang\",\"switch1\"]"
+     }
+    ],
+    "inbound": [
+     "opp -> me : Waterfall",
+     "opp -> me : Bounce",
+     "opp -> me : Earthquake"
+    ],
+    "outbound": [
+     "me -> opp : Knock Off",
+     "me -> opp : Sludge Wave",
+     "me -> opp : Crabhammer"
+    ],
+    "strategy": {
+     "text": "(1) ATTACK? — Gyarados almost certainly attacks or sets up. No moves revealed. Candidates: Dragon Dance (very common on lead Gyarados), Waterfall (its STAB, but only 22-26% vs Crawdaunt which resists Water), Bounce (47-56%, its best hit), Earthquake (37-44%), Ice Fang (11-14%). I expect Dragon Dance or Waterfall/Bounce — medium confidence, zero moves revealed. Note: no single branch KOs Crawdaunt from full, so whichever it clicks I survive and fire Knock Off. (2) SWITCH? — Unlikely; nothing on my bench walls it and it just came in even. (3) THEIR READ — they see Crawdaunt (Water/Dark, Adaptability). They may underrate Knock Off and try to DD/set up, or Waterfall thinking Crawdaunt is a Water wall. They do not know my full team. (4) MY OPTIONS — Stay is clearly best: Knock Off does 70-83% (no item) or 105-124% (if it holds ANY item → likely OHKO, and essentially every competitive Gyarados holds Boots/Leftovers/Life Orb/Sitrus). The engine confirms Crawdaunt survives EVERY branch: 100% vs DD, 74-78% vs Waterfall, 44-53% vs Bounce, 56-63% vs EQ, 86-89% vs Ice Fang. Switching gains nothing — none of my mons hits Gyarados super effectively (Fairy/Steel/Bug/Fighting all neutral-or-resisted), and a switch forfeits my best damage while my switch-in eats a free hit. No entry hazards up. I am not behind; this is turn 1. (5) MOST LIKELY ACTION + MY RESPONSE — Dragon Dance (or Bounce). I fire Knock Off → big damage / likely KO + item removal. Falsifier: it switches out (then Knock Off lands on the switch-in, still fine) or reveals a Grass move (Power Whip — it can learn it, 89-105%, the only real KO threat). (6) ACTION SEQUENCE — This turn: I Knock Off, Gyarados takes 70-124% (or sets DD/+1 with ~20-30% left). Next decision: if Gyarados survived at ~20-30% and is +1 Atk/Spe, finish with a second Knock Off (or Aqua Jet priority) if Crawdaunt lives, else preserve. DANGER: only a Power Whip-style Grass hit threatens a KO this turn — low probability.",
+     "scene": "Gyarados at ~0-30% (KO'd outright if it held an item) OR fainted if item Knock Off connected; if it DD'd it is at +1 Atk/+1 Spe with item removed. Crawdaunt on field at 74-100% depending on branch (100% if it DD'd). No hazards, no weather. If Gyarados fainted, opponent sends next pokemon.",
+     "checks": "1) Confirm Gyarados's move: DD (setup) vs Waterfall/Bounce/EQ/Ice Fang — pins its role/EVs. 2) Verify Knock Off damage lands 70-83% (no item) or 105-124% (item held) to confirm Crawdaunt's spread/Adaptability. 3) Confirm Gyarados's Speed: did it move before my 209 Crawdaunt — reveals its EV/nature (range 178-287). 4) Check if it reveals a Grass move (Power Whip) — the only branch that threatens Crawdaunt's KO.",
+     "action": "move Knock Off",
+     "branch": "Waterfall",
+     "outcome": "74-78%"
+    },
+    "rounds": 5,
+    "ms": 40541,
+    "fallback": false,
+    "simCalls": 1,
+    "sims": [
+     {
+      "actionKey": "move Knock Off",
+      "opp_does": [
+       "Dragon Dance",
+       "Waterfall",
+       "Bounce",
+       "Earthquake",
+       "Ice Fang",
+       "switch 1"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 1,
+    "lastWarning": "REMINDER (not blocking) — the branch you declared (Waterfall) is NOT the worst branch for that action. Worst is \"Bounce\": ORDER UNRESOLVED (both simulated — do NOT assume you move first) you first → Crawdaunt: 70-83% out, 47-56% in → 44-53% left  [by order: you first = 44-53% (47-56% in) | they firs",
+    "multMentions": 3,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "move Knock Off",
+    "declaredBranch": "Waterfall",
+    "declaredOutcome": "74-78%",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 0,
+    "targetName": "Crawdaunt",
+    "worst": {
+     "pctMin": 47,
+     "pctMax": 56,
+     "ko": "84% chance to 2HKO",
+     "move": "Bounce",
+     "acc": 85,
+     "error": null
+    },
+    "isSwitch": false
+   }
+  },
+  {
+   "i": 5,
+   "battleId": "F-063-R5",
+   "ms": 60277,
+   "action": {
+    "type": "attack",
+    "attackSlot": 1
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Knock Off\"} vs [\"Dragon Dance\",\"Waterfall\",\"Bounce\",\"Earthquake\",\"Crunch\",\"Power Whip\",\"Ice Fang\"]"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Knock Off"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me : Waterfall"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me : Bounce"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me : Earthquake"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Crawdaunt -> Gyarados : Knock Off"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Crawdaunt -> Gyarados : Knock Off"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Gyarados -> me : Waterfall"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Gyarados -> me : Bounce"
+     }
+    ],
+    "inbound": [
+     "opp -> me : Waterfall",
+     "opp -> me : Bounce",
+     "opp -> me : Earthquake",
+     "Gyarados -> me : Waterfall",
+     "Gyarados -> me : Bounce"
+    ],
+    "outbound": [
+     "me -> opp : Knock Off",
+     "Crawdaunt -> Gyarados : Knock Off",
+     "Crawdaunt -> Gyarados : Knock Off"
+    ],
+    "strategy": {
+     "text": "(1) ATTACK? Gyarados likely attacks or sets up. Candidate moves: Dragon Dance (very likely — Crawdaunt threatens Knock Off but Gyarados leads, so it wants +Spe/+Atk), Waterfall, Bounce/Earthquake, or Power Whip (2x vs my Water typing, OHKO risk). I can't be certain; expecting DD/setup or a STAB hit. (2) SWITCH? Opponent unlikely to switch on turn 1 vs an unknown Crawdaunt. (3) THEIR READ: they think Crawdaunt is a Water breaker; Intimidate already made my Atk -1 so they may feel safe to set up. (4) MY OPTIONS: Knock Off — chips ~40-55% (with the -1 factored) AND removes Gyarados's item (Leftovers/Boots/LO), robust whether it DDs or attacks; Crawdaunt survives everything except a Power Whip roll. Switching to Scizor (resists Bounce + 4x resists Power Whip) forfeits this turn and still faces a +1 Gyarados next turn if it DDs — worse. (5) MOST LIKELY: Dragon Dance (or Waterfall). My reply: Knock Off now, then pivot turn 2 if it boosted. Falsifier: it reveals Power Whip (kills me before I act). (6) Sequence: Gyarados acts (DD or attack) → Crawdaunt Knock Offs, item removed, Gyarados ~45-60% (or ~70-80% if spread bulky). Next turn: if +1, switch Crawdaunt to a check; if +0 and I'm healthy, Knock Off again for the KO.",
+     "scene": "Crawdaunt ~100% (or 74-78% if hit by Waterfall), Gyarados ~45-80% with item removed; if it DDs, Gyarados at +1. My turn 2 decision.",
+     "checks": "Confirm Gyarados's turn-1 move: DD (falsified if it attacks, esp. Power Whip). Verify Knock Off deals ~40-55% (Intimidate -1 applied) NOT the sim's unboosted 70-83%; refuted if Gyarados drops ~40% or less of expected. Watch for reveal of Power Whip / item (Leftovers heal message).",
+     "action": "move Knock Off",
+     "branch": "Dragon Dance",
+     "outcome": "survives"
+    },
+    "rounds": 5,
+    "ms": 60003,
+    "fallback": false,
+    "simCalls": 1,
+    "sims": [
+     {
+      "actionKey": "move Knock Off",
+      "opp_does": [
+       "Dragon Dance",
+       "Waterfall",
+       "Bounce",
+       "Earthquake",
+       "Crunch",
+       "Power Whip",
+       "Ice Fang"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 1,
+    "lastWarning": "REMINDER (not blocking) — the branch you declared (Dragon Dance) is NOT the worst branch for that action. Worst is \"Power Whip\": ORDER UNRESOLVED (both simulated — do NOT assume you move first) you first → Crawdaunt: 70-83% out, 89-105% in → -5-11% left  [by order: you first = -5-11% (89-105% in) | ",
+    "multMentions": 1,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "move Knock Off",
+    "declaredBranch": "Dragon Dance",
+    "declaredOutcome": "survives",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 0,
+    "targetName": "Crawdaunt",
+    "worst": {
+     "pctMin": 47,
+     "pctMax": 56,
+     "ko": "84% chance to 2HKO",
+     "move": "Bounce",
+     "acc": 85,
+     "error": null
+    },
+    "isSwitch": false
+   }
+  }
+ ]
+}

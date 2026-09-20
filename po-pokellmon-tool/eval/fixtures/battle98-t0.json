@@ -1,0 +1,584 @@
+{
+ "state": {
+  "account": "「木偶」析构万理的发条公主",
+  "log": true,
+  "battleId": 98,
+  "scriptVersion": "0.6.11",
+  "turn": 0,
+  "shadow": false,
+  "teamPreview": false,
+  "bannedMoves": [],
+  "bannedSwitches": [],
+  "history": [
+   "You sent out Crawdaunt. opposing sent out Gyarados. Gyarados intimidates Crawdaunt!. "
+  ],
+  "fullHistory": [
+   "You sent out Crawdaunt. opposing sent out Gyarados. Gyarados intimidates Crawdaunt!. "
+  ],
+  "messages": [],
+  "oppRemaining": 6,
+  "weather": null,
+  "terrain": null,
+  "myHazards": [],
+  "oppHazards": [],
+  "screens": {
+   "me": [],
+   "opp": []
+  },
+  "opp": {
+   "name": "Gyarados",
+   "types": [
+    "Water",
+    "Flying"
+   ],
+   "hpPct": 100,
+   "status": null,
+   "moves": [],
+   "fainted": false,
+   "abilityInferred": "Intimidate",
+   "itemInferred": null,
+   "possibleAbilities": [
+    "Intimidate",
+    "Moxie/Chilling Neigh"
+   ],
+   "boosts": []
+  },
+  "oppTeam": [
+   {
+    "name": "Gyarados",
+    "revealed": true,
+    "ko": false,
+    "hpPct": 100,
+    "status": null,
+    "abilityInferred": "Intimidate",
+    "possibleAbilities": [
+     "Intimidate",
+     "Moxie/Chilling Neigh"
+    ],
+    "moves": [],
+    "itemInferred": null
+   },
+   {
+    "name": null,
+    "revealed": false,
+    "ko": false,
+    "hpPct": null,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [],
+    "moves": [],
+    "itemInferred": null
+   },
+   {
+    "name": null,
+    "revealed": false,
+    "ko": false,
+    "hpPct": null,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [],
+    "moves": [],
+    "itemInferred": null
+   },
+   {
+    "name": null,
+    "revealed": false,
+    "ko": false,
+    "hpPct": null,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [],
+    "moves": [],
+    "itemInferred": null
+   },
+   {
+    "name": null,
+    "revealed": false,
+    "ko": false,
+    "hpPct": null,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [],
+    "moves": [],
+    "itemInferred": null
+   },
+   {
+    "name": null,
+    "revealed": false,
+    "ko": false,
+    "hpPct": null,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [],
+    "moves": [],
+    "itemInferred": null
+   }
+  ],
+  "oppSeen": [
+   "Gyarados"
+  ],
+  "me": {
+   "name": "Crawdaunt",
+   "types": [
+    "Water",
+    "Dark"
+   ],
+   "hpPct": 100,
+   "status": null,
+   "moves": [
+    {
+     "slot": 0,
+     "name": "Crabhammer",
+     "type": "Water",
+     "num": 152,
+     "pp": 16
+    },
+    {
+     "slot": 1,
+     "name": "Knock Off",
+     "type": "Dark",
+     "num": 282,
+     "pp": 32
+    },
+    {
+     "slot": 2,
+     "name": "Aqua Jet",
+     "type": "Water",
+     "num": 453,
+     "pp": 32
+    },
+    {
+     "slot": 3,
+     "name": "Sludge Wave",
+     "type": "Poison",
+     "num": 482,
+     "pp": 16
+    }
+   ],
+   "fainted": false,
+   "boosts": [],
+   "ability": "Adaptability",
+   "item": "Life Orb"
+  },
+  "myTeam": [
+   {
+    "slot": 0,
+    "name": "Crawdaunt",
+    "hpPct": 100,
+    "ko": false,
+    "status": null
+   },
+   {
+    "slot": 1,
+    "name": "Conkeldurr",
+    "hpPct": 100,
+    "ko": false,
+    "status": null
+   },
+   {
+    "slot": 2,
+    "name": "Primarina",
+    "hpPct": 100,
+    "ko": false,
+    "status": null
+   },
+   {
+    "slot": 3,
+    "name": "Scizor",
+    "hpPct": 100,
+    "ko": false,
+    "status": null
+   },
+   {
+    "slot": 4,
+    "name": "Hatterene",
+    "hpPct": 100,
+    "ko": false,
+    "status": null
+   },
+   {
+    "slot": 5,
+    "name": "Politoed",
+    "hpPct": 100,
+    "ko": false,
+    "status": null
+   }
+  ],
+  "myStats": [
+   {
+    "slot": 0,
+    "name": "Crawdaunt",
+    "numRef": 342,
+    "level": 100,
+    "ev": [
+     0,
+     252,
+     4,
+     0,
+     0,
+     252
+    ],
+    "iv": [
+     31,
+     31,
+     31,
+     31,
+     31,
+     31
+    ],
+    "nature": 4
+   },
+   {
+    "slot": 1,
+    "name": "Conkeldurr",
+    "numRef": 534,
+    "level": 100,
+    "ev": [
+     0,
+     252,
+     0,
+     0,
+     4,
+     252
+    ],
+    "iv": [
+     31,
+     31,
+     31,
+     31,
+     31,
+     31
+    ],
+    "nature": 3
+   },
+   {
+    "slot": 2,
+    "name": "Primarina",
+    "numRef": 730,
+    "level": 100,
+    "ev": [
+     0,
+     0,
+     0,
+     252,
+     4,
+     252
+    ],
+    "iv": [
+     31,
+     31,
+     31,
+     31,
+     31,
+     31
+    ],
+    "nature": 15
+   },
+   {
+    "slot": 3,
+    "name": "Scizor",
+    "numRef": 212,
+    "level": 100,
+    "ev": [
+     0,
+     252,
+     0,
+     0,
+     4,
+     252
+    ],
+    "iv": [
+     31,
+     31,
+     31,
+     31,
+     31,
+     31
+    ],
+    "nature": 3
+   },
+   {
+    "slot": 4,
+    "name": "Hatterene",
+    "numRef": 858,
+    "level": 100,
+    "ev": [
+     252,
+     0,
+     0,
+     252,
+     4,
+     0
+    ],
+    "iv": [
+     31,
+     31,
+     31,
+     31,
+     31,
+     0
+    ],
+    "nature": 17
+   },
+   {
+    "slot": 5,
+    "name": "Politoed",
+    "numRef": 186,
+    "level": 100,
+    "ev": [
+     252,
+     0,
+     252,
+     0,
+     4,
+     0
+    ],
+    "iv": [
+     31,
+     31,
+     31,
+     31,
+     31,
+     31
+    ],
+    "nature": 5
+   }
+  ],
+  "bench": [
+   {
+    "slot": 1,
+    "name": "Conkeldurr",
+    "numRef": 534,
+    "unrevealed": true,
+    "types": [
+     "Fighting"
+    ],
+    "hpPct": 100,
+    "status": null,
+    "moves": [
+     {
+      "slot": 0,
+      "name": "Drain Punch",
+      "type": "Fighting",
+      "num": 409,
+      "pp": 16
+     },
+     {
+      "slot": 1,
+      "name": "Facade",
+      "type": "Normal",
+      "num": 263,
+      "pp": 32
+     },
+     {
+      "slot": 2,
+      "name": "Knock Off",
+      "type": "Dark",
+      "num": 282,
+      "pp": 32
+     },
+     {
+      "slot": 3,
+      "name": "Mach Punch",
+      "type": "Fighting",
+      "num": 183,
+      "pp": 48
+     }
+    ],
+    "ability": "Guts",
+    "item": "Flame Orb"
+   },
+   {
+    "slot": 2,
+    "name": "Primarina",
+    "numRef": 730,
+    "unrevealed": true,
+    "types": [
+     "Water",
+     "Fairy"
+    ],
+    "hpPct": 100,
+    "status": null,
+    "moves": [
+     {
+      "slot": 0,
+      "name": "Hydro Pump",
+      "type": "Water",
+      "num": 56,
+      "pp": 8
+     },
+     {
+      "slot": 1,
+      "name": "Moonblast",
+      "type": "Fairy",
+      "num": 572,
+      "pp": 24
+     },
+     {
+      "slot": 2,
+      "name": "Psychic",
+      "type": "Psychic",
+      "num": 94,
+      "pp": 16
+     },
+     {
+      "slot": 3,
+      "name": "Scald",
+      "type": "Water",
+      "num": 503,
+      "pp": 24
+     }
+    ],
+    "ability": "Torrent",
+    "item": "Choice Specs"
+   },
+   {
+    "slot": 3,
+    "name": "Scizor",
+    "numRef": 212,
+    "unrevealed": true,
+    "types": [
+     "Bug",
+     "Steel"
+    ],
+    "hpPct": 100,
+    "status": null,
+    "moves": [
+     {
+      "slot": 0,
+      "name": "U-turn",
+      "type": "Bug",
+      "num": 369,
+      "pp": 32
+     },
+     {
+      "slot": 1,
+      "name": "Bullet Punch",
+      "type": "Steel",
+      "num": 418,
+      "pp": 48
+     },
+     {
+      "slot": 2,
+      "name": "Knock Off",
+      "type": "Dark",
+      "num": 282,
+      "pp": 32
+     },
+     {
+      "slot": 3,
+      "name": "Superpower",
+      "type": "Fighting",
+      "num": 276,
+      "pp": 8
+     }
+    ],
+    "ability": "Technician",
+    "item": "Choice Band"
+   },
+   {
+    "slot": 4,
+    "name": "Hatterene",
+    "numRef": 858,
+    "unrevealed": true,
+    "types": [
+     "Psychic",
+     "Fairy"
+    ],
+    "hpPct": 100,
+    "status": null,
+    "moves": [
+     {
+      "slot": 0,
+      "name": "Trick Room",
+      "type": "Psychic",
+      "num": 433,
+      "pp": 8
+     },
+     {
+      "slot": 1,
+      "name": "Psyshock",
+      "type": "Psychic",
+      "num": 473,
+      "pp": 16
+     },
+     {
+      "slot": 2,
+      "name": "Draining Kiss",
+      "type": "Fairy",
+      "num": 564,
+      "pp": 16
+     },
+     {
+      "slot": 3,
+      "name": "Mystical Fire",
+      "type": "Fire",
+      "num": 573,
+      "pp": 16
+     }
+    ],
+    "ability": "Magic Bounce",
+    "item": "Life Orb"
+   },
+   {
+    "slot": 5,
+    "name": "Politoed",
+    "numRef": 186,
+    "unrevealed": true,
+    "types": [
+     "Water"
+    ],
+    "hpPct": 100,
+    "status": null,
+    "moves": [
+     {
+      "slot": 0,
+      "name": "Scald",
+      "type": "Water",
+      "num": 503,
+      "pp": 24
+     },
+     {
+      "slot": 1,
+      "name": "Toxic",
+      "type": "Poison",
+      "num": 92,
+      "pp": 16
+     },
+     {
+      "slot": 2,
+      "name": "Encore",
+      "type": "Normal",
+      "num": 227,
+      "pp": 8
+     },
+     {
+      "slot": 3,
+      "name": "Ice Beam",
+      "type": "Ice",
+      "num": 58,
+      "pp": 16
+     }
+    ],
+    "ability": "Drizzle",
+    "item": "Damp Rock"
+   }
+  ]
+ },
+ "eval": {
+  "name": "battle98-T0",
+  "note": "打落（对手道具未知）+ 对手 EV 默认 0 的场景：Crawdaunt vs Gyarados，旧决策=攻击 slot1 (Knock Off)。测 0.6.0 的「两个值 / 两个锚点」会不会被用上",
+  "opp": "Gyarados",
+  "threatMoves": [
+   "Waterfall",
+   "Crunch",
+   "Earthquake",
+   "Ice Fang",
+   "Bounce"
+  ],
+  "expectSafeSlots": [
+   -1
+  ],
+  "accidentSlot": -1
+ }
+}

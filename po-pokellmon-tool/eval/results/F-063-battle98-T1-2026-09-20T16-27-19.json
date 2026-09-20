@@ -1,0 +1,549 @@
+{
+ "fixture": "battle98-T1",
+ "arm": "F-063",
+ "url": "http://127.0.0.1:8092",
+ "n": 5,
+ "when": "2026-09-20T16-27-19",
+ "summary": {
+  "byAction": {
+   "SWITCH→Scizor": 3,
+   "ATK(stay)": 2
+  },
+  "byVerdict": {
+   "SAFE": 3,
+   "LETHAL": 2
+  },
+  "inboundTotal": 2,
+  "simCalls": 14,
+  "branchTotal": 51,
+  "strategyRejections": 0,
+  "gateRejections": 3,
+  "gateUnmet": 0,
+  "gateBypassed": 0,
+  "honestFaints": 1,
+  "behaviorHits": 0,
+  "accident": 0,
+  "nOk": 5
+ },
+ "samples": [
+  {
+   "i": 1,
+   "battleId": "F-063-R1",
+   "ms": 18941,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 3
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Knock Off\"} vs [\"Spore\",\"Sludge Bomb\",\"Giga Drain\",\"Foul Play\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Crabhammer\"} vs [\"Spore\",\"Sludge Bomb\",\"Giga Drain\",\"Foul Play\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":7} vs [\"Spore\",\"Giga Drain\",\"Sludge Bomb\",\"Foul Play\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":3} vs [\"Spore\",\"Giga Drain\",\"Sludge Bomb\",\"Foul Play\"]"
+     }
+    ],
+    "inbound": [],
+    "outbound": [],
+    "strategy": {
+     "text": "(1) ATTACK? Amoonguss most likely uses Spore (standard opener vs a physical attacker it can't KO fast) or Giga Drain. Crawdaunt cannot KO it (Knock Off only 46-55%, then dies to Giga Drain next turn). (2) SWITCH? Unlikely; Amoonguss is comfortable in. (3) THEIR READ OF ME: they know Crawdaunt is a Life Orb physical attacker (Atk-1 from Intimidate) and likely expect me to attack. (4) MY OPTIONS: Switching to Scizor (slot 3) forfeits the turn and eats Amoonguss's move, but Scizor takes near-nothing from Grass (7-8%) and is immune to Poison, only fearing Foul Play 40-48% or Spore. This forces Amoonguss out or lets Scizor set up a Bullet Punch/Knock Off line. Confidence: Spore/Giga Drain branch is the likely one. (5) MOST LIKELY ACTION: Spore → Scizor falls asleep but survives at 92-100%; alternative Giga Drain → Scizor survives at 92-93%. Falsifier: a Dark move (Foul Play) hits Scizor 40-48%. (6) SEQUENCE: I switch to Scizor, Amoonguss acts (Spore/Giga Drain/Sludge Bomb/Foul Play), I end at ~52-100%. Next turn: if awake, Bullet Punch/Knock Off; if asleep, absorb.",
+     "scene": "Scizor (slot 3) active, HP 92-100% (or 52-60% if Foul Play, or asleep if Spore). Crawdaunt benched at 90%. Amoonguss ~100%. No hazards/weather.",
+     "checks": "Verify Amoonguss's move: Spore (Scizor asleep) vs Giga Drain (Scizor ~92%) vs Foul Play (Scizor ~52-60%) — confirm which and its ability (Effect Spore on contact vs Regenerator on switch-out). Verify whether Amoonguss switches out when Scizor is in.",
+     "action": "switch 3",
+     "branch": "Spore",
+     "outcome": "survives"
+    },
+    "rounds": 9,
+    "ms": 18773,
+    "fallback": false,
+    "simCalls": 4,
+    "sims": [
+     {
+      "actionKey": "move Knock Off",
+      "opp_does": [
+       "Spore",
+       "Sludge Bomb",
+       "Giga Drain",
+       "Foul Play"
+      ]
+     },
+     {
+      "actionKey": "move Crabhammer",
+      "opp_does": [
+       "Spore",
+       "Sludge Bomb",
+       "Giga Drain",
+       "Foul Play"
+      ]
+     },
+     {
+      "actionKey": "switch 3",
+      "opp_does": [
+       "Spore",
+       "Giga Drain",
+       "Sludge Bomb",
+       "Foul Play"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 1,
+    "lastWarning": "REMINDER (not blocking) — the branch you declared (Spore) is NOT the worst branch for that action. Worst is \"Foul Play\": Scizor takes 40-48% from Foul Play → 52-60% left  [their spread unassumed: 52-60% @0EV | 52-60% @252+ — see ev_note]  If you are deliberately betting against that branch, say so e",
+    "multMentions": 2,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 1,
+    "declaredAction": "switch 3",
+    "declaredBranch": "Spore",
+    "declaredOutcome": "survives",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 3,
+    "targetName": "Scizor",
+    "worst": {
+     "pctMin": 8,
+     "pctMax": 10,
+     "ko": "not a 9HKO",
+     "move": "Energy Ball",
+     "acc": 100,
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 2,
+   "battleId": "F-063-R2",
+   "ms": 22992,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 3
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Sludge Wave\"} vs [\"Spore\",\"Giga Drain\",\"Sludge Bomb\",\"Clear Smog\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Crabhammer\"} vs [\"Spore\",\"Giga Drain\",\"Sludge Bomb\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":3} vs [\"Spore\",\"Giga Drain\",\"Sludge Bomb\",\"Clear Smog\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":4} vs [\"Spore\",\"Giga Drain\",\"Sludge Bomb\"]"
+     }
+    ],
+    "inbound": [],
+    "outbound": [],
+    "strategy": {
+     "text": "(1) ATTACK? Amoonguss likely Spores (its signature, 100% acc) or Giga Drains/Sludge Bombs. vs Crawdaunt: Giga Drain 95-113% (OHKO risk), Sludge Bomb 57-67%, Spore = sleep. Amoonguss is slow (30 Spe) so I move first, but Sludge Wave only does 26-31% and Crabhammer 36-42% — neither KOs and Regenerator undoes chip. (2) SWITCH? Yes — Amoonguss beats Crawdaunt on status + Giga Drain. (3) THEIR READ OF ME: they expect me to attack or switch to a Spore absorber; Crawdaunt is my wallbreaker they'd like to cripple. (4) MY OPTIONS & COST: Switching to Scizor (slot 3) — cost: forfeit turn, Scizor eats the hit. Gain: Scizor is IMMUNE to Sludge Bomb/Clear Smog (Poison 0x) and takes only 7-8% from Giga Drain (Grass 0.25x) — a hard wall to Amoonguss's whole STAB set. Only risk is Spore (sleeps Scizor), but Amoonguss then can barely scratch it (max 7-8%), so the sleep costs me nothing defensively and Scizor is my safest pivot. Hatterene (Magic Bounce, would reflect Spore) takes 52-62% from Sludge Bomb — too risky. Confident because Scizor's type matchup is near-total. Not behind — this is the steady line. (5) MOST LIKELY: Amoonguss Spores Scizor (or Giga Drains). Reply: on next turn U-turn out or Bullet Punch / Knock Off. Falsifier: Amoonguss uses a coverage move that chunks Scizor (none expected — only Foul Play 40-48% max, unusual). (6) SEQUENCE: I switch Scizor in → Amoonguss acts (Spore sleep or Giga Drain 7-8%) → my next decision turn: Scizor at 92-100% (or asleep).",
+     "scene": "Scizor in at ~92-100% (or asleep from Spore), Amoonguss ~100% (Regenerator/Leftovers later). Crawdaunt benched at 90%. No hazards either side.",
+     "checks": "Verify Amoonguss's move on the Scizor switch-in: if Spore → confirm Scizor sleeps but takes ~0; if Giga Drain → confirm it only does ~7-8% (Grass resisted). Refute if it uses a strong unexpected coverage move. Track whether Amoonguss stays in or switches (Regenerator would reveal on switch-out).",
+     "action": "switch 3",
+     "branch": "Sludge Bomb",
+     "outcome": "100%"
+    },
+    "rounds": 11,
+    "ms": 22803,
+    "fallback": false,
+    "simCalls": 4,
+    "sims": [
+     {
+      "actionKey": "move Sludge Wave",
+      "opp_does": [
+       "Spore",
+       "Giga Drain",
+       "Sludge Bomb",
+       "Clear Smog"
+      ]
+     },
+     {
+      "actionKey": "move Crabhammer",
+      "opp_does": [
+       "Spore",
+       "Giga Drain",
+       "Sludge Bomb"
+      ]
+     },
+     {
+      "actionKey": "switch 3",
+      "opp_does": [
+       "Spore",
+       "Giga Drain",
+       "Sludge Bomb",
+       "Clear Smog"
+      ]
+     },
+     {
+      "actionKey": "switch 4",
+      "opp_does": [
+       "Spore",
+       "Giga Drain",
+       "Sludge Bomb"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 1,
+    "lastWarning": "REMINDER (not blocking) — the branch you declared (Sludge Bomb) is NOT the worst branch for that action. Worst is \"Giga Drain\": Scizor takes 7-8% from Giga Drain → 92-93% left  If you are deliberately betting against that branch, say so explicitly in `text` (which branch you are betting against, and",
+    "multMentions": 2,
+    "assumeConflicts": [
+     "inconsistent assumptions for Amoonguss within one turn: an earlier simulate_turn used {\"opp_spread\":\"252 HP / 168 Def / 88 SpD Relaxed\"} (from move Sludge Wave), this one uses {\"opp_spread\":\"252 HP / 168 Def / 88 SpD Relaxed\",\"opp_spread_off\":\"0 SpA\"}. Options evaluated under different assumptions are not comparable — re-run them all with ONE shared assumption set.",
+     "inconsistent assumptions for Amoonguss within one turn: an earlier simulate_turn used {\"opp_spread\":\"252 HP / 168 Def / 88 SpD Relaxed\"} (from move Sludge Wave), this one uses {\"opp_spread\":\"252 HP / 168 Def / 88 SpD Relaxed\",\"opp_spread_off\":\"0 SpA\"}. Options evaluated under different assumptions are not comparable — re-run them all with ONE shared assumption set."
+    ],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 2,
+    "declaredAction": "switch 3",
+    "declaredBranch": "Sludge Bomb",
+    "declaredOutcome": "100%",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 3,
+    "targetName": "Scizor",
+    "worst": {
+     "pctMin": 8,
+     "pctMax": 10,
+     "ko": "not a 9HKO",
+     "move": "Energy Ball",
+     "acc": 100,
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 3,
+   "battleId": "F-063-R3",
+   "ms": 22454,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 3
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Knock Off\"} vs [\"Spore\",\"Giga Drain\",\"Sludge Bomb\",\"Foul Play\"]"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Knock Off"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Crabhammer"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":4} vs [\"Spore\",\"Giga Drain\",\"Sludge Bomb\",\"Foul Play\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":3} vs [\"Spore\",\"Giga Drain\",\"Sludge Bomb\",\"Foul Play\"]"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:3 -> opp : Knock Off"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:3 -> opp : U-turn"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:3 -> opp : Bullet Punch"
+     }
+    ],
+    "inbound": [],
+    "outbound": [
+     "me -> opp : Knock Off",
+     "me -> opp : Crabhammer",
+     "me:3 -> opp : Knock Off",
+     "me:3 -> opp : U-turn",
+     "me:3 -> opp : Bullet Punch"
+    ],
+    "strategy": {
+     "text": "Betting against Foul Play (uncommon on Amoonguss, and if it comes Scizor still survives at 52-60%). Scizor switch is a hard counter to Amoonguss.",
+     "scene": "Scizor in vs Amoonguss, low damage taken.",
+     "checks": "Confirm Amoonguss move and Scizor's ability to 2HKO next turn.",
+     "action": "switch 3",
+     "branch": "Giga Drain",
+     "outcome": "92-93%"
+    },
+    "rounds": 9,
+    "ms": 22269,
+    "fallback": false,
+    "simCalls": 3,
+    "sims": [
+     {
+      "actionKey": "move Knock Off",
+      "opp_does": [
+       "Spore",
+       "Giga Drain",
+       "Sludge Bomb",
+       "Foul Play"
+      ]
+     },
+     {
+      "actionKey": "switch 4",
+      "opp_does": [
+       "Spore",
+       "Giga Drain",
+       "Sludge Bomb",
+       "Foul Play"
+      ]
+     },
+     {
+      "actionKey": "switch 3",
+      "opp_does": [
+       "Spore",
+       "Giga Drain",
+       "Sludge Bomb",
+       "Foul Play"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 2,
+    "lastWarning": "REMINDER (not blocking) — the branch you declared (Giga Drain) is NOT the worst branch for that action. Worst is \"Foul Play\": Scizor takes 40-48% from Foul Play → 52-60% left  [their spread unassumed: 52-60% @0EV | 52-60% @252+ — see ev_note]  If you are deliberately betting against that branch, say",
+    "multMentions": 0,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "switch 3",
+    "declaredBranch": "Giga Drain",
+    "declaredOutcome": "92-93%",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 3,
+    "targetName": "Scizor",
+    "worst": {
+     "pctMin": 8,
+     "pctMax": 10,
+     "ko": "not a 9HKO",
+     "move": "Energy Ball",
+     "acc": 100,
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 4,
+   "battleId": "F-063-R4",
+   "ms": 19549,
+   "action": {
+    "type": "attack",
+    "attackSlot": 1
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Knock Off"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Sludge Wave"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me : Giga Drain"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me : Sludge Bomb"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Knock Off\"} vs [\"Spore\",\"Giga Drain\",\"Sludge Bomb\",\"Synthesis\"]"
+     }
+    ],
+    "inbound": [
+     "opp -> me : Giga Drain",
+     "opp -> me : Sludge Bomb"
+    ],
+    "outbound": [
+     "me -> opp : Knock Off",
+     "me -> opp : Sludge Wave"
+    ],
+    "strategy": {
+     "text": "(1) ATTACK? Amoonguss almost certainly attacks or uses Spore. Candidates: Giga Drain (2x on Crawdaunt's Water — KOes), Sludge Bomb (57-67%), Spore (sleep). Most likely it clicks Giga Drain or Spore given it's facing a Water/Dark wallbreaker. Confidence moderate; no moves revealed yet so its set is unknown. Note: Crawdaunt outspeeds (209 vs Amoonguss ~86-174).\n(2) SWITCH? Unlikely — Amoonguss at 100% vs a low-HP Crawdaunt; it will just act.\n(3) THEIR READ OF ME: They saw Crawdaunt kill Gyarados with Knock Off and know it's a strong Dark wallbreaker; they may expect me to switch out of the Grass weakness.\n(4) MY OPTIONS: Knock Off does 69-81% if Amoonguss holds an item (realistic — Leftovers/Black Sludge), removing it and putting Amoonguss near KO. If it Gigas, Crawdaunt faints but Amoonguss is at ~25%. Switching to Scizor (4x Grass resist, Poison immune) is the defensive option but Spore still lands on it and Scizor does little back. I'll take the aggressive Knock Off.\n(5) MOST LIKELY ACTION: Giga Drain (KO) or Spore. My response: Knock Off first (I outspeed). Falsified if Amoonguss shows a move I don't expect.\n(6) If Giga Drain → Crawdaunt faints, Amoonguss ~25%, I bring in Scizor who walls it. If Spore → Crawdaunt asleep, Amoonguss item knock off'd and low; I switch to Scizor.",
+     "scene": "Crawdaunt (may be KO'd by Giga Drain or asleep from Spore) vs Amoonguss at ~25-45% (item removed, or slept itself). If Crawdaunt faints I bring in Scizor.",
+     "checks": "1) Verify Amoonguss's real moves on its next click (Spore confirmed? Giga Drain? Sludge Bomb?). 2) Verify whether Knock Off removed an item (Leftovers/Black Sludge healing gone). 3) Confirm whether Amoonguss outspeeds or not (it should not, base 30 Spe). 4) Check Amoonguss's ability via Regenerator on switch-out or Effect Spore on contact.",
+     "action": "move Knock Off",
+     "branch": "Giga Drain",
+     "outcome": "faints"
+    },
+    "rounds": 6,
+    "ms": 19368,
+    "fallback": false,
+    "simCalls": 1,
+    "sims": [
+     {
+      "actionKey": "move Knock Off",
+      "opp_does": [
+       "Spore",
+       "Giga Drain",
+       "Sludge Bomb",
+       "Synthesis"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 1,
+    "lastWarning": "WARNING (not blocking) — your `text` asserts a type-multiplier (Poison: \"~25%. Switching to Scizor (4x Grass resist, Poison immune) is the defe\" | Water: \"e. Candidates: Giga Drain (2x on Crawdaunt's Water — KOes), Sludge Bom\" | Grass: \"moonguss is at ~25%. Switching to Scizor (4x Grass resist, Pois",
+    "multMentions": 3,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "move Knock Off",
+    "declaredBranch": "Giga Drain",
+    "declaredOutcome": "faints",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "LETHAL",
+    "targetSlot": 0,
+    "targetName": "Crawdaunt",
+    "worst": {
+     "pctMin": 114,
+     "pctMax": 134,
+     "ko": "guaranteed OHKO",
+     "move": "Energy Ball",
+     "acc": 100,
+     "error": null
+    },
+    "isSwitch": false
+   }
+  },
+  {
+   "i": 5,
+   "battleId": "F-063-R5",
+   "ms": 15741,
+   "action": {
+    "type": "attack",
+    "attackSlot": 1
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Knock Off"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Sludge Wave"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Crabhammer"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Knock Off\"} vs [\"Spore\",\"Sludge Bomb\",\"Giga Drain\",\"Toxic\",\"switch1\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":5} vs [\"Giga Drain\",\"Spore\",\"Sludge Bomb\",\"Toxic\"]"
+     }
+    ],
+    "inbound": [],
+    "outbound": [
+     "me -> opp : Knock Off",
+     "me -> opp : Sludge Wave",
+     "me -> opp : Crabhammer"
+    ],
+    "strategy": {
+     "text": "(1) ATTACK? Yes — Amoonguss will most likely attack. Candidates: Giga Drain (OHKOs Crawdaunt 95-113%), Spore (neutralizes Crawdaunt), Sludge Bomb (57-67%), Toxic. Expect Spore or Giga Drain; Amoonguss is slow so Crawdaunt acts first regardless. (2) SWITCH? Unlikely — Amoonguss is a slow utility mon that wants to stay and Spore. (3) THEIR READ: they see Crawdaunt (killed their Gyarados, Life Orb, Atk-1) as a dangerous-but-frail wallbreaker; they'll try to Spore it or Giga Drain it out. (4) MY OPTIONS: Staying + Knock Off deals 69-81% (with item) + strips its item — the best value and Crawdaunt is nearly spent anyway (survived only to chunk). Switching to Politoed forfeits the turn and only eats a 36-43% Giga Drain / risks Spore for no gain — strictly worse. Not behind; this is a fine trade. (5) MOST LIKELY ACTION: Spore or Giga Drain → my reply is Knock Off; falsified if Amoonguss switches or uses something unexpected like Growth. (6) SEQUENCE: Crawdaunt Knock Off first (fast), Amoonguss likely survives at ~20-30% and either Spores Crawdaunt or Giga Drains it. If Giga Drain, Crawdaunt faints but Amoonguss is heavily damaged + itemless. If Spore, Crawdaunt sleeps but Amoonguss is chunked.",
+     "scene": "Crawdaunt 90%→likely asleep or fainted after eating Amoonguss's move; Amoonguss ~20-45% (46-81% taken) and itemless if it survived Spore/attack. If Crawdaunt fainted, I pick a replacement next turn. Weather none, no hazards.",
+     "checks": "Verify Amoonguss's item was actually knocked off (log \"Amoonguss lost its item\") — confirms it held one. Verify which move Amoonguss used (Spore vs Giga Drain vs Sludge Bomb) to refine its set. Confirm Knock Off damage falls in 46-81% band.",
+     "action": "move Knock Off",
+     "branch": "Spore",
+     "outcome": "90-90%"
+    },
+    "rounds": 6,
+    "ms": 15515,
+    "fallback": false,
+    "simCalls": 2,
+    "sims": [
+     {
+      "actionKey": "move Knock Off",
+      "opp_does": [
+       "Spore",
+       "Sludge Bomb",
+       "Giga Drain",
+       "Toxic",
+       "switch 1"
+      ]
+     },
+     {
+      "actionKey": "switch 5",
+      "opp_does": [
+       "Giga Drain",
+       "Spore",
+       "Sludge Bomb",
+       "Toxic"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 1,
+    "lastWarning": "REMINDER (not blocking) — the branch you declared (Spore) is NOT the worst branch for that action. Worst is \"Giga Drain\": you first → Crawdaunt: 46-55% out, 95-113% in → -23--5% left  [their spread unassumed: -23--5% @0EV | -70--45% @252+ — see ev_note]  If you are deliberately betting against that ",
+    "multMentions": 0,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "move Knock Off",
+    "declaredBranch": "Spore",
+    "declaredOutcome": "90-90%",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "LETHAL",
+    "targetSlot": 0,
+    "targetName": "Crawdaunt",
+    "worst": {
+     "pctMin": 114,
+     "pctMax": 134,
+     "ko": "guaranteed OHKO",
+     "move": "Energy Ball",
+     "acc": 100,
+     "error": null
+    },
+    "isSwitch": false
+   }
+  }
+ ]
+}
