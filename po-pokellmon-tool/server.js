@@ -65,7 +65,7 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.6.0';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
+var SERVER_VERSION = '0.6.1';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
 
 // ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
 // 对战主脑用 v4-pro（闭卷深想强，决策更深）；一键回 flash：POKELLMON_MODEL=deepseek-v4-flash
@@ -180,12 +180,26 @@ function callDeepSeek(messages, noThink, cb, opts) {
     }, function (res) {
         var data = '';
         res.on('data', function (c) { data += c; });
-        res.on('end', function () { cb(null, res.statusCode, data); });
+        res.on('end', function () { done(null, res.statusCode, data); });
+        res.on('error', function (e) { done(e); });
     });
+    // ⚠ req.setTimeout 是**空闲超时**（socket idle），不是墙钟上限：连接上只要有零星保活/分块流量，
+    // 它就永远不触发（实测 2026-09-20 battle98 T11：一个请求挂了 564s 仍未掐，PO 侧同步 webCall 一直卡着，
+    // 面板停在「实时 503s 思考中」）。所以必须再压一个**硬墙钟 deadline**，并保证回调只发生一次。
+    var settled = false;
+    function done(err, code, d) {
+        if (settled) return;
+        settled = true;
+        clearTimeout(hardTimer);
+        cb(err, code, d);
+    }
+    var hardTimer = setTimeout(function () {
+        req.destroy(new Error('deepseek hard timeout (' + TIMEOUT_MS + 'ms wall clock)'));
+    }, TIMEOUT_MS);
     req.setTimeout(TIMEOUT_MS, function () {
-        req.destroy(new Error('deepseek timeout'));
+        req.destroy(new Error('deepseek idle timeout'));
     });
-    req.on('error', function (e) { cb(e); });
+    req.on('error', function (e) { done(e); });
     req.write(payload);
     req.end();
 }
