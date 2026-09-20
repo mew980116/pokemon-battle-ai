@@ -107,7 +107,7 @@ function extractProcess(entry, state) {
     if (!entry) return { calcs: [], inbound: [], outbound: [], strategy: null };
     const myNames = (state.myTeam || []).map(t => t.name);
     const calcs = [], inbound = [], outbound = [];
-    let strategy = null;
+    let strategy = null, simCalls = 0, strategyRejections = 0;
     (entry.toolLog || []).forEach(r => {
         (r.calls || []).forEach(c => {
             if (c.name === 'calc_damage') {
@@ -120,12 +120,31 @@ function extractProcess(entry, state) {
                 });
             } else if (c.name === 'calc_stats') {
                 calcs.push({ side: 'STATS', label: (c.args.legs || []).map(x => (x.poke || '?') + ' spe').join(',') });
+            } else if (c.name === 'simulate_turn') {
+                simCalls++;
+                calcs.push({ side: 'SIM', label: JSON.stringify(c.args.i_do) + ' vs ' + JSON.stringify((c.args.opp_does || []).map(b => b.move || ('switch' + b.switch))) });
             } else if (c.name === 'save_strategy') {
-                strategy = c.args;
+                if (c.result && c.result.error) strategyRejections++;
+                else strategy = c.args;
+            } else if (c.name === 'predict') {
+                calcs.push({ side: 'PREDICT', label: '' });
             }
         });
     });
-    return { calcs, inbound, outbound, strategy, rounds: entry.rounds, ms: entry.totalMs, fallback: !!(entry.action && entry.action.fallback), reason: entry.action && entry.action.reason };
+    const led = entry.ledger || { sims: [] };
+    const sims = (led.sims || []).map(s => ({ actionKey: s.actionKey, opp_does: s.opp_does }));
+    const txt = (strategy && strategy.text) || '';
+    // 「以对手行为作为理由」的粗略计数（用于观察防幻觉是否逼出新的行为幻觉）
+    const behaviorHits = (txt.match(/they (?:will |would |likely |probably )?(?:switch|u-?turn|pivot|roost)/gi) || []).length +
+        (txt.match(/(?:it|they|opponent)[^.]{0,40}(?:won'?t|will not|unlikely to) (?:click|use|attack)/gi) || []).length;
+    return {
+        calcs, inbound, outbound, strategy, rounds: entry.rounds, ms: entry.totalMs,
+        fallback: !!(entry.action && entry.action.fallback), reason: entry.action && entry.action.reason,
+        simCalls, sims, strategyRejections,
+        gateUnmet: !!entry.gateUnmet, gateBypassed: !!entry.gateBypassed, gateRejections: led.rejections || 0,
+        declaredAction: strategy && strategy.action, declaredBranch: strategy && strategy.branch, declaredOutcome: strategy && strategy.outcome,
+        behaviorHits
+    };
 }
 
 // ---------- 采样 ----------
@@ -169,33 +188,51 @@ async function run() {
         console.log('R' + String(r.i).padStart(2, ' ') + ' | ' + act.padEnd(30, ' ') +
             ' | r=' + String(r.proc.rounds === undefined ? '?' : r.proc.rounds).padStart(2, ' ') +
             ' ' + Math.round(r.ms / 1000) + 's' +
-            ' | inbound验算=' + r.proc.inbound.length +
-            ' | 最坏承伤 ' + (v.worst ? (v.worst.move + ' ' + v.worst.pctMin + '-' + v.worst.pctMax + '%') : '-') +
+            ' | inbound=' + r.proc.inbound.length +
+            ' sims=' + (r.proc.simCalls || 0) +
+            ' | 最坏 ' + (v.worst ? (v.worst.move + ' ' + v.worst.pctMin + '-' + v.worst.pctMax + '%') : '-') +
             ' | ' + v.verdict + (r.proc.fallback ? ' [FALLBACK ' + r.proc.reason + ']' : ''));
+        const simList = (r.proc.sims || []).map(s => s.actionKey + '⟵[' + (s.opp_does || []).join(',') + ']').join(' ; ');
+        console.log('      sims: ' + (simList || '(none)') +
+            ' | 声明=' + (r.proc.declaredAction || '-') + ' / ' + (r.proc.declaredBranch || '-') + ' → ' + (r.proc.declaredOutcome || '-') +
+            ' | strategy拒=' + (r.proc.strategyRejections || 0) + ' gate打回=' + (r.proc.gateRejections || 0) +
+            (r.proc.gateUnmet ? ' gateUnmet' : '') + (r.proc.gateBypassed ? ' gateBypassed' : '') +
+            ' | 行为理由=' + (r.proc.behaviorHits || 0));
     });
 
     // 汇总
     const byAction = {}, byVerdict = {};
-    let inboundTotal = 0;
+    let inboundTotal = 0, simCalls = 0, branchTotal = 0, stratRej = 0, gateRej = 0, unmet = 0, bypassed = 0, misfits = 0, behTotal = 0;
     samples.forEach(r => {
         const v = r.verdict;
         const key = r.err ? 'ERROR' : (r.action.type === 'switch' ? ('SWITCH→' + v.targetName) : 'ATK(stay)');
         byAction[key] = (byAction[key] || 0) + 1;
         byVerdict[v.verdict] = (byVerdict[v.verdict] || 0) + 1;
         inboundTotal += r.proc.inbound.length;
+        simCalls += (r.proc.simCalls || 0);
+        (r.proc.sims || []).forEach(s => { branchTotal += (s.opp_does || []).length; });
+        stratRej += (r.proc.strategyRejections || 0);
+        gateRej += (r.proc.gateRejections || 0);
+        if (r.proc.gateUnmet) unmet++;
+        if (r.proc.gateBypassed) bypassed++;
+        behTotal += (r.proc.behaviorHits || 0);
+        if (r.proc.declaredOutcome && /faint|die|ko|倒下|送/i.test(r.proc.declaredOutcome)) misfits++;
     });
     const nOk = samples.filter(r => !r.err).length;
     console.log('\n===== ' + opts.arm + ' 汇总 (n=' + nOk + '/' + samples.length + ') =====');
     console.log('动作分布:  ' + Object.keys(byAction).map(k => k + ' ×' + byAction[k]).join('   '));
     console.log('风险分布:  ' + Object.keys(byVerdict).map(k => k + ' ×' + byVerdict[k]).join('   '));
-    console.log('inbound 验算: 合计 ' + inboundTotal + ' 次，均值 ' + (inboundTotal / Math.max(1, nOk)).toFixed(2) + ' / 样本');
+    console.log('inbound 验算: 合计 ' + inboundTotal + '，均值 ' + (inboundTotal / Math.max(1, nOk)).toFixed(2) + ' / 样本');
+    console.log('simulate_turn: 调用 ' + simCalls + ' 次（均值 ' + (simCalls / Math.max(1, nOk)).toFixed(2) + '/样本），枚举分支合计 ' + branchTotal);
+    console.log('闸门摩擦: strategy 被拒 ' + stratRej + ' 次，最终答案被拒 ' + gateRej + ' 次，gateUnmet ' + unmet + '，gateBypassed ' + bypassed);
+    console.log('如实写 faints（承认牺牲/赌）: ' + misfits + '/' + nOk + '；「以对手行为为理由」计数合计 ' + behTotal);
     const acc = samples.filter(r => !r.err && r.action && r.action.type === 'switch' && r.action.pokeSlot === F.accidentSlot).length;
     console.log('事故决策(' + (baseState.myTeam[F.accidentSlot] || {}).name + '): ' + acc + '/' + nOk + ' = ' + (100 * acc / Math.max(1, nOk)).toFixed(0) + '%');
 
     if (!fs.existsSync(opts.out)) fs.mkdirSync(opts.out, { recursive: true });
     const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
     const outFile = path.join(opts.out, opts.arm + '-' + F.name + '-' + stamp + '.json');
-    fs.writeFileSync(outFile, JSON.stringify({ fixture: F.name, arm: opts.arm, url: opts.url, n: opts.n, when: stamp, summary: { byAction: byAction, byVerdict: byVerdict, inboundTotal: inboundTotal, accident: acc, nOk: nOk }, samples: samples }, null, 1));
+    fs.writeFileSync(outFile, JSON.stringify({ fixture: F.name, arm: opts.arm, url: opts.url, n: opts.n, when: stamp, summary: { byAction: byAction, byVerdict: byVerdict, inboundTotal: inboundTotal, simCalls: simCalls, branchTotal: branchTotal, strategyRejections: stratRej, gateRejections: gateRej, gateUnmet: unmet, gateBypassed: bypassed, honestFaints: misfits, behaviorHits: behTotal, accident: acc, nOk: nOk }, samples: samples }, null, 1));
     console.log('明细(含 strategy 原文): ' + outFile);
 }
 

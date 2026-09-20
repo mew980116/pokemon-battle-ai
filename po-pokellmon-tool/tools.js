@@ -128,7 +128,10 @@ var TOOL_DEFS = [
                 properties: {
                     text: { type: 'string', description: 'Labeled lines (1)-(6) as described — or the (R1)-(R3) replacement template when picking a replacement. Not carried over to later turns.' },
                     scene: { type: 'string', description: 'The board you EXPECT at your next decision: both HP ranges, who is fainted, key item/ability/boost/hazard/weather state. Carried into your next prompt and compared with reality.' },
-                    checks: { type: 'string', description: 'Assumptions your later turns must verify against the battle log, written as tests (e.g. "verify X hits harder than I assumed, refuted if <40%"; "check whether X is really faster"). The most recent TWO turns\' checks are merged into later prompts; drop ones already resolved.' }
+                    checks: { type: 'string', description: 'Assumptions your later turns must verify against the battle log, written as tests (e.g. "verify X hits harder than I assumed, refuted if <40%"; "check whether X is really faster"). The most recent TWO turns\' checks are merged into later prompts; drop ones already resolved.' },
+                    action: { type: 'string', description: 'The action this plan commits to, in the same form simulate_turn takes: "move Thunderbolt" or "switch 3". Must match an i_do you already simulated.' },
+                    branch: { type: 'string', description: 'Which opponent branch your plan is playing around: "Hydro Pump" / "switch 2" — one of the opp_does entries you simulated.' },
+                    outcome: { type: 'string', description: 'What happens to the pokemon YOUR action puts on the field, under that branch: "survives" / "faints" / "<a-b>%" (its remaining HP or the damage it takes). This is checked against the simulation, so state it honestly — a sacrifice play is fine as long as you write "faints".' }
                 },
                 required: ['text', 'scene', 'checks']
             }
@@ -160,6 +163,22 @@ var TOOL_DEFS = [
                     }
                 },
                 required: ['claims']
+            }
+        }
+    },
+    {
+        type: 'function',
+        function: {
+            name: 'simulate_turn',
+            description: 'Simulate THIS turn for the branches YOU name: give your action and one or more candidate opponent actions, and get back what the engine computes for each branch (who acts first, damage both ways, resulting HP, who faints) plus an explicit list of what it could NOT know. Use it BEFORE you commit: save_strategy checks your stated outcome against this table, so a number you did not simulate is a number you cannot use. It only projects the current turn from the live board — for later turns, state assumptions in `assume`. The branch list is yours to provide: this tool never guesses what the opponent carries, and it never ranks your options.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    i_do: { type: 'object', description: 'Your action: {"move":"Thunderbolt"} or {"switch":3} (your team slot, 0 = active).' },
+                    opp_does: { type: 'array', description: 'Up to 8 candidate opponent actions for this turn: [{"move":"Hydro Pump"},{"switch":2}, ...] — list every branch you are relying on.', items: { type: 'object' } },
+                    assume: { type: 'object', description: 'Assumptions the state does not know, e.g. {"opp_spread":"252 HP / 0 SpD"} or {"opp_spread_off":"Modest 252 SpA"} — they are reported back so a wrong assumption is visible, not silent.' }
+                },
+                required: ['i_do', 'opp_does']
             }
         }
     },
@@ -537,7 +556,7 @@ function saveObservation(args, ctx) {
 // ===== 预测账本（门禁 Rule 1 + Rule 4）=====
 // 只做两件事：① 强制「你写下的预测必须被工具裁决过」（Rule 1）；② 裁决结果必须与你的预测一致（Rule 4，数字不能编）。
 // 明确不做：不判断决策好坏、不判断该不该赌、不建「对手可能带什么招」的表 —— 只查「你说的」与「你算的」是否自洽。
-function newLedger() { return { claims: {}, order: [] }; }
+function newLedger() { return { claims: {}, order: [], sims: [], rejections: 0 }; }
 
 function registerClaims(args, ctx) {
     var led = ctx && ctx.ledger;
@@ -708,21 +727,326 @@ function actionGateCheck(ledger, action) {
     return null;
 }
 
+// ===== simulate_turn：单回合分支仿真（幻觉门禁的执行体）=====
+// 设计边界（与用户 2026-09-20 讨论确定）：
+//   1) 分支由 LLM 指名（i_do / opp_does），服务端只负责算 —— 不建「对手可能带什么招」的表，也不排序/选最优
+//   2) 只做「本回合」投影；引用当前实物（from_state）时，系统已知的（我方能力值、天气、场地）以 state 为准
+//   3) 必须显式列出 unknown（未暴露的道具/特性、未知 EV、残余伤害、陷阱……）—— 只报算得了的，不假装精确
+//   4) 合法性只做 soft check：学习面外 → 提示「可能是伪装 / 误读」（保留 Illusion / Ditto 的可能），不硬拒
+function sideSpec(s) {
+    if (!s || typeof s !== 'object') return { error: 'must be {"move":"X"} or {"switch":<slot>}' };
+    var hasMv = (s.move !== undefined && s.move !== null);
+    var hasSw = (s.switch !== undefined && s.switch !== null);
+    if (hasMv && hasSw) return { error: 'give only one of "move" / "switch"' };
+    if (hasMv) return { kind: 'move', move: String(s.move) };
+    if (hasSw) {
+        var n = Number(s.switch);
+        if (isNaN(n)) return { error: '"switch" must be a team slot number' };
+        return { kind: 'switch', slot: n };
+    }
+    return { error: 'needs either "move" or "switch"' };
+}
+function actionKey(spec) { return spec.kind === 'move' ? ('move ' + spec.move) : ('switch ' + spec.slot); }
+function branchKey(spec) { return spec.kind === 'move' ? spec.move : ('switch ' + spec.slot); }
+
+function slotName(team, slot) {
+    for (var i = 0; i < (team || []).length; i++) {
+        if (team[i] && Number(team[i].slot) === Number(slot)) return team[i].name || null;
+    }
+    return null;
+}
+function slotEntry(team, slot) {
+    for (var i = 0; i < (team || []).length; i++) {
+        if (team[i] && Number(team[i].slot) === Number(slot)) return team[i];
+    }
+    return null;
+}
+// 我方某槽位的已知能力值（state.myStats）与道具名（state.me / state.bench）—— 系统已知，以 state 为准
+function myStatOf(state, slot) {
+    var arr = (state && state.myStats) || [];
+    for (var i = 0; i < arr.length; i++) if (Number(arr[i].slot) === Number(slot)) return arr[i];
+    return null;
+}
+function myItemOf(state, slot) {
+    if (Number(slot) === 0) return (state.me || {}).item || null;
+    var b = slotEntry(state.bench, slot);
+    return (b && b.item) || null;
+}
+// 对手速度只能用区间（EV/性格未知）：0IV/0EV/降性格 ~ 31IV/252EV/升性格
+function oppSpeedRange(pokeName) {
+    var r = resolvePokemonInput({ poke: pokeName });
+    if (!r || r.error || !r.baseStats) return null;
+    var bs = r.baseStats;
+    var base = Array.isArray(bs) ? bs[5] : (bs && bs.spe);
+    if (base === undefined || base === null) return null;
+    return { min: Math.floor((2 * base + 5) * 0.9), max: Math.floor((2 * base + 31 + 63 + 5) * 1.1) };
+}
+function movePriorityByName(name) {
+    var rm = resolveMoveInput({ name: name });
+    if (!rm || rm.error || rm.num === undefined || rm.num === null) return 0;
+    var rec = MOVES[String(rm.num)] || (MOVES.byNum ? MOVES.byNum[String(rm.num)] : null) || {};
+    return Number(rec.priority || 0);
+}
+function applyFromStateSpec(state, who, slot, extra) {
+    var spec = { from_state: who + (slot === null ? '' : ':' + slot) };
+    for (var k in (extra || {})) spec[k] = extra[k];
+    return spec;
+}
+function simLeg(state, atkSpec, defSpec, moveName) {
+    var r = calcOneLeg({ attacker: atkSpec, defender: defSpec, move: { name: moveName } }, 0, { state: state });
+    if (!r || r.percent_max === undefined) return { error: (r && r.error) || 'calc failed' };
+    return r;
+}
+
+function simulateTurn(args, ctx) {
+    var state = ctx && ctx.state;
+    if (!state) return { error: 'no state' };
+    var mine = sideSpec(args.i_do);
+    if (mine.error) return { error: 'i_do: ' + mine.error };
+    if (mine.kind === 'switch' && Number(mine.slot) === 0) return { error: 'i_do switch 0 is the pokemon already on the field' };
+    var opps = args.opp_does;
+    if (!opps || !opps.length) return { error: 'opp_does needs at least one branch (the actions you are playing around)' };
+    if (opps.length > 8) return { error: 'at most 8 branches, got ' + opps.length };
+    var branches = [];
+    for (var b = 0; b < opps.length; b++) {
+        var sp = sideSpec(opps[b]);
+        if (sp.error) return { error: 'opp_does[' + b + ']: ' + sp.error };
+        sp.key = branchKey(sp);
+        branches.push(sp);
+    }
+
+    var myTeam = state.myTeam || [];
+    var oppTeam = state.oppTeam || [];
+    var opp = state.opp || {};
+    var oppActive = opp.name || null;
+    var iSwitch = (mine.kind === 'switch');
+    var mySlot = iSwitch ? Number(mine.slot) : 0;
+    var myName = iSwitch ? (slotName(myTeam, mySlot) || ('slot ' + mySlot)) : (myTeam[0] && myTeam[0].name) || oppActive;
+    if (iSwitch && !slotName(myTeam, mySlot)) return { error: 'i_do: my team has no slot ' + mySlot };
+    var myHpPct = (function () {
+        if (!iSwitch) { var m = slotEntry(myTeam, 0); return m && m.hpPct !== undefined && m.hpPct !== null ? m.hpPct : 100; }
+        var b2 = slotEntry(state.bench, mySlot);
+        return b2 && b2.hpPct !== undefined && b2.hpPct !== null ? b2.hpPct : 100;
+    })();
+
+    var out = {
+        my_action: actionKey(mine),
+        my_pokemon_on_field_after: myName,
+        board: 'weather=' + (state.weather || 'None') + ' terrain=' + (state.terrain || 'None') +
+            ' myHazards=' + JSON.stringify(state.myHazards || []) + ' oppHazards=' + JSON.stringify(state.oppHazards || []),
+        rows: []
+    };
+
+    for (var k = 0; k < branches.length; k++) {
+        var br = branches[k];
+        var row = { opp: br.key, branchKey: br.key, legal: 'ok', order: '', mine: null, theirs: null, unknown: [], note: '' };
+
+        // ---- 合法性：对手侧 ----
+        if (br.kind === 'switch') {
+            var te = slotEntry(oppTeam, br.slot);
+            if (!te || !te.name || te.revealed === false) { row.legal = 'NOT possible — opponent slot ' + br.slot + ' has not been revealed'; }
+            else if (te.ko) { row.legal = 'NOT possible — ' + te.name + ' is fainted'; }
+            else if (oppActive && te.name === oppActive) { row.legal = 'NOT possible — ' + te.name + ' is already on the field'; }
+        } else {
+            var rm = resolveMoveInput({ name: br.move });
+            if (rm.error) row.legal = 'unknown move name — ' + br.move;
+            else if (oppActive) {
+                var gi = getPokemonInfo({ pokemon: oppActive, moves: [rm.name] });
+                var chk = (gi && gi.checks && gi.checks[0]) || null;
+                if (chk && chk.can_learn === false) {
+                    row.legal = 'NOT in ' + oppActive + '\'s movepool';
+                    row.note = 'A move outside the movepool does not mean "illegal branch" — it means the species is misread OR this is a disguise (Zoroark/Illusion) or a copied move (Ditto/Transform/Mimic). Re-read the log before relying on this branch.';
+                }
+            }
+        }
+        // 受招式合法性：i_do 是 move 时，确认自己这只学得到
+        if (mine.kind === 'move') {
+            var myRm = resolveMoveInput({ name: mine.move });
+            if (myRm.error) return { error: 'i_do move not found: ' + mine.move };
+        }
+
+        var oppAfterName = oppActive;
+        if (br.kind === 'switch') oppAfterName = slotName(oppTeam, br.slot) || oppActive;
+
+        // ---- 出手顺序：PO 的换人阶段先于出招阶段 ----
+        if (iSwitch || br.kind === 'switch') {
+            if (iSwitch && br.kind === 'switch') row.order = 'both switch (switch phase): no damage either way this turn';
+            else if (iSwitch) row.order = 'you switch first (switch phase), then they act — your switch-in eats the hit';
+            else row.order = 'they switch first (switch phase), then your move lands on the pokemon they bring in';
+        } else {
+            var myPrio = movePriorityByName(mine.move), theirPrio = movePriorityByName(br.move);
+            var myStat = myStatOf(state, 0);
+            var mySpe = myStat && myStat.stats ? myStat.stats.spe : null;
+            var scarfMine = String(myItemOf(state, 0) || '').toLowerCase().indexOf('choice scarf') >= 0;
+            if (mySpe && scarfMine) mySpe = Math.floor(mySpe * 1.5);
+            var osr = oppSpeedRange(oppActive);
+            if (myPrio !== theirPrio) {
+                row.order = (myPrio > theirPrio ? 'you move first (priority ' + myPrio + ' vs ' + theirPrio + ')' : 'they move first (priority ' + theirPrio + ' vs ' + myPrio + ')');
+            } else if (mySpe && osr) {
+                if (mySpe > osr.max) row.order = 'you move first (your spe ' + mySpe + ' vs their ' + osr.min + '-' + osr.max + ')';
+                else if (mySpe < osr.min) row.order = 'they move first (your spe ' + mySpe + ' vs their ' + osr.min + '-' + osr.max + ')';
+                else row.order = 'SPEED TIE-ish: your spe ' + mySpe + ' is inside their possible range ' + osr.min + '-' + osr.max + ' — their EV/nature decides who moves first (unknown)';
+            } else {
+                row.order = 'unknown (could not resolve both speeds)';
+            }
+            if (osr) row.unknown.push('opponent speed range ' + osr.min + '-' + osr.max + ' (EV/nature unrevealed)');
+        }
+
+        // ---- 伤害 ----
+        if (iSwitch) {
+            if (br.kind === 'move') {
+                var legA = simLeg(state, applyFromStateSpec(state, 'opp', null), applyFromStateSpec(state, 'me', mySlot), br.move);
+                if (legA.error) row.unknown.push('incoming damage could not be computed (' + legA.error + ')');
+                else {
+                    var hpLo = Math.round(myHpPct - legA.percent_max), hpHi = Math.round(myHpPct - legA.percent_min);
+                    row.mine = { takes: legA.percent_min + '-' + legA.percent_max + '%', hp_after: hpLo + '-' + hpHi + '%', faints: (hpHi <= 0 ? true : (hpLo <= 0 ? 'possible' : false)), summary: myName + ' takes ' + legA.percent_min + '-' + legA.percent_max + '% from ' + br.move + ' → ' + hpLo + '-' + hpHi + '% left' };
+                }
+            } else {
+                row.mine = { takes: '0%', hp_after: myHpPct + '%', faints: false, summary: myName + ' comes in untouched (they also switched)' };
+            }
+            row.unknown.push('entry hazards on your side are NOT applied here (' + JSON.stringify(state.myHazards || []) + ')');
+        } else {
+            // 我出招，他们出招 → 两边都算
+            if (br.kind === 'move') {
+                var legOut = simLeg(state, applyFromStateSpec(state, 'me', null), applyFromStateSpec(state, 'opp', null), mine.move);
+                if (legOut.error) row.unknown.push('your outgoing damage could not be computed (' + legOut.error + ')');
+                else row.theirs = { takes: legOut.percent_min + '-' + legOut.percent_max + '%', ko: legOut.ko_verdict || '', summary: oppActive + ' takes ' + legOut.percent_min + '-' + legOut.percent_max + '% from ' + mine.move };
+                var legIn2 = simLeg(state, applyFromStateSpec(state, 'opp', null), applyFromStateSpec(state, 'me', null), br.move);
+                if (legIn2.error) row.unknown.push('incoming damage could not be computed (' + legIn2.error + ')');
+                else {
+                    var hpLo2 = Math.round(myHpPct - legIn2.percent_max), hpHi2 = Math.round(myHpPct - legIn2.percent_min);
+                    row.mine = { takes: legIn2.percent_min + '-' + legIn2.percent_max + '%', hp_after: hpLo2 + '-' + hpHi2 + '%', faints: (hpHi2 <= 0 ? true : (hpLo2 <= 0 ? 'possible' : false)), summary: myName + ' takes ' + legIn2.percent_min + '-' + legIn2.percent_max + '% → ' + hpLo2 + '-' + hpHi2 + '% left' };
+                }
+            } else {
+                var incomingName = slotName(oppTeam, br.slot);
+                var legOut3 = simLeg(state, applyFromStateSpec(state, 'me', null), applyFromStateSpec(state, 'opp', br.slot), mine.move);
+                if (legOut3.error) {
+                    row.unknown.push('your move vs the pokemon they bring in could not be computed (' + legOut3.error + ')');
+                    row.theirs = { takes: 'unknown', summary: 'cannot compute ' + mine.move + ' vs ' + (incomingName || ('slot ' + br.slot)) };
+                } else {
+                    row.theirs = { takes: legOut3.percent_min + '-' + legOut3.percent_max + '%', ko: legOut3.ko_verdict || '', summary: (incomingName || ('slot ' + br.slot)) + ' takes ' + legOut3.percent_min + '-' + legOut3.percent_max + '% from ' + mine.move };
+                }
+                row.mine = { takes: '0%', hp_after: myHpPct + '%', faints: false, summary: myName + ' untouched (they switched instead of attacking)' };
+                row.unknown.push('the switch-in\'s defensive spread is unknown — number assumes the spread you passed / defaults');
+            }
+        }
+        if (row.legal !== 'ok') row.unknown.push('legality: ' + row.legal);
+        row.unknown.push('unrevealed items/abilities are NOT modelled (no Leftovers/Rain Dish/Intimidate-on-entry/etc.)');
+        out.rows.push(row);
+    }
+
+    out.how_to_read = 'Each row is one opponent branch under YOUR action. `mine` describes the pokemon your action leaves on the field. Use these numbers, not your own estimates; save_strategy will check your stated outcome against them.';
+    out.assumptions = args.assume || {};
+    if (!args.assume || (!args.assume.opp_spread && !args.assume.opp_spread_off)) {
+        out.assumptions_warning = 'You passed no opponent spread assumption — numbers for the OPPONENT\'s stats default to 0 EV / neutral. Pass assume.opp_spread (defensive) and/or assume.opp_spread_off (offensive) if you have a read on its set.';
+    }
+
+    var led = ctx && ctx.ledger;
+    if (led) {
+        if (!led.sims) led.sims = [];
+        led.sims.push({ actionKey: actionKey(mine), i_do: actionKey(mine), opp_does: branches.map(function (x) { return x.key; }), rows: out.rows, ts: Date.now() });
+    }
+    return out;
+}
+
+// 门禁：提交计划时必须与仿真一致（Rule 1 + Rule 4 的仿真版）
+// 断言口径：换人/攻击都不要求"必须活下来"——炮灰打法只要如实写 "faints" 就能过；但描述必须与仿真一致。
+function simGate(ledger, args) {
+    if (!ledger) return null;
+    var sims = ledger.sims || [];
+    if (!sims.length) {
+        return 'STRATEGY REJECTED — you have not run simulate_turn this turn. Simulate the branches your plan relies on (i_do + opp_does), then state action / branch / outcome.';
+    }
+    var want = String(args.action || '').trim().toLowerCase().replace(/\s+/g, ' ');
+    if (!want) {
+        return 'STRATEGY REJECTED — save_strategy needs `action` (same form as simulate_turn i_do, e.g. "switch 3" or "move Thunderbolt"). You simulated: ' + sims.map(function (s) { return s.actionKey; }).join(', ');
+    }
+    var sim = null;
+    for (var i = 0; i < sims.length; i++) {
+        var a = String(sims[i].actionKey).toLowerCase();
+        if (a === want || a === want.replace(/^(use|i )/, '')) { sim = sims[i]; break; }
+    }
+    if (!sim) {
+        return 'STRATEGY REJECTED — your action "' + args.action + '" was never simulated. Run simulate_turn with that exact i_do first. Simulated so far: ' + sims.map(function (s) { return s.actionKey; }).join(', ') + '.';
+    }
+    var branch = String(args.branch || '').trim().toLowerCase().replace(/\s+/g, ' ');
+    if (!branch) {
+        return 'STRATEGY REJECTED — save_strategy needs `branch`: which opponent action your plan is playing around (one of: ' + sim.rows.map(function (r) { return r.branchKey; }).join(', ') + ').';
+    }
+    var row = null;
+    for (var j = 0; j < sim.rows.length; j++) {
+        if (String(sim.rows[j].branchKey).toLowerCase() === branch) { row = sim.rows[j]; break; }
+    }
+    if (!row) {
+        return 'STRATEGY REJECTED — branch "' + args.branch + '" is not among the simulated branches for that action (' + sim.rows.map(function (r) { return r.branchKey; }).join(', ') + '). Simulate it, or pick a branch you did simulate.';
+    }
+    var outcome = String(args.outcome || '').trim();
+    if (!outcome) {
+        return 'STRATEGY REJECTED — save_strategy needs `outcome`: what happens to ' + (row.mine && row.mine.summary ? '(see simulation) ' : '') + 'the pokemon your action puts on the field under that branch — "survives" / "faints" / "<a-b>%". A sacrifice play is allowed: just write "faints".';
+    }
+    // 与仿真比对
+    var m = row.mine || {};
+    var t = outcome.toLowerCase();
+    var bad = false, why = '';
+    if (/faint|die|ko|倒下|送/.test(t)) {
+        if (m.faints === false) { bad = true; why = 'simulation says it survives (' + m.summary + ')'; }
+    } else if (/surviv|live|safe|没事|活/.test(t)) {
+        if (m.faints === true || m.faints === 'possible') { bad = true; why = 'simulation says it may faint (' + m.summary + ')'; }
+    } else {
+        var nums = parseExpectNumbers(outcome);
+        var hp = String(m.hp_after || '').match(/(-?\d+)\s*-\s*(-?\d+)/);
+        if (nums.single !== null && hp) {
+            var lo = Number(hp[1]), hi = Number(hp[2]);
+            if (nums.single < lo - 5 || nums.single > hi + 5) { bad = true; why = 'simulation says ' + m.hp_after + ' HP left (' + m.summary + ')'; }
+        }
+    }
+    if (bad) {
+        return 'STRATEGY REJECTED — your stated outcome "' + args.outcome + '" contradicts the simulation on branch "' + args.branch + '": ' + why + '. Rewrite the plan so it matches what the engine computes. (If you expect a DIFFERENT move than the branch you simulated, simulate that move and use it as the branch.)';
+    }
+    return null;
+}
+
+// 最终答案前的门禁：你选中的动作必须已经被仿真过（不要求活下来，只要求"你没在没仿真的情况下下结论"）
+function actionGateCheck(ledger, action, state) {
+    if (!ledger || !action) return null;
+    var sims = ledger.sims || [];
+    var need = null;
+    if (action.type === 'switch') need = 'switch ' + Number(action.pokeSlot);
+    else {
+        var moves = (state && state.me && state.me.moves) || [];
+        var mv = moves[Number(action.attackSlot)];
+        if (mv && mv.name) need = 'move ' + mv.name;
+    }
+    if (!need) return null;   // 解析不到招式名 → 不拦（避免误伤）
+    for (var i = 0; i < sims.length; i++) {
+        if (String(sims[i].actionKey).toLowerCase() === need.toLowerCase()) return null;
+    }
+    return 'NOT READY — you are about to answer "' + need + '" but you never simulated it. Call simulate_turn with i_do = {"' +
+        (action.type === 'switch' ? ('switch":' + Number(action.pokeSlot)) : ('move":"' + need.replace(/^move /, ''))) +
+        '} and the opponent branches you are playing around, then re-save the strategy and answer.' + (sims.length ? (' Simulated so far: ' + sims.map(function (s) { return s.actionKey; }).join(', ') + '.') : '');
+}
+
 // 记录当前回合的战略思路（默认用当前 turn；可显式指定 turn）
 // 存成 {text, scene, checks}：text = 本回合推演（不回灌）；scene = 预设的下次决策场面（回灌 1 条，用于与实况对比）；
 // checks = 留给后续回合核对的待验证假设（回灌最近 2 条）
+// 门禁：action / branch / outcome 必须与 simulate_turn 的结果一致（见 simGate）。
 function saveStrategy(args, ctx) {
     if (!args.text) return { error: 'text required' };
     if (!args.scene) return { error: 'scene required (the board you expect at your next decision)' };
     if (!args.checks) return { error: 'checks required (the assumptions your later turns should verify against the battle log)' };
     var notes = ctx && ctx.notes;
     if (!notes) return { error: 'no notes store' };
-    // 门禁 Rule 1 + Rule 4：未裁决 / 已冲突 / 完全没登记 → 拒绝提交
-    var gateMsg = predictGate(ctx && ctx.ledger);
+    // 门禁：没跑仿真 / 动作没仿真过 / 分支不在仿真里 / 结论与仿真矛盾 → 拒绝提交
+    var gateMsg = ctx && ctx.simGateOn ? simGate(ctx.ledger, args) : null;
     if (gateMsg) return { error: gateMsg };
     if (!notes.turns) notes.turns = {};
     var t = (args.turn !== undefined && args.turn !== null) ? parseInt(args.turn, 10) : (ctx.turn || 0);
-    notes.turns[String(t)] = { text: String(args.text), scene: String(args.scene), checks: String(args.checks) };
+    notes.turns[String(t)] = {
+        text: String(args.text), scene: String(args.scene), checks: String(args.checks),
+        action: args.action ? String(args.action) : null,
+        branch: args.branch ? String(args.branch) : null,
+        outcome: args.outcome ? String(args.outcome) : null
+    };
     return { ok: true, turn: t };
 }
 
@@ -2449,6 +2773,7 @@ function runTool(name, args, ctx) {
     if (name === 'get_battle_history') return getBattleHistory(args, ctx && ctx.state);
     if (name === 'save_observation') return saveObservation(args, ctx);
     if (name === 'save_strategy') return saveStrategy(args, ctx);
+    if (name === 'simulate_turn') return simulateTurn(args, ctx);
     if (name === 'predict') return registerClaims(args, ctx);
     if (name === 'update_worklog') return updateWorklog(args, ctx);
     if (name === 'get_observation') return getObservation(args, ctx);
