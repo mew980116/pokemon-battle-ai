@@ -1,0 +1,951 @@
+{
+ "fixture": "battle96-t1",
+ "arm": "C-0414",
+ "url": "http://127.0.0.1:8098",
+ "n": 10,
+ "when": "2026-09-20T13-01-33",
+ "summary": {
+  "byAction": {
+   "SWITCH→Rotom-Heat": 2,
+   "SWITCH→Noivern": 1,
+   "SWITCH→Toxtricity": 5,
+   "ATK(stay)": 2
+  },
+  "byVerdict": {
+   "LETHAL": 2,
+   "SAFE": 6,
+   "RISKY": 2
+  },
+  "inboundTotal": 46,
+  "accident": 2,
+  "nOk": 10
+ },
+ "samples": [
+  {
+   "i": 1,
+   "battleId": "C-0414-R1",
+   "ms": 66596,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 4
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "Rotom-Heat -> Pelipper : Thunderbolt"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Rotom-Heat -> Pelipper : Thunderbolt"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Rotom-Heat -> Pelipper : Thunderbolt"
+     },
+     {
+      "side": "STATS",
+      "label": "Rotom-Heat spe,Pelipper spe"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Rotom-Heat -> Pelipper : Thunderbolt"
+     },
+     {
+      "side": "STATS",
+      "label": "Rotom-Heat spe"
+     }
+    ],
+    "inbound": [],
+    "outbound": [
+     "Rotom-Heat -> Pelipper : Thunderbolt",
+     "Rotom-Heat -> Pelipper : Thunderbolt",
+     "Rotom-Heat -> Pelipper : Thunderbolt",
+     "Rotom-Heat -> Pelipper : Thunderbolt"
+    ],
+    "strategy": {
+     "checks": "Verify Pelipper's action was U-turn vs Scald/Hurricane (log next turn). If Claydol/a Water mon came in, confirm Rotom's Thunderbolt/Overheat damage. Confirm Drizzle (rain message) to lock Pelipper's ability.",
+     "scene": "Rotom-Heat active (near full HP after absorbing Pelipper's chip), Pelipper either still in (about to be OHKO'd) or switched to a rain abuser / Claydol. Weather: Rain. No hazards.",
+     "text": "(1) ATTACK? Pelipper is a standard rain pivot (Drizzle setter). Likely U-turn (to a rain abuser or Claydol) or Scald/Hurricane. ~60% U-turn, ~30% Scald/Hurricane, ~10% Defog/Roost.\n(2) SWITCH? Could U-turn into Claydol (revealed Ground, immune to Electric) or a Swift Swim rain abuser. If it predicts my Electric, Claydol is likely.\n(3) THEIR READ OF ME: knows only Weezing-Galar (Poison/Fairy, Levitate, Black Sludge). No idea my Rotom-Heat exists; sees a mon that can't hurt Pelipper much, so it feels safe pivoting.\n(4) MY OPTIONS & COST: Rotom-Heat (slot4, Scarf) switch has NO hazard cost (field clean), and Rotom easily lives Pelipper's neutral Scald/Hurricane. GAIN: Thunderbolt is a guaranteed OHKO on Pelipper (217-257%, MATCH), hits any water abuser 2x; Levitate + Overheat answer Claydol. Staying with Weezing only chips while Pelipper U-turns for free momentum — worse.\n(5) MOST LIKELY ACTION + RESPONSE: Pelipper U-turns/attacks → I switch Rotom-Heat in, then Thunderbolt OHKO (or Overheat vs Claydol). Falsifier: hard switch into an Electric-immune wall.\n(6) SEQUENCE: switch Rotom → Pelipper U-turns (neutral chip) or Scalds → next turn Rotom outspeeds (Scarf, MATCH) and Thunderbolt OHKOs the active mon, or Overheat vs Claydol."
+    },
+    "rounds": 12,
+    "ms": 66421,
+    "fallback": false
+   },
+   "verdict": {
+    "verdict": "LETHAL",
+    "targetSlot": 4,
+    "targetName": "Rotom-Heat",
+    "worst": {
+     "pctMin": 137,
+     "pctMax": 162,
+     "ko": "guaranteed OHKO",
+     "move": "Hydro Pump",
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 2,
+   "battleId": "C-0414-R2",
+   "ms": 64145,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 4
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "me:4 -> opp : Thunderbolt"
+     },
+     {
+      "side": "STATS",
+      "label": "Rotom-Heat spe,Pelipper spe"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:4 -> opp : Thunderbolt"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:4 -> opp : Thunderbolt"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:4 -> opp : Thunderbolt"
+     },
+     {
+      "side": "STATS",
+      "label": "Rotom-Heat spe,Pelipper spe"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:4 -> opp : Thunderbolt"
+     },
+     {
+      "side": "STATS",
+      "label": "Rotom-Heat spe"
+     }
+    ],
+    "inbound": [],
+    "outbound": [
+     "me:4 -> opp : Thunderbolt",
+     "me:4 -> opp : Thunderbolt",
+     "me:4 -> opp : Thunderbolt",
+     "me:4 -> opp : Thunderbolt",
+     "me:4 -> opp : Thunderbolt"
+    ],
+    "strategy": {
+     "checks": "verify Pelipper's ability = Drizzle (Rain already up [proved]); watch for a revealed item or move from Pelipper before it's KO'd",
+     "scene": "Pelipper fainted. Rotom-Heat active at 100% (Choice Scarf). Opponent sends replacement (Claydol 100% or unrevealed). Weather: Rain.",
+     "text": "(1) ATTACK? Pelipper likely attacks (Scald/Hydro Pump Rain-boosted, Hurricane 100% acc in Rain, U-turn) or pivots. I don't need to tank anything — I switch to a guaranteed OHKO.\n(2) SWITCH? Unlikely to switch again right after setting Rain.\n(3) THEIR READ: only knows Weezing-Galar (Poison/Fairy, Levitate, Black Sludge); hasn't seen my bench.\n(4) MY OPTIONS: switch to Rotom-Heat (Choice Scarf) → Thunderbolt is a guaranteed OHKO on Pelipper (4x Electric, 217-257% VERIFIED; Scarf Rotom-Heat outspeeds Pelipper, I move first VERIFIED). No hazards on my side — switch-in is free. Toxtricity Wild Charge also 4x but slower and recoil; Rotom-Heat is the clean kill and holds momentum.\n(5) MOST LIKELY + RESPONSE: Pelipper stays → I switch to Rotom-Heat and OHKO with Scarf Thunderbolt. Falsifier: it switches out (I still force out the Rain setter).\n(6) SEQUENCE: switch → Rotom-Heat in free → Thunderbolt OHKOs Pelipper (moves first). Next: opponent sends replacement."
+    },
+    "rounds": 17,
+    "ms": 63914,
+    "fallback": false
+   },
+   "verdict": {
+    "verdict": "LETHAL",
+    "targetSlot": 4,
+    "targetName": "Rotom-Heat",
+    "worst": {
+     "pctMin": 137,
+     "pctMax": 162,
+     "ko": "guaranteed OHKO",
+     "move": "Hydro Pump",
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 3,
+   "battleId": "C-0414-R3",
+   "ms": 131581,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 3
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "Rotom-Heat -> Pelipper : Thunderbolt"
+     },
+     {
+      "side": "STATS",
+      "label": "Rotom-Heat spe,Pelipper spe"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Rotom-Heat -> Pelipper : Thunderbolt"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Rotom-Heat -> Pelipper : Thunderbolt"
+     },
+     {
+      "side": "STATS",
+      "label": "Rotom-Heat spe"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Rotom-Heat -> Pelipper : Thunderbolt"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Rotom-Heat : Hydro Pump"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Rotom-Heat : Scald"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Rotom-Heat : Hurricane"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Weezing-Galar : Hydro Pump"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Weezing-Galar : Hurricane"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Noivern : Hydro Pump"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Noivern : Hurricane"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Noivern -> Pelipper : Draco Meteor"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Noivern -> Pelipper : Hurricane"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Noivern : Hydro Pump"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Noivern -> Pelipper : Draco Meteor"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Rotom-Heat : Hydro Pump"
+     }
+    ],
+    "inbound": [
+     "Pelipper -> Rotom-Heat : Hydro Pump",
+     "Pelipper -> Rotom-Heat : Scald",
+     "Pelipper -> Rotom-Heat : Hurricane",
+     "Pelipper -> Weezing-Galar : Hydro Pump",
+     "Pelipper -> Weezing-Galar : Hurricane",
+     "Pelipper -> Noivern : Hydro Pump",
+     "Pelipper -> Noivern : Hurricane",
+     "Pelipper -> Noivern : Hydro Pump",
+     "Pelipper -> Rotom-Heat : Hydro Pump"
+    ],
+    "outbound": [
+     "Rotom-Heat -> Pelipper : Thunderbolt",
+     "Rotom-Heat -> Pelipper : Thunderbolt",
+     "Rotom-Heat -> Pelipper : Thunderbolt",
+     "Rotom-Heat -> Pelipper : Thunderbolt",
+     "Noivern -> Pelipper : Draco Meteor",
+     "Noivern -> Pelipper : Hurricane",
+     "Noivern -> Pelipper : Draco Meteor"
+    ],
+    "strategy": {
+     "checks": "verify Noivern actually survives the switch-in hit (refuted if Pelipper carries a non-Water/Flying move like Ice Beam that 2HKOs Noivern); check whether Pelipper U-turns or stays in; confirm Pelipper's full set/item after it acts.",
+     "scene": "My active: Noivern (Flying/Dragon, HP ~55-66% after eating one Water/Flying hit, Choice Specs, Frisk). Opp active: Pelipper HP 100% (expected KO next turn via Draco Meteor). Rain up this turn. No hazards.",
+     "text": "(1) ATTACK? Pelipper most likely attacks with rain-boosted Scald/Hydro Pump or Hurricane, or U-turns to pivot. High confidence it attacks — it just set up rain and its Water STAB is neutral into Weezing-Galar. (2) SWITCH? It could U-turn out or hard-switch to Claydol (walls Weezing-Galar); moderate chance. (3) THEIR READ: knows only Weezing-Galar (Levitate shown); sees me as pressured by its rain Water moves. (4) MY OPTIONS: Rotom-Heat (Electric) is the obvious anti-Pelipper pick but is FATALLY frail — it gets OHKO'd by rain-boosted Water on the switch-in (Scald 99-119%, Hydro Pump 137-162%), so switching it in is a big gamble. Noivern is strictly better: Dragon typing RESISTS Water (Hydro Pump only 34-40%), survives Hurricane (45-53%), and Choice Specs Draco Meteor guarantees the OHKO on Pelipper (110-130%) while outspeeding (345 vs ~166). Switch cost: Noivern eats one resisted/neutral hit (max ~53%) with no hazards on my side. Gain: removes their rain setter and gets a KO. High confidence — Noivern is the safe, kill-securing switch. Not behind; this is the steadiest line. (5) MOST LIKELY + RESPONSE: Pelipper attacks with Water/Hurricane; Noivern switches in, survives (max 53%), then Draco Meteor OHKOs next turn regardless. Falsifier: Pelipper carries Ice Beam (Flying/Dragon Noivern is 4x weak) or something that 2HKOs. (6) SEQUENCE: now — Pelipper acts (hit absorbed, Noivern at ≥47%), Noivern switches in; next turn — Noivern outspeeds and Draco Meteor OHKOs Pelipper; rain then decays."
+    },
+    "rounds": 25,
+    "ms": 131264,
+    "fallback": false
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 3,
+    "targetName": "Noivern",
+    "worst": {
+     "pctMin": 45,
+     "pctMax": 53,
+     "ko": "39.5% chance to 2HKO",
+     "move": "Hurricane",
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 4,
+   "battleId": "C-0414-R4",
+   "ms": 53112,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 2
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "Rotom-Heat -> Pelipper : Thunderbolt"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Rotom-Heat -> Pelipper : Thunderbolt"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Rotom-Heat : Scald"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Toxtricity -> Pelipper : Wild Charge"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Toxtricity : Hurricane"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Toxtricity : Scald"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Toxtricity : Scald"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Toxtricity -> Pelipper : Wild Charge"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Toxtricity : Scald"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Toxtricity -> Pelipper : Wild Charge"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Toxtricity : Scald"
+     }
+    ],
+    "inbound": [
+     "Pelipper -> Rotom-Heat : Scald",
+     "Pelipper -> Toxtricity : Hurricane",
+     "Pelipper -> Toxtricity : Scald",
+     "Pelipper -> Toxtricity : Scald",
+     "Pelipper -> Toxtricity : Scald",
+     "Pelipper -> Toxtricity : Scald"
+    ],
+    "outbound": [
+     "Rotom-Heat -> Pelipper : Thunderbolt",
+     "Rotom-Heat -> Pelipper : Thunderbolt",
+     "Toxtricity -> Pelipper : Wild Charge",
+     "Toxtricity -> Pelipper : Wild Charge",
+     "Toxtricity -> Pelipper : Wild Charge"
+    ],
+    "strategy": {
+     "checks": "Verify Pelipper's move this turn (Scald vs Hurricane vs U-turn) and confirm Wild Charge OHKO (refuted if Pelipper survives). Check whether Toxtricity outspeeds Pelipper.",
+     "scene": "My Toxtricity active (30-73% HP after taking the hit), opposing Pelipper at 100% (faints next turn to Wild Charge). Opposing bench has Claydol 100%. Weather Rain.",
+     "text": "(1) ATTACK? Pelipper attacks: Scald (rain-boosted, 59-70% to Toxtricity), Hurricane (27-32%), U-turn, Knock Off. Medium confidence; rain abuser likely fires Water/Flying STAB.\n(2) SWITCH? Unlikely — entered last turn, healthy.\n(3) THEIR READ OF ME: sees Weezing-Galar, expects an Electric/resist switch-in; safe Water/Flying STAB is their play.\n(4) MY OPTIONS & COST: Toxtricity switch costs the turn but survives worst case (Scald 70%) and guaranteed-OHKOs Pelipper with 4x Wild Charge next turn. Rotom-Heat also OHKOs but is 93.8% OHKO'd by rain Scald — rejected. Not behind; clean free kill.\n(5) MOST LIKELY + RESPONSE: Pelipper Scald/Hurricane/U-turn; Toxtricity tanks.\n(6) SEQUENCE: switch Toxtricity in (take 27-70%); next turn Wild Charge OHKO Pelipper."
+    },
+    "rounds": 12,
+    "ms": 52792,
+    "fallback": false
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 2,
+    "targetName": "Toxtricity",
+    "worst": {
+     "pctMin": 81,
+     "pctMax": 96,
+     "ko": "guaranteed 2HKO",
+     "move": "Hydro Pump",
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 5,
+   "battleId": "C-0414-R5",
+   "ms": 137796,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 2
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "Rotom-Heat -> Pelipper : Thunderbolt"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Rotom-Heat : Hurricane"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Rotom-Heat -> Pelipper : Thunderbolt"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Rotom-Heat : Hurricane"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Rotom-Heat : Hydro Pump"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Toxtricity : Hydro Pump"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Toxtricity : Hurricane"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Pelipper -> Pelipper : Storm Drain"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Toxtricity -> Pelipper : Wild Charge"
+     },
+     {
+      "side": "STATS",
+      "label": "Toxtricity spe,Pelipper spe"
+     },
+     {
+      "side": "STATS",
+      "label": "Pelipper spe"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Rotom-Heat -> Pelipper : Thunderbolt"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Toxtricity -> Pelipper : Wild Charge"
+     },
+     {
+      "side": "STATS",
+      "label": "Toxtricity spe"
+     }
+    ],
+    "inbound": [
+     "Pelipper -> Rotom-Heat : Hurricane",
+     "Pelipper -> Rotom-Heat : Hurricane",
+     "Pelipper -> Rotom-Heat : Hydro Pump",
+     "Pelipper -> Toxtricity : Hydro Pump",
+     "Pelipper -> Toxtricity : Hurricane"
+    ],
+    "outbound": [
+     "Rotom-Heat -> Pelipper : Thunderbolt",
+     "Rotom-Heat -> Pelipper : Thunderbolt",
+     "Pelipper -> Pelipper : Storm Drain",
+     "Toxtricity -> Pelipper : Wild Charge",
+     "Rotom-Heat -> Pelipper : Thunderbolt",
+     "Toxtricity -> Pelipper : Wild Charge"
+    ],
+    "strategy": {
+     "checks": "Verify Pelipper's actual move on the switch (Hurricane vs Hydro Pump vs U-turn — refutes \"STAB\" read if U-turn). Confirm Toxtricity outspeeds Pelipper next turn. Confirm Wild Charge OHKO. Note opponent's 3rd-6th team members as revealed (Rain team Swift Swim threats).",
+     "scene": "Next decision: my Toxtricity active at ~73-4% HP (after taking Hurricane/Hydro Pump), Pelipper fainted (Wild Charge OHKO) and opponent sent a replacement, OR Pelipper U-turned to a Swift Swim sweeper. Rain ends when Pelipper faints.",
+     "text": "(1) ATTACK? Pelipper likely attacks: Hurricane (100% acc in Rain, STAB) or Hydro Pump/Scald (Rain-boosted STAB); may U-turn to a Swift Swim sweeper. Read: Hurricane or Hydro Pump, ~60% confident — came in on Weezing-Galar (Poison/Fairy), both STABs neutral, no super-effective coverage, clicks strongest Rain STAB. (2) SWITCH? Unlikely to switch itself this turn (fresh switch-in, set rain, wants momentum). (3) THEIR READ OF ME: knows Weezing-Galar is Poison/Fairy with Strange Steam; hasn't seen my bench. (4) MY OPTIONS & COST OF SWITCHING: Staying wastes a turn (Sludge Bomb ~20% neutral, Flamethrower resisted). Switch to Toxtricity: forfeit turn, eats Pelipper's hit — Hurricane 27-32% (resisted 0.5x) or Hydro Pump 81-96% (Rain-boosted neutral) — survives BOTH. Rotom-Heat also OHKOs but DIES to Hydro Pump (137-162%) on switch-in, so Toxtricity is strictly safer. Gain: Toxtricity outspeeds (249 vs ~166) and OHKOs Pelipper with Wild Charge (203-239%), removing Drizzle/Rain. (5) MOST LIKELY ACTION + MY RESPONSE: Pelipper clicks Hurricane/Hydro Pump → switch Toxtricity (survives), then OHKO with Wild Charge. Falsifier: it U-turns to a Swift Swim sweeper. (6) ACTION SEQUENCE: Pelipper moves (Toxtricity takes 27-96%) → Toxtricity in → next turn outspeeds & Wild Charge OHKOs Pelipper → Rain ends → opponent sends replacement."
+    },
+    "rounds": 25,
+    "ms": 137521,
+    "fallback": false
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 2,
+    "targetName": "Toxtricity",
+    "worst": {
+     "pctMin": 81,
+     "pctMax": 96,
+     "ko": "guaranteed 2HKO",
+     "move": "Hydro Pump",
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 6,
+   "battleId": "C-0414-R6",
+   "ms": 126466,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 2
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "me:7 -> Pelipper : Thunderbolt"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:5 -> Pelipper : Wild Charge"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me : Hurricane"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:4 -> Pelipper : Thunderbolt"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me:4 : Hurricane"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me:4 : Scald"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me:4 : U-turn"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:2 -> Pelipper : Wild Charge"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me:2 : Scald"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me:2 : Hurricane"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me : Scald"
+     },
+     {
+      "side": "STATS",
+      "label": "Toxtricity spe"
+     },
+     {
+      "side": "STATS",
+      "label": "Pelipper spe,Pelipper spe"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me:2 : Scald"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:2 -> Pelipper : Wild Charge"
+     },
+     {
+      "side": "STATS",
+      "label": "Toxtricity spe,Pelipper spe"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me:2 : Scald"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:2 -> Pelipper : Wild Charge"
+     },
+     {
+      "side": "STATS",
+      "label": "Toxtricity spe"
+     }
+    ],
+    "inbound": [
+     "opp -> me : Hurricane",
+     "opp -> me:4 : Hurricane",
+     "opp -> me:4 : Scald",
+     "opp -> me:4 : U-turn",
+     "opp -> me:2 : Scald",
+     "opp -> me:2 : Hurricane",
+     "opp -> me : Scald",
+     "opp -> me:2 : Scald",
+     "opp -> me:2 : Scald"
+    ],
+    "outbound": [
+     "me:7 -> Pelipper : Thunderbolt",
+     "me:5 -> Pelipper : Wild Charge",
+     "me:4 -> Pelipper : Thunderbolt",
+     "me:2 -> Pelipper : Wild Charge",
+     "me:2 -> Pelipper : Wild Charge",
+     "me:2 -> Pelipper : Wild Charge"
+    ],
+    "strategy": {
+     "checks": "verify whether Pelipper outsped Toxtricity (i.e. was 252+ Spe) — refuted if Toxtricity moved first or KO'd before a second Scald; verify Pelipper's actual move (Scald vs Hurricane) to pin its set.",
+     "scene": "Toxtricity active (HP 30-73% depending on incoming hit + Life Orb recoil), Pelipper fainted. Opposing bench: Claydol 100% + 4 unrevealed. Rain active (Drizzle). Weezing-Galar bench 100% (Black Sludge).",
+     "text": "(1) ATTACK? Pelipper likely attacks: Scald (rain-boosted ~64-75%) or Hurricane (rain 100% acc ~58-68%), both 2HKO; possibly U-turn. Confidence medium, Scald/U-turn most likely for a Drizzle pivot. (2) SWITCH? Unlikely — it just proactively switched in to wall Weezing's Poison/Fairy hits. (3) THEIR READ: sees Poison/Fairy Levitate Weezing hitting it neutrally; doesn't know my bench. (4) MY OPTIONS: Switch to Toxtricity. COST: forfeit turn, eat Scald 59-70% or Hurricane 27-32% (no hazards). GAIN: Wild Charge (Life Orb) 203-239% = guaranteed OHKO on Pelipper; Toxtricity (249) outspeeds uninvested Pelipper (166), only loses to 252+ Timid (251) that Scalds twice in a row. Rejected Rotom-Heat (Scarf Thunderbolt also OHKOs but Scald in rain is ~94% OHKO on switch-in). Toxtricity is the steady line. (5) RESPONSE: Pelipper Scalds/Hurricanes; I switch Toxtricity, survive, Wild Charge OHKOs next turn. Falsifier: 252+ Timid Pelipper Scalding twice. (6) SEQUENCE: Turn2 Pelipper hits Toxtricity (survives ~30-73%). Turn3 Toxtricity Wild Charge KO's Pelipper."
+    },
+    "rounds": 21,
+    "ms": 126295,
+    "fallback": false
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 2,
+    "targetName": "Toxtricity",
+    "worst": {
+     "pctMin": 81,
+     "pctMax": 96,
+     "ko": "guaranteed 2HKO",
+     "move": "Hydro Pump",
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 7,
+   "battleId": "C-0414-R7",
+   "ms": 156373,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 2
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "Rotom-Heat -> Pelipper : Thunderbolt"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Rotom-Heat : Scald"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Toxtricity -> Pelipper : Wild Charge"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Toxtricity : Scald"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Toxtricity : Scald"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Toxtricity : Scald"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Toxtricity : Scald"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Toxtricity : Scald"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Toxtricity : Scald"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Toxtricity : Scald"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Toxtricity : Scald"
+     }
+    ],
+    "inbound": [
+     "Pelipper -> Rotom-Heat : Scald",
+     "Pelipper -> Toxtricity : Scald",
+     "Pelipper -> Toxtricity : Scald",
+     "Pelipper -> Toxtricity : Scald",
+     "Pelipper -> Toxtricity : Scald",
+     "Pelipper -> Toxtricity : Scald",
+     "Pelipper -> Toxtricity : Scald",
+     "Pelipper -> Toxtricity : Scald",
+     "Pelipper -> Toxtricity : Scald"
+    ],
+    "outbound": [
+     "Rotom-Heat -> Pelipper : Thunderbolt",
+     "Toxtricity -> Pelipper : Wild Charge"
+    ],
+    "strategy": {
+     "checks": "verify Pelipper's move (Scald vs U-turn) next turn; check Pelipper's SpA investment (Scald %).",
+     "scene": "Toxtricity active at ~30-100% HP, Pelipper in at 100% or swapped. Rain active. My bench all 100%. Opponent bench: Claydol (100%) + 4 unrevealed.",
+     "text": "(4) Switch to Toxtricity: costs the turn + eats one Pelipper hit; Scald does 59-70% (2HKO), U-turn negligible — safe either way. GAIN: Life Orb Wild Charge (Electric, 4x) OHKOs Pelipper 203-239%, removing the rain setter and giving a strong anti-rain Electric. Safer than Rotom-Heat (OHKO'd back by rain Scald) and better than staying in (Weezing has no KO threat and gives a free pivot)."
+    },
+    "rounds": 25,
+    "ms": 156215,
+    "fallback": false
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 2,
+    "targetName": "Toxtricity",
+    "worst": {
+     "pctMin": 81,
+     "pctMax": 96,
+     "ko": "guaranteed 2HKO",
+     "move": "Hydro Pump",
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 8,
+   "battleId": "C-0414-R8",
+   "ms": 145386,
+   "action": {
+    "type": "attack",
+    "attackSlot": 0
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "Rotom-Heat -> Pelipper : Thunderbolt"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Rotom-Heat -> Pelipper : Thunderbolt"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Rotom-Heat : Scald"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Weezing-Galar -> Pelipper : Strange Steam"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Weezing-Galar : Scald"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Weezing-Galar : Scald"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Weezing-Galar -> Pelipper : Strange Steam"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Weezing-Galar : Scald"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Weezing-Galar -> Pelipper : Strange Steam"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Weezing-Galar : Scald"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Weezing-Galar -> Pelipper : Strange Steam"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Weezing-Galar -> Pelipper : Strange Steam"
+     }
+    ],
+    "inbound": [
+     "Pelipper -> Rotom-Heat : Scald",
+     "Pelipper -> Weezing-Galar : Scald",
+     "Pelipper -> Weezing-Galar : Scald",
+     "Pelipper -> Weezing-Galar : Scald",
+     "Pelipper -> Weezing-Galar : Scald"
+    ],
+    "outbound": [
+     "Rotom-Heat -> Pelipper : Thunderbolt",
+     "Rotom-Heat -> Pelipper : Thunderbolt",
+     "Weezing-Galar -> Pelipper : Strange Steam",
+     "Weezing-Galar -> Pelipper : Strange Steam",
+     "Weezing-Galar -> Pelipper : Strange Steam",
+     "Weezing-Galar -> Pelipper : Strange Steam",
+     "Weezing-Galar -> Pelipper : Strange Steam"
+    ],
+    "strategy": {
+     "checks": "verify whether Pelipper reveals Scald / Hurricane / U-turn (its actual set) next turn; verify Pelipper's item (potential Damp Rock vs Leftovers) — refuted if Pelipper heals at end of turn; check whether Pelipper is actually faster than my Weezing each turn.",
+     "scene": "Weezing-Galar active at ~26-54% HP (took one Scald, healed Black Sludge). Pelipper at ~46-54% HP (took Strange Steam) OR a fresh opposing switch-in at ~50-54% if it U-turned. Rain active (Pelipper Drizzle). No hazards, no screens.",
+     "text": "(1) ATTACK? — Likely. Candidates: Scald (rain-boosted, 64-75% to my Weezing, neutral), Hurricane (rain-accurate ~neutral 110BP), U-turn (pivot). I expect Scald or U-turn. Confidence moderate.\n(2) SWITCH? — Possibly U-turn out to a rain abuser, but none revealed yet (only Claydol).\n(3) THEIR READ OF ME — sees Weezing-Galar (Poison/Fairy, Levitate).\n(4) MY OPTIONS & COST — (a) Switch Rotom-Heat: Thunderbolt OHKO + Scarf outspeeds but eats a rain Scald (94%+ OHKO), losing my best rain answer for free — too risky. (b) Stay Weezing + Strange Steam: 2HKO (45-54%), I survive Scald (64-75%) with Black Sludge. Steadier.\n(5) MOST LIKELY + RESPONSE — Pelipper clicks Scald (or U-turn). I stay and Strange Steam. Falsifier: surprise super-effective coverage outpacing my 2HKO.\n(6) SEQUENCE — Pelipper acts first (Scald/U-turn). My Weezing Strange Steam 45-54%. Next decision: Weezing ~26-54%, Pelipper ~46-54% (or fresh switch-in chipped)."
+    },
+    "rounds": 25,
+    "ms": 145217,
+    "fallback": false
+   },
+   "verdict": {
+    "verdict": "RISKY",
+    "targetSlot": 0,
+    "targetName": "Weezing-Galar",
+    "worst": {
+     "pctMin": 87,
+     "pctMax": 103,
+     "ko": "25% chance to OHKO",
+     "move": "Hydro Pump",
+     "error": null
+    },
+    "isSwitch": false
+   }
+  },
+  {
+   "i": 9,
+   "battleId": "C-0414-R9",
+   "ms": 97858,
+   "action": {
+    "type": "attack",
+    "attackSlot": 3
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Sludge Bomb"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Sludge Bomb"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Sludge Bomb"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Sludge Bomb"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Sludge Bomb"
+     }
+    ],
+    "inbound": [],
+    "outbound": [
+     "me -> opp : Sludge Bomb",
+     "me -> opp : Sludge Bomb",
+     "me -> opp : Sludge Bomb",
+     "me -> opp : Sludge Bomb",
+     "me -> opp : Sludge Bomb"
+    ],
+    "strategy": {
+     "checks": "Verify whether Pelipper clicked Hurricane/U-turn/Scald and its damage output vs Weezing-Galar; check for a coverage move (Ice Beam) that changes its threat.",
+     "scene": "Weezing-Galar ~70-85% HP, Pelipper ~45-55% and possibly poisoned, or Pelipper switched to a rain abuser. Rain active.",
+     "text": "(1) ATTACK? Pelipper (Drizzle confirmed) likely attacks: Hurricane (accurate in rain, 1x) or pivots U-turn (1x) or Scald. Medium confidence. (2) SWITCH? Could U-turn out to Claydol or a rain abuser. Moderate. (3) THEIR READ OF ME: Sees Weezing-Galar; may expect a switch to Electric. (4) MY OPTIONS: Sludge Bomb neutral 45-54% with 30% poison — steady chip, Weezing takes little back. Flamethrower 0.5x in rain (skip). Sludge Bomb is steadiest. (5) LIKELY ACTION + RESPONSE: Expect Hurricane/U-turn; reply Sludge Bomb. (6) SEQUENCE: I Sludge Bomb — they hit/pivot back, I stay healthy next turn."
+    },
+    "rounds": 25,
+    "ms": 97677,
+    "fallback": false
+   },
+   "verdict": {
+    "verdict": "RISKY",
+    "targetSlot": 0,
+    "targetName": "Weezing-Galar",
+    "worst": {
+     "pctMin": 87,
+     "pctMax": 103,
+     "ko": "25% chance to OHKO",
+     "move": "Hydro Pump",
+     "error": null
+    },
+    "isSwitch": false
+   }
+  },
+  {
+   "i": 10,
+   "battleId": "C-0414-R10",
+   "ms": 62788,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 2
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "Toxtricity -> Pelipper : Wild Charge"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Toxtricity : Hydro Pump"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Toxtricity : Hurricane"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Toxtricity : Hydro Pump"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Toxtricity -> Pelipper : Wild Charge"
+     },
+     {
+      "side": "STATS",
+      "label": "Toxtricity spe,Pelipper spe"
+     },
+     {
+      "side": "STATS",
+      "label": "Pelipper spe"
+     }
+    ],
+    "inbound": [
+     "Pelipper -> Toxtricity : Hydro Pump",
+     "Pelipper -> Toxtricity : Hurricane",
+     "Pelipper -> Toxtricity : Hydro Pump"
+    ],
+    "outbound": [
+     "Toxtricity -> Pelipper : Wild Charge",
+     "Toxtricity -> Pelipper : Wild Charge"
+    ],
+    "strategy": {
+     "checks": "verify Pelipper's move this turn (Hydro Pump vs Hurricane vs U-turn/Defog); confirm Toxtricity OHKOs with Wild Charge next turn.",
+     "scene": "Next decision: Toxtricity active (~15-100% HP depending on the hit), Pelipper likely KO'd (unless it U-turned out), Rain still up.",
+     "text": "(1) ATTACK? Pelipper likely attacks: Hydro Pump (rain-boosted) or Hurricane (100% acc in rain), possibly U-turn/Defog. Confidence medium — offensive Rain pivot with a favorable matchup vs my Weezing-Galar.\n(2) SWITCH? Unlikely to switch right after switching in.\n(3) THEIR READ OF ME: sees Weezing-Galar (Poison/Fairy, Levitate), no Electric revealed; expects me to stay or switch.\n(4) MY OPTIONS: Switch to Toxtricity (Electric/Poison) — cleanest line. Cost: forfeit turn, eat one hit (max Hydro Pump 81-96%, Hurricane 27-32%, both survive), no hazards on my side. Gain: OHKOs Pelipper with 4x Wild Charge (203-239%). Rotom-Heat also has the 4x OHKO but is 2x Water-weak, risking the Hydro Pump switch-in; Toxtricity is Water-neutral and safer.\n(5) MOST LIKELY ACTION + RESPONSE: Pelipper attacks; my Toxtricity survives and then OHKOs next turn. Falsifier: Pelipper uses U-turn/Defog into a teammate.\n(6) SEQUENCE: switch to Toxtricity; Pelipper attacks (survive); next turn Toxtricity OHKOs with Wild Charge."
+    },
+    "rounds": 12,
+    "ms": 62553,
+    "fallback": false
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 2,
+    "targetName": "Toxtricity",
+    "worst": {
+     "pctMin": 81,
+     "pctMax": 96,
+     "ko": "guaranteed 2HKO",
+     "move": "Hydro Pump",
+     "error": null
+    },
+    "isSwitch": true
+   }
+  }
+ ]
+}
