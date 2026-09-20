@@ -211,6 +211,13 @@
 
 - [ ] **主脚本 20201227.js 伤害计算对齐 @smogon/calc（等 tool 侧验证后再做）**：tool 侧 calc_damage 已对齐（0.3.37：随机系数→STAB(4096定点)→克制(pokeRound)→extra，6 用例与 @smogon/calc 一致）。主脚本 getMoveDamage 有两处差异：① **随机系数顺序反**——movepow[i]（L2427）算出的是「最大伤害」（1.0x，先 base→克制→STAB 连续乘），别处用 `maxpow * 0.85`（L1042/L1285）算最小伤害；正确应「先随机系数(85-100) 再 STAB 再克制」② **取整方式**——主脚本纯浮点连续乘（无逐步 floor/pokeRound），正确应逐步 floor（随机向下取整、STAB 五舍六入 pokeRound、克制向下取整）。对齐需改 L2427 base damage 公式（`(2*level+10)/250` 等价 `(2*level/5+2)/50`，但 buff 里 atk/def 未逐步 floor）+ 后续克制/STAB/修正链 + getPossibleDamage/analyseCurrentDamage 的 `maxpow*0.85`。注意：主脚本是评分用估算、精度要求低于 tool，可先对齐顺序，逐步 floor 视收益再决定。
 
+- [ ] **主脚本 `disabledAttackSlot` 可能同样有「被拒槽位跨宝可梦串味」（battle94 T20 发现，待验证）**：po-script 侧已修（0.6.11：我方 `onSendOut`/`onKo` 时清空 ban 列表）。主脚本对应实现是 `disabledAttackSlot`（[20201227.js:1402](20201227.js#L1402)）——**同样按槽位记**，清空只发生在 `resetCommandStatus()`（由 **`onOfferChoice`** 调用，[1422-1428](20201227.js#L1422-L1428)、[3764-3765](20201227.js#L3764-L3765)），**没有**按宝可梦作用域。所以「被拒 → 同一回合换人 → 新宝可梦的同号槽位被误禁用」在它那里是否会发生，取决于一个**未验证的点**：PO 在「指令被拒 → 要求重选」时会不会**再触发一次 `onOfferChoice`**？
+  - 会 → `resetCommandStatus()` 顺带把列表清掉 → 主脚本碰巧不受影响（**这可能正是几年数万场没暴露的原因**）。
+  - 只会触发 `onChoiceSelection` → 主脚本有同样的 bug（上一只的禁用槽位套到新上场宝可梦头上，**漏掉最优招**）。
+  - **验证办法**：给 `onOfferChoice` / `onChoiceCancellation` / `onChoiceSelection` 各加一个自增序号心跳（探针脚本已有类似写法），然后**故意点一招被专爱锁住的招**，看同一回合内 `onOfferChoice` 是否出现两次。若确认有 bug，修法照抄本次：在我方 `onSendOut` / `onKo` 里 `disabledAttackSlot = []`（**不要**改成在 `onOfferChoice` 里清 —— 万一重选时也会触发，就会把同回合的禁用清掉、退回「重复点被拒招」的坑）。
+
+- [ ] **重点观察（battle95+，验 0.6.11）**：① 换人/倒下后的那次决策里，**招式列表是否完整**（不再出现「同号槽位被误过滤」）② `state.bannedMoves` 报出的**招名是否与真实被拒的招一致**（之前按当前宝可梦解析槽位号，会把 Rotom 的 Volt Switch 渲染成 Oranguru 的 Psychic）③ 被拒频率（battle94：4/29 决策带 bannedMoves）——其中若有「Trick 换走道具后锁招检测失效」造成的，属**已知不修**的面（见 battle94 条目）。
+
 - [x] ✅ **已完成（0.4.0）** **calc_damage 补全特性/道具/天气/场地等修正（对齐 @smogon，后续做）**：**改成了内嵌官方计算器**（不是手工移植）——把 @smogon/calc v0.11.0 的 `dist/`（MIT，26 文件 ~810KB，零依赖）放进 `po-pokellmon-tool/vendor/smogon-calc/`，`calcOneLeg` 改成「解析入参 → 喂给计算器 → 整理输出」。LLM 新增入参：`attacker/defender` 的 `ability` / `item` / `status`，`leg.field` = `{weather, terrain, reflect, lightScreen, auroraVeil, helpingHand}`；`extra` 保留但与这些**互斥**（同时传报错）。附带白拿：体重类招式（Low Kick/Heavy Slam）、招式专属 BP 回调、`detail.applied` 回显实际生效项、拼错名称提示、默认特性提示。验证：44 例基础 + 29 例修正项差分全一致。详见 README 0.4.0 条目。
 
 - [x] ✅ **已修（0.3.72）** 🟡 **【优先级：中高 —— 与上面「calc_damage 补全特性/道具/天气」合并成一轮「伤害计算全面对齐 @smogon/calc」；同时它也是 learnsets 之外另一处「PO 数据与 PS 口径不一致」的地方】** calc_damage 特殊属性克制招式未处理（实测算错）：（**本轮只修了「特殊属性克制招式」；「特性/道具/天气/场地」那条即上面 L152，仍未做**）`calcOneLeg` 的 typeMult 只做 `CHART[move.type][defType]`，以下 3 个招式的特殊属性克制全错（2026-09-17 实测 vs @smogon/calc）：
