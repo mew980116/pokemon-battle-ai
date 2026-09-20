@@ -181,7 +181,7 @@
   - 已修（**0.6.11，用户发现「T21 为什么点暗影球」**）：**被拒槽位跨宝可梦串味** —— `pklmBannedSlots` 存的是**槽位号**，而 `pklmIsMoveDisabled(m)` 只按槽位过滤**当前场上**这只的招。实测链路（T20）：Rotom-Wash 的 **Volt Switch（slot 0）**被 PO 拒（专爱锁招）→ ban 槽位 0 → 同回合换上 Oranguru，它的 **Psychic 也是 slot 0** → 被误过滤 → prompt 只剩 `Focus Blast / Trick / Shadow Ball` → LLM 只好打 **Shadow Ball（46-55，14%）**；而正解 **Psychic（78-93，23-28%）根本没出现在选项里**（CAUTION 还按当前宝可梦解析槽位号，把这次拒绝渲染成「Psychic 被拒」）。修：我方 `onSendOut`（换人）/`onKo`（倒下补位）时清空 ban 列表 —— 被拒本质是「这只宝可梦的这个槽位不可用」，换人后不适用。
   - 已评估不改（T6：「围巾被 Trick 换走后点水炮/被拒」）：**Trick 换走道具后 `state.me.item` 读成空** → 专爱锁招的**正向**检测（`item ∈ {4,5,6}`）失效 → LLM 看到 4 个招都能点 → 点了被锁的 Volt Switch → 被 PO 拒 → 重决策（46s + 45s）。**用户判断：不修** —— ① 多烧一轮影响有限；② 跨回合保留 ban 列表反而会在道具被换走后变成错误信息；③ 现在这套（被拒→ban 该槽位→重决策）与主脚本 `disabledAttackSlot`（每回合 `resetCommandStatus` 清空 + `checkDisabled` 累积）语义一致，符合既定设计。
   - 待观察：**218s 的单次决策**（29 个决策里最长）离 240s 上限只差 22s —— 是偶发还是「多轮 tool + 长思考」的常态？若常态需考虑压 `MAX_TOOL_ROUNDS` 或给关键回合单独设上限。
-  - **⏳ 待部署（等屏幕解锁后才能做）**：0.6.11 **尚未重贴进 PO**（锁屏时终端拿不到剪贴板）；8092 也还是 **0.4.11**（0.4.12 的 CAUTION 文案修正待重启生效）。解锁后走 `po-client-ops` skill：`set-po-script-clipboard.ps1` → Script Window → Battle scripts → 全选替换 → 复制回来核对 `PKLM_VERSION = "0.6.11"` → OK → 重启 8092。另：PO 里有个 battle94 的**残留对战窗口**待关。
+  - **[x] 待部署项已解决（2026-09-20 核实）**：0.6.11 **已进 PO** —— battle96 实战日志实测 `scriptVersion=0.6.11`（该局 33 回合、`result=1/winner=0` 胜）。8092 也已推进到 **0.5.3**（`max_tool_rounds=35`、tools 含 `simulate_turn`、worklog 关）。battle94 的残留对战窗口已关。
 
 - [x] **battle93 复盘（LLM 打吧服 BOT，胜 6-0；14 回合 / 8 分钟 / script 0.6.10 / server 0.4.10→0.4.11）**：
   - 结果：**胜且零封**（`08:37:45 started → 08:45:43 won`；我方 0 折、对手 6 折）。`0 fallback`；平均 28s / 最长 77s（比前两局快）。**这一局是「重贴 0.6.10 + 重启 8092」之后的第一次实战，日志逐回合确认 `script=0.6.10 / server=0.4.10`** ✓
