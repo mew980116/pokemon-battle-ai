@@ -1,0 +1,374 @@
+{
+ "fixture": "CTRL94-T2",
+ "arm": "CTRL94",
+ "url": "http://127.0.0.1:8098",
+ "n": 5,
+ "when": "2026-09-20T14-15-38",
+ "summary": {
+  "byAction": {
+   "SWITCH→Rotom-Wash": 5
+  },
+  "byVerdict": {
+   "SAFE": 5
+  },
+  "inboundTotal": 0,
+  "simCalls": 6,
+  "branchTotal": 20,
+  "strategyRejections": 0,
+  "gateRejections": 0,
+  "gateUnmet": 0,
+  "gateBypassed": 0,
+  "honestFaints": 0,
+  "behaviorHits": 0,
+  "accident": 0,
+  "nOk": 5
+ },
+ "samples": [
+  {
+   "i": 1,
+   "battleId": "CTRL94-R1",
+   "ms": 26925,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 4
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "SIM",
+      "label": "{\"switch\":4} vs [\"Scald\",\"Ice Beam\",\"Toxic\"]"
+     }
+    ],
+    "inbound": [],
+    "outbound": [],
+    "strategy": {
+     "text": "(1) ATTACK? Milotic is a bulky Water staller, very likely to attack or status: Scald (most likely, resisted by Rotom-Wash), Ice Beam (coverage, neutral), Toxic/Recover (stall). Most likely Scald, moderate confidence — it wants chip+potential burn on Oranguru. (2) SWITCH? Unlikely to switch; it just entered and has favorable matchup stalling a Psychic type. (3) THEIR READ OF ME: knows Oranguru packs Focus Blast (huge Fighting damage), so it will be wary of the Fighting coverage and likely stay in to wear me down / status me, rather than switch something weak to Fighting. (4) MY OPTIONS: Rotom-Wash is the clean switch — Electric/Water resists Scald and Ice Beam neutral, eats everything comfortably (17-20% Scald, 13-15% Ice Beam, immune to Toxic... actually Toxic lands but Rotom can Defog/Volt Switch later; Volt Switch immediately pressures Milotic for super-effective damage + momentum). Cost of switching: forfeit turn, Rotom eats the hit — but takes almost nothing. Gain: immediate super-effective Volt Switch pressure and a wall that Milotic struggles to break. Confident in read (Milotic wants to status/stall, not blow itself up). Not behind — I'm at full team, 5 healthy. Steadier alternative: attack with Oranguru (Focus Blast 1x now, Psychic risks Competitive boost). Switch is clearly better than staying in with a Focus Blast that misses 30% vs a stall wall. (5) MOST LIKELY + RESPONSE: Milotic clicks Scald; my Rotom-Wash comes in, takes ~20%, then Volt Switches next turn for super-effective pressure. Falsifier: if Milotic uses a strong Special attack that chunks Rotom oddly, or reveals Hidden Power/other coverage. (6) SEQUENCE: Rotom switches in eating Scald (~80% left); next turn I Volt Switch into a strong answer or stay and press the super-effective Electric.",
+     "scene": "My Rotom-Wash active ~80-87% HP; Milotic active 100% HP (no stat changes); no hazards/weather; 5 healthy bench + Oranguru 63%.",
+     "checks": "verify Milotic's ability — if Competitive triggers from any stat drop, avoid Psychic/Defog stat-lowering on it; check whether Milotic carries Scald (most likely) vs Toxic vs Ice Beam next turn; confirm Rotom-Wash outspends Milotic (Spe 271 vs 81) for Volt Switch priority.",
+     "action": "switch 4",
+     "branch": "Scald",
+     "outcome": "80-83%"
+    },
+    "rounds": 6,
+    "ms": 26758,
+    "fallback": false,
+    "simCalls": 1,
+    "sims": [
+     {
+      "actionKey": "switch 4",
+      "opp_does": [
+       "Scald",
+       "Ice Beam",
+       "Toxic"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "switch 4",
+    "declaredBranch": "Scald",
+    "declaredOutcome": "80-83%",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 4,
+    "targetName": "Rotom-Wash",
+    "worst": {
+     "pctMin": 17,
+     "pctMax": 20,
+     "ko": "possible 5HKO",
+     "move": "Scald",
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 2,
+   "battleId": "CTRL94-R2",
+   "ms": 33966,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 4
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "me:4 -> Milotic : Volt Switch"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:5 -> Milotic : Moonblast"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":4} vs [\"Ice Beam\",\"Scald\",\"Toxic\",\"Recover\"]"
+     }
+    ],
+    "inbound": [],
+    "outbound": [
+     "me:4 -> Milotic : Volt Switch",
+     "me:5 -> Milotic : Moonblast"
+    ],
+    "strategy": {
+     "text": "(1) ATTACK? Milotic is a bulky wall — likely Scald (burn threat), Ice Beam, Toxic, or Recover. It won't be trying to KO Oranguru (Focus Blast only did 71% to Beartic, and Milotic is bulky). Most likely Scald or a status move to cripple my pivot. (2) SWITCH? No, Milotic just switched in and has no reason to switch out vs Oranguru. (3) THEIR READ OF ME: knows Oranguru (Focus Blast spammer), hasn't seen my bench. (4) MY OPTIONS: Staying Oranguru is bad (can't break Milotic's SpD, risks burn/Toxic). Rotom-Wash is the clean answer — resists Scald, eats Ice Beam (13-15%)/Scald (17-20%) comfortably, Choice Scarf out-speeds, and can Volt Switch (chip ~41-49% + pivot) or Trick the Scarf onto Milotic to permanently cripple a Recover/status-stall set. Primarina resists Water but Moonblast only ~32-38% and lacks the pivot. Rotom is clearly best. (5) MOST LIKELY ACTION + RESPONSE: Milotic Scalds or Toxics/Trick-baits; Rotom switch-in survives all and immediately threatens Volt Switch or Trick. Falsifier: if Milotic reveals a surprise Electric coverage (unlikely, not in movepool). (6) SEQUENCE: I switch Rotom-Wash in, eat Milotic's move, then next turn Volt Switch out (chip ~45%) or Trick to lock it. Rotom survives comfortably.",
+     "scene": "Rotom-Wash on field at ~80-100% HP (vs Scald/Ice Beam/Toxic/Recover respectively), Milotic at 100% (or Recovered). No hazards, no status on my side unless Milotic landed Toxic/para.",
+     "checks": "verify Milotic's move revealed this turn (Scald/Ice Beam/Toxic/Recover) to confirm its set; check if Rotom gets burned by Scald (would matter for its Attack, but it's special so minor)",
+     "action": "switch 4",
+     "branch": "Scald",
+     "outcome": "80-83%"
+    },
+    "rounds": 5,
+    "ms": 33788,
+    "fallback": false,
+    "simCalls": 1,
+    "sims": [
+     {
+      "actionKey": "switch 4",
+      "opp_does": [
+       "Ice Beam",
+       "Scald",
+       "Toxic",
+       "Recover"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "switch 4",
+    "declaredBranch": "Scald",
+    "declaredOutcome": "80-83%",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 4,
+    "targetName": "Rotom-Wash",
+    "worst": {
+     "pctMin": 17,
+     "pctMax": 20,
+     "ko": "possible 5HKO",
+     "move": "Scald",
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 3,
+   "battleId": "CTRL94-R3",
+   "ms": 37452,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 4
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "SIM",
+      "label": "{\"switch\":4} vs [\"Scald\",\"Ice Beam\",\"Toxic\",\"Recover\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Shadow Ball\"} vs [\"Scald\",\"Ice Beam\",\"Toxic\"]"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:4 -> Milotic : Volt Switch"
+     }
+    ],
+    "inbound": [],
+    "outbound": [
+     "me:4 -> Milotic : Volt Switch"
+    ],
+    "strategy": {
+     "text": "(1) ATTACK? Milotic likely attacks with Scald (STAB, threatens burn) or Ice Beam, or uses Toxic/Recover to stall. Its best play vs Oranguru is Scald/Ice Beam. Confidence medium — a bulky Water loves to click Scald for the burn/spread and to chip. (2) SWITCH? Unlikely to switch; Milotic just came in and has a good matchup vs Oranguru. (3) THEIR READ: it knows Oranguru has Focus Blast (2x SE on Beartic) and is a special attacker at 63%; it will treat Oranguru as a broken/semi-healthy mon it can pressure with Scald. It has not seen my bench. (4) MY OPTIONS: Staying in is bad — Shadow Ball only does 13-16% to Milotic while I eat 25-30% from Scald (with burn risk) — a losing trade. Switching to Rotom-Wash costs the turn (eats 13-20% from Scald/Ice Beam, both resisted; Toxic/Recover do nothing) and gains a big threat: Rotom outspeeds Milotic (271 vs <287) and Volt Switch is 2x SE for 34-41%, plus it walls Milotic's STAB entirely. This is the steadiest, highest-value line — I am NOT behind, and I punish their almost-certain Scald/Ice Beam. (5) MOST LIKELY: Scald/Ice Beam; my response is the Rotom-Wash switch which eats it safely. Falsifier: if Milotic reveals something unexpected (e.g. no Scald/Ice Beam, or a Mirror Coat). (6) SEQUENCE: I switch Rotom-Wash in (eats ~13-20%), then next turn Volt Switch for ~40% (Rotom outspeeds) and pivot/hold momentum.",
+     "scene": "Rotom-Wash active at ~80-87% HP (after eating a resisted Scald/Ice Beam), Milotic at 100% (or slightly chipped if it stays), no hazards, no weather. My next decision with Rotom-Wash in vs full Milotic.",
+     "checks": "verify Milotic's first move (Scald vs Ice Beam vs Toxic/Recover) to pin its set; check whether it runs Leftovers (heal message) vs something else; confirm Rohm's Volt Switch really 2x and Milotic doesn't reveal an Electric resist item.",
+     "action": "switch 4",
+     "branch": "Scald",
+     "outcome": "survives"
+    },
+    "rounds": 6,
+    "ms": 37271,
+    "fallback": false,
+    "simCalls": 2,
+    "sims": [
+     {
+      "actionKey": "switch 4",
+      "opp_does": [
+       "Scald",
+       "Ice Beam",
+       "Toxic",
+       "Recover"
+      ]
+     },
+     {
+      "actionKey": "move Shadow Ball",
+      "opp_does": [
+       "Scald",
+       "Ice Beam",
+       "Toxic"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "switch 4",
+    "declaredBranch": "Scald",
+    "declaredOutcome": "survives",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 4,
+    "targetName": "Rotom-Wash",
+    "worst": {
+     "pctMin": 17,
+     "pctMax": 20,
+     "ko": "possible 5HKO",
+     "move": "Scald",
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 4,
+   "battleId": "CTRL94-R4",
+   "ms": 19596,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 4
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "SIM",
+      "label": "{\"switch\":4} vs [\"Scald\",\"Ice Beam\",\"Recover\"]"
+     }
+    ],
+    "inbound": [],
+    "outbound": [],
+    "strategy": {
+     "text": "(1) ATTACK? Likely — Milotic will attack or set up. Candidates: Scald (most likely, spread water move), Ice Beam, or Recover. I'm confident it attacks ~70%; Scald is the default water STAB with a burn chance and hits Oranguru neutrally. (2) SWITCH? Unlikely — it just came in at full HP with no reason to switch. (3) THEIR READ: Oranguru at 63% set up Focus Blast kills; Milotic is a special wall that wants to answer Oranguru, may expect me to keep attacking with Focus Blast/Psychic (neutral). (4) MY OPTIONS: Rotom-Wash switch-in resists Water/Ice 4x vs Water, 2x vs Ice. Costs: forfeit turn, eats one hit (17-20% Scald / 13-15% Ice Beam — no hazards on my side), but gains a Volt Switch that hits Milotic 2x for momentum + free switch. This is the steadier line vs attacking into Marvel Scale Milotic with neutral Focus Blast (only 70% acc). (5) MOST LIKELY: Scald → switch Rotom-Wash tanks it, next turn Volt Switch 2x. Falsifier: if Milotic uses Toxic or Dragon Tail, Rotom still handles well. (6) SEQUENCE: I switch Rotom-Wash, Milotic attacks (tanks), next turn I Volt Switch into a counter.",
+     "scene": "Rotom-Wash active at ~80-87% HP, Milotic at ~100% (or +recover), no hazards either side.",
+     "checks": "verify Milotic's first move (Scald likely) and whether it reveals an item/ability; check if Milotic has Toxic/Dragon Tail/Haze by next turn",
+     "action": "switch 4",
+     "branch": "Scald",
+     "outcome": "survives"
+    },
+    "rounds": 5,
+    "ms": 19330,
+    "fallback": false,
+    "simCalls": 1,
+    "sims": [
+     {
+      "actionKey": "switch 4",
+      "opp_does": [
+       "Scald",
+       "Ice Beam",
+       "Recover"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "switch 4",
+    "declaredBranch": "Scald",
+    "declaredOutcome": "survives",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 4,
+    "targetName": "Rotom-Wash",
+    "worst": {
+     "pctMin": 17,
+     "pctMax": 20,
+     "ko": "possible 5HKO",
+     "move": "Scald",
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 5,
+   "battleId": "CTRL94-R5",
+   "ms": 25566,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 4
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "SIM",
+      "label": "{\"switch\":4} vs [\"Ice Beam\",\"Scald\",\"Mirror Coat\"]"
+     }
+    ],
+    "inbound": [],
+    "outbound": [],
+    "strategy": {
+     "text": "(1) ATTACK? — Milotic likely attacks with Ice Beam or Scald, or uses a utility move (Recover/Haze). It won't Mirror Coat into a switch (no damage). I expect Ice Beam/Scald, ~70% confident; it's pivoting to check what my switch-in is.\n(2) SWITCH? — Milotic just switched in with 100% HP; unlikely to switch out immediately.\n(3) THEIR READ OF ME — it knows my Oranguru (spread moves), has seen nothing else of my team.\n(4) MY OPTIONS — Oranguru's SpA (228) vs Milotic's 125 SpD can't dent it; attacking is a dead end. Switching to Rotom-Wash: cost = forfeit turn + Rotom eats one hit (13-20%), no hazards on my side. Gain = healthy Electric/Water that 2x-threatens Milotic with Volt Switch and resists its STAB — a strong momentum pivot. Confident in read; Rotom-Wash is the natural answer and Primarina also works but Rotom gives offensive momentum. Steadier line exists (Rotom takes ~17% max) so switch is safe, not overextending.\n(5) MOST LIKELY ACTION + RESPONSE — Milotic Ice Beam/Scald; my Rotom-Wash eats it and threatens Volt Switch next turn. Falsifier: if Milotic reveals Mirror Coat/Haze/Competitive setup it changes pressure.\n(6) SEQUENCE — I switch to Rotom-Wash (eats ~17%); next turn Rotom outspeeds (271 vs likely 81-speed Milotic) and Volt Switches for heavy 2x damage or Hydro Pumps.",
+     "scene": "Rotom-Wash active at ~83-87% HP vs Milotic 100%, no hazards, no weather. Rotom-Wash outspeeds.",
+     "checks": "verify Milotic's speed (expect slow, Rotom 271 outspeeds); watch for Mirror Coat/Rest/Competitive reveals; confirm Milotic's offensive pressure is mild (Ice Beam ~13-15% on Rotom).",
+     "action": "switch 4",
+     "branch": "Ice Beam",
+     "outcome": "survives"
+    },
+    "rounds": 5,
+    "ms": 25357,
+    "fallback": false,
+    "simCalls": 1,
+    "sims": [
+     {
+      "actionKey": "switch 4",
+      "opp_does": [
+       "Ice Beam",
+       "Scald",
+       "Mirror Coat"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "switch 4",
+    "declaredBranch": "Ice Beam",
+    "declaredOutcome": "survives",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 4,
+    "targetName": "Rotom-Wash",
+    "worst": {
+     "pctMin": 17,
+     "pctMax": 20,
+     "ko": "possible 5HKO",
+     "move": "Scald",
+     "error": null
+    },
+    "isSwitch": true
+   }
+  }
+ ]
+}

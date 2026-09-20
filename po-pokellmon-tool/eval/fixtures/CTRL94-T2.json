@@ -1,0 +1,601 @@
+{
+ "state": {
+  "account": "「木偶」析构万理的发条公主",
+  "log": true,
+  "battleId": "CTRL94-T2",
+  "scriptVersion": "0.6.10",
+  "turn": 2,
+  "shadow": false,
+  "teamPreview": false,
+  "bannedMoves": [],
+  "bannedSwitches": [],
+  "history": [
+   "You sent out Oranguru. opposing sent out Beartic. [Weather:None, Terrain:None, You:None, Opp:None] ",
+   "Turn 1: You used Focus Blast. It's super effective. opposing Beartic lost 71%. opposing used Icicle Crash. You Oranguru lost 153 HP. Oranguru restored a little HP using its Leftovers!. [Weather:None, Terrain:None, You:None, Opp:None] ",
+   "Turn 2: You used Focus Blast. It's super effective. opposing Beartic lost 53%. opposing's pokemon fainted. Oranguru restored a little HP using its Leftovers!. opposing sent out Milotic. "
+  ],
+  "fullHistory": [
+   "You sent out Oranguru. opposing sent out Beartic. [Weather:None, Terrain:None, You:None, Opp:None] ",
+   "Turn 1: You used Focus Blast. It's super effective. opposing Beartic lost 71%. opposing used Icicle Crash. You Oranguru lost 153 HP. Oranguru restored a little HP using its Leftovers!. [Weather:None, Terrain:None, You:None, Opp:None] ",
+   "Turn 2: You used Focus Blast. It's super effective. opposing Beartic lost 53%. opposing's pokemon fainted. Oranguru restored a little HP using its Leftovers!. opposing sent out Milotic. "
+  ],
+  "messages": [],
+  "oppRemaining": 5,
+  "weather": null,
+  "terrain": null,
+  "myHazards": [],
+  "oppHazards": [],
+  "screens": {
+   "me": [],
+   "opp": []
+  },
+  "opp": {
+   "name": "Milotic",
+   "types": [
+    "Water"
+   ],
+   "hpPct": 100,
+   "status": null,
+   "moves": [],
+   "fainted": false,
+   "abilityInferred": null,
+   "itemInferred": null,
+   "possibleAbilities": [
+    "Marvel Scale",
+    "Competitive",
+    "Cute Charm"
+   ],
+   "boosts": []
+  },
+  "oppTeam": [
+   {
+    "name": "Milotic",
+    "revealed": true,
+    "ko": false,
+    "hpPct": 100,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [
+     "Marvel Scale",
+     "Competitive",
+     "Cute Charm"
+    ],
+    "moves": [],
+    "itemInferred": null
+   },
+   {
+    "name": "Beartic",
+    "revealed": true,
+    "ko": true,
+    "hpPct": null,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [
+     "Snow Cloak",
+     "Slush Rush",
+     "Swift Swim"
+    ],
+    "moves": [
+     {
+      "name": "Icicle Crash",
+      "type": "Ice",
+      "num": 556,
+      "used": 1
+     }
+    ],
+    "itemInferred": null
+   },
+   {
+    "name": null,
+    "revealed": false,
+    "ko": false,
+    "hpPct": null,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [],
+    "moves": [],
+    "itemInferred": null
+   },
+   {
+    "name": null,
+    "revealed": false,
+    "ko": false,
+    "hpPct": null,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [],
+    "moves": [],
+    "itemInferred": null
+   },
+   {
+    "name": null,
+    "revealed": false,
+    "ko": false,
+    "hpPct": null,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [],
+    "moves": [],
+    "itemInferred": null
+   },
+   {
+    "name": null,
+    "revealed": false,
+    "ko": false,
+    "hpPct": null,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [],
+    "moves": [],
+    "itemInferred": null
+   }
+  ],
+  "oppSeen": [
+   "Beartic",
+   "Milotic"
+  ],
+  "me": {
+   "name": "Oranguru",
+   "types": [
+    "Normal",
+    "Psychic"
+   ],
+   "hpPct": 63,
+   "status": null,
+   "moves": [
+    {
+     "slot": 0,
+     "name": "Psychic",
+     "type": "Psychic",
+     "num": 94,
+     "pp": 16
+    },
+    {
+     "slot": 1,
+     "name": "Focus Blast",
+     "type": "Fighting",
+     "num": 411,
+     "pp": 6
+    },
+    {
+     "slot": 2,
+     "name": "Trick",
+     "type": "Psychic",
+     "num": 271,
+     "pp": 16
+    },
+    {
+     "slot": 3,
+     "name": "Shadow Ball",
+     "type": "Ghost",
+     "num": 247,
+     "pp": 24
+    }
+   ],
+   "fainted": false,
+   "boosts": [],
+   "ability": "Inner Focus",
+   "item": "Leftovers"
+  },
+  "myTeam": [
+   {
+    "slot": 0,
+    "name": "Oranguru",
+    "hpPct": 63,
+    "ko": false,
+    "status": null
+   },
+   {
+    "slot": 1,
+    "name": "Jirachi",
+    "hpPct": 100,
+    "ko": false,
+    "status": null
+   },
+   {
+    "slot": 2,
+    "name": "Hitmonlee",
+    "hpPct": 100,
+    "ko": false,
+    "status": null
+   },
+   {
+    "slot": 3,
+    "name": "Weezing-Galar",
+    "hpPct": 100,
+    "ko": false,
+    "status": null
+   },
+   {
+    "slot": 4,
+    "name": "Rotom-Wash",
+    "hpPct": 100,
+    "ko": false,
+    "status": null
+   },
+   {
+    "slot": 5,
+    "name": "Primarina",
+    "hpPct": 100,
+    "ko": false,
+    "status": null
+   }
+  ],
+  "myStats": [
+   {
+    "slot": 0,
+    "name": "Oranguru",
+    "numRef": 765,
+    "level": 100,
+    "ev": [
+     48,
+     48,
+     48,
+     48,
+     48,
+     252
+    ],
+    "iv": [
+     15,
+     31,
+     15,
+     31,
+     15,
+     31
+    ],
+    "nature": 0
+   },
+   {
+    "slot": 1,
+    "name": "Jirachi",
+    "numRef": 385,
+    "level": 100,
+    "ev": [
+     48,
+     48,
+     48,
+     48,
+     48,
+     252
+    ],
+    "iv": [
+     15,
+     31,
+     15,
+     31,
+     15,
+     31
+    ],
+    "nature": 0
+   },
+   {
+    "slot": 2,
+    "name": "Hitmonlee",
+    "numRef": 106,
+    "level": 100,
+    "ev": [
+     48,
+     48,
+     48,
+     48,
+     48,
+     252
+    ],
+    "iv": [
+     15,
+     31,
+     15,
+     31,
+     15,
+     31
+    ],
+    "nature": 0
+   },
+   {
+    "slot": 3,
+    "name": "Weezing-Galar",
+    "numRef": 65646,
+    "level": 100,
+    "ev": [
+     48,
+     48,
+     48,
+     48,
+     48,
+     252
+    ],
+    "iv": [
+     15,
+     31,
+     15,
+     31,
+     15,
+     31
+    ],
+    "nature": 0
+   },
+   {
+    "slot": 4,
+    "name": "Rotom-Wash",
+    "numRef": 262623,
+    "level": 100,
+    "ev": [
+     48,
+     48,
+     48,
+     48,
+     48,
+     252
+    ],
+    "iv": [
+     15,
+     31,
+     15,
+     31,
+     15,
+     31
+    ],
+    "nature": 0
+   },
+   {
+    "slot": 5,
+    "name": "Primarina",
+    "numRef": 730,
+    "level": 100,
+    "ev": [
+     48,
+     48,
+     48,
+     48,
+     48,
+     252
+    ],
+    "iv": [
+     15,
+     31,
+     15,
+     31,
+     15,
+     31
+    ],
+    "nature": 0
+   }
+  ],
+  "bench": [
+   {
+    "slot": 1,
+    "name": "Jirachi",
+    "numRef": 385,
+    "unrevealed": true,
+    "types": [
+     "Steel",
+     "Psychic"
+    ],
+    "hpPct": 100,
+    "status": null,
+    "moves": [
+     {
+      "slot": 0,
+      "name": "Iron Head",
+      "type": "Steel",
+      "num": 442,
+      "pp": 24
+     },
+     {
+      "slot": 1,
+      "name": "Thunder Wave",
+      "type": "Electric",
+      "num": 86,
+      "pp": 32
+     },
+     {
+      "slot": 2,
+      "name": "U-turn",
+      "type": "Bug",
+      "num": 369,
+      "pp": 32
+     },
+     {
+      "slot": 3,
+      "name": "Stealth Rock",
+      "type": "Rock",
+      "num": 446,
+      "pp": 32
+     }
+    ],
+    "ability": "Serene Grace",
+    "item": "Leftovers"
+   },
+   {
+    "slot": 2,
+    "name": "Hitmonlee",
+    "numRef": 106,
+    "unrevealed": true,
+    "types": [
+     "Fighting"
+    ],
+    "hpPct": 100,
+    "status": null,
+    "moves": [
+     {
+      "slot": 0,
+      "name": "High Jump Kick",
+      "type": "Fighting",
+      "num": 136,
+      "pp": 16
+     },
+     {
+      "slot": 1,
+      "name": "Knock Off",
+      "type": "Dark",
+      "num": 282,
+      "pp": 32
+     },
+     {
+      "slot": 2,
+      "name": "Stone Edge",
+      "type": "Rock",
+      "num": 444,
+      "pp": 8
+     },
+     {
+      "slot": 3,
+      "name": "Poison Jab",
+      "type": "Poison",
+      "num": 398,
+      "pp": 32
+     }
+    ],
+    "ability": "Reckless",
+    "item": "Choice Scarf"
+   },
+   {
+    "slot": 3,
+    "name": "Weezing-Galar",
+    "numRef": 65646,
+    "unrevealed": true,
+    "types": [
+     "Poison",
+     "Fairy"
+    ],
+    "hpPct": 100,
+    "status": null,
+    "moves": [
+     {
+      "slot": 0,
+      "name": "Strange Steam",
+      "type": "Fairy",
+      "num": 790,
+      "pp": 16
+     },
+     {
+      "slot": 1,
+      "name": "Will-O-Wisp",
+      "type": "Fire",
+      "num": 261,
+      "pp": 24
+     },
+     {
+      "slot": 2,
+      "name": "Defog",
+      "type": "Flying",
+      "num": 432,
+      "pp": 24
+     },
+     {
+      "slot": 3,
+      "name": "Toxic",
+      "type": "Poison",
+      "num": 92,
+      "pp": 16
+     }
+    ],
+    "ability": "Levitate",
+    "item": "Black Sludge"
+   },
+   {
+    "slot": 4,
+    "name": "Rotom-Wash",
+    "numRef": 262623,
+    "unrevealed": true,
+    "types": [
+     "Electric",
+     "Water"
+    ],
+    "hpPct": 100,
+    "status": null,
+    "moves": [
+     {
+      "slot": 0,
+      "name": "Volt Switch",
+      "type": "Electric",
+      "num": 521,
+      "pp": 32
+     },
+     {
+      "slot": 1,
+      "name": "Hydro Pump",
+      "type": "Water",
+      "num": 56,
+      "pp": 8
+     },
+     {
+      "slot": 2,
+      "name": "Trick",
+      "type": "Psychic",
+      "num": 271,
+      "pp": 16
+     },
+     {
+      "slot": 3,
+      "name": "Defog",
+      "type": "Flying",
+      "num": 432,
+      "pp": 24
+     }
+    ],
+    "ability": "Levitate",
+    "item": "Choice Scarf"
+   },
+   {
+    "slot": 5,
+    "name": "Primarina",
+    "numRef": 730,
+    "unrevealed": true,
+    "types": [
+     "Water",
+     "Fairy"
+    ],
+    "hpPct": 100,
+    "status": null,
+    "moves": [
+     {
+      "slot": 0,
+      "name": "Sparkling Aria",
+      "type": "Water",
+      "num": 644,
+      "pp": 16
+     },
+     {
+      "slot": 1,
+      "name": "Moonblast",
+      "type": "Fairy",
+      "num": 572,
+      "pp": 24
+     },
+     {
+      "slot": 2,
+      "name": "Encore",
+      "type": "Normal",
+      "num": 227,
+      "pp": 8
+     },
+     {
+      "slot": 3,
+      "name": "Psychic",
+      "type": "Psychic",
+      "num": 94,
+      "pp": 16
+     }
+    ],
+    "ability": "Torrent",
+    "item": "Leftovers"
+   }
+  ],
+  "replayOfTurn": 2
+ },
+ "eval": {
+  "note": "正确换人对照：Oranguru 换 Rotom-Wash 进 Milotic，旧决策=switch pokeSlot4。用于测门禁会不会误拦合理换人",
+  "threatMoves": [
+   "Scald",
+   "Ice Beam",
+   "Haze"
+  ],
+  "opp": "Milotic",
+  "expectSafeSlots": [
+   -1
+  ],
+  "accidentSlot": -1,
+  "name": "CTRL94-T2"
+ }
+}

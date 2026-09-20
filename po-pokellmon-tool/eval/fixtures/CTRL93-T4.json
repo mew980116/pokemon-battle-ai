@@ -1,0 +1,613 @@
+{
+ "state": {
+  "account": "「木偶」析构万理的发条公主",
+  "log": true,
+  "battleId": "CTRL93-T4",
+  "scriptVersion": "0.6.10",
+  "turn": 4,
+  "shadow": false,
+  "teamPreview": false,
+  "bannedMoves": [],
+  "bannedSwitches": [],
+  "history": [
+   "You sent out Toxapex. opposing sent out Blissey. [Weather:None, Terrain:None, You:None, Opp:None] ",
+   "Turn 1: opposing called back its pokemon. opposing sent out Hydreigon. You used Knock Off. It's not very effective. opposing Hydreigon lost 8%. Toxapex knocked off Hydreigon's Rocky Helmet!. [Weather:None, Terrain:None, You:None, Opp:None] ",
+   "Turn 2: opposing called back its pokemon. opposing sent out Magearna-Original. You called back its pokemon. You sent out Tapu Koko. [Weather:None, Terrain:Electric Terrain, You:None, Opp:None] ",
+   "Turn 3: opposing called back its pokemon. opposing sent out Blissey. You used Volt Switch. opposing Blissey lost 21%. You called back its pokemon. You sent out Melmetal. [Weather:None, Terrain:Electric Terrain, You:None, Opp:None] ",
+   "Turn 4: opposing used Soft-Boiled. Blissey regained health!. You used Double Iron Bash. opposing Blissey lost 39%. opposing Blissey lost 35%. "
+  ],
+  "fullHistory": [
+   "You sent out Toxapex. opposing sent out Blissey. [Weather:None, Terrain:None, You:None, Opp:None] ",
+   "Turn 1: opposing called back its pokemon. opposing sent out Hydreigon. You used Knock Off. It's not very effective. opposing Hydreigon lost 8%. Toxapex knocked off Hydreigon's Rocky Helmet!. [Weather:None, Terrain:None, You:None, Opp:None] ",
+   "Turn 2: opposing called back its pokemon. opposing sent out Magearna-Original. You called back its pokemon. You sent out Tapu Koko. [Weather:None, Terrain:Electric Terrain, You:None, Opp:None] ",
+   "Turn 3: opposing called back its pokemon. opposing sent out Blissey. You used Volt Switch. opposing Blissey lost 21%. You called back its pokemon. You sent out Melmetal. [Weather:None, Terrain:Electric Terrain, You:None, Opp:None] ",
+   "Turn 4: opposing used Soft-Boiled. Blissey regained health!. You used Double Iron Bash. opposing Blissey lost 39%. opposing Blissey lost 35%. "
+  ],
+  "messages": [],
+  "oppRemaining": 6,
+  "weather": null,
+  "terrain": "Electric Terrain",
+  "myHazards": [],
+  "oppHazards": [],
+  "screens": {
+   "me": [],
+   "opp": []
+  },
+  "opp": {
+   "name": "Blissey",
+   "types": [
+    "Normal"
+   ],
+   "hpPct": 24,
+   "status": null,
+   "moves": [
+    {
+     "name": "Soft-Boiled",
+     "type": "Normal",
+     "num": 135,
+     "used": 1
+    }
+   ],
+   "fainted": false,
+   "abilityInferred": null,
+   "itemInferred": null,
+   "possibleAbilities": [
+    "Natural Cure",
+    "Serene Grace",
+    "Curious Medicine"
+   ],
+   "boosts": []
+  },
+  "oppTeam": [
+   {
+    "name": "Blissey",
+    "revealed": true,
+    "ko": false,
+    "hpPct": 24,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [
+     "Natural Cure",
+     "Serene Grace",
+     "Curious Medicine"
+    ],
+    "moves": [
+     {
+      "name": "Soft-Boiled",
+      "type": "Normal",
+      "num": 135,
+      "used": 1
+     }
+    ],
+    "itemInferred": null
+   },
+   {
+    "name": null,
+    "revealed": false,
+    "ko": false,
+    "hpPct": null,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [],
+    "moves": [],
+    "itemInferred": null
+   },
+   {
+    "name": "Hydreigon",
+    "revealed": true,
+    "ko": false,
+    "hpPct": 91,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [
+     "Levitate"
+    ],
+    "moves": [],
+    "itemInferred": "Rocky Helmet"
+   },
+   {
+    "name": null,
+    "revealed": false,
+    "ko": false,
+    "hpPct": null,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [],
+    "moves": [],
+    "itemInferred": null
+   },
+   {
+    "name": null,
+    "revealed": false,
+    "ko": false,
+    "hpPct": null,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [],
+    "moves": [],
+    "itemInferred": null
+   },
+   {
+    "name": "Magearna-Original",
+    "revealed": true,
+    "ko": false,
+    "hpPct": 100,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [
+     "Soul-Heart"
+    ],
+    "moves": [],
+    "itemInferred": null
+   }
+  ],
+  "oppSeen": [
+   "Blissey",
+   "Hydreigon",
+   "Magearna-Original"
+  ],
+  "me": {
+   "name": "Melmetal",
+   "types": [
+    "Steel"
+   ],
+   "hpPct": 100,
+   "status": null,
+   "moves": [
+    {
+     "slot": 0,
+     "name": "Protect",
+     "type": "Normal",
+     "num": 182,
+     "pp": 16
+    },
+    {
+     "slot": 1,
+     "name": "Double Iron Bash",
+     "type": "Steel",
+     "num": 742,
+     "pp": 7
+    },
+    {
+     "slot": 2,
+     "name": "Earthquake",
+     "type": "Ground",
+     "num": 89,
+     "pp": 16
+    },
+    {
+     "slot": 3,
+     "name": "Toxic",
+     "type": "Poison",
+     "num": 92,
+     "pp": 16
+    }
+   ],
+   "fainted": false,
+   "boosts": [],
+   "ability": "Iron Fist",
+   "item": "Leftovers"
+  },
+  "myTeam": [
+   {
+    "slot": 0,
+    "name": "Melmetal",
+    "hpPct": 100,
+    "ko": false,
+    "status": null
+   },
+   {
+    "slot": 1,
+    "name": "Tapu Koko",
+    "hpPct": 100,
+    "ko": false,
+    "status": null
+   },
+   {
+    "slot": 2,
+    "name": "Garchomp",
+    "hpPct": 100,
+    "ko": false,
+    "status": null
+   },
+   {
+    "slot": 3,
+    "name": "Hawlucha",
+    "hpPct": 100,
+    "ko": false,
+    "status": null
+   },
+   {
+    "slot": 4,
+    "name": "Toxapex",
+    "hpPct": 100,
+    "ko": false,
+    "status": null
+   },
+   {
+    "slot": 5,
+    "name": "Cinderace",
+    "hpPct": 100,
+    "ko": false,
+    "status": null
+   }
+  ],
+  "myStats": [
+   {
+    "slot": 0,
+    "name": "Melmetal",
+    "numRef": 809,
+    "level": 100,
+    "ev": [
+     0,
+     252,
+     0,
+     0,
+     244,
+     12
+    ],
+    "iv": [
+     31,
+     31,
+     31,
+     31,
+     31,
+     31
+    ],
+    "nature": 3
+   },
+   {
+    "slot": 1,
+    "name": "Tapu Koko",
+    "numRef": 785,
+    "level": 100,
+    "ev": [
+     0,
+     0,
+     0,
+     252,
+     4,
+     252
+    ],
+    "iv": [
+     31,
+     31,
+     31,
+     31,
+     31,
+     31
+    ],
+    "nature": 10
+   },
+   {
+    "slot": 2,
+    "name": "Garchomp",
+    "numRef": 445,
+    "level": 100,
+    "ev": [
+     252,
+     0,
+     200,
+     0,
+     0,
+     56
+    ],
+    "iv": [
+     31,
+     31,
+     31,
+     31,
+     31,
+     31
+    ],
+    "nature": 13
+   },
+   {
+    "slot": 3,
+    "name": "Hawlucha",
+    "numRef": 701,
+    "level": 100,
+    "ev": [
+     0,
+     252,
+     0,
+     0,
+     4,
+     252
+    ],
+    "iv": [
+     31,
+     31,
+     31,
+     31,
+     31,
+     31
+    ],
+    "nature": 13
+   },
+   {
+    "slot": 4,
+    "name": "Toxapex",
+    "numRef": 748,
+    "level": 100,
+    "ev": [
+     252,
+     0,
+     252,
+     0,
+     4,
+     0
+    ],
+    "iv": [
+     31,
+     31,
+     31,
+     31,
+     31,
+     31
+    ],
+    "nature": 5
+   },
+   {
+    "slot": 5,
+    "name": "Cinderace",
+    "numRef": 815,
+    "level": 100,
+    "ev": [
+     0,
+     252,
+     4,
+     0,
+     0,
+     252
+    ],
+    "iv": [
+     31,
+     31,
+     31,
+     31,
+     31,
+     31
+    ],
+    "nature": 13
+   }
+  ],
+  "bench": [
+   {
+    "slot": 1,
+    "name": "Tapu Koko",
+    "numRef": 785,
+    "unrevealed": false,
+    "types": [
+     "Electric",
+     "Fairy"
+    ],
+    "hpPct": 100,
+    "status": null,
+    "moves": [
+     {
+      "slot": 0,
+      "name": "Thunderbolt",
+      "type": "Electric",
+      "num": 85,
+      "pp": 24
+     },
+     {
+      "slot": 1,
+      "name": "Volt Switch",
+      "type": "Electric",
+      "num": 521,
+      "pp": 31
+     },
+     {
+      "slot": 2,
+      "name": "Dazzling Gleam",
+      "type": "Fairy",
+      "num": 563,
+      "pp": 16
+     },
+     {
+      "slot": 3,
+      "name": "Grass Knot",
+      "type": "Grass",
+      "num": 447,
+      "pp": 32
+     }
+    ],
+    "ability": "Electric Surge",
+    "item": "Choice Specs"
+   },
+   {
+    "slot": 2,
+    "name": "Garchomp",
+    "numRef": 445,
+    "unrevealed": true,
+    "types": [
+     "Dragon",
+     "Ground"
+    ],
+    "hpPct": 100,
+    "status": null,
+    "moves": [
+     {
+      "slot": 0,
+      "name": "Stealth Rock",
+      "type": "Rock",
+      "num": 446,
+      "pp": 32
+     },
+     {
+      "slot": 1,
+      "name": "Earthquake",
+      "type": "Ground",
+      "num": 89,
+      "pp": 16
+     },
+     {
+      "slot": 2,
+      "name": "Toxic",
+      "type": "Poison",
+      "num": 92,
+      "pp": 16
+     },
+     {
+      "slot": 3,
+      "name": "Endure",
+      "type": "Normal",
+      "num": 203,
+      "pp": 16
+     }
+    ],
+    "ability": "Rough Skin",
+    "item": "Rocky Helmet"
+   },
+   {
+    "slot": 3,
+    "name": "Hawlucha",
+    "numRef": 701,
+    "unrevealed": true,
+    "types": [
+     "Fighting",
+     "Flying"
+    ],
+    "hpPct": 100,
+    "status": null,
+    "moves": [
+     {
+      "slot": 0,
+      "name": "Acrobatics",
+      "type": "Flying",
+      "num": 512,
+      "pp": 24
+     },
+     {
+      "slot": 1,
+      "name": "Close Combat",
+      "type": "Fighting",
+      "num": 370,
+      "pp": 8
+     },
+     {
+      "slot": 2,
+      "name": "Swords Dance",
+      "type": "Normal",
+      "num": 14,
+      "pp": 32
+     },
+     {
+      "slot": 3,
+      "name": "Encore",
+      "type": "Normal",
+      "num": 227,
+      "pp": 8
+     }
+    ],
+    "ability": "Unburden",
+    "item": "Electric Seed"
+   },
+   {
+    "slot": 4,
+    "name": "Toxapex",
+    "numRef": 748,
+    "unrevealed": false,
+    "types": [
+     "Poison",
+     "Water"
+    ],
+    "hpPct": 100,
+    "status": null,
+    "moves": [
+     {
+      "slot": 0,
+      "name": "Scald",
+      "type": "Water",
+      "num": 503,
+      "pp": 24
+     },
+     {
+      "slot": 1,
+      "name": "Recover",
+      "type": "Normal",
+      "num": 105,
+      "pp": 16
+     },
+     {
+      "slot": 2,
+      "name": "Haze",
+      "type": "Ice",
+      "num": 114,
+      "pp": 48
+     },
+     {
+      "slot": 3,
+      "name": "Knock Off",
+      "type": "Dark",
+      "num": 282,
+      "pp": 31
+     }
+    ],
+    "ability": "Regenerator",
+    "item": "Rocky Helmet"
+   },
+   {
+    "slot": 5,
+    "name": "Cinderace",
+    "numRef": 815,
+    "unrevealed": true,
+    "types": [
+     "Fire"
+    ],
+    "hpPct": 100,
+    "status": null,
+    "moves": [
+     {
+      "slot": 0,
+      "name": "U-turn",
+      "type": "Bug",
+      "num": 369,
+      "pp": 32
+     },
+     {
+      "slot": 1,
+      "name": "Pyro Ball",
+      "type": "Fire",
+      "num": 780,
+      "pp": 8
+     },
+     {
+      "slot": 2,
+      "name": "Iron Head",
+      "type": "Steel",
+      "num": 442,
+      "pp": 24
+     },
+     {
+      "slot": 3,
+      "name": "Gunk Shot",
+      "type": "Poison",
+      "num": 441,
+      "pp": 8
+     }
+    ],
+    "ability": "Protean/Libero",
+    "item": "Life Orb"
+   }
+  ],
+  "replayOfTurn": 4
+ },
+ "eval": {
+  "note": "平凡回合对照：Melmetal vs Blissey(残血)，旧决策=直接攻击收掉。用于测门禁在简单回合是否加摩擦",
+  "threatMoves": [
+   "Seismic Toss",
+   "Ice Beam",
+   "Thunderbolt",
+   "Flamethrower"
+  ],
+  "opp": "Blissey",
+  "expectSafeSlots": [
+   -1
+  ],
+  "accidentSlot": -1,
+  "name": "CTRL93-T4"
+ }
+}
