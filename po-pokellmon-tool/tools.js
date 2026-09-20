@@ -772,14 +772,27 @@ function myItemOf(state, slot) {
     var b = slotEntry(state.bench, slot);
     return (b && b.item) || null;
 }
-// 对手速度只能用区间（EV/性格未知）：0IV/0EV/降性格 ~ 31IV/252EV/升性格
+// 对手速度只能用区间（EV/性格未知）：按标准 IV31，0EV/降性格 ~ 252EV/升性格
 function oppSpeedRange(pokeName) {
     var r = resolvePokemonInput({ poke: pokeName });
     if (!r || r.error || !r.baseStats) return null;
     var bs = r.baseStats;
     var base = Array.isArray(bs) ? bs[5] : (bs && bs.spe);
     if (base === undefined || base === null) return null;
-    return { min: Math.floor((2 * base + 5) * 0.9), max: Math.floor((2 * base + 31 + 63 + 5) * 1.1) };
+    return { min: Math.floor((2 * base + 31 + 5) * 0.9), max: Math.floor((2 * base + 31 + 63 + 5) * 1.1) };
+}
+// 我方速度：state.myStats 只给 ev/iv/nature（没有算好的能力值），必须用 effectiveStat 现算；围巾按已知道具×1.5
+function mySpeedOf(state, slot, boosts) {
+    var ms = myStatOf(state, slot);
+    if (!ms || !ms.name) return null;
+    var r = resolvePokemonInput({ poke: ms.name });
+    if (!r || r.error || !r.baseStats) return null;
+    var spe = null;
+    try {
+        spe = effectiveStat(r.baseStats, ms.level || 100, ms.ev, ms.iv, resolveNature({ nature: ms.nature }), boosts || {}, 5);
+    } catch (e) { return null; }
+    if (spe && String(myItemOf(state, slot) || '').toLowerCase().indexOf('choice scarf') >= 0) spe = Math.floor(spe * 1.5);
+    return spe;
 }
 function movePriorityByName(name) {
     var rm = resolveMoveInput({ name: name });
@@ -875,10 +888,7 @@ function simulateTurn(args, ctx) {
             else row.order = 'they switch first (switch phase), then your move lands on the pokemon they bring in';
         } else {
             var myPrio = movePriorityByName(mine.move), theirPrio = movePriorityByName(br.move);
-            var myStat = myStatOf(state, 0);
-            var mySpe = myStat && myStat.stats ? myStat.stats.spe : null;
-            var scarfMine = String(myItemOf(state, 0) || '').toLowerCase().indexOf('choice scarf') >= 0;
-            if (mySpe && scarfMine) mySpe = Math.floor(mySpe * 1.5);
+            var mySpe = mySpeedOf(state, 0, null);
             var osr = oppSpeedRange(oppActive);
             if (myPrio !== theirPrio) {
                 row.order = (myPrio > theirPrio ? 'you move first (priority ' + myPrio + ' vs ' + theirPrio + ')' : 'they move first (priority ' + theirPrio + ' vs ' + myPrio + ')');
