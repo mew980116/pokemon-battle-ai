@@ -20,7 +20,7 @@
 
 1. 接收 PO 采集的 `state` → 拼 prompt + `tools` 定义
 2. 调 DeepSeek（默认无思考；首回合开 low 思考 + tool）
-3. 若返回 `tool_calls` → 执行 tool → 结果追加进 messages → 再调（最多 `MAX_TOOL_ROUNDS=25` 轮）
+3. 若返回 `tool_calls` → 执行 tool → 结果追加进 messages → 再调（最多 `MAX_TOOL_ROUNDS=35` 轮）
 4. 直到返回最终 `{"choice":N}` → 解析成 slot 动作
 
 **tool**（[tools.js](tools.js)，20 个；当前暴露 19 个）：
@@ -89,6 +89,11 @@
 - **DeepSeek 请求必须压「硬墙钟」超时（0.6.1，真 bug）**：原来只有 `req.setTimeout(TIMEOUT_MS)`——那是**空闲超时**（socket idle），连接上只要有零星保活/分块流量就**永远不触发**。
   - 实测（2026-09-20 battle98 T11）：`api.deepseek.com`（117.185.125.154）的连接从 23:42:00 建起到 23:51:24 **仍 Established（564s）**，240s 空闲超时没掐，PO 侧 `sys.synchronousWebCall` 一直阻塞，面板停在「实时 503s 思考中…」。
   - 现在另加一个 `setTimeout` 硬墙钟 deadline（同一时长，`done()` 保证 cb 只回调一次、`res.on('error')` 也接住）。PO 侧兜底：**单次失败→`pklmFallbackAttack()`**，连续 3 次且跨度 >15s 才会认输。
+- **整回合时长上限（0.6.2）**：单请求硬超时管不住"一个回合跑很多轮"，battle98 T11 实测整回合 663s（9 轮里 2 个"无 tool 的纯生成轮"各占 ~300s）。
+  - `MAX_TURN_MS = 120000`（首回合 `MAX_TURN_MS_T0 = 180000`，因为 T0 是唯一开思考的回合、实测最坏 118s）。到点走 `finalizeNoThink('turn_deadline')`，如实标 `gateBypassed = true`。
+  - 选 120s 的依据（当前架构 battle93-98，n=137）：中位 36s、平均 54s，**>120s 只有 5%**（7 个，都是轮数最多的最难回合）。
+  - `TURN_DEADLINE` 同时被 `callDeepSeek` 用来把单请求硬超时夹成 `min(TIMEOUT_MS, 剩余预算)`；`attempt()` 里**剩余预算 <15s 不再重试**，直接 `fallbackAction(state,'budget_exhausted')`——否则"超时后重试 3 次"最坏会撑到 3×240s。
+  - 配套落盘字段：`fallbackReason`（之前只记 `fallback: true`，看不出是 parse_failed / error / budget_exhausted）与 `dsRequests`（含重试的请求数）。
 - **默认值的偏向必须给出来（0.6.0）**：两类"默认值会给出自信的错误数字"的情况，不再让模型自己猜：
   - `item_note`：**打落（Knock Off）/ 灵骚（Poltergeist）** 这类「目标持道具会改变威力」的招，**目标道具未知时两个值都给**（`if the target holds an item` / `if it holds none`）；道具已知时只给一个（由 `sideItemKnown` 判定，并去掉两个值相同的冗余情况）。
   - `ev_note` + `mine.hp_after_max_investment`：**对手当攻击方**且本回合没传 `assume` 时，除默认 0EV 外**再给一个「252 + 升性格」锚点**，并把 `faints` **保守化**（两个锚点里更坏的算）。

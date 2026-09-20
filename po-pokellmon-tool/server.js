@@ -65,7 +65,7 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.6.1';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
+var SERVER_VERSION = '0.6.2';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
 
 // ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
 // 对战主脑用 v4-pro（闭卷深想强，决策更深）；一键回 flash：POKELLMON_MODEL=deepseek-v4-flash
@@ -75,10 +75,25 @@ var REASONING_EFFORT = 'low';           // 仅在 THINKING_ENABLED=true 时生�
 var FIRST_TURN_THINKING = true;         // 首回合（turn 0）单独开思考，之后沿用上面的全局设置
 var FIRST_TURN_EFFORT = 'low';          // 首回合思考强度（low/high/max）
 var MAX_TOKENS = null;                  // 不限制输出 token（思考链 + 最终答案）
-var TIMEOUT_MS = 240000;                // 放宽：240s（tool 多轮往返慢）
+var TIMEOUT_MS = 240000;                // 单次请求的硬墙钟上限（不设 max_tokens，8192 是服务端默认）
 var MAX_TOOL_ROUNDS = 35;               // 最多 function calling 轮数，超过则 no-think 收敛（门禁要 predict+验算+可能打回，25 实测会被打满）
-var MAX_TURN_MS = 0;                    // 单回合总时长上限（0=禁用 no-think 收尾；实测 webCall 120s 不超时，暂不需要兜底）
+// 单回合总时长上限：到点走 finalizeNoThink()（关思考、用已有 tool 结果收答案）。
+// 2026-09-20 统计（当前架构 battle93-98，n=137）：中位 36s、平均 54s，>120s 只有 5%（7 个，且都是最难/轮数最多的回合）。
+// 之前是 0（禁用），结果 battle98 T11 跑了 663s 才结束 —— 单请求超时管不到整回合，必须有这道闸。
+var MAX_TURN_MS = 120000;
+// 首回合（唯一开思考的回合，FIRST_TURN_THINKING）单独放宽：实测 battle91-98 的 T0 最坏已到 118s（battle98），
+// 贴着 120s 上限，不放宽的话开局决策会经常被兜底砍掉。
+var MAX_TURN_MS_T0 = 180000;
+// 本回合的绝对截止时刻（0=不限）。callDeepSeek 用它把单请求硬超时压成 min(TIMEOUT_MS, 剩余预算)，
+// 这样"超时后重试 3 次"也不会把整回合撑爆（否则最坏 3×240s）。
+var TURN_DEADLINE = 0;
+var dsRequests = 0;                     // 本回合已发出的 DeepSeek 请求数（含重试），写进日志
 var RETRY_DELAYS = [2000, 5000, 10000]; // 单次请求失败后的重试延迟：第1次2s、第2次5s、第3次10s（第3次降级 no think），再失败 fallback
+
+// 本回合的时长上限：首回合（唯一开思考）单独放宽，其余走 MAX_TURN_MS。0 = 不限。
+function turnCapMs(state) {
+    return (state && state.turn === 0) ? MAX_TURN_MS_T0 : MAX_TURN_MS;
+}
 
 // system prompt 结构：战术底色（BATTLE_TIPS）+ 每回合工作流（WORKFLOW）+ 一句 tool 指引。
 // 各 tool 的「何时调用 / 怎么用」下沉到 tools.js 的 tool description（tool helper），避免 system prompt 膨胀。
@@ -186,6 +201,9 @@ function callDeepSeek(messages, noThink, cb, opts) {
     // ⚠ req.setTimeout 是**空闲超时**（socket idle），不是墙钟上限：连接上只要有零星保活/分块流量，
     // 它就永远不触发（实测 2026-09-20 battle98 T11：一个请求挂了 564s 仍未掐，PO 侧同步 webCall 一直卡着，
     // 面板停在「实时 503s 思考中」）。所以必须再压一个**硬墙钟 deadline**，并保证回调只发生一次。
+    // 而且这个硬超时取 min(TIMEOUT_MS, 本回合剩余预算) —— 否则"超时后重试 3 次"最坏会把整回合撑到 3×240s。
+    var timeoutMs = TIMEOUT_MS;
+    if (TURN_DEADLINE > 0) timeoutMs = Math.max(1000, Math.min(TIMEOUT_MS, TURN_DEADLINE - Date.now()));
     var settled = false;
     function done(err, code, d) {
         if (settled) return;
@@ -194,9 +212,9 @@ function callDeepSeek(messages, noThink, cb, opts) {
         cb(err, code, d);
     }
     var hardTimer = setTimeout(function () {
-        req.destroy(new Error('deepseek hard timeout (' + TIMEOUT_MS + 'ms wall clock)'));
-    }, TIMEOUT_MS);
-    req.setTimeout(TIMEOUT_MS, function () {
+        req.destroy(new Error('deepseek hard timeout (' + timeoutMs + 'ms' + (TURN_DEADLINE > 0 ? ', turn deadline clamped' : '') + ')'));
+    }, timeoutMs);
+    req.setTimeout(timeoutMs, function () {
         req.destroy(new Error('deepseek idle timeout'));
     });
     req.on('error', function (e) { done(e); });
@@ -687,6 +705,8 @@ function handleChoice(res, state) {
     ];
     var rounds = 0;
     var startTime = Date.now();
+    TURN_DEADLINE = turnCapMs(state) > 0 ? (startTime + turnCapMs(state)) : 0;   // callDeepSeek 用它压单请求硬超时
+    dsRequests = 0;                                                   // 本回合实际发出的 DeepSeek 请求数（含重试），写进日志便于查"重试链吃掉了多少时间"
     var toolLog = [];        // 记录每轮 tool 调用
     var lastUsage = null;
     var lastReply = '';
@@ -709,6 +729,8 @@ function handleChoice(res, state) {
             toolLog: toolLog,
             usage: lastUsage,
             fallback: !!action.fallback,
+            fallbackReason: action.fallback ? (action.reason || '?') : '',   // 之前只记 `true`，看不出是 parse_failed / error / budget_exhausted
+            dsRequests: dsRequests,                                          // 本回合发出的 DeepSeek 请求数（含重试）—— 用于查"重试链吃掉了多少时间"
             gateUnmet: !!action.gateUnmet,
             gateBypassed: gateBypassed,
             ledger: ledger,
@@ -732,9 +754,12 @@ function handleChoice(res, state) {
     function loop() {
         rounds++;
         // 快到点：剩余预算不够再跑一轮 tool，直接 no-think 收尾（messages 已含前面所有 tool 结果）
-        if (MAX_TURN_MS > 0 && (Date.now() - startTime) >= MAX_TURN_MS) {
-            console.log('[choice] turn=' + state.turn + ' deadline ' + MAX_TURN_MS + 'ms hit, final no-think');
-            finalizeNoThink();
+        var capMs = turnCapMs(state);
+        if (capMs > 0 && (Date.now() - startTime) >= capMs) {
+            console.log('[choice] turn=' + state.turn + ' deadline ' + capMs + 'ms hit, final no-think');
+            // 这条路径**绕过**最终答案层的门禁（它不经过 actionGateCheck）—— 如实标记，便于统计"有多少决策是被兜底放过的"
+            if (ENABLE_PREDICT_GATE && ledger) gateBypassed = true;
+            finalizeNoThink('turn_deadline');
             return;
         }
         attempt(0);
@@ -782,10 +807,18 @@ function handleChoice(res, state) {
     function attempt(retryIdx) {
         var noThink = retryIdx >= RETRY_DELAYS.length;   // 最后一次重试用 no think
         var t0 = Date.now();
+        dsRequests++;
         callDS(noThink, function (err, statusCode, data) {
             var ms = Date.now() - t0;
 
             if (err || statusCode !== 200) {
+                // 预算已用尽（或即将用尽）：**不再重试**，直接 fallback —— 否则重试链会把整回合拖过 MAX_TURN_MS。
+                var remaining = TURN_DEADLINE > 0 ? (TURN_DEADLINE - Date.now()) : Infinity;
+                if (remaining < 15000) {
+                    console.log('[choice] fail ' + ms + 'ms (' + (err ? err.message : ('http ' + statusCode)) + '), budget left ' + Math.round(remaining / 1000) + 's -> no retry, fallback');
+                    respond(fallbackAction(state, 'budget_exhausted'), 'ERROR: ' + (err ? err.message : ('http ' + statusCode)));
+                    return;
+                }
                 if (retryIdx < RETRY_DELAYS.length) {
                     var delay = RETRY_DELAYS[retryIdx];
                     console.log('[choice] fail ' + ms + 'ms (' + (err ? err.message : ('http ' + statusCode)) + '), retry ' + (retryIdx + 1) + '/' + RETRY_DELAYS.length + ' in ' + delay + 'ms' + (retryIdx + 1 >= RETRY_DELAYS.length ? ' [no think]' : ''));
