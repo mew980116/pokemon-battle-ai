@@ -671,10 +671,12 @@ function predictGate(ledger) {
 }
 
 // 最终答案前的门禁（Rule 1 的动作层）：你选中的动作，必须挂着一个已裁决(MATCH)的 claim —— 覆盖「你将放到场上那只」。
-// server 在模型给出 {"choice":N} 且没有再调 tool 时调用它。
+// 换人时**必须**是承伤类 claim（kind=survive）：因为 save_strategy 的 scene 断言了换入者活到什么血量，
+// 那句断言必须被验算过。用「我打它多少」这种输出 claim 不能代替（实测被这么绕过：C 臂 R1/R2）。
 function actionGateCheck(ledger, action) {
     if (!ledger || !action) return null;
-    var needSlot = (action.type === 'switch') ? Number(action.pokeSlot) : 0;
+    var isSwitch = (action.type === 'switch');
+    var needSlot = isSwitch ? Number(action.pokeSlot) : 0;
     var unresolved = [], mismatched = [];
     for (var i = 0; i < ledger.order.length; i++) {
         var c = ledger.claims[ledger.order[i]];
@@ -691,11 +693,17 @@ function actionGateCheck(ledger, action) {
     var hit = false;
     for (var j = 0; j < ledger.order.length; j++) {
         var c2 = ledger.claims[ledger.order[j]];
-        if (c2 && c2.status === 'MATCH' && Number(c2.on_slot) === needSlot) { hit = true; break; }
+        if (!c2 || c2.status !== 'MATCH') continue;
+        if (Number(c2.on_slot) !== needSlot) continue;
+        // 换人：必须是承伤 claim（scene 断言的「它活下来」必须被验算）；攻击：输出或承伤都算
+        if (isSwitch) { if (c2.kind === 'survive') { hit = true; break; } }
+        else if (c2.kind === 'damage' || c2.kind === 'survive' || c2.kind === 'order') { hit = true; break; }
     }
     if (!hit) {
-        var who = (action.type === 'switch') ? ('the pokemon you are switching in (slot ' + needSlot + ')') : 'your active pokemon (slot 0)';
-        return 'NOT READY — your choice puts ' + who + ' on the field, but no verified prediction is attached to it. Call predict for it (the incoming hit it eats, or the damage it deals) with on_slot=' + needSlot + ', verify it with claim_id, re-save the strategy, then answer.';
+        if (isSwitch) {
+            return 'NOT READY — your plan switches in slot ' + needSlot + ' and your `scene` asserts how much HP it has left, but no verified INCOMING prediction is attached to it. Call predict with kind="survive", on_slot=' + needSlot + ', move=<the move you expect to eat>, expects=<your predicted %>, then verify it with calc_damage passing claim_id (defender = from_state "me:' + needSlot + '"). A claim about YOUR damage output does not cover this.';
+        }
+        return 'NOT READY — your choice attacks with the active pokemon (slot 0), but no verified prediction is attached to it. Call predict for it (its outgoing damage, or the hit it eats) with on_slot=0, verify it with claim_id, re-save the strategy, then answer.';
     }
     return null;
 }

@@ -76,7 +76,7 @@ var FIRST_TURN_THINKING = true;         // 首回合（turn 0）单独开思考�
 var FIRST_TURN_EFFORT = 'low';          // 首回合思考强度（low/high/max）
 var MAX_TOKENS = null;                  // 不限制输出 token（思考链 + 最终答案）
 var TIMEOUT_MS = 240000;                // 放宽：240s（tool 多轮往返慢）
-var MAX_TOOL_ROUNDS = 25;               // 最多 function calling 轮数，超过则 fallback
+var MAX_TOOL_ROUNDS = 35;               // 最多 function calling 轮数，超过则 no-think 收敛（门禁要 predict+验算+可能打回，25 实测会被打满）
 var MAX_TURN_MS = 0;                    // 单回合总时长上限（0=禁用 no-think 收尾；实测 webCall 120s 不超时，暂不需要兜底）
 var RETRY_DELAYS = [2000, 5000, 10000]; // 单次请求失败后的重试延迟：第1次2s、第2次5s、第3次10s（第3次降级 no think），再失败 fallback
 
@@ -674,6 +674,7 @@ function handleChoice(res, state) {
     var lastReply = '';
     // 幻觉门禁账本（本回合）：LLM 用 predict 登记预测，计算类 tool 带 claim_id 裁决，save_strategy / 最终答案前校验
     var ledger = ENABLE_PREDICT_GATE ? tools.newLedger() : null;
+    var gateBypassed = false;   // 工具轮次用尽走 no-think 收敛时，最终动作层闸门会被绕过 —— 记下来便于统计
 
     function logEntry(reply, action) {
         if (!state.log) return;
@@ -691,6 +692,7 @@ function handleChoice(res, state) {
             usage: lastUsage,
             fallback: !!action.fallback,
             gateUnmet: !!action.gateUnmet,
+            gateBypassed: gateBypassed,
             ledger: ledger,
             state: state,
             systemPrompt: SYSTEM_PROMPT,
@@ -810,6 +812,10 @@ function handleChoice(res, state) {
                     // 工具轮次用尽：不直接硬兜底（旧行为 = 返回招式列表第 1 项，会覆盖掉 LLM 已写下的结论），
                     // 而是追加一条指令让它用 no-think 收敛成最终 JSON（不再执行任何 tool）；解析失败才 fallback。
                     console.log('[choice] turn=' + state.turn + ' tool rounds ' + MAX_TOOL_ROUNDS + ' used up -> finalize no-think');
+                    if (ENABLE_PREDICT_GATE && ledger) {
+                        gateBypassed = true;
+                        console.log('[gate] turn=' + state.turn + ' gate BYPASSED by tool-rounds exhaustion');
+                    }
                     messages.push({
                         role: 'user',
                         content: 'Tool rounds are exhausted — you can NOT call any more tools. Using everything you already gathered, output ONLY the final JSON object {"choice": <number>} now. No explanation, no preamble.'

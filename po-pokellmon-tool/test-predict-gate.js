@@ -39,10 +39,17 @@ tools.runTool('calc_damage', { legs: [HP_ON_ROTOM] }, c2);
 var r3d = tools.runTool('save_strategy', SAVE, c2);
 chk('改正预测后重验 → 放行', r3d.ok === true, JSON.stringify(r3d).slice(0, 170));
 
-console.log('gate: 动作层（选中的动作必须挂着 MATCH 的 claim）');
-chk('actionGateCheck(换 slot4，有 claim) → 通过', tools.actionGateCheck(c2.ledger, { type: 'switch', pokeSlot: 4 }) === null);
+console.log('gate: 动作层（换人必须挂着 MATCH 的【承伤】claim）');
+chk('actionGateCheck(换 slot4，有 survive claim) → 通过', tools.actionGateCheck(c2.ledger, { type: 'switch', pokeSlot: 4 }) === null);
 var g2 = tools.actionGateCheck(c2.ledger, { type: 'switch', pokeSlot: 2 });
-chk('actionGateCheck(换 slot2，无 claim) → 拒绝', !!(g2 && /no verified prediction/.test(g2)), String(g2).slice(0, 150));
+chk('actionGateCheck(换 slot2，无 claim) → 拒绝', !!(g2 && /INCOMING prediction/.test(g2)), String(g2).slice(0, 150));
+
+// 漏洞回归（C 臂 R1/R2）：用「我的洛托姆打它多少」这种输出 claim 不该能通过换人闸门
+var cDmg = ctx();
+tools.runTool('predict', { claims: [{ id: 'd1', kind: 'damage', on_slot: 4, move: 'Thunderbolt', expects: '217-257%' }] }, cDmg);
+tools.runTool('calc_damage', { legs: [{ claim_id: 'd1', attacker: { from_state: 'me:4' }, defender: { from_state: 'opp' }, move: { name: 'Thunderbolt' } }] }, cDmg);
+var gDmg = tools.actionGateCheck(cDmg.ledger, { type: 'switch', pokeSlot: 4 });
+chk('只有输出 claim → 换人仍被拒（堵住 C 臂绕过）', !!(gDmg && /INCOMING prediction/.test(gDmg)), String(gDmg).slice(0, 150));
 
 console.log('gate: 类型幻觉（B R10 说 Hurricane 对 Fairy 是 2x，实际 1x）');
 var c4 = ctx();
