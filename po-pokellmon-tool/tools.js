@@ -500,6 +500,7 @@ function getTypeMatchup(args, ctx) {
         m *= CHART[ai][di];
     }
     var out = { multiplier: m };
+    if (ctx && ctx.ledger) ctx.ledger.typeChecks = (ctx.ledger.typeChecks || 0) + 1;
     var cv = attachClaimVerdict(ctx, args.claim_id, { multiplier: m });
     if (cv) out.claim_verdict = cv;
     return out;
@@ -876,28 +877,47 @@ function simulateTurn(args, ctx) {
         if (mine.kind === 'move') {
             var myRm = resolveMoveInput({ name: mine.move });
             if (myRm.error) return { error: 'i_do move not found: ' + mine.move };
+            // 还要确认**当前场上这只**真的有这一招（否则会算出一个不存在的动作）
+            var myMoveList = (state.me && state.me.moves) || [];
+            if (myMoveList.length) {
+                var hasIt = false;
+                for (var mm = 0; mm < myMoveList.length; mm++) {
+                    if (String(myMoveList[mm].name || '').toLowerCase() === String(myRm.name).toLowerCase()) { hasIt = true; break; }
+                }
+                if (!hasIt) {
+                    return { error: 'i_do "' + mine.move + '" is not a move your active pokemon (' + ((state.me || {}).name || '?') + ') has. Available: ' + myMoveList.map(function (x) { return x.name; }).join(', ') };
+                }
+            }
         }
 
         var oppAfterName = oppActive;
         if (br.kind === 'switch') oppAfterName = slotName(oppTeam, br.slot) || oppActive;
 
         // ---- 出手顺序：PO 的换人阶段先于出招阶段 ----
+        // orderModes = 谁先动：['you'] / ['they'] / ['you','they']（速度重叠或解析不出时**两种情况都算**，不猜）
+        var orderModes = [];
         if (iSwitch || br.kind === 'switch') {
-            if (iSwitch && br.kind === 'switch') row.order = 'both switch (switch phase): no damage either way this turn';
-            else if (iSwitch) row.order = 'you switch first (switch phase), then they act — your switch-in eats the hit';
-            else row.order = 'they switch first (switch phase), then your move lands on the pokemon they bring in';
+            if (iSwitch && br.kind === 'switch') { row.order = 'both switch (switch phase): no damage either way this turn'; orderModes = ['none']; }
+            else if (iSwitch) { row.order = 'you switch first (switch phase), then they act — your switch-in eats the hit'; orderModes = ['they']; }
+            else { row.order = 'they switch first (switch phase), then your move lands on the pokemon they bring in'; orderModes = ['you']; }
         } else {
             var myPrio = movePriorityByName(mine.move), theirPrio = movePriorityByName(br.move);
             var mySpe = mySpeedOf(state, 0, null);
             var osr = oppSpeedRange(oppActive);
             if (myPrio !== theirPrio) {
-                row.order = (myPrio > theirPrio ? 'you move first (priority ' + myPrio + ' vs ' + theirPrio + ')' : 'they move first (priority ' + theirPrio + ' vs ' + myPrio + ')');
+                var prioYou = (myPrio > theirPrio);
+                row.order = (prioYou ? 'you move first' : 'they move first') + ' (priority ' + myPrio + ' vs ' + theirPrio + ')';
+                orderModes = [prioYou ? 'you' : 'they'];
             } else if (mySpe && osr) {
-                if (mySpe > osr.max) row.order = 'you move first (your spe ' + mySpe + ' vs their ' + osr.min + '-' + osr.max + ')';
-                else if (mySpe < osr.min) row.order = 'they move first (your spe ' + mySpe + ' vs their ' + osr.min + '-' + osr.max + ')';
-                else row.order = 'SPEED TIE-ish: your spe ' + mySpe + ' is inside their possible range ' + osr.min + '-' + osr.max + ' — their EV/nature decides who moves first (unknown)';
+                if (mySpe > osr.max) { row.order = 'you move first (your spe ' + mySpe + ' vs their ' + osr.min + '-' + osr.max + ')'; orderModes = ['you']; }
+                else if (mySpe < osr.min) { row.order = 'they move first (your spe ' + mySpe + ' vs their ' + osr.min + '-' + osr.max + ')'; orderModes = ['they']; }
+                else {
+                    row.order = 'speed UNRESOLVED: your spe ' + mySpe + ' is inside their possible range ' + osr.min + '-' + osr.max + ' → BOTH orders simulated (see cases[])';
+                    orderModes = ['you', 'they'];
+                }
             } else {
-                row.order = 'unknown (could not resolve both speeds)';
+                row.order = 'speed unknown (could not resolve) → BOTH orders simulated (see cases[])';
+                orderModes = ['you', 'they'];
             }
             if (osr) row.unknown.push('opponent speed range ' + osr.min + '-' + osr.max + ' (EV/nature unrevealed)');
         }
@@ -916,16 +936,48 @@ function simulateTurn(args, ctx) {
             }
             row.unknown.push('entry hazards on your side are NOT applied here (' + JSON.stringify(state.myHazards || []) + ')');
         } else {
-            // 我出招，他们出招 → 两边都算
+            // 我出招 + 他们出招 → 两边都算，并按 orderModes 逐种顺序给出结果
             if (br.kind === 'move') {
                 var legOut = simLeg(state, applyFromStateSpec(state, 'me', null), applyFromStateSpec(state, 'opp', null), mine.move);
-                if (legOut.error) row.unknown.push('your outgoing damage could not be computed (' + legOut.error + ')');
-                else row.theirs = { takes: legOut.percent_min + '-' + legOut.percent_max + '%', ko: legOut.ko_verdict || '', summary: oppActive + ' takes ' + legOut.percent_min + '-' + legOut.percent_max + '% from ' + mine.move };
                 var legIn2 = simLeg(state, applyFromStateSpec(state, 'opp', null), applyFromStateSpec(state, 'me', null), br.move);
+                if (legOut.error) row.unknown.push('your outgoing damage could not be computed (' + legOut.error + ')');
                 if (legIn2.error) row.unknown.push('incoming damage could not be computed (' + legIn2.error + ')');
-                else {
-                    var hpLo2 = Math.round(myHpPct - legIn2.percent_max), hpHi2 = Math.round(myHpPct - legIn2.percent_min);
-                    row.mine = { takes: legIn2.percent_min + '-' + legIn2.percent_max + '%', hp_after: hpLo2 + '-' + hpHi2 + '%', faints: (hpHi2 <= 0 ? true : (hpLo2 <= 0 ? 'possible' : false)), summary: myName + ' takes ' + legIn2.percent_min + '-' + legIn2.percent_max + '% → ' + hpLo2 + '-' + hpHi2 + '% left' };
+                if (!legOut.error && !legIn2.error) {
+                    var theirHp = (opp.hpPct === undefined || opp.hpPct === null) ? 100 : opp.hpPct;
+                    row.theirs = { takes: legOut.percent_min + '-' + legOut.percent_max + '%', ko: legOut.ko_verdict || '', summary: oppActive + ' takes ' + legOut.percent_min + '-' + legOut.percent_max + '% from ' + mine.move };
+                    row.cases = [];
+                    var worstCase = null;
+                    for (var oc = 0; oc < orderModes.length; oc++) {
+                        var first = orderModes[oc];
+                        // 先动的一方如果直接把对手打倒下，对手就**不会还手**（这是顺序真正影响结果的地方）
+                        var takeMin = legIn2.percent_min, takeMax = legIn2.percent_max;
+                        var dealTxt = legOut.percent_min + '-' + legOut.percent_max + '%';
+                        var extra = [];
+                        if (first === 'you') {
+                            if (legOut.percent_min >= theirHp) { takeMin = 0; takeMax = 0; extra.push(oppActive + ' faints before it can act'); }
+                            else if (legOut.percent_max >= theirHp) extra.push('if your roll KOs it (' + legOut.percent_max + '% vs its ' + theirHp + '%), it never acts; otherwise you eat the hit');
+                        } else if (first === 'they') {
+                            if (legIn2.percent_min >= myHpPct) { dealTxt = '0% — you faint before your move lands'; }
+                            else if (legIn2.percent_max >= myHpPct) extra.push('if their roll KOs you (' + legIn2.percent_max + '% vs your ' + myHpPct + '%), your move never lands');
+                        }
+                        var cHpLo = Math.round(myHpPct - takeMax), cHpHi = Math.round(myHpPct - takeMin);
+                        var c = {
+                            order: first + ' first',
+                            you_deal: dealTxt,
+                            you_take: (takeMin === 0 && takeMax === 0) ? '0%' : (takeMin + '-' + takeMax + '%'),
+                            mine_hp_after: cHpLo + '-' + cHpHi + '%',
+                            mine_faints: (cHpHi <= 0 ? true : (cHpLo <= 0 ? 'possible' : false)),
+                            note: extra.join('; ')
+                        };
+                        c.summary = c.order + ' → ' + myName + ': ' + c.you_deal + ' out, ' + c.you_take + ' in → ' + c.mine_hp_after + ' left' + (c.note ? ' (' + c.note + ')' : '');
+                        row.cases.push(c);
+                        if (!worstCase || cHpLo < worstCase._lo) { worstCase = c; worstCase._lo = cHpLo; }
+                    }
+                    // row.mine 取**最坏的那个顺序**（门禁按它比对，保持保守）
+                    row.mine = {
+                        takes: worstCase.you_take, hp_after: worstCase.mine_hp_after, faints: worstCase.mine_faints,
+                        summary: worstCase.summary + (row.cases.length > 1 ? '  [worst of ' + row.cases.length + ' order cases: ' + row.cases.map(function (x) { return x.order + ' = ' + x.mine_hp_after; }).join(' | ') + ']' : '')
+                    };
                 }
             } else {
                 var incomingName = slotName(oppTeam, br.slot);
@@ -955,8 +1007,74 @@ function simulateTurn(args, ctx) {
     if (led) {
         if (!led.sims) led.sims = [];
         led.sims.push({ actionKey: actionKey(mine), i_do: actionKey(mine), opp_does: branches.map(function (x) { return x.key; }), rows: out.rows, ts: Date.now() });
+        // (a) 假设一致性（结构化，不碰文本）：同一只对手在本次决策内必须用同一套 assume，
+        //     否则不同选项的数字来自不同前提、根本不可比（这正是 E001 里"对想否掉的用进攻型、对想选的用防御型"的机制）。
+        var asm = args.assume || {};
+        if (oppActive && Object.keys(asm).length) {
+            if (!led.assumeByOpp) led.assumeByOpp = {};
+            var cur = JSON.stringify(asm);
+            var prev = led.assumeByOpp[oppActive];
+            if (prev && prev.json !== cur) {
+                if (!led.assumeConflicts) led.assumeConflicts = [];
+                led.assumeConflicts.push('inconsistent assumptions for ' + oppActive + ' within one turn: an earlier simulate_turn used ' + prev.json + ' (from ' + prev.from + '), this one uses ' + cur + '. Options evaluated under different assumptions are not comparable — re-run them all with ONE shared assumption set.');
+                out.assumption_conflict = led.assumeConflicts[led.assumeConflicts.length - 1];
+            } else if (!prev) {
+                led.assumeByOpp[oppActive] = { json: cur, from: actionKey(mine) };
+            }
+        }
     }
     return out;
+}
+
+// 按 action 字符串在账本里找那次仿真（容错大小写/多余空格）
+function findSimByAction(ledger, actionStr) {
+    if (!ledger) return null;
+    var sims = ledger.sims || [];
+    var want = String(actionStr || '').trim().toLowerCase().replace(/\s+/g, ' ');
+    if (!want) return null;
+    for (var i = 0; i < sims.length; i++) {
+        var a = String(sims[i].actionKey).toLowerCase();
+        if (a === want || a === want.replace(/^(use|i )/, '')) return sims[i];
+    }
+    return null;
+}
+
+// 强提醒（不拦）：你声明的分支若**不是最坏的那个**，就把最坏分支的数字直接摆出来。
+// 允许赌，但必须知道自己赌的是什么（用户 2026-09-20：不用拦，强提醒就行）。
+function worstBranchNote(ledger, args) {
+    if (!ledger || !args || !args.action || !args.branch) return null;
+    var sim = findSimByAction(ledger, args.action);
+    if (!sim) return null;
+    var declared = null, worst = null;
+    for (var i = 0; i < sim.rows.length; i++) {
+        var r = sim.rows[i];
+        if (!r.mine) continue;
+        if (String(r.branchKey).toLowerCase() === String(args.branch).trim().toLowerCase()) declared = r;
+        var lo = parseInt(String(r.mine.hp_after || '').replace(/[^0-9\-]/g, '').split('-')[0], 10);
+        var score = (r.mine.faints === true ? -9999 : (isNaN(lo) ? 9999 : lo));
+        if (!worst || score < worst._score) { worst = r; worst._score = score; }
+    }
+    if (!declared || !worst || declared === worst) return null;
+    return 'REMINDER (not blocking) — the branch you declared (' + args.branch + ') is NOT the worst branch for that action. Worst is "' + worst.branchKey + '": ' + worst.mine.summary + '  If you are deliberately betting against that branch, say so explicitly in `text` (which branch you are betting against, and what it costs if it comes).';
+}
+
+// (b).1 倍率词窄正则：散文里出现「属性名 + 倍率词」但本回合完全没查过 get_type_matchup → 只警告不拦。
+// 只做观察用；从 simulate_turn 里拿到的数字才是权威。
+var MULT_WORD_RE = /(neutral|resists?|resisted|super[- ]?effective|not very effective|immune|\b[0-9.]+x\b|\bhalf\b)/i;
+function multiplierProseHits(text) {
+    if (!text) return [];
+    var hits = [], low = String(text).toLowerCase();
+    for (var i = 0; i < TYPE_NAMES.length; i++) {
+        var tn = String(TYPE_NAMES[i]).toLowerCase();
+        var idx = low.indexOf(tn);
+        while (idx >= 0) {
+            var win = text.substring(Math.max(0, idx - 45), idx + tn.length + 45);
+            if (MULT_WORD_RE.test(win)) { hits.push(TYPE_NAMES[i] + ': "' + win.replace(/\s+/g, ' ').trim().slice(0, 70) + '"'); break; }
+            idx = low.indexOf(tn, idx + 1);
+        }
+        if (hits.length >= 3) break;
+    }
+    return hits;
 }
 
 // 门禁：提交计划时必须与仿真一致（Rule 1 + Rule 4 的仿真版）
@@ -1057,7 +1175,28 @@ function saveStrategy(args, ctx) {
         branch: args.branch ? String(args.branch) : null,
         outcome: args.outcome ? String(args.outcome) : null
     };
-    return { ok: true, turn: t };
+    // 非阻断提醒（只警告、不拒绝）：① 声明的分支不是最坏分支；② 散文里写了倍率但没查过表；③ 对手假设不一致
+    var ret = { ok: true, turn: t };
+    var warns = [];
+    if (ctx && ctx.simGateOn && ctx.ledger) {
+        var wb = worstBranchNote(ctx.ledger, args);
+        if (wb) warns.push(wb);
+        var hits = multiplierProseHits(args.text);
+        if (hits.length) {
+            ret.multiplierMentions = hits.length;
+            if (!(ctx.ledger.typeChecks > 0)) {
+                warns.push('WARNING (not blocking) — your `text` asserts a type-multiplier (' + hits.join(' | ') + ') but you never called get_type_matchup this turn. Prose multipliers are a known hallucination source (e.g. "Water is neutral to Fire/Electric" when it is actually 2x). Verify with get_type_matchup; treat simulate_turn\'s numbers as authoritative.');
+            }
+        }
+        if (ctx.ledger.assumeConflicts && ctx.ledger.assumeConflicts.length) {
+            warns.push('WARNING (not blocking) — ' + ctx.ledger.assumeConflicts[ctx.ledger.assumeConflicts.length - 1]);
+        }
+    }
+    if (warns.length) {
+        ret.warning = warns.join('\n');
+        ctx.ledger.warningCount = (ctx.ledger.warningCount || 0) + warns.length;
+    }
+    return ret;
 }
 
 // 读取观察（不传 pokemon 返回全部）

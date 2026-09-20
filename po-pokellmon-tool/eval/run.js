@@ -107,7 +107,7 @@ function extractProcess(entry, state) {
     if (!entry) return { calcs: [], inbound: [], outbound: [], strategy: null };
     const myNames = (state.myTeam || []).map(t => t.name);
     const calcs = [], inbound = [], outbound = [];
-    let strategy = null, simCalls = 0, strategyRejections = 0;
+    let strategy = null, simCalls = 0, strategyRejections = 0, warningCount = 0, lastWarning = null, multMentions = 0;
     (entry.toolLog || []).forEach(r => {
         (r.calls || []).forEach(c => {
             if (c.name === 'calc_damage') {
@@ -125,7 +125,11 @@ function extractProcess(entry, state) {
                 calcs.push({ side: 'SIM', label: JSON.stringify(c.args.i_do) + ' vs ' + JSON.stringify((c.args.opp_does || []).map(b => b.move || ('switch' + b.switch))) });
             } else if (c.name === 'save_strategy') {
                 if (c.result && c.result.error) strategyRejections++;
-                else strategy = c.args;
+                else {
+                    strategy = c.args;
+                    if (c.result && c.result.warning) { warningCount++; lastWarning = String(c.result.warning).slice(0, 300); }
+                    if (c.result && c.result.multiplierMentions) multMentions += c.result.multiplierMentions;
+                }
             } else if (c.name === 'predict') {
                 calcs.push({ side: 'PREDICT', label: '' });
             }
@@ -141,6 +145,8 @@ function extractProcess(entry, state) {
         calcs, inbound, outbound, strategy, rounds: entry.rounds, ms: entry.totalMs,
         fallback: !!(entry.action && entry.action.fallback), reason: entry.action && entry.action.reason,
         simCalls, sims, strategyRejections,
+        warningCount, lastWarning, multMentions,
+        assumeConflicts: (entry.ledger && entry.ledger.assumeConflicts) || [],
         gateUnmet: !!entry.gateUnmet, gateBypassed: !!entry.gateBypassed, gateRejections: led.rejections || 0,
         declaredAction: strategy && strategy.action, declaredBranch: strategy && strategy.branch, declaredOutcome: strategy && strategy.outcome,
         behaviorHits
@@ -196,13 +202,14 @@ async function run() {
         console.log('      sims: ' + (simList || '(none)') +
             ' | 声明=' + (r.proc.declaredAction || '-') + ' / ' + (r.proc.declaredBranch || '-') + ' → ' + (r.proc.declaredOutcome || '-') +
             ' | strategy拒=' + (r.proc.strategyRejections || 0) + ' gate打回=' + (r.proc.gateRejections || 0) +
+            ' 提醒=' + (r.proc.warningCount || 0) + ' 倍率提及=' + (r.proc.multMentions || 0) + (r.proc.assumeConflicts && r.proc.assumeConflicts.length ? ' 假设冲突' : '') +
             (r.proc.gateUnmet ? ' gateUnmet' : '') + (r.proc.gateBypassed ? ' gateBypassed' : '') +
             ' | 行为理由=' + (r.proc.behaviorHits || 0));
     });
 
     // 汇总
     const byAction = {}, byVerdict = {};
-    let inboundTotal = 0, simCalls = 0, branchTotal = 0, stratRej = 0, gateRej = 0, unmet = 0, bypassed = 0, misfits = 0, behTotal = 0;
+    let inboundTotal = 0, simCalls = 0, branchTotal = 0, stratRej = 0, gateRej = 0, unmet = 0, bypassed = 0, misfits = 0, behTotal = 0, warnTotal = 0, multTotal = 0, assumeConflictSamples = 0;
     samples.forEach(r => {
         const v = r.verdict;
         const key = r.err ? 'ERROR' : (r.action.type === 'switch' ? ('SWITCH→' + v.targetName) : 'ATK(stay)');
@@ -216,6 +223,9 @@ async function run() {
         if (r.proc.gateUnmet) unmet++;
         if (r.proc.gateBypassed) bypassed++;
         behTotal += (r.proc.behaviorHits || 0);
+        warnTotal += (r.proc.warningCount || 0);
+        multTotal += (r.proc.multMentions || 0);
+        if (r.proc.assumeConflicts && r.proc.assumeConflicts.length) assumeConflictSamples++;
         if (r.proc.declaredOutcome && /faint|die|ko|倒下|送/i.test(r.proc.declaredOutcome)) misfits++;
     });
     const nOk = samples.filter(r => !r.err).length;
@@ -226,6 +236,7 @@ async function run() {
     console.log('simulate_turn: 调用 ' + simCalls + ' 次（均值 ' + (simCalls / Math.max(1, nOk)).toFixed(2) + '/样本），枚举分支合计 ' + branchTotal);
     console.log('闸门摩擦: strategy 被拒 ' + stratRej + ' 次，最终答案被拒 ' + gateRej + ' 次，gateUnmet ' + unmet + '，gateBypassed ' + bypassed);
     console.log('如实写 faints（承认牺牲/赌）: ' + misfits + '/' + nOk + '；「以对手行为为理由」计数合计 ' + behTotal);
+    console.log('非阻断提醒: 合计 ' + warnTotal + ' 条；散文倍率提及合计 ' + multTotal + '；假设冲突样本 ' + assumeConflictSamples + '/' + nOk);
     const acc = samples.filter(r => !r.err && r.action && r.action.type === 'switch' && r.action.pokeSlot === F.accidentSlot).length;
     console.log('事故决策(' + (baseState.myTeam[F.accidentSlot] || {}).name + '): ' + acc + '/' + nOk + ' = ' + (100 * acc / Math.max(1, nOk)).toFixed(0) + '%');
 

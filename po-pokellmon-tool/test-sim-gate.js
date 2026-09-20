@@ -74,5 +74,65 @@ sim(c5, { switch: 3 }, [{ move: 'Hydro Pump' }]);
 chk('选了没仿真过的 switch 4 → 拒绝', /never simulated/.test(tools.actionGateCheck(c5.ledger, { type: 'switch', pokeSlot: 4 }, state) || ''));
 chk('选了已仿真过的 switch 3 → 放行', tools.actionGateCheck(c5.ledger, { type: 'switch', pokeSlot: 3 }, state) === null);
 
+console.log('速度重叠 → 正反两种情况都仿（不猜）');
+var c6 = ctx();
+var r6 = sim(c6, { move: 'Sludge Bomb' }, [{ move: 'Hydro Pump' }]);
+chk('order 明说 BOTH orders', /BOTH orders/.test(r6.rows[0].order), r6.rows[0].order);
+chk('cases 给了两种顺序', (r6.rows[0].cases || []).length === 2, JSON.stringify(r6.rows[0].cases));
+chk('cases 里两种 order 都出现', (r6.rows[0].cases || []).map(function (x) { return x.order; }).join('|') === 'you first|they first', JSON.stringify((r6.rows[0].cases || []).map(function (x) { return x.order; })));
+chk('row.mine 取最坏顺序', /worst of 2 order cases/.test(r6.rows[0].mine.summary), r6.rows[0].mine.summary);
+
+console.log('先手方打死对手 → 对手不还手（顺序真正影响结果之处）');
+// 用一份最小合成 state，让「我方明显更快 + 招能杀」成立（CTRL93 里 Melmetal 比 Blissey 慢，构造不出 you-first）
+var mini = {
+    weather: 'None', terrain: 'None', myHazards: [], oppHazards: [],
+    myTeam: [{ slot: 0, name: 'Weavile', hpPct: 100, ko: false }],
+    myStats: [{ slot: 0, name: 'Weavile', level: 100, ev: [0, 0, 0, 0, 0, 252], iv: [31, 31, 31, 31, 31, 31], nature: 0 }],
+    bench: [],
+    me: { name: 'Weavile', item: '', moves: [{ name: 'Icicle Crash' }] },
+    opp: { name: 'Pelipper', hpPct: 30 },
+    oppTeam: [{ slot: 0, name: 'Pelipper', hpPct: 30, ko: false, revealed: true }]
+};
+var c7 = { state: mini, notes: notes, turn: 1, ledger: tools.newLedger(), simGateOn: true };
+var r7 = tools.runTool('simulate_turn', { i_do: { move: 'Icicle Crash' }, opp_does: [{ move: 'Hurricane' }] }, c7);
+chk('更快的我方 → 单一 you-first 顺序', /you move first/.test(r7.rows[0].order || ''), r7.rows[0].order);
+var youCase7 = (r7.rows[0].cases || []).filter(function (x) { return x.order === 'you first'; })[0];
+chk('对手残血被先手杀掉 → 它不还手（你吃 0%）', !!youCase7 && /faints before it can act/.test(youCase7.note || ''), JSON.stringify(youCase7));
+
+console.log('i_do 的招式必须是场上这只会的');
+var c7b = { state: mini, notes: notes, turn: 1, ledger: tools.newLedger(), simGateOn: true };
+var r7b = tools.runTool('simulate_turn', { i_do: { move: 'Thunderbolt' }, opp_does: [{ move: 'Hurricane' }] }, c7b);
+chk('用了自己没有的招 → 报错并列出可用招', !!(r7b.error && /not a move your active pokemon/.test(r7b.error)), JSON.stringify(r7b).slice(0, 200));
+
+console.log('最坏分支强提醒（不拦，只提醒）');
+var c8 = ctx();
+sim(c8, { switch: 4 }, [{ move: 'Hydro Pump' }, { move: 'Hurricane' }]);
+var s8 = save(c8, { action: 'switch 4', branch: 'Hurricane', outcome: 'survives' });
+chk('声明无害分支 → 通过但仍返回提醒', s8.ok === true && /NOT the worst branch/.test(s8.warning || ''), JSON.stringify(s8).slice(0, 220));
+var c8b = ctx();
+sim(c8b, { switch: 4 }, [{ move: 'Hydro Pump' }, { move: 'Hurricane' }]);
+var s8b = save(c8b, { action: 'switch 4', branch: 'Hydro Pump', outcome: 'faints' });
+chk('声明最坏分支 → 无该提醒', s8b.ok === true && !/NOT the worst branch/.test(s8b.warning || ''), JSON.stringify(s8b).slice(0, 160));
+
+console.log('倍率词警告（未查表时提醒；查过则不提）');
+var c9 = ctx();
+sim(c9, { switch: 2 }, [{ move: 'Scald' }]);
+var s9 = save(c9, { text: 'Rotom-Heat is a trap: Water is neutral to Fire/Electric, so Scald KOs it.', action: 'switch 2', branch: 'Scald', outcome: '30-41%' });
+chk('散文写了倍率但没查表 → 警告（不拦）', s9.ok === true && /never called get_type_matchup/.test(s9.warning || ''), JSON.stringify(s9).slice(0, 240));
+chk('并回报倍率提及数', s9.multiplierMentions >= 1, JSON.stringify(s9.multiplierMentions));
+var c10 = ctx();
+tools.runTool('get_type_matchup', { attack_type: 'Water', defend_types: ['Electric', 'Fire'] }, c10);
+sim(c10, { switch: 2 }, [{ move: 'Scald' }]);
+var s10 = save(c10, { text: 'Water is neutral to Fire/Electric, so Scald KOs it.', action: 'switch 2', branch: 'Scald', outcome: '30-41%' });
+chk('本回合查过表 → 不再提该警告', !/never called get_type_matchup/.test(s10.warning || ''), JSON.stringify(s10).slice(0, 200));
+
+console.log('对手假设不一致 → 结构化检出（不碰文本）');
+var c11 = ctx();
+tools.runTool('simulate_turn', { i_do: { switch: 2 }, opp_does: [{ move: 'Scald' }], assume: { opp_spread: '252 HP / 0 SpD' } }, c11);
+var r11 = tools.runTool('simulate_turn', { i_do: { switch: 4 }, opp_does: [{ move: 'Scald' }], assume: { opp_spread: '0 HP / 252 Def' } }, c11);
+chk('同一对手用了两套假设 → 该次 sim 带 assumption_conflict', /inconsistent assumptions/.test(r11.assumption_conflict || ''), JSON.stringify(r11.assumption_conflict).slice(0, 200));
+var s11 = save(c11, { action: 'switch 4', branch: 'Scald', outcome: 'faints' });
+chk('save_strategy 也把它作为提醒带出', /inconsistent assumptions/.test(s11.warning || ''), JSON.stringify(s11).slice(0, 240));
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);
