@@ -870,6 +870,32 @@ function statusConditionNote(label, status) {
     return label + ' is ' + what + ' — this is NOT applied to the numbers above';
 }
 
+// 运行时变属性的招：dex 里记的是基础属性（如 Weather Ball 记 Normal），按当前天气/场地换成**实际属性**，
+// 否则分组会错桶（实测：雨天的 Weather Ball 让 "Normal" 桶虚高成 126-149%）。
+// 依赖道具/IV 无法从 state 推定的（Judgment / Techno Blast / Multi-Attack / Hidden Power / Nature Power…）返回 null → 跳过。
+function effectiveMoveType(mvName, baseType, weather, terrain) {
+    var nm = String(mvName || '').toLowerCase();
+    var w = String(weather || '').toLowerCase();
+    var tr = String(terrain || '').toLowerCase();
+    if (nm === 'weather ball') {
+        if (w.indexOf('rain') >= 0) return 'Water';
+        if (w.indexOf('sun') >= 0) return 'Fire';
+        if (w.indexOf('sand') >= 0) return 'Rock';
+        if (w.indexOf('hail') >= 0 || w.indexOf('snow') >= 0) return 'Ice';
+        return 'Normal';
+    }
+    if (nm === 'terrain pulse') {
+        if (tr.indexOf('electric') >= 0) return 'Electric';
+        if (tr.indexOf('grassy') >= 0) return 'Grass';
+        if (tr.indexOf('misty') >= 0) return 'Fairy';
+        if (tr.indexOf('psychic') >= 0) return 'Psychic';
+        return 'Normal';
+    }
+    if (nm === 'judgment' || nm === 'techno blast' || nm === 'multi-attack' || nm === 'hidden power' ||
+        nm === 'nature power' || nm === 'revelation dance' || nm === 'raging bull') return null;
+    return baseType;
+}
+
 // 「它没想到的」：从对手**学得到的攻击招**里，找出对「我行动后留在场上那只」威胁最大的几个。
 // 这是**可能性空间的上界**——只回答"若它带了会怎样"，**不声称它带了或会点**。
 // 与"建合理招表"不同：纯逻辑推导（学习面 ∩ 伤害计算），不含任何对配置频率的猜测，所以不需要使用率先验。
@@ -880,33 +906,60 @@ function unlistedThreats(state, oppName, mySlot, myHpPct, listed, ctx) {
     if (!list || !list.length) return null;
     var listedLower = {};
     for (var i = 0; i < (listed || []).length; i++) listedLower[String(listed[i]).toLowerCase()] = true;
-    var rows = [], checked = 0, skippedVar = 0;
+    var rows = [], checked = 0, skippedVar = 0, skippedTypeVaries = 0;
     for (var j = 0; j < list.length; j++) {
         var num = Number(list[j]);
         var me = MOVES[String(num)] || (MOVES.byNum ? MOVES.byNum[String(num)] : null);
         if (!me || !me.name) continue;
         if (String(me.category || '').toLowerCase() === 'status') continue;   // 本表只算伤害，变化招不在此列
         if (listedLower[String(me.name).toLowerCase()]) continue;             // 已经列过的分支不重复
+        var effType = effectiveMoveType(me.name, me.type, state.weather, state.terrain);
+        if (!effType) { skippedTypeVaries++; continue; }                      // 类型取决于道具/IV，无法推定 → 跳过
         if (me.variable_power) skippedVar++;
         checked++;
         var r = calcOneLeg({ attacker: applyFromStateSpec(state, 'opp', null), defender: applyFromStateSpec(state, 'me', mySlot), move: { name: me.name } }, 0, ctx);
         if (!r || r.percent_max === undefined) continue;
         if (r.percent_max < 25) continue;   // 只报真有威胁的（≥25%），避免刷屏
         var koTxt = r.ko_verdict || (r.percent_min >= 100 ? 'guaranteed OHKO' : (r.percent_max >= 100 ? 'possible OHKO' : ''));
-        rows.push({ move: me.name, type: me.type, dmg: r.percent_min + '-' + r.percent_max + '%', ko: koTxt, faints: (r.percent_min >= 100 ? true : (r.percent_max >= 100 ? 'possible' : false)), _sort: -r.percent_max });
+        rows.push({ move: me.name, type: effType, dmg: r.percent_min + '-' + r.percent_max + '%', ko: koTxt, faints: (r.percent_min >= 100 ? true : (r.percent_max >= 100 ? 'possible' : false)), _max: r.percent_max, _sort: -r.percent_max });
     }
     if (!rows.length) {
         return { attack_moves_checked: checked, note: 'No unlisted attack move from ' + oppName + "'s learnable pool reaches 25% on the pokemon your action leaves on the field." };
     }
-    rows.sort(function (a, b) { return a._sort - b._sort; });
-    var top = rows.slice(0, 4);
+    // **按招式属性聚合**，只报"哪一类威胁你没覆盖 + 最坏/最轻"。
+    // 不列具体招名清单：那会把"可能性"伪装成"候选清单"（实测反例：Weather Ball 大嘴鸥基本不带，
+    // 但列出来会让人以为要考虑它）。真正的结论是"这一类里任何一个都够要命"，与它带哪个无关。
+    var byType = {};
+    for (var m = 0; m < rows.length; m++) {
+        var t = rows[m].type || '?';
+        if (!byType[t]) byType[t] = { type: t, how_many: 0, worst: rows[m], min_pct: rows[m]._max };
+        byType[t].how_many++;
+        if (rows[m]._sort < byType[t].worst._sort) byType[t].worst = rows[m];
+        if (rows[m]._max < byType[t].min_pct) byType[t].min_pct = rows[m]._max;
+    }
+    var groups = [];
+    for (var g in byType) {
+        var gr = byType[g];
+        groups.push({
+            move_type: gr.type,
+            how_many: gr.how_many,
+            worst_move: gr.worst.move,
+            worst_dmg: gr.worst.dmg,
+            worst_ko: gr.worst.ko,
+            worst_faints: gr.worst.faints,
+            weakest_dmg: gr.min_pct + '%',
+            _sort: gr.worst._sort
+        });
+    }
+    groups.sort(function (a, b) { return a._sort - b._sort; });
+    var top = groups.slice(0, 3);
     for (var k = 0; k < top.length; k++) delete top[k]._sort;
     return {
         attack_moves_checked: checked,
-        total_reaching_25pct: rows.length,
-        unlisted_dangerous: top,
-        note: 'Moves ' + oppName + ' CAN LEARN that would do ≥25% to the pokemon your action leaves on the field BECAUSE YOU DID NOT LIST THEM AS BRANCHES. This is NOT a prediction that it carries or clicks them — it is the upper bound of the possibility space. But if any of them is plausibly in its set, your branch list is incomplete: the table above only covers the branches you declared, and so does the gate. Consider adding the plausible ones as branches.',
-        caveats: 'Variable-power moves (Grass Knot / Low Kick / Gyro Ball / Foul Play …) use one fixed assumption; ability / item / field modifiers are not applied.' + (skippedVar ? (' (' + skippedVar + ' variable-power moves checked this way.)') : '')
+        uncovered_threat_types: top,
+        total_moves_reaching_25pct: rows.length,
+        note: 'Attack TYPES you did not cover with any branch, that ' + oppName + ' can learn and that hit the pokemon your action leaves on the field for ≥25%. Grouped BY TYPE on purpose: the actionable fact is "if any ' + (top[0] ? top[0].move_type : '') + '-type attack lands, this is what happens" — NOT "it carries ' + (top[0] ? top[0].worst_move : 'that move') + '" (worst_move is just the strongest of that type it can learn; many species never run it). This is the upper bound of the possibility space, not a prediction. If a whole TYPE here is plausible for its set, your branch list is incomplete — the gate only checks the branches you declared.',
+        caveats: 'Variable-power moves (Grass Knot / Low Kick / Gyro Ball / Foul Play …) use one fixed assumption; ability / item / field modifiers are not applied.' + (skippedVar ? (' (' + skippedVar + ' variable-power moves checked this way.)') : '') + (skippedTypeVaries ? (' ' + skippedTypeVaries + ' moves whose type depends on item/IVs (Judgment / Hidden Power / Nature Power …) were SKIPPED — they could be a threat this table does not show.') : '')
     };
 }
 

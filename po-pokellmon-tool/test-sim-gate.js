@@ -172,18 +172,21 @@ var r15 = tools.runTool('simulate_turn', { i_do: { move: 'Sludge Bomb' }, opp_do
 chk('我方麻痹 → 标 status_condition_note（速度未减半）', /paralysed/.test(r15.rows[0].status_condition_note || '') && /NOT applied/.test(r15.rows[0].status_condition_note || ''), String(r15.rows[0].status_condition_note));
 chk('unknown 声明状态/能力等级/残余均未算', ['status conditions are NOT applied', 'stat stages', 'end-of-turn residuals'].every(function (k) { return (r15.rows[0].unknown || []).some(function (x) { return x.indexOf(k) >= 0; }); }), JSON.stringify(r15.rows[0].unknown));
 
-console.log('可能性空间补全（「它没想到的」）');
+console.log('可能性空间补全（「它没想到的」，按属性聚合）');
 var c16 = ctx();
 var r16 = sim(c16, { switch: 4 }, [{ move: 'Hydro Pump' }, { move: 'Hurricane' }]);
 var ps = r16.possibility_space || {};
 chk('扫了对手学得到的一批攻击招', ps.attack_moves_checked > 20, String(ps.attack_moves_checked));
-chk('把未列出的致命水招补出来了', (ps.unlisted_dangerous || []).some(function (x) { return /Scald|Surf|Brine|Weather Ball|Water Pulse/.test(x.move); }), JSON.stringify((ps.unlisted_dangerous || []).map(function (x) { return x.move; })));
-chk('补出的项带 dmg + faints', (ps.unlisted_dangerous || []).every(function (x) { return x.dmg && x.faints !== undefined; }), JSON.stringify(ps.unlisted_dangerous));
-chk('note 明确「这不是预测它带了/会点」', /NOT a prediction/.test(ps.note || ''), String(ps.note).slice(0, 120));
-chk('已列过的分支不重复出现', (ps.unlisted_dangerous || []).every(function (x) { return x.move !== 'Hydro Pump' && x.move !== 'Hurricane'; }), JSON.stringify((ps.unlisted_dangerous || []).map(function (x) { return x.move; })));
+var waterG = (ps.uncovered_threat_types || []).filter(function (g) { return g.move_type === 'Water'; })[0];
+chk('聚合成「Water 这一类未覆盖」且带 how_many', !!waterG && waterG.how_many >= 3, JSON.stringify(ps.uncovered_threat_types));
+chk('该类里最轻的也 ≥50%（与它带哪个水招无关）', !!waterG && parseInt(waterG.weakest_dmg, 10) >= 50, waterG && waterG.weakest_dmg);
+chk('worst_move 只作参考、不是"它会带这招"', !!waterG && /NOT "it carries /.test(ps.note || ''), String(ps.note).slice(0, 140));
+chk('已列过的招不参与（worst_move 不是已列的三招）', !!waterG && ['Hydro Pump', 'Scald', 'Hurricane'].indexOf(waterG.worst_move) < 0, waterG && waterG.worst_move);
+chk('运行时变属性的招归到实际属性桶（雨天 Weather Ball → Water）', !!waterG && waterG.worst_move === 'Weather Ball', waterG && waterG.worst_move);
 var c17 = ctx();
-var r17 = sim(c17, { switch: 4 }, [{ move: 'Hydro Pump' }, { move: 'Scald' }, { move: 'Hurricane' }, { move: 'U-turn' }, { move: 'Surf' }]);
-chk('把 Scald/Surf 也列进分支后，它们不再出现在补全里', (r17.possibility_space.unlisted_dangerous || []).every(function (x) { return x.move !== 'Scald' && x.move !== 'Surf'; }), JSON.stringify((r17.possibility_space.unlisted_dangerous || []).map(function (x) { return x.move; })));
+var r17 = sim(c17, { switch: 4 }, [{ move: 'Hydro Pump' }, { move: 'Scald' }, { move: 'Hurricane' }, { move: 'Surf' }, { move: 'Brine' }, { move: 'Water Pulse' }, { move: 'Weather Ball' }]);
+var w17 = (r17.possibility_space.uncovered_threat_types || []).filter(function (g) { return g.move_type === 'Water'; })[0];
+chk('把水招都列进分支后，Water 这一类消失（或 how_many 变小）', !w17 || w17.how_many < (waterG ? waterG.how_many : 99), JSON.stringify(r17.possibility_space.uncovered_threat_types));
 
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);
