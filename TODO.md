@@ -68,6 +68,16 @@
   - **降级期间持续重试连接 server**：进入兜底模式后不放弃 LLM 路线，每回合（或按间隔）探测 server 是否恢复（如轻量 `/health` 或直接重发 `/choice`）；一旦恢复则切回 LLM 决策。降级是「可逆的降级」，而非一次性判死。
   - 实现要点：兜底决策器与 LLM 决策器做成可切换的双路；server 恢复检测要轻量、有节流（避免断线时又触发 antidos）；与现有的「断线节流」「连续失败认输」逻辑联动——降级优先于认输（先试着用规则 AI 撑下去，认输是最后手段）。
 
+- [ ] **生产环境允许 LLM 主动认输省 token + 认输后走 PO 代理**（用户 2026-09-20 提出；**依赖上面那条「降级为非 LLM 规则 AI」先做完**，本质是同一个「双路切换」基础设施）：
+  - **目标**：LLM 判定「劣势大到无法翻盘」时可以直接认输，不再把 token 烧在必输的残局上（battle92 那种打到 T16 的消耗战、或明显被推平的局）。
+  - **认输之后**：**后续所有操作直接由 PO 侧代理处理**（不再发 LLM 请求），即降级到非 LLM 路径；等到下一局/下一个明确时机再切回 LLM。
+  - 设计要点（待细化）：
+    - **协议**：新增动作类型（如 `{"type":"forfeit"}`），po-script 收到后 `battle.forfeit()`；server 侧解析 + 日志标 `concede` + 理由，便于统计。
+    - **判据写进 prompt**：明确「**什么时候才可以**认输」（对手存活数显著领先 + 我方主要威胁无解 + 看不到清场/消耗/换血路线），并要求写出依据——否则模型容易早早认输。
+    - **硬门槛防滥用**：例如「turn ≥ N」「我方剩余 ≤2 且对手 ≥4」「连续两回合评估都判定无翻盘线」才允许认输。
+    - **复盘统计**：记录每局是否认输 + 理由，事后核对「认输的局是否真的都输了」（误判率），据此调门槛；误判（把能打的局认输）比多烧点 token 更糟。
+  - **状态**：待实现（等 PO 侧兜底双路做完）。
+
 **tool 模式长期 TODO**：
 
 - [x] 🔴 **【高优先级】对战主脑切 `deepseek-v4-pro`（已切 0.3.46，待实测对比）**：实测（2026-09-16）确认 `deepseek-v4-pro` 端点可用、**未被路由到 flash**（响应 `model:deepseek-v4-pro`）；开 thinking + tool 多轮时**不回传 reasoning_content 不报错**（两场景均 200），故切换**无需**改 [server.js](po-pokellmon-tool/server.js) 的 reasoning_content 回传逻辑。附带发现：回传 reasoning_content 提升 prompt cache 命中（cached_tokens 384 vs 256、miss 41 vs 169），属可选优化。**已落地（0.3.46）**：`MODEL` 默认改 `deepseek-v4-pro`，提成 env `POKELLMON_MODEL`（一键回 flash：`POKELLMON_MODEL=deepseek-v4-flash`），thinking 仍 `low`。**待做**：实测对比 Flash/Pro 的决策质量 + 延迟；Pro-max 在多轮 tool（MAX_TOOL_ROUNDS=15）下可能逼近 240s 超时，若 low 稳定再考虑按「关键回合（换人/残局/强化手判断）升 high/max」分级。
