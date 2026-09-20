@@ -196,6 +196,16 @@
 
 - [ ] **天气伤害判定 tool（来自 battle55 的 submit_feedback）**：LLM 想要一个能明确报告「对手某只宝可梦本回合是否吃到沙暴/冰雹等天气掉血」的 tool，用来从战报确认 Magic Guard / Unaware（是否免疫间接伤害）之类的特性。现状：只能靠 `get_battle_history` 逐回合扫天气/掉血行。方案：po-script 侧在回合末记录「天气伤害事件」（哪个 slot 掉了多少 HP），存进 history 或独立字段，供 tool 直接查询/汇总。
 
+- [x] **battle97 复盘（LLM 打吧服 BOT，胜；19 决策 / script 0.6.11 / server 0.5.5——门禁+simulate_turn 首次实战）**：
+  - 结果：**胜**（`result=1 / winner=0`）。**平均 48s / 中位 39s / 最长 106s** —— 没有逼近 `TIMEOUT_MS=240s`（之前担心的长决策这局没出现）。
+  - `simulate_turn` 共 **25 次 / 19 决策 = 1.32 次每决策**（比 eval fixture 的 2.2-6.8 省得多）；`save_strategy` 被拒 5 次（都是缺 `action/branch/outcome` 的格式问题）；最终闸门打回 2 次；**`gateUnmet` / `gateBypassed` 均 0（没有逃逸）**。
+  - **变化招 `status_move_note` 基本被理会**：31 行变化招分支里 **25 行被 strategy 明确提及（81%）**；未提及的 6 行**全在 T13**，而 T13 是 `Slowbro@14%`「反正要死」的局面（忽略强化招合理，WORKFLOW 明确鼓励"每条线都要死时选最有价值的"）。
+  - 典型：T0 写「or sets **Trick Room/Wish**」、T1 写「likely continues setting up (**Calm Mind**)」、T2 写「**Roost**/Brave Bird/Defog each possible」—— 都提到了。
+  - ⚠ 教训（我方工具踩坑）：第一版统计脚本因为**在 toolLog 里先遇到 `simulate_turn` 后遇到 `save_strategy`**，读 strategy 时还是 null，把结果误算成"30/31 未提及"。**跨 tool 的统计必须两遍扫（先收全、再判断）**。
+  - 【已做】本局结束后 8092 已切到 **0.5.8**（`/version` 确认）。
+
+- [ ] 🟡 **`save_strategy.text` 退化成占位符（battle97 T13 实测）**：那一回合模型把 `text` 写成 **26 字符的 `"(placeholder filled above)"`**，门禁放过了它（门禁有意只校验 `action/branch/outcome` 一致性，不评价 text 质量）。影响：`text` 不回灌 → 对**当前**决策影响有限，但它是**复盘与我们迭代的主要证据来源**，退化会让我们看不到它的推演；同回合还伴随"3 个变化招分支未在 text 提及"，**两者可能同源**（该回合整体输出质量下降）。候选修法：`save_strategy` 对 `text` 做**长度 + 占位符检测**（过短或含 placeholder → 返回 warning，只提醒不拦）。
+
 - [x] **battle94 复盘（LLM 打吧服 BOT，胜；29 决策 / 25 分钟 / script 0.6.10 / server 0.4.11）**：
   - 结果：**胜**（`09:16:04 started → 09:41:25 won against`）。`0 fallback`、`0 攻击方被覆盖`。**平均 47s / 最长 218s**（逼近 `TIMEOUT_MS=240s`，值得盯）；29 个决策里 4 个带 `bannedMoves`（=发生了 PO 拒绝→重决策）。
   - 已修（**0.6.11，用户发现「T21 为什么点暗影球」**）：**被拒槽位跨宝可梦串味** —— `pklmBannedSlots` 存的是**槽位号**，而 `pklmIsMoveDisabled(m)` 只按槽位过滤**当前场上**这只的招。实测链路（T20）：Rotom-Wash 的 **Volt Switch（slot 0）**被 PO 拒（专爱锁招）→ ban 槽位 0 → 同回合换上 Oranguru，它的 **Psychic 也是 slot 0** → 被误过滤 → prompt 只剩 `Focus Blast / Trick / Shadow Ball` → LLM 只好打 **Shadow Ball（46-55，14%）**；而正解 **Psychic（78-93，23-28%）根本没出现在选项里**（CAUTION 还按当前宝可梦解析槽位号，把这次拒绝渲染成「Psychic 被拒」）。修：我方 `onSendOut`（换人）/`onKo`（倒下补位）时清空 ban 列表 —— 被拒本质是「这只宝可梦的这个槽位不可用」，换人后不适用。
