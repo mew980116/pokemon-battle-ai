@@ -349,7 +349,7 @@ const fl = xLeg({ attacker: { poke: 'Snorlax', ev: [252, 0, 0, 0, 0, 0], nature:
 const flOk = fl.notes.join(' ').indexOf('derived the real power') >= 0 && fl.notes.join(' ').indexOf('FIXED-damage') < 0;
 if (!flOk) xdiff++;
 console.log('[' + (flOk ? 'OK  ' : 'DIFF') + '] 抓狂（按 HP 算威力，计算器能算）-> ' + fl.min + '-' + fl.max);
-console.log('固定伤害招：' + (5 - xdiff) + '/5 通过');
+console.log('fixed_damage 招：' + (5 - xdiff) + '/5 通过');
 
 // ===== 特性描述数据（Gen8 口径）=====
 console.log('\n--- 特性描述（Gen8 数值口径）---');
@@ -465,3 +465,26 @@ const jOk = !!(J.error && J.error.indexOf('NOT found') >= 0);
 if (!jOk) bdiff++;
 console.log('[' + (jOk ? 'OK  ' : 'DIFF') + '] 越界槽位 me:9 -> ' + (J.error || 'no error'));
 console.log('from_state 场下：' + (4 - bdiff) + '/4 通过');
+
+// ===== from_state 名字反查槽位 + "A/B" 名字容错（battle93 实战发现）=====
+// ① 它写 {from_state:'me', poke:'Tapu Koko'} 想算「换上 Tapu Koko 打」，而 'me' 是**场上**那只 →
+//    新逻辑用名字反查槽位（me:1）并记进 inputs_used.slot_resolved_by_name
+// ② 特性写成 "Protean/Libero"（两个名字塞一个字符串）→ 新逻辑取能识别的那个并说明
+console.log('\n--- from_state 名字反查槽位 + A/B 名字容错 ---');
+let sdiff = 0;
+const M1 = fsLeg({ from_state: 'me', poke: 'Garchomp' }, { from_state: 'opp', poke: 'Clefable' }, 'Earthquake', fakeState);
+const m1Ok = !!M1.detail.inputs_used.slot_resolved_by_name && M1.detail.inputs_used.attacker_side === 'me:2' &&
+    String(M1.detail.inputs_used.attacker_src.poke).indexOf('myStats[2]') >= 0 &&
+    M1.desc.indexOf('Mew') < 0;   // 不能再算成场上那只
+if (!m1Ok) sdiff++;
+console.log('[' + (m1Ok ? 'OK  ' : 'DIFF') + '] from_state:"me" + 点名后备 Garchomp -> ' + M1.detail.inputs_used.attacker_side + ' | ' + String(M1.desc).slice(0, 80));
+console.log('    slot_resolved_by_name=' + JSON.stringify(M1.detail.inputs_used.slot_resolved_by_name));
+const M2 = xLeg({ attacker: { poke: 'Cinderace', ev: [0, 252, 0, 0, 0, 252], nature: 'Jolly', ability: 'Protean/Libero' }, defender: { poke: 'Blissey', ev: [252, 0, 252, 0, 0, 0], nature: 'Bold' }, move: { name: 'Pyro Ball' } });
+const m2Ok = M2.notes.join(' ').indexOf('applied "Protean"') >= 0 && M2.notes.join(' ').indexOf('not recognised') < 0;
+if (!m2Ok) sdiff++;
+console.log('[' + (m2Ok ? 'OK  ' : 'DIFF') + '] 特性 "Protean/Libero" -> ' + M2.notes.join(' | '));
+const M3 = xLeg({ attacker: { poke: 'Cinderace', ev: [0, 252, 0, 0, 0, 252], nature: 'Jolly', ability: 'NotARealAbility' }, defender: { poke: 'Blissey', ev: [252, 0, 252, 0, 0, 0], nature: 'Bold' }, move: { name: 'Pyro Ball' } });
+const m3Ok = M3.notes.join(' ').indexOf('not recognised') >= 0;   // 真的拼错仍要报
+if (!m3Ok) sdiff++;
+console.log('[' + (m3Ok ? 'OK  ' : 'DIFF') + '] 真拼错的特性仍报 not recognised');
+console.log('名字反查 + A/B 容错：' + (3 - sdiff) + '/3 通过');

@@ -151,6 +151,12 @@
 
 - [ ] **天气伤害判定 tool（来自 battle55 的 submit_feedback）**：LLM 想要一个能明确报告「对手某只宝可梦本回合是否吃到沙暴/冰雹等天气掉血」的 tool，用来从战报确认 Magic Guard / Unaware（是否免疫间接伤害）之类的特性。现状：只能靠 `get_battle_history` 逐回合扫天气/掉血行。方案：po-script 侧在回合末记录「天气伤害事件」（哪个 slot 掉了多少 HP），存进 history 或独立字段，供 tool 直接查询/汇总。
 
+- [x] **battle93 复盘（LLM 打吧服 BOT，胜 6-0；14 回合 / 8 分钟 / script 0.6.10 / server 0.4.10→0.4.11）**：
+  - 结果：**胜且零封**（`08:37:45 started → 08:45:43 won`；我方 0 折、对手 6 折）。`0 fallback`；平均 28s / 最长 77s（比前两局快）。**这一局是「重贴 0.6.10 + 重启 8092」之后的第一次实战，日志逐回合确认 `script=0.6.10 / server=0.4.10`** ✓
+  - 已修（0.4.11，本局发现）：① **`from_state:'me'` + 显式点名后备宝可梦 → 算错对象**（T1：它写 `{from_state:'me', poke:'Tapu Koko'}` 想算「换上 Tapu Koko 打」，而 'me' 是场上 Toxapex → 被「系统为准」覆盖成 Toxapex，算出 Toxapex 的招）→ 改为**按名字反查槽位**（我方 myStats/bench、对手已亮相 oppTeam），命中即解析成 `me:1`/`opp:4` 并记进 `inputs_used.slot_resolved_by_name`。② 特性写成 **`"Protean/Libero"`** → 计算器不认 → `normalizeDexName` 拆开取能识别的那个（特性/道具通用），真拼错仍报 not recognised。
+  - **未被验证**：0.6.9 的能力等级残留修复这局没机会生效（**全程双方 `boosts` 都是空**，没有任何强化/降能力）→ 留待下一局出现强化时核对。
+  - 待观察：同名不同形态仍按「不同」处理（本局它写 `Magearna` 而 PO 叫 `Magearna-Original` → 名字反查/填充都跳过，**方向安全**但少拿信息）；若这类误伤变多，再考虑加「形态后缀」归一化。
+
 - [x] **battle92 复盘（LLM 打吧服 BOT，胜；20 回合 / 19.5 分钟 / script 0.6.8 / server 0.4.10）**：
   - 结果：**胜**（`01:08:34 started → 01:28:00 won against [Lv0.吧服BOT]清分少女`）；**我方折 3（Steelix T6 / Conkeldurr T9 与 Vaporeon 对掉 / Excadrill T14）**，对手折 6 —— 这局比 battle91（0 折）更接近均势，有参考价值。`0 fallback`、`0 工具轮次用尽`、`0 个 not recognised`、**攻击方被 state 覆盖 0 次**（0.4.9 的坑没再出现 ✓）。耗时均值 52s / 最长 157s（T12）。
   - 已修（**0.6.9，从这局日志里抓到的真 bug**）：**换人当回合 PO 的 `field.poke().statBoost()` 残留换下那只的能力等级** —— 对手 Silvally-Fairy 剑舞 Atk+2 后被换下，换上来的 Duraludon 读到 `Boosts:[Atk+2]`（假），prompt 与 `calc_damage` 的 `from_state` 都吃到了它（会把对手伤害高估 ~1.5 倍）。**是 LLM 自己看出来的**（Duraludon 笔记：「the "Atk+2" in state was stale from Silvally's Swords Dance, which boosts reset on switch per 换人 rule」），但系统不该递错数据。修法：`onSendOut` 给该侧置位 `pklmBoostsReset`、`onBeginTurn` 清除，置位期间 boosts 一律报 0（`pklmCollectBoosts` 是唯一的 statBoost 读取点，state/prompt/history 三处同时修）。**要重贴 po-script.js 才生效。**

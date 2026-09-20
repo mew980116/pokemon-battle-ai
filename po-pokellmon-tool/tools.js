@@ -796,8 +796,8 @@ function toCalcPokemon(spec) {
     opts.ivs = ivArrToObj(spec.iv);
     opts.nature = natureNameOf(spec);
     if (spec.boosts) opts.boosts = parseStateBoosts(spec.boosts);   // 兼容 ["Def+3"] 数组写法
-    if (spec.ability) opts.ability = String(spec.ability);
-    if (spec.item) opts.item = String(spec.item);
+    if (spec.ability) opts.ability = normalizeDexName(String(spec.ability), psAbilityExists);
+    if (spec.item) opts.item = normalizeDexName(String(spec.item), psItemExists);
     if (spec.status) opts.status = String(spec.status);
     if (spec.gender) opts.gender = String(spec.gender);
     if (spec.alliesFainted !== undefined) opts.alliesFainted = parseInt(spec.alliesFainted, 10) || 0;
@@ -918,6 +918,23 @@ function psAbilityExists(name) {
 }
 function psItemExists(name) {
     try { return !!GEN8DEX.items.get(SMOGON.toID(String(name))); } catch (e) { return true; }
+}
+// 名字容错：LLM 偶尔把「同义/二选一」的两个名字塞成一个字符串，如特性 "Protean/Libero"
+//（Cinderace 两种地区命名）→ 计算器不认。拆开逐个试，命中第一个能识别的就用它。
+function normalizeDexName(v, existsFn) {
+    if (typeof v !== 'string' || v.indexOf('/') < 0) return v;
+    var parts = v.split('/');
+    for (var i = 0; i < parts.length; i++) {
+        var p = parts[i].replace(/^\s+|\s+$/g, '');
+        if (p && existsFn(p)) return p;
+    }
+    return v;
+}
+// 归一化 + 一句「替换成了什么」的说明（没有替换则 note=null）
+function normalizeWithNote(v, existsFn, label) {
+    var n = normalizeDexName(v, existsFn);
+    if (n !== v) return { name: n, note: label + ' "' + v + '" → applied "' + n + '" (only that part is in the calculator data)' };
+    return { name: v, note: null };
 }
 // 计算器 rawDesc 里「实际生效」的修正项（供 LLM 核对输入是否被识别）
 var RAWDESC_KEYS = ['attackerAbility', 'attackerItem', 'defenderAbility', 'defenderItem', 'weather', 'terrain', 'isReflect', 'isLightScreen', 'isAuroraVeil', 'isHelpingHand', 'isCritical', 'isBurned', 'attackBoost', 'defenseBoost', 'isSwitching'];
@@ -1138,6 +1155,30 @@ function keepExplicitSide(res, orig) {
     return res;
 }
 
+// 用宝可梦名字反查它在 state 里的槽位（我方 myStats/bench 全量；对手只查已亮相的 oppTeam）。
+// 用于纠正 `from_state:'me'`（=场上）+ 显式点名后备/别的宝可梦 这种写法。
+function resolveSlotByName(st, who, name) {
+    if (!st || !name) return null;
+    var want = pklmNormName(name);
+    if (!want) return null;
+    if (who === 'me') {
+        var arr = st.myStats || [];
+        for (var i = 0; i < arr.length; i++) {
+            if (arr[i] && arr[i].name && pklmNormName(arr[i].name) === want) {
+                return { slot: (arr[i].slot !== undefined ? arr[i].slot : i), from: 'state.myStats[' + (arr[i].slot !== undefined ? arr[i].slot : i) + '].name' };
+            }
+        }
+    } else {
+        var ot = st.oppTeam || [];
+        for (var k = 0; k < ot.length; k++) {
+            if (ot[k] && ot[k].name && ot[k].revealed !== false && pklmNormName(ot[k].name) === want) {
+                return { slot: k, from: 'state.oppTeam[' + k + '].name (revealed)' };
+            }
+        }
+    }
+    return null;
+}
+
 // 把 state 的场上参数填进 leg（返回新 leg；不适用时原样返回）。同时把天气/场地/防守方双墙填进 field。
 function applyStateToLeg(leg, ctx) {
     var st = (ctx && ctx.state) || null;
@@ -1158,6 +1199,20 @@ function applyStateToLeg(leg, ctx) {
     // 结果算成「自己打自己」（实测 battle91 T1/T2：Tapu Bulu 木槌 → 变成 Scizor 木槌）。
     if (aReq.who === null && dReq.who !== null) aReq.who = (dReq.who === 'me' ? 'opp' : 'me');
     if (dReq.who === null && aReq.who !== null) dReq.who = (aReq.who === 'me' ? 'opp' : 'me');
+    // 「from_state 写了场上一侧，却又显式点名另一只」→ 用名字反查槽位（battle93 T1：
+    // 它写 {from_state:'me', poke:'Tapu Koko'} 想算「换上 Tapu Koko 打」，而 'me' 是**场上** Toxapex，
+    // 名字被覆盖 → 算出 Toxapex 的招）。命中槽位就改用它，并把纠正过程记进 inputs_used。
+    var slotFix = {};
+    var aNamed = (aSpec.poke !== undefined && aSpec.poke !== null) ? aSpec.poke : aSpec.name;
+    var dNamed = (dSpec.poke !== undefined && dSpec.poke !== null) ? dSpec.poke : dSpec.name;
+    if (aReq.slot === null && aNamed) {
+        var hitA = resolveSlotByName(st, aReq.who, aNamed);
+        if (hitA && Number(hitA.slot) !== 0) { aReq.slot = Number(hitA.slot); slotFix.attacker = 'from_state "' + aReq.who + '" resolved by name "' + aNamed + '" → ' + aReq.who + ':' + aReq.slot + ' (' + hitA.from + ')'; }
+    }
+    if (dReq.slot === null && dNamed) {
+        var hitD = resolveSlotByName(st, dReq.who, dNamed);
+        if (hitD && Number(hitD.slot) !== 0) { dReq.slot = Number(hitD.slot); slotFix.defender = 'from_state "' + dReq.who + '" resolved by name "' + dNamed + '" → ' + dReq.who + ':' + dReq.slot + ' (' + hitD.from + ')'; }
+    }
     var a = applyFromState(st, aSpec, aReq.who, aReq.slot);
     var d = applyFromState(st, dSpec, dReq.who, dReq.slot);
     // 没写 from_state 的那一侧（implied）：只补它没给的空缺，**不覆盖**它显式给的值
@@ -1186,6 +1241,7 @@ function applyStateToLeg(leg, ctx) {
         attacker_side: aReq.who + (aReq.slot === null ? ' (active)' : ':' + aReq.slot),
         defender_side: dReq.who + (dReq.slot === null ? ' (active)' : ':' + dReq.slot),
         attacker_asked: !!aSpec.from_state, defender_asked: !!dSpec.from_state,
+        slot_resolved_by_name: (slotFix.attacker || slotFix.defender) ? slotFix : undefined,
         note: (!!aSpec.from_state && !!dSpec.from_state) ? undefined
             : ('the side without from_state was filled with the OPPOSITE side\'s state, and only where you left a field empty — your explicit values on it were kept'),
         attacker_src: a.src, defender_src: d.src,
@@ -1328,11 +1384,20 @@ function calcOneLeg(leg, idx, ctx) {
     var calcMove = toCalcMove(mv, leg);
     if (calcMove.error) return { index: idx, error: calcMove.error };
 
-    // 名称拼写提醒（计算器靠 PS 数据查表；拼错会静默不生效）
-    if (leg.attacker && leg.attacker.ability && !psAbilityExists(leg.attacker.ability)) notes.push('attacker ability "' + leg.attacker.ability + '" not recognised by the calculator — check the spelling (nothing applied)');
-    if (leg.defender && leg.defender.ability && !psAbilityExists(leg.defender.ability)) notes.push('defender ability "' + leg.defender.ability + '" not recognised by the calculator — check the spelling (nothing applied)');
-    if (leg.attacker && leg.attacker.item && !psItemExists(leg.attacker.item)) notes.push('attacker item "' + leg.attacker.item + '" not recognised by the calculator — check the spelling (nothing applied)');
-    if (leg.defender && leg.defender.item && !psItemExists(leg.defender.item)) notes.push('defender item "' + leg.defender.item + '" not recognised by the calculator — check the spelling (nothing applied)');
+    // 名称拼写提醒（计算器靠 PS 数据查表；拼错会静默不生效）。先做 "A/B" 这类二选一名字的归一化，
+    // 替换过就说一句，替换后仍认不出才报「拼错」。
+    var abA = (leg.attacker && leg.attacker.ability) ? normalizeWithNote(String(leg.attacker.ability), psAbilityExists, 'attacker ability') : null;
+    var abD = (leg.defender && leg.defender.ability) ? normalizeWithNote(String(leg.defender.ability), psAbilityExists, 'defender ability') : null;
+    var itA = (leg.attacker && leg.attacker.item) ? normalizeWithNote(String(leg.attacker.item), psItemExists, 'attacker item') : null;
+    var itD = (leg.defender && leg.defender.item) ? normalizeWithNote(String(leg.defender.item), psItemExists, 'defender item') : null;
+    if (abA && abA.note) notes.push(abA.note);
+    if (abD && abD.note) notes.push(abD.note);
+    if (itA && itA.note) notes.push(itA.note);
+    if (itD && itD.note) notes.push(itD.note);
+    if (abA && !psAbilityExists(abA.name)) notes.push('attacker ability "' + abA.name + '" not recognised by the calculator — check the spelling (nothing applied)');
+    if (abD && !psAbilityExists(abD.name)) notes.push('defender ability "' + abD.name + '" not recognised by the calculator — check the spelling (nothing applied)');
+    if (itA && !psItemExists(itA.name)) notes.push('attacker item "' + itA.name + '" not recognised by the calculator — check the spelling (nothing applied)');
+    if (itD && !psItemExists(itD.name)) notes.push('defender item "' + itD.name + '" not recognised by the calculator — check the spelling (nothing applied)');
     // 天气/场地：名字不被识别时同样**静默不生效**（伤害照常返回，只是少了那一份修正）
     if (leg.field && leg.field.weather) {
         var normW = normalizeWeather(leg.field.weather);
