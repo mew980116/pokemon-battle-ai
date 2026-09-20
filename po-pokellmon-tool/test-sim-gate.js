@@ -80,7 +80,8 @@ var r6 = sim(c6, { move: 'Sludge Bomb' }, [{ move: 'Hydro Pump' }]);
 chk('order 明说 BOTH orders', /BOTH orders/.test(r6.rows[0].order), r6.rows[0].order);
 chk('cases 给了两种顺序', (r6.rows[0].cases || []).length === 2, JSON.stringify(r6.rows[0].cases));
 chk('cases 里两种 order 都出现', (r6.rows[0].cases || []).map(function (x) { return x.order; }).join('|') === 'you first|they first', JSON.stringify((r6.rows[0].cases || []).map(function (x) { return x.order; })));
-chk('两种顺序结果相同时不加冗余后缀', !/worst of/.test(r6.rows[0].mine.summary), r6.rows[0].mine.summary);
+chk('【顺序未定】summary 必须显式写明，不能只显示 you first', /ORDER UNRESOLVED/.test(r6.rows[0].mine.summary) && /do NOT assume you move first/.test(r6.rows[0].mine.summary), r6.rows[0].mine.summary.slice(0, 160));
+chk('【顺序未定】逐顺序都列出来', /by order:/.test(r6.rows[0].mine.summary) && /they first/.test(r6.rows[0].mine.summary), r6.rows[0].mine.summary.slice(0, 200));
 chk('cases 里不泄漏内部打分字段 _lo', JSON.stringify(r6.rows[0].cases).indexOf('_lo') < 0, JSON.stringify(r6.rows[0].cases).slice(0, 120));
 
 console.log('先手方打死对手 → 对手不还手（顺序真正影响结果之处）');

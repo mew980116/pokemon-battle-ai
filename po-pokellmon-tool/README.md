@@ -86,6 +86,8 @@
   - **分工理由（用户 2026-09-20）**：变化招在 `simulate_turn` 里只会显示 `0%`（我们已把变化招从"可能性空间补全"里明确排除），所以"它可能剑舞/冥想"这种**物种级知识必须在查图鉴时给**，塞进单回合表只会污染它。
   - 实测分类：`Diggersby → self_setup:[Swords Dance, Bulk Up, Work Up] + Spikes`；`Aromatisse → [Calm Mind, Nasty Plot]`；`Claydol → [Cosmic Power, Iron Defense, Calm Mind] + Stealth Rock`；`Blissey → [Soft-Boiled, Sing, Thunder Wave, Toxic]`。
   - tool 描述里也加了一句：**"状态招永远不会出现在 simulate_turn 里，所以只看伤害表会低估带强化招的对手"**。
+- **顺序未定必须写明（0.5.9）**：`row.mine.summary` 在「速度区间重叠、两种顺序都仿」时会在最前面加 `ORDER UNRESOLVED (both simulated — do NOT assume you move first)` 并逐顺序列出（`[by order: you first = … | they first = …]`）。
+  - 修的原因（实测 battle98-T0）：两种顺序的 HP 结果相同时，summary 只显示其中一个 case 的 `you first → …`，**会被读成"我先手"**（同一行的 `order` 字段其实写着 UNRESOLVED，但 summary 更显眼）。
 - `simulate_turn` 还会校验 `i_do` 的招式**确实是当前场上这只会的**。
 
 **单测**（不花 LLM 费用，直接打账本逻辑，用 battle96 T1 的真实 state）：
