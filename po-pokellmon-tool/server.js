@@ -65,7 +65,7 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.4.13';  // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
+var SERVER_VERSION = '0.4.14';  // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
 
 // ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
 // 对战主脑用 v4-pro（闭卷深想强，决策更深）；一键回 flash：POKELLMON_MODEL=deepseek-v4-flash
@@ -88,23 +88,34 @@ var RETRY_DELAYS = [2000, 5000, 10000]; // 单次请求失败后的重试延迟�
 // 中段常写成千字内心独白，还夹带未清洗的 thinking / DSML 残留。改回 true 即恢复。
 var ENABLE_WORKLOG = false;
 
+// 幻觉门禁开关（Rule 1 + Rule 4：只禁「说了没验 / 说的和算的不一致」，不评价决策好坏、不判断该不该赌）：
+//   true  = 暴露 predict；save_strategy 拒绝「未裁决 / 已冲突 / 没登记」的计划；最终答案前要求被选中的
+//           动作挂着一个已 MATCH 的 claim（覆盖它将放到场上的那只）。
+//   false = 完全退回原行为（predict 不暴露、不建账本、不拦）。
+var ENABLE_PREDICT_GATE = true;
+var MAX_GATE_REJECTIONS = 2;   // 同一回合内最多打回几次（防死锁；超限放行并标 gateUnmet）
+
 var WORKLOG_STEP = '(1) OPEN WORKLOG — this must be your FIRST action every turn. Call update_worklog with a short scratchpad for THIS turn: the goal, the current situation, confirmed facts, open questions and your next action. Treat it as your working memory: the server injects the latest worklog back into your context on every following tool call, so it is what keeps your plan alive across a long tool-calling loop (reasoning is off, so nothing else preserves it). Overwrite the whole text whenever the plan changes or a fact is confirmed; keep it compact and never let it go stale, and update it again before you finish. ';
 // REVIEW 的序号：带 worklog 时是 (2)，屏蔽后是 (1)
 var WF_N = ENABLE_WORKLOG ? 2 : 1;
 var WORKFLOW = 'WORKFLOW — follow this order every turn: ' +
     (ENABLE_WORKLOG ? WORKLOG_STEP : '') +
     '(' + WF_N + ') REVIEW: read the last turn(s) with get_battle_history and work out what they reveal about the opponent — the speed line (who moved first; any speed boost, paralysis, Tailwind or Choice Scarf clue), which moves / items / abilities are now EXPOSED or can be EXCLUDED, and back-calculate from the damage dealt and taken to infer their EV spread and any offensive boost (item or ability). Record all of it with save_observation, tagging every fact [proved] or [estimated] and setting each pokemon\'s threat level to my team (High/Medium/Low — revise it whenever new information changes it). Also RESOLVE the PENDING CHECKS you left for yourself last turn (listed in your notes): confirm or refute each one from the new log, and compare LAST TURN\'S PREDICTION with what actually happened — if they differ, work out why (a newly revealed move or item? a behaviour preference worth recording? or your own miscalculation?) before you move on. ' +
-    '(' + (WF_N + 1) + ') PLAN: re-read your previous save_strategy notes, look at the actions you are offered, and run the simulations you need (get_my_stats / calc_stats / calc_damage) plus the tactical guidance you need (battle_tips). ' +
-    '(' + (WF_N + 2) + ') VERIFY: never trust memory for a move / ability / item effect, power or accuracy — call get_move_info / get_ability_info / get_item_info unless that detail is already present in the context. Never trust memory for a species base stats / types / abilities / weight either — call get_pokemon_info. Always call get_knowledge for the switch rules before switching unless they are already present in the context. Check the opponent against its legal movepool: if it has used a move it cannot learn (see the CAUTION line in the prompt, or verify with get_pokemon_info), the species is either misread or disguised (Illusion / Transform / Mimic / Ditto) — stop assuming that species and re-read the battle log. ' +
-    '(' + (WF_N + 3) + ') DECIDE: choose the action, then record it with save_strategy. `text` = the labeled lines (1) likely attack, (2) likely switch, (3) their read of my team, (4) my own options AND, for any voluntary switch, the full cost (forfeit the turn + the switch-in eats the hit + may take entry hazards) together with how much it actually gains (forces a kill / starts a setup / chunks a threat, or only chips), how confident my read of their action is and why, whether I am already behind (only winning if they play exactly my prediction, or by assuming an unrevealed threat is not carried, or by hoping they err), and whether a steadier line exists (a switch-in that takes little or heals, or simply attacking), (5) their most likely action + my response + falsifier, (6) the action sequence until my next decision — that step is there to SPOT DANGER, not to avoid losing pokemon, so if every option loses the active pokemon anyway, take the most valuable line instead of dragging the team down to save it. In REPLACEMENT MODE (see the NOTE in the prompt) write `text` as (R1)-(R3) instead and skip the opponent-prediction lines. `scene` = the board you expect at your next decision. `checks` = your uncertain assumptions phrased as tests for later turns. Only `scene` (latest one) and `checks` (latest two) are re-injected later, never `text`. Never skip save_strategy.';
+    '(' + (WF_N + 1) + ') PREDICT: before you lean on any NUMBER, commit to it first. Call predict with one claim per quantitative assumption your plan depends on — the incoming hit on whichever of your pokemon will be on the field after your action, your own damage output, any defensive multiplier, any speed order — each with a concrete `expects` ("22-26%", "survives", "OHKO", "2x", "neutral", "I move first") and an `on_slot`. Then verify each claim by calling the matching tool with its claim_id; the result comes back MATCH or MISMATCH. This is NOT optional: save_strategy is rejected while any claim is unverified or contradicted, and the action you finally pick must carry a MATCHed claim about the pokemon it puts on the field. If a claim comes back MISMATCH, your number was wrong — fix the plan so it agrees with the calculation, re-verify, then save. Never state a number you have not verified. ' +
+    '(' + (WF_N + 2) + ') PLAN: re-read your previous save_strategy notes, look at the actions you are offered, and run the simulations you need (get_my_stats / calc_stats / calc_damage) plus the tactical guidance you need (battle_tips). ' +
+    '(' + (WF_N + 3) + ') VERIFY: never trust memory for a move / ability / item effect, power or accuracy — call get_move_info / get_ability_info / get_item_info unless that detail is already present in the context. Never trust memory for a species base stats / types / abilities / weight either — call get_pokemon_info. Always call get_knowledge for the switch rules before switching unless they are already present in the context. Check the opponent against its legal movepool: if it has used a move it cannot learn (see the CAUTION line in the prompt, or verify with get_pokemon_info), the species is either misread or disguised (Illusion / Transform / Mimic / Ditto) — stop assuming that species and re-read the battle log. ' +
+    '(' + (WF_N + 4) + ') DECIDE: choose the action, then record it with save_strategy. `text` = the labeled lines (1) likely attack, (2) likely switch, (3) their read of my team, (4) my own options AND, for any voluntary switch, the full cost (forfeit the turn + the switch-in eats the hit + may take entry hazards) together with how much it actually gains (forces a kill / starts a setup / chunks a threat, or only chips), how confident my read of their action is and why, whether I am already behind (only winning if they play exactly my prediction, or by assuming an unrevealed threat is not carried, or by hoping they err), and whether a steadier line exists (a switch-in that takes little or heals, or simply attacking), (5) their most likely action + my response + falsifier, (6) the action sequence until my next decision — that step is there to SPOT DANGER, not to avoid losing pokemon, so if every option loses the active pokemon anyway, take the most valuable line instead of dragging the team down to save it. In REPLACEMENT MODE (see the NOTE in the prompt) write `text` as (R1)-(R3) instead and skip the opponent-prediction lines. `scene` = the board you expect at your next decision. `checks` = your uncertain assumptions phrased as tests for later turns. Only `scene` (latest one) and `checks` (latest two) are re-injected later, never `text`. Never skip save_strategy.';
 
 var SYSTEM_PROMPT = require('../po-pokellmon/prompts.js').BATTLE_TIPS +
     ' You decide by calling the tools you have been given; every tool description states when to call it, so follow the workflow below and that guidance. get_pokemon_info is the pokedex lookup (base stats / types / abilities / weight + legal movepool) — use it instead of memory, and to validate a surprising opponent move, since a move outside that movepool means a disguise or a misread species.' +
     '\n\n' + WORKFLOW;
 
-// 实际暴露给模型的 tool 列表（ENABLE_WORKLOG=false 时剔除 update_worklog；runTool 仍保留其分发，便于改回 true）
-var EXPOSED_TOOL_DEFS = ENABLE_WORKLOG ? tools.TOOL_DEFS : tools.TOOL_DEFS.filter(function (t) {
-    return t.function.name !== 'update_worklog';
+// 实际暴露给模型的 tool 列表（关掉的开关对应 tool 不暴露；runTool 仍保留其分发，便于改回 true）
+var EXPOSED_TOOL_DEFS = tools.TOOL_DEFS.filter(function (t) {
+    var n = t.function.name;
+    if (n === 'update_worklog' && !ENABLE_WORKLOG) return false;
+    if (n === 'predict' && !ENABLE_PREDICT_GATE) return false;
+    return true;
 });
 
 // 复用 po-pokellmon 知识库
@@ -661,6 +672,8 @@ function handleChoice(res, state) {
     var toolLog = [];        // 记录每轮 tool 调用
     var lastUsage = null;
     var lastReply = '';
+    // 幻觉门禁账本（本回合）：LLM 用 predict 登记预测，计算类 tool 带 claim_id 裁决，save_strategy / 最终答案前校验
+    var ledger = ENABLE_PREDICT_GATE ? tools.newLedger() : null;
 
     function logEntry(reply, action) {
         if (!state.log) return;
@@ -677,6 +690,8 @@ function handleChoice(res, state) {
             toolLog: toolLog,
             usage: lastUsage,
             fallback: !!action.fallback,
+            gateUnmet: !!action.gateUnmet,
+            ledger: ledger,
             state: state,
             systemPrompt: SYSTEM_PROMPT,
             prompt: userPrompt,
@@ -778,7 +793,7 @@ function handleChoice(res, state) {
                     var tc = toolCalls[i];
                     var args = {};
                     try { args = JSON.parse(tc.function.arguments || '{}'); } catch (e) {}
-                    var result = tools.runTool(tc.function.name, args, { state: state, notes: notes, turn: state.turn, setWorklog: function (t) { worklog = t; } });
+                    var result = tools.runTool(tc.function.name, args, { state: state, notes: notes, turn: state.turn, ledger: ledger, setWorklog: function (t) { worklog = t; } });
                     called.push({ name: tc.function.name, args: args, result: result });
                     messages.push({ role: 'tool', tool_call_id: tc.id, content: JSON.stringify(result) });
                 }
@@ -810,6 +825,21 @@ function handleChoice(res, state) {
             var action = parseAction(reply, state);
             if (!action) {
                 action = fallbackAction(state, 'parse_failed');
+            } else if (ENABLE_PREDICT_GATE && ledger) {
+                // 门禁（Rule 1 动作层）：被选中的动作必须挂着一个已裁决(MATCH)的 claim，覆盖它将放到场上的那只。
+                // 只查「说了没验 / 说的和算的不一致」，不评价这个决策好不好。
+                var gateMsg = tools.actionGateCheck(ledger, action);
+                if (gateMsg && (ledger.rejections || 0) < MAX_GATE_REJECTIONS) {
+                    ledger.rejections = (ledger.rejections || 0) + 1;
+                    console.log('[gate] turn=' + state.turn + ' answer rejected (' + ledger.rejections + '/' + MAX_GATE_REJECTIONS + '): ' + gateMsg.split('\n')[0].slice(0, 160));
+                    messages.push({ role: 'user', content: gateMsg });
+                    loop();
+                    return;
+                }
+                if (gateMsg) {
+                    action.gateUnmet = true;
+                    console.log('[gate] turn=' + state.turn + ' gate UNMET after ' + MAX_GATE_REJECTIONS + ' rejections — passing through');
+                }
             }
             respond(action, reply);
         });
@@ -872,4 +902,5 @@ server.listen(PORT, HOST, function () {
     console.log('  timeout: ' + TIMEOUT_MS + 'ms, max_tool_rounds: ' + MAX_TOOL_ROUNDS);
     console.log('  apiKey : ' + (getApiKey() ? 'present' : 'MISSING'));
     console.log('  tools  : ' + EXPOSED_TOOL_DEFS.map(function (t) { return t.function.name; }).join(', ') + (ENABLE_WORKLOG ? '' : '  [worklog DISABLED]'));
+    console.log('  gate   : ' + (ENABLE_PREDICT_GATE ? 'predict ON (Rule1+Rule4: unverified/contradicted numbers block save_strategy and the final answer; max ' + MAX_GATE_REJECTIONS + ' rejections)' : 'OFF'));
 });

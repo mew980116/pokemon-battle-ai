@@ -23,7 +23,7 @@
 3. 若返回 `tool_calls` → 执行 tool → 结果追加进 messages → 再调（最多 `MAX_TOOL_ROUNDS=25` 轮）
 4. 直到返回最终 `{"choice":N}` → 解析成 slot 动作
 
-**tool**（[tools.js](tools.js)，19 个；当前暴露 18 个）：
+**tool**（[tools.js](tools.js)，20 个；当前暴露 19 个）：
 
 *战场 / 笔记*
 
@@ -34,6 +34,7 @@
 - `get_strategy(turn?)` —— 读思路（不传返回全部）
 - `update_worklog(text)` —— 本轮工作暂存（覆盖式），server 每轮注入回 system。**当前已屏蔽**（server.js `ENABLE_WORKLOG=false`：不暴露给模型、WORKFLOW 不提、system 不注入）。屏蔽依据（battle93/94/95 实测）：约 28% 的 tool 轮次被它独占一次 LLM 往返（从不与其他 tool 合并），且 LLM 把它当思考通道的替代品，中段常写成千字内心独白、夹带未清洗的 thinking / DSML 残留。改回 `true` 即恢复
 - `submit_feedback(text)` —— 反馈「想要的 tool」/ 报告伤害计算异常
+- `predict(claims)` —— **幻觉门禁的入口**（见下节）：先写下你打算依赖的数字（`expects`：`"22-26%"` / `"survives"` / `"2x"` / `"I move first"`），再用 `calc_damage` / `get_type_matchup` / `calc_stats` 带 `claim_id` 去裁决，结果回 `MATCH` / `MISMATCH`
 
 *确定计算*
 
@@ -54,6 +55,24 @@
 - `get_pokemon_info(pokemon, moves?, full_movepool?)` —— **图鉴**：种族值（具名 + 总和）/ 属性 / 可能特性（静态）/ 体重；传 `moves` 逐条校验 `can_learn`（对手用出学习面外招式 = 伪装/误判），`full_movepool:true` 才返回整份招式池
 
 最后 2 回合战报显式贴进 prompt；更早的战报由 DS 按需调 `get_battle_history` 读取（省 token）。
+
+## 幻觉门禁（Rule 1 + Rule 4，`ENABLE_PREDICT_GATE`）
+
+**只禁「说了没验」和「说的与算的不一致」，不评价决策好坏、不判断该不该赌。** 开关与说明见 `server.js` 顶部。
+
+- **Rule 1（必须验）**：`predict` 登记过的每条预测都必须被工具裁决过；`save_strategy` 在存在「未裁决」或「完全没登记」时**返回 error 拒绝提交**。最终答案前还有一道**动作层**检查：你选中的动作必须挂着一个已 `MATCH` 的 claim，覆盖**它将放到场上的那只**（换人=换入者 `on_slot=<slot>`，攻击=场上那只 `on_slot=0`）。
+- **Rule 4（数字一致）**：裁决时 server 自动比对「它预测的」与「工具算出的」，不一致记 `MISMATCH`，同样拒绝提交。解析不出预测内容时**一律放行并标 note**（宁可不拦也不误伤多跑轮次）；`MISMATCH` 必须把计划改成与计算一致才能通过。
+- 防死锁：同一回合最多打回 `MAX_GATE_REJECTIONS=2` 次，超限放行并在日志标 `gateUnmet`。
+- 账本（`predict` 登记了什么、每条 MATCH/MISMATCH）随每回合写进日志的 `ledger` 字段，便于事后统计。
+
+**单测**（不花 LLM 费用，直接打账本逻辑，用 battle96 T1 的真实 state）：
+
+```
+node po-pokellmon-tool/test-predict-gate.js
+```
+
+覆盖：未登记 / 未验算 / 已冲突三种拒绝路径，改正后放行，动作层匹配，
+以及两类真实幻觉——「Rotom-Heat 只吃 22-26%」（实为 137-162% 必杀）与「Hurricane 对 Fairy 是 2x」（实为 1x）。
 
 ## 知识库（build-knowledge.js）
 

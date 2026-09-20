@@ -137,6 +137,35 @@ var TOOL_DEFS = [
     {
         type: 'function',
         function: {
+            name: 'predict',
+            description: 'COMMIT to a number BEFORE you compute it. Register every quantitative assumption your plan depends on as a claim, then verify it by calling the matching tool with that claim_id (calc_damage for damage/existing HP, calc_stats for speed, get_type_matchup for a defensive/offensive multiplier). The tool returns MATCH or MISMATCH against what you predicted. WHY THIS EXISTS: a number you assert must be either verified or flagged as wrong — never invented. Every claim you register must end MATCH before save_strategy will accept your plan, and the action you finally choose must carry at least one MATCHed claim about the pokemon it puts on the field (the switch-in for a switch, the active mon for an attack). If a claim comes back MISMATCH, your number was wrong: fix the plan so it is consistent with the computed value and re-verify (register a new claim if the prediction itself changes). Do NOT skip this to save a round — an unverified claim blocks the plan.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    claims: {
+                        type: 'array',
+                        description: 'One entry per quantitative assumption your plan relies on.',
+                        items: {
+                            type: 'object',
+                            properties: {
+                                id: { type: 'string', description: 'Short handle, e.g. "c1". You pass it back as claim_id when verifying.' },
+                                kind: { type: 'string', description: 'damage (my move\'s output) | survive (the incoming hit on one of my pokemon) | type (a defensive/offensive multiplier) | order (who moves first)' },
+                                on_slot: { type: 'integer', description: 'Which of MY pokemon this is about, by team slot (0 = the active one, 1-5 = bench). Required for survive/order so the gate can tie it to your action.' },
+                                move: { type: 'string', description: 'The move involved, when the claim is about one.' },
+                                about: { type: 'string', description: 'Free text, e.g. "my Rotom-Heat vs their Pelipper".' },
+                                expects: { type: 'string', description: 'Your prediction, concretely: "22-26%", "~45%", "OHKO", "survives", "2x", "neutral", "I move first". Vague wording cannot be verified and will be treated as unverified.' }
+                            },
+                            required: ['id', 'kind', 'expects']
+                        }
+                    }
+                },
+                required: ['claims']
+            }
+        }
+    },
+    {
+        type: 'function',
+        function: {
             name: 'update_worklog',
             description: 'Set/OVERWRITE the WORKLOG for the CURRENT turn — a running scratchpad of your working state, which stays in your context for the rest of this turn. Use it like a harness worklog to make your reasoning explicit and durable even without a thinking channel: (a) after reading the battle state, write the task you are solving and how you break it into steps; (b) after each tool call, refresh it with what you confirmed, how your plan changed, and what is still open; (c) mark it done when you commit to an action. Because it is overwritten, always write the FULL current state, not a delta. It is cleared at the start of every new turn.',
             parameters: {
@@ -441,7 +470,7 @@ var TOOL_DEFS = [
 ];
 
 // 类型克制（移植主脚本 typechart）
-function getTypeMatchup(args) {
+function getTypeMatchup(args, ctx) {
     var ai = typeIndex(args.attack_type);
     if (ai < 0) return { error: 'unknown attack_type: ' + args.attack_type };
     var m = 1;
@@ -451,7 +480,10 @@ function getTypeMatchup(args) {
         if (di < 0) return { error: 'unknown defend_type: ' + types[i] };
         m *= CHART[ai][di];
     }
-    return { multiplier: m };
+    var out = { multiplier: m };
+    var cv = attachClaimVerdict(ctx, args.claim_id, { multiplier: m });
+    if (cv) out.claim_verdict = cv;
+    return out;
 }
 
 // 能力等级修正（移植主脚本 calcStatWhenBoost）
@@ -502,6 +534,172 @@ function saveObservation(args, ctx) {
     return { ok: true, pokemon: args.pokemon, threat: String(args.threat), mode: (args.append ? 'append' : 'overwrite') };
 }
 
+// ===== 预测账本（门禁 Rule 1 + Rule 4）=====
+// 只做两件事：① 强制「你写下的预测必须被工具裁决过」（Rule 1）；② 裁决结果必须与你的预测一致（Rule 4，数字不能编）。
+// 明确不做：不判断决策好坏、不判断该不该赌、不建「对手可能带什么招」的表 —— 只查「你说的」与「你算的」是否自洽。
+function newLedger() { return { claims: {}, order: [] }; }
+
+function registerClaims(args, ctx) {
+    var led = ctx && ctx.ledger;
+    if (!led) return { error: 'no ledger (server too old for predict)' };
+    var list = args.claims;
+    if (!list || !list.length) return { error: 'claims required (at least one)' };
+    var out = [];
+    for (var i = 0; i < list.length; i++) {
+        var c = list[i] || {};
+        if (!c.id) return { error: 'claim #' + (i + 1) + ' needs an id' };
+        if (!c.expects) return { error: 'claim ' + c.id + ' needs expects (a concrete prediction: "22-26%" / "survives" / "2x" / "I move first")' };
+        var id = String(c.id);
+        led.claims[id] = {
+            id: id,
+            kind: String(c.kind || ''),
+            about: String(c.about || ''),
+            on_slot: (c.on_slot === undefined || c.on_slot === null) ? null : Number(c.on_slot),
+            move: c.move ? String(c.move) : '',
+            predicted: String(c.expects),
+            status: 'unresolved',
+            actual: null,
+            note: null
+        };
+        if (led.order.indexOf(id) < 0) led.order.push(id);
+        out.push(id);
+    }
+    return {
+        ok: true,
+        recorded: out,
+        note: 'Now verify each id by calling the matching tool with claim_id: calc_damage (damage / survival), get_type_matchup (multipliers), calc_stats (speed). save_strategy is REJECTED while any claim is unresolved or MISMATCHed.'
+    };
+}
+
+// claim 摘要（给 save_strategy 的 error 用）
+function claimLine(c) {
+    return c.id + ' [' + (c.kind || '?') + (c.on_slot === null ? '' : ' slot' + c.on_slot) + (c.move ? ' ' + c.move : '') + '] predicted "' + c.predicted + '"';
+}
+
+// 从预测文本里抠数字：支持 "22-26%" / "~45%" / "45%" / "2x" / "0.5x" / "neutral"
+function parseExpectNumbers(s) {
+    var t = String(s || '').toLowerCase();
+    var out = { min: null, max: null, single: null };
+    var m = t.match(/(-?\d+(?:\.\d+)?)\s*(?:-|–|~|to)\s*(-?\d+(?:\.\d+)?)\s*%/);
+    if (m) { out.min = parseFloat(m[1]); out.max = parseFloat(m[2]); return out; }
+    var s2 = t.match(/~?\s*(-?\d+(?:\.\d+)?)\s*%/);
+    if (s2) { out.single = parseFloat(s2[1]); return out; }
+    var s3 = t.match(/~?\s*(-?\d+(?:\.\d+)?)/);
+    if (s3) out.single = parseFloat(s3[1]);
+    return out;
+}
+
+function parseExpectMultiplier(s) {
+    var t = String(s || '').toLowerCase();
+    if (/immune|no effect|0\s*x/.test(t)) return 0;
+    if (/0\.25|1\/4/.test(t)) return 0.25;
+    if (/0\.5|1\/2|half|resist/.test(t)) return 0.5;
+    if (/4\s*x/.test(t)) return 4;
+    if (/2\s*x/.test(t)) return 2;
+    if (/neutral|1\s*x/.test(t)) return 1;
+    return null;
+}
+
+// 把工具算出的实际值挂到 claim 上，给出 MATCH / MISMATCH。
+// 解析不出来的预测一律放行（标 unparsed），只拦「能读懂且明确矛盾」的情况——避免解析器误伤导致多跑轮次。
+function attachClaimVerdict(ctx, claimId, payload) {
+    var led = ctx && ctx.ledger;
+    if (!led || claimId === undefined || claimId === null || claimId === '') return null;
+    var c = led.claims[String(claimId)];
+    if (!c) return { claim_id: String(claimId), status: 'UNKNOWN_CLAIM', note: 'no claim with this id — call predict first' };
+    var pred = String(c.predicted);
+    var pl = payload || {};
+    var status = 'MATCH', note = '';
+
+    if (pl.multiplier !== undefined && pl.multiplier !== null) {
+        var pm = parseExpectMultiplier(pred);
+        if (pm === null) note = 'prediction not machine-readable — passed';
+        else if (Math.abs(pm - pl.multiplier) < 1e-9) note = 'multiplier matches';
+        else status = 'MISMATCH';
+        c.actual = pl.multiplier + 'x';
+    } else if (pl.percent_max !== undefined && pl.percent_max !== null) {
+        var pn = parseExpectNumbers(pred);
+        var lo = pl.percent_min, hi = pl.percent_max;
+        if (pn.min !== null) {
+            if (pn.max < lo - 3 || pn.min > hi + 3) status = 'MISMATCH'; else note = 'range matches';
+        } else if (pn.single !== null) {
+            if (pn.single >= lo - 3 && pn.single <= hi + 3) note = 'value inside computed range'; else status = 'MISMATCH';
+        } else if (/ohko|one.?shot/.test(pred.toLowerCase())) {
+            if (/ohko/i.test(String(pl.ko || ''))) note = 'OHKO confirmed'; else status = 'MISMATCH';
+        } else if (/surviv|live|won.?t ko|not ko|safe/.test(pred.toLowerCase())) {
+            if (hi < 100) note = 'survives (max ' + hi + '%)'; else status = 'MISMATCH';
+        } else {
+            note = 'prediction not machine-readable — passed';
+        }
+        c.actual = pl.percent_min + '-' + pl.percent_max + '%' + (pl.ko ? ' (' + pl.ko + ')' : '');
+    } else if (pl.speed !== undefined && pl.speed !== null) {
+        var sn = parseExpectNumbers(pred);
+        if (sn.single !== null) {
+            if (Math.abs(sn.single - pl.speed) <= 2) note = 'speed matches'; else status = 'MISMATCH';
+        } else note = 'prediction not machine-readable — passed';
+        c.actual = 'spe ' + pl.speed;
+    } else {
+        note = 'nothing to compare — passed';
+        c.actual = '(no value)';
+    }
+
+    c.status = status;
+    c.note = note;
+    return { claim_id: c.id, status: status, predicted: pred, actual: c.actual, note: note };
+}
+
+// 门禁检查（Rule 1）：提交计划时，所有登记过的预测都必须已裁决且一致。
+function predictGate(ledger) {
+    if (!ledger) return null;
+    var unresolved = [], mismatched = [];
+    for (var i = 0; i < ledger.order.length; i++) {
+        var c = ledger.claims[ledger.order[i]];
+        if (!c) continue;
+        if (c.status === 'unresolved') unresolved.push(claimLine(c));
+        else if (c.status === 'MISMATCH') mismatched.push(c.id + ': you predicted "' + c.predicted + '" but the calculation says ' + c.actual + '  → your number was wrong, fix the plan so it is consistent with the computed value');
+    }
+    if (unresolved.length) {
+        return 'STRATEGY REJECTED — these predictions were never verified. Verify each with the matching tool passing claim_id, or drop it (register an updated claim) if you no longer rely on it:\n - ' + unresolved.join('\n - ');
+    }
+    if (mismatched.length) {
+        return 'STRATEGY REJECTED — your own numbers contradict the calculations. Rewrite the plan so it matches what was computed, re-verify, then save again:\n - ' + mismatched.join('\n - ');
+    }
+    if (!ledger.order.length) {
+        return 'STRATEGY REJECTED — you registered no predictions. Call predict first with the quantitative assumptions your plan relies on (the incoming hit on the pokemon that will be on the field, your own damage output, any type/speed assumption), verify them, then save.';
+    }
+    return null;
+}
+
+// 最终答案前的门禁（Rule 1 的动作层）：你选中的动作，必须挂着一个已裁决(MATCH)的 claim —— 覆盖「你将放到场上那只」。
+// server 在模型给出 {"choice":N} 且没有再调 tool 时调用它。
+function actionGateCheck(ledger, action) {
+    if (!ledger || !action) return null;
+    var needSlot = (action.type === 'switch') ? Number(action.pokeSlot) : 0;
+    var unresolved = [], mismatched = [];
+    for (var i = 0; i < ledger.order.length; i++) {
+        var c = ledger.claims[ledger.order[i]];
+        if (!c) continue;
+        if (c.status === 'unresolved') unresolved.push(claimLine(c));
+        else if (c.status === 'MISMATCH') mismatched.push(c.id + ': you predicted "' + c.predicted + '" but the calculation says ' + c.actual);
+    }
+    if (unresolved.length || mismatched.length) {
+        var msgs = [];
+        if (unresolved.length) msgs.push('still unverified: ' + unresolved.join('; '));
+        if (mismatched.length) msgs.push('contradicted by your own calculation: ' + mismatched.join('; '));
+        return 'NOT READY — ' + msgs.join(' | ') + ' Fix or verify them, re-save the strategy, then answer.';
+    }
+    var hit = false;
+    for (var j = 0; j < ledger.order.length; j++) {
+        var c2 = ledger.claims[ledger.order[j]];
+        if (c2 && c2.status === 'MATCH' && Number(c2.on_slot) === needSlot) { hit = true; break; }
+    }
+    if (!hit) {
+        var who = (action.type === 'switch') ? ('the pokemon you are switching in (slot ' + needSlot + ')') : 'your active pokemon (slot 0)';
+        return 'NOT READY — your choice puts ' + who + ' on the field, but no verified prediction is attached to it. Call predict for it (the incoming hit it eats, or the damage it deals) with on_slot=' + needSlot + ', verify it with claim_id, re-save the strategy, then answer.';
+    }
+    return null;
+}
+
 // 记录当前回合的战略思路（默认用当前 turn；可显式指定 turn）
 // 存成 {text, scene, checks}：text = 本回合推演（不回灌）；scene = 预设的下次决策场面（回灌 1 条，用于与实况对比）；
 // checks = 留给后续回合核对的待验证假设（回灌最近 2 条）
@@ -511,6 +709,9 @@ function saveStrategy(args, ctx) {
     if (!args.checks) return { error: 'checks required (the assumptions your later turns should verify against the battle log)' };
     var notes = ctx && ctx.notes;
     if (!notes) return { error: 'no notes store' };
+    // 门禁 Rule 1 + Rule 4：未裁决 / 已冲突 / 完全没登记 → 拒绝提交
+    var gateMsg = predictGate(ctx && ctx.ledger);
+    if (gateMsg) return { error: gateMsg };
     if (!notes.turns) notes.turns = {};
     var t = (args.turn !== undefined && args.turn !== null) ? parseInt(args.turn, 10) : (ctx.turn || 0);
     notes.turns[String(t)] = { text: String(args.text), scene: String(args.scene), checks: String(args.checks) };
@@ -1599,7 +1800,14 @@ function calcDamage(args, ctx) {
     if (args.legs.length > 10) return { error: 'at most 10 legs allowed, got ' + args.legs.length };
     var out = [];
     for (var i = 0; i < args.legs.length; i++) {
-        out.push(calcOneLeg(args.legs[i], i, ctx));
+        var legOut = calcOneLeg(args.legs[i], i, ctx);
+        var cid = args.legs[i] ? args.legs[i].claim_id : null;
+        if (cid !== undefined && cid !== null && cid !== '') {
+            legOut.claim_verdict = attachClaimVerdict(ctx, cid, {
+                percent_min: legOut.percent_min, percent_max: legOut.percent_max, ko: legOut.ko_verdict || legOut.ko
+            });
+        }
+        out.push(legOut);
     }
     return { legs: out };
 }
@@ -1710,12 +1918,17 @@ function runJs(args, ctx) {
 
 // ===== calc_stats：LLM 自定参数算能力值（名/种族值 + ev/iv/nature/boosts），legs≤10 =====
 // 复用 resolvePokemonInput / resolveNature / effectiveStat
-function calcStats(args) {
+function calcStats(args, ctx) {
     if (!args.legs || !args.legs.length) return { error: 'legs required' };
     if (args.legs.length > 10) return { error: 'at most 10 legs allowed, got ' + args.legs.length };
     var out = [];
     for (var i = 0; i < args.legs.length; i++) {
-        out.push(calcOneStatLeg(args.legs[i], i));
+        var legOut = calcOneStatLeg(args.legs[i], i);
+        var cid = args.legs[i] ? args.legs[i].claim_id : null;
+        if (cid !== undefined && cid !== null && cid !== '' && legOut && legOut.stats && legOut.stats.spe !== undefined) {
+            legOut.claim_verdict = attachClaimVerdict(ctx, cid, { speed: legOut.stats.spe });
+        }
+        out.push(legOut);
     }
     return { legs: out };
 }
@@ -2223,18 +2436,19 @@ function updateWorklog(args, ctx) {
 
 // tool 执行器：根据 name 分发；ctx 含 state（供 get_battle_history 读取战报）+ notes（笔记存储）+ turn + setWorklog
 function runTool(name, args, ctx) {
-    if (name === 'get_type_matchup') return getTypeMatchup(args);
+    if (name === 'get_type_matchup') return getTypeMatchup(args, ctx);
     if (name === 'calc_stat_boost') return calcStatBoost(args);
     if (name === 'get_battle_history') return getBattleHistory(args, ctx && ctx.state);
     if (name === 'save_observation') return saveObservation(args, ctx);
     if (name === 'save_strategy') return saveStrategy(args, ctx);
+    if (name === 'predict') return registerClaims(args, ctx);
     if (name === 'update_worklog') return updateWorklog(args, ctx);
     if (name === 'get_observation') return getObservation(args, ctx);
     if (name === 'get_strategy') return getStrategy(args, ctx);
     if (name === 'submit_feedback') return submitFeedback(args, ctx);
     if (name === 'calc_damage') return calcDamage(args, ctx);
     if (name === 'run_js') return runJs(args, ctx);
-    if (name === 'calc_stats') return calcStats(args);
+    if (name === 'calc_stats') return calcStats(args, ctx);
     if (name === 'get_my_stats') return getMyStats(args, ctx);
     if (name === 'battle_tips') return battleTips(args);
     if (name === 'get_knowledge') return getKnowledge(args);
@@ -2250,5 +2464,7 @@ module.exports = {
     CHART: CHART,
     typeIndex: typeIndex,
     TOOL_DEFS: TOOL_DEFS,
-    runTool: runTool
+    runTool: runTool,
+    newLedger: newLedger,
+    actionGateCheck: actionGateCheck
 };
