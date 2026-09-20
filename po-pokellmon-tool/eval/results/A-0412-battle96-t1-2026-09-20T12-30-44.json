@@ -1,0 +1,574 @@
+{
+ "fixture": "battle96-t1",
+ "arm": "A-0412",
+ "url": "http://127.0.0.1:8096",
+ "n": 10,
+ "when": "2026-09-20T12-30-44",
+ "summary": {
+  "byAction": {
+   "SWITCH→Toxtricity": 3,
+   "SWITCH→Rotom-Heat": 7
+  },
+  "byVerdict": {
+   "SAFE": 3,
+   "LETHAL": 7
+  },
+  "inboundTotal": 13,
+  "accident": 7,
+  "nOk": 10
+ },
+ "samples": [
+  {
+   "i": 1,
+   "battleId": "A-0412-R1",
+   "ms": 69864,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 2
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "Rotom-Heat -> Pelipper : Thunderbolt"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Rotom-Heat : Scald"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Toxtricity -> Pelipper : Wild Charge"
+     }
+    ],
+    "inbound": [
+     "Pelipper -> Rotom-Heat : Scald"
+    ],
+    "outbound": [
+     "Rotom-Heat -> Pelipper : Thunderbolt",
+     "Toxtricity -> Pelipper : Wild Charge"
+    ],
+    "strategy": {
+     "text": "(1) ATTACK? Pelipper likely Scald/Hurricane/U-turn. As a rain setter that just pivoted in, it likely U-turns (to a Swift Swim abuser I haven't seen) or clicks Scald/Hurricane to pressure Weezing. Confidence moderate (~50% U-turn, ~35% Scald/Hurricane, ~15% Roost/other). Key: Scald in rain is 2x/OHKO-risk on Rotom-Heat but only 1x on Toxtricity; Hurricane is 1x on both.\n(2) SWITCH? Could U-turn out to an unrevealed Swift Swim teammate. Cannot predict which.\n(3) THEIR READ OF ME: only Weezing-Galar revealed. It does not know my Electric answers.\n(4) MY OPTIONS & COST: Switching to Toxtricity (Electric/Poison) threatens a guaranteed Wild Charge OHKO on Pelipper (4x, I outspend at 249 vs ~229). Cost vs Rotom-Heat: Toxtricity takes Scald at 1x (survives) whereas Rotom-Heat takes 2x (~93.8% OHKO) — so Toxtricity is the safer switch. Cost: forfeit turn, eat the hit; Toxtricity also eats Wild Charge recoil + Life Orb (drops to ~35-40% HP after killing). Gain: removes their Drizzle rain and a pivot. Even if Pelipper U-turns, U-turn is 0.5x on Toxtricity (negligible) and Toxtricity is a live Shift Gear threat vs whatever comes in. Not behind; this is a steady, high-reward line. Weezing attacking (Sludge Bomb/Strange Steam 1x) is weaker tempo and does not threaten a kill.\n(5) MOST LIKELY + RESPONSE: Pelipper U-turns or Scalds. My Toxtricity switch survives both (U-turn 0.5x, Scald 1x) and threatens the OHKO. Falsifier: if Pelipper had a move that 2HKOs Toxtricity while also being faster would be bad — it is slow, so no.\n(6) SEQUENCE: Pelipper acts (Scald/U-turn/Hurricane) -> Toxtricity switches in, takes ~1x or 0.5x -> next turn I Wild Charge (OHKO) unless Pelipper switched out via U-turn, in which case I decide vs the new mon (Toxtricity can Shift Gear or attack).",
+     "scene": "Toxtricity active, ~65-100% HP (depends on Pelipper's hit), Pelipper either fainted from Wild Charge next turn or pivoted out. Rain likely cleared if Pelipper fainted. Opponent's Claydol + 4 unrevealed on bench.",
+     "checks": "Verify whether Pelipper U-turns out this turn (confirm/refute pivot read). Verify Pelipper's actual moves (Scald/Hurricane/U-turn) once revealed. Check whether Toxtricity outspeeds Pelipper (refuted if Pelipper moved first on the KO turn)."
+    },
+    "rounds": 9,
+    "ms": 69825,
+    "fallback": false
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 2,
+    "targetName": "Toxtricity",
+    "worst": {
+     "pctMin": 81,
+     "pctMax": 96,
+     "ko": "guaranteed 2HKO",
+     "move": "Hydro Pump",
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 2,
+   "battleId": "A-0412-R2",
+   "ms": 28856,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 4
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "Rotom-Heat -> Pelipper : Thunderbolt"
+     }
+    ],
+    "inbound": [],
+    "outbound": [
+     "Rotom-Heat -> Pelipper : Thunderbolt"
+    ],
+    "strategy": {
+     "text": "(1) ATTACK? Pelipper likely uses Hurricane (rain accuracy) or Scald or U-turn. (2) SWITCH? It may U-turn back to Claydol, but I respond by switching regardless. (3) THEIR READ: knows only Weezing-Galar. (4) MY OPTIONS: switch to Rotom-Heat (Choice Scarf) — Thunderbolt 4x OHKOs Pelipper (206-245%), and Scarf means I outspeed and KO cleanly next turn even if I eat a Scald/Hurricane. Steadier than staying in with Weezing's neutral attacks. (5) MOST LIKELY: Pelipper attacks or U-turns; my Rotom-Heat switch + Thunderbolt covers both (Thunderbolt OHKOs Pelipper, and hits Claydol for neutral if it U-turns in). (6) SEQUENCE: I switch to Rotom-Heat (eats Pelipper's move), then next turn Thunderbolt OHKOs Pelipper (or hits Claydol neutral).",
+     "scene": "Rotom-Heat in vs Pelipper (Rain active). Pelipper 100% or possibly switched to Claydol.",
+     "checks": "verify Pelipper stays in vs U-turns; Thunderbolt should OHKO if Pelipper stays."
+    },
+    "rounds": 6,
+    "ms": 28819,
+    "fallback": false
+   },
+   "verdict": {
+    "verdict": "LETHAL",
+    "targetSlot": 4,
+    "targetName": "Rotom-Heat",
+    "worst": {
+     "pctMin": 137,
+     "pctMax": 162,
+     "ko": "guaranteed OHKO",
+     "move": "Hydro Pump",
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 3,
+   "battleId": "A-0412-R3",
+   "ms": 40183,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 4
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "Weezing-Galar -> Pelipper : Sludge Bomb"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Rotom-Heat -> Pelipper : Thunderbolt"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Rotom-Heat : Hurricane"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Weezing-Galar : Hurricane"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Weezing-Galar : Scald"
+     }
+    ],
+    "inbound": [
+     "Pelipper -> Rotom-Heat : Hurricane",
+     "Pelipper -> Weezing-Galar : Hurricane",
+     "Pelipper -> Weezing-Galar : Scald"
+    ],
+    "outbound": [
+     "Weezing-Galar -> Pelipper : Sludge Bomb",
+     "Rotom-Heat -> Pelipper : Thunderbolt"
+    ],
+    "strategy": {
+     "text": "(1) ATTACK? — Pelipper likely attacks. Candidates: Scald/Surf (Rain boosted, hits Weezing-Galar 64-75% — a 2HKO with burn chance), Hurricane (110 BP, 100% acc in rain, hits 58-68%, 2HKO), possibly U-turn (to scout/preserve momentum). I expect it to stay in and attack since it has rain up and Weezing-Galar has no SE coverage against Water/Flying. Confidence: 70% it attacks; split between Water and Flying — I lean Scald/Surf for the burn value vs my physical-heavy bench? Actually my Weezing is defensive; likely Scald/Surf. (2) SWITCH? — Low chance it switches out: it just came in to reset rain and I showed only Strange Steam (which missed). It's fine in this position. Maybe 15% U-turn to reset into Claydol. (3) THEIR READ OF ME — it knows I have Weezing-Galar (Poison/Fairy). It hasn't seen my other 5. It will probably attack directly and not overthink my switch. (4) MY OPTIONS & COST — Stay with Sludge Bomb (STAB, 45-54%, 2HKO) does not KO before it 2HKOs Weezing (so Weezing gets 2HKO'd first if Pelipper attacks each turn). Switching forfeits the turn; my switch-in must eat Pelipper's move. Rotom-Heat: 271 Scarf speed > 251 max Pelipper, so I move first after switching in and Thunderbolt is a GUARANTEED OHKO (217-257%). Rotom eats Hurricane 23-27% or Scald 22-26% — trivial. Switch is confident: Pelipper cannot hurt Rotom meaningfully, Rotom cleanly OHKOs. (5) MOST LIKELY ACTION + RESPONSE — Pelipper attacks in place; I switch Rotom-Heat, eat a negligible hit, then Thunderbolt OHKO next turn. Falsifier: if Pelipper U-turns to Claydol instead (Cleadol is not shown to eat Thunderbolt well? unclear), but I still net a favorable board. (6) SEQUENCE — This turn I switch to Rotom-Heat (Scarf, 271 speed; forfeits my move, Pelipper moves first but hits Rotom for ~22-27%). Next turn Rotom outspeeds and Thunderbolt OHKOs Pelipper. I expect Rotom-Heat healthy ~75%+ vs fresh opponent switch-in.",
+     "scene": "After switch-in: my Rotom-Heat active at ~75% HP (ate one Pelipper hit), Pelipper active at 100%. Next turn Rotom outspeeds and OHKOs Pelipper with Thunderbolt. Rain up.",
+     "checks": "verify Pelipper does not U-turn into Claydol this turn (refuted if Claydol comes in); verify Pelipper's hit on Rotom is small (~22-27%); confirm Thunderbolt is guaranteed OHKO next turn (should be, but log will confirm)."
+    },
+    "rounds": 6,
+    "ms": 40149,
+    "fallback": false
+   },
+   "verdict": {
+    "verdict": "LETHAL",
+    "targetSlot": 4,
+    "targetName": "Rotom-Heat",
+    "worst": {
+     "pctMin": 137,
+     "pctMax": 162,
+     "ko": "guaranteed OHKO",
+     "move": "Hydro Pump",
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 4,
+   "battleId": "A-0412-R4",
+   "ms": 42233,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 4
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "Rotom-Heat -> Pelipper : Thunderbolt"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Rotom-Heat -> Pelipper : Volt Switch"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Weezing-Galar -> Pelipper : Sludge Bomb"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Rotom-Heat : Scald"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Rotom-Heat : Weather Ball"
+     }
+    ],
+    "inbound": [
+     "Pelipper -> Rotom-Heat : Scald",
+     "Pelipper -> Rotom-Heat : Weather Ball"
+    ],
+    "outbound": [
+     "Rotom-Heat -> Pelipper : Thunderbolt",
+     "Rotom-Heat -> Pelipper : Volt Switch",
+     "Weezing-Galar -> Pelipper : Sludge Bomb"
+    ],
+    "strategy": {
+     "text": "(1) ATTACK? Pelipper likely attacks this turn (it swapped in against my Weezing with Rain up). Candidate moves: Hurricane (110BP, accurate in rain, neutral vs Weezing Poison/Fairy), Weather Ball (100BP water in rain), Scald, or U-turn/Roost. Confident it will use an offensive move ~70% (it came in to apply rain pressure). No move is a surprise KO on my Weezing this turn.\n(2) SWITCH? Unlikely to switch — Pelipper just entered to counter my Weezing under rain. Small chance of U-turn for momentum.\n(3) THEIR READ OF ME: Knows I have Weezing-Galar (seen Strange Steam). Doesn't know my bench. Weezing levitates (no hazard threat). They may fear nothing from Weezing — its Fairy/Poison STAB is neutral and resisted/neutral vs Pelipper.\n(4) MY OPTIONS & COST OF SWITCHING: Sludge Bomb does ~45-53% (2HKO w/ 56% chance) and 30% poison; but I risk eating a rain-boosted Hurricane/Weather Ball 2HKO next. Best line is switch to Rotom-Heat (Scarf). COST: forfeit turn; Rotom-Heat eats Pelipper's move — but Scarf Rotom (406 Spe) OUTSPEEDS base-65 Pelipper, so it moves first and kills. GAIN: Thunderbolt OHKOs Pelipper guaranteed (217-257%) — a clean kill of their rain setter, huge momentum. Confidence in their staying-in: high (they just swapped in to pressure). Even if they switch, Scarf Thunderbolt/Volt Switch still threatens their rain team. This is the steady value line vs a rain team.\n(5) MOST LIKELY ACTION + RESPONSE: Pelipper uses Hurricane/Weather Ball; I switch to Rotom-Heat and next turn OHKO with Thunderbolt (or Volt Switch for momentum but Thunderbolt is guaranteed KO). Falsifier: if they U-turn/switch out and I lose the KO.\n(6) SEQUENCE: I switch to Rotom-Heat (Scarf) -> Pelipper (slower) attacks Rotom-Heat (Scald/Weather Ball/Hurricane — if it survives, is fine but I fully expect to OHKO first) -> next turn Rotom-Heat Thunderbolt, guaranteed OHKO.",
+     "scene": "Next decision: Rotom-Heat (Scarf, 100% or chunked by one Pelipper hit) active vs Pelipper (either fainted from Thunderbolt, or switched out at some HP). Rain still up (5 turns from Pelipper's Drizzle). My Weezing-Galar benched at 100%.",
+     "checks": "Verify Pelipper's ability is Drizzle (not Keen Eye) — Rain was the trigger; confirm no other rain source. Check whether Pelipper carries Choice Specs (its damage vs Rotom-Heat will reveal). Watch for a U-turn/switch-out — if Pelipper leaves, confirm which pokemon walls Rotom-Heat. Confirm Rotom-Heat outspeeds Pelipper (it must, Scarf 406 vs 65 base)."
+    },
+    "rounds": 7,
+    "ms": 42195,
+    "fallback": false
+   },
+   "verdict": {
+    "verdict": "LETHAL",
+    "targetSlot": 4,
+    "targetName": "Rotom-Heat",
+    "worst": {
+     "pctMin": 137,
+     "pctMax": 162,
+     "ko": "guaranteed OHKO",
+     "move": "Hydro Pump",
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 5,
+   "battleId": "A-0412-R5",
+   "ms": 58889,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 4
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "Rotom-Heat -> Pelipper : Thunderbolt"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Toxtricity -> Pelipper : Wild Charge"
+     }
+    ],
+    "inbound": [],
+    "outbound": [
+     "Rotom-Heat -> Pelipper : Thunderbolt",
+     "Toxtricity -> Pelipper : Wild Charge"
+    ],
+    "strategy": {
+     "text": "(1) ATTACK? Pelipper (Fresh, Drizzle pivot) most likely clicks Scald (rain-boosted, 30% burn fishing) or Hurricane, or U-turns to preserve momentum. It just switched in and set rain; Scald/U-turn most likely. Medium-high confidence.\n(2) SWITCH? Possibly U-turn back to Claydol or another teammate to scout.\n(3) THEIR READ OF ME: sees Weezing-Galar (Poison/Fairy, Levitate). Likely expects me to switch since Weezing has no great SE hit on Pelipper and fears rain Scald.\n(4) MY OPTIONS & COST: Switching to Rotom-Heat forfeits this turn; it eats one Pelipper move. Pelipper Scald in rain is neutral to Electric/Fire (manageable), Hurricane 0.5x, U-turn 0.5x (Bug vs Fire/Flying neutral... Bug vs Fire 0.5x). Low cost. Gain: Scarf Rotom-Heat outspeeds and Thunderbolt is a guaranteed OHKO (217-257%) — I force a kill or force Pelipper out, and even vs U-turn I outspeed next turn. Toxtricity Wild Charge is also guaranteed OHKO (203-239%) but slower (249) and carries recoil. Rotom-Heat is the steadier pivot (Scarf + Volt Switch). Confidence in their action is medium — but both likely actions (Scald/U-turn) are fine into Rotom-Heat.\n(5) MOST LIKELY: Scald or U-turn. My reply: switch to Rotom-Heat, then Thunderbolt the 4x target. Falsifier: a surprise Knock Off or coverage that chunks Rotom-Heat.\n(6) SEQUENCE: I switch Rotom-Heat in (takes Pelipper's move, low damage). Next turn I click Thunderbolt — guaranteed OHKO if Pelipper stays; if Pelipper U-turned to a teammate, I'm Choice-locked Scarf Thunderbolt/Volt Switch and outspeed, keeping momentum.",
+     "scene": "Rotom-Heat active (near full HP, Choice Scarf), Pelipper either fainted to Thunderbolt or switched out to a teammate (Claydol 100% or other). Rain active. No hazards.",
+     "checks": "verify Pelipper stays or U-turns and whether it carries a Rotom-Heat-hitting coverage move (e.g. Knock Off); verify my first Thunderbolt actually lands (100% acc, no miss concern unless accuracy modifiers)."
+    },
+    "rounds": 8,
+    "ms": 58849,
+    "fallback": false
+   },
+   "verdict": {
+    "verdict": "LETHAL",
+    "targetSlot": 4,
+    "targetName": "Rotom-Heat",
+    "worst": {
+     "pctMin": 137,
+     "pctMax": 162,
+     "ko": "guaranteed OHKO",
+     "move": "Hydro Pump",
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 6,
+   "battleId": "A-0412-R6",
+   "ms": 24507,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 4
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "me:4 -> Pelipper : Thunderbolt"
+     }
+    ],
+    "inbound": [],
+    "outbound": [
+     "me:4 -> Pelipper : Thunderbolt"
+    ],
+    "strategy": {
+     "text": "(1) ATTACK? Pelipper likely attacks (Hurricane, Scald, or U-turn to pivot). Expect Hurricane (no-miss in rain) or Scald; U-turn also possible. Confidence moderate — it may scout with U-turn.\n(2) SWITCH? Unlikely to switch this turn; it just switched in and will want to exert rain pressure.\n(3) THEIR READ: My active is Weezing-Galar (Poison/Fairy); Pelipper can hit neutral with STAB water/flying, no super-effective option vs Weezing. It may try to set up momentum.\n(4) MY OPTIONS: Weezing's attacks are all neutral (Strange Steam/Sludge Bomb 1x) or resisted (Flamethrower 0.5x) — no kill threat. Switching to Rotom-Heat (Choice Scarf Thunderbolt) is a guaranteed OHKO (568-672 on any reasonable Pelipper spread), Rotom outspeeds, and takes only neutral damage from Pelipper. Cost of switching is trivial (no hazards, takes one neutral hit). High confidence in this line's payoff.\n(5) MOST LIKELY ACTION + RESPONSE: Pelipper attacks or U-turns; my switch brings in Rotom-Heat which survives and then OHKOs with Thunderbolt. Falsified if Pelipper reveals a move that KOs Rotom outright.\n(6) SEQUENCE: I switch to Rotom-Heat (takes one neutral Pelipper hit) → next turn I Thunderbolt for OHKO.",
+     "scene": "Rotom-Heat active (100%, maybe slightly chipped by one neutral Pelipper hit), Pelipper active (or a pivoted-in opponent). Weather Rain.",
+     "checks": "Verify Pelipper's ability is Drizzle (rain set on entry) vs Rain Dish; confirm whether Pelipper U-turns or stays in; verify Thunderbolt still OHKOs if Pelipper has substantial SpD investment."
+    },
+    "rounds": 5,
+    "ms": 24499,
+    "fallback": false
+   },
+   "verdict": {
+    "verdict": "LETHAL",
+    "targetSlot": 4,
+    "targetName": "Rotom-Heat",
+    "worst": {
+     "pctMin": 137,
+     "pctMax": 162,
+     "ko": "guaranteed OHKO",
+     "move": "Hydro Pump",
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 7,
+   "battleId": "A-0412-R7",
+   "ms": 47427,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 4
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "Rotom-Heat -> Pelipper : Thunderbolt"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Toxtricity -> Pelipper : Wild Charge"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Weezing-Galar : Scald"
+     }
+    ],
+    "inbound": [
+     "Pelipper -> Weezing-Galar : Scald"
+    ],
+    "outbound": [
+     "Rotom-Heat -> Pelipper : Thunderbolt",
+     "Toxtricity -> Pelipper : Wild Charge"
+    ],
+    "strategy": {
+     "text": "(1) ATTACK? — Pelipper will likely use Scald (rain-boosted, 2HKOs my Weezing) or U-turn (to pivot into a teammate that answers my likely Electric switch-in). Hurricane also possible (100% acc in rain, hits Weezing neutral). Confidence in Scald/U-turn: medium — it's a rain pivot, both are standard.\n(2) SWITCH? — Pelipper is unlikely to switch away (it just came in to set rain and pressure Weezing); if it does, into Claydol or an unrevealed rain teammate expecting my Electric answer.\n(3) THEIR READ OF ME �� it saw Weezing-Galar only; it expects me to either stay (Weezing struggles vs Pelipper) or switch to a Pelipper check (likely Electric or a strong special attacker). It may U-turn to punish that switch.\n(4) MY OPTIONS & SWITCH COST — Staying: Weezing's Fairy/Poison both neutral, Flamethrower halved in rain; it loses the exchange and eats a rain Scald 2HKO. Switching to Rotom-Heat (Scarf) or Toxtricity: forfeit the turn and eat one Scald/Hurricane (both neutral-to-2x, survivable), but gain a guaranteed OHKO threat on Pelipper via 4x Electric. Rotom-Heat is the better pick: Choice Scarf outruns everything (incl. Swift Swim threats) and Thunderbolt/Volt Switch OHKOs/keeps momentum vs the rain team. Toxtricity's Wild Charge is also an OHKO but is recoil/Life Orb and slower, and loses momentum. Confidence I gain more than I lose: high — Pelipper walls Weezing, and my Electric STAB blanks it.\n(5) MOST LIKELY ACTION + MY RESPONSE — Scald or U-turn from Pelipper; my reply: switch in Rotom-Heat (eats the hit fine), then Volt Switch or Thunderbolt (OHKO). Falsifier: if Pelipper U-turns into a Ground/Electric-resist, Rotom's Thunderbolt is still strong (and Volt Switch preserves momentum).\n(6) SEQUENCE — Pelipper acts (Scald/U-turn/Hurricane) → Rotom-Heat switches in (takes Scald ~2x/Hurricane ~neutral, survives) → next turn Rotom-Heat moves first (Scarf): Volt Switch/Thunderbolt KO or momentum.",
+     "scene": "Rotom-Heat active at ~50-80% HP (ate one Scald/Hurricane) vs Pelipper (or its U-turn switch-in) at 100%. Rain up. My Weezing benched at 100%.",
+     "checks": "Verify Rotom-Heat survives Pelipper's hit if it stays (refuted if Rotom faints on switch-in). Check whether Pelipper U-turns vs stays (reveals pivot habit and next mon). Confirm Electric OHKOs Pelipper if it stays."
+    },
+    "rounds": 7,
+    "ms": 47415,
+    "fallback": false
+   },
+   "verdict": {
+    "verdict": "LETHAL",
+    "targetSlot": 4,
+    "targetName": "Rotom-Heat",
+    "worst": {
+     "pctMin": 137,
+     "pctMax": 162,
+     "ko": "guaranteed OHKO",
+     "move": "Hydro Pump",
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 8,
+   "battleId": "A-0412-R8",
+   "ms": 39183,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 2
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "me:2 -> Pelipper : Wild Charge"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:4 -> Pelipper : Thunderbolt"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> me:2 : Scald"
+     }
+    ],
+    "inbound": [
+     "Pelipper -> me:2 : Scald"
+    ],
+    "outbound": [
+     "me:2 -> Pelipper : Wild Charge",
+     "me:4 -> Pelipper : Thunderbolt"
+    ],
+    "strategy": {
+     "text": "(1) ATTACK? Pelipper likely attacks with Water STAB (Scald) in rain or Hurricane, maybe U-turn/Roost. Scald in rain hits my current Weezing neutral (1x) and would hit Toxtricity neutral (1x, ~59-70%). Hurricane hits Toxtricity 0.5x. I expect Scald or Hurricane, moderate confidence (STAB in rain). (2) SWITCH? Unlikely to switch — it just came in and sets rain. (3) THEIR READ OF ME: they see Weezing-Galar only; they may expect me to stay in or switch to an Electric answer to punish Pelipper. (4) MY OPTIONS: Weezing's attacks are all neutral-or-worse vs Pelipper (Flamethrower 0.5x). Best line is switching to Toxtricity: cost = forfeit turn + eat Pelipper's move (Scald 2HKO but survives, Hurricane resisted); gain = guaranteed OHKO on Pelipper next turn with Wild Charge (4x, 203-239%). Rotom-Heat also OHKOs but takes 2x from Scald — riskier. Toxtricity is the safer, steadier switch-in. (5) MOST LIKELY ACTION + MY RESPONSE: Pelipper uses Scald/Hurricane; I switch to Toxtricity which tanks it and next turn OHKOs with Wild Charge. Falsifier: if it reveals a surprise Electric-weak coverage or Roost stall, still fine — Toxtricity OHKOs anyway. (6) SEQUENCE: this turn I switch to Toxtricity, Pelipper attacks (~0-70% damage on Toxtricity); next turn Toxtricity outspeeds and OHKOs Pelipper with Wild Charge (minor Life Orb+recoil self-damage).",
+     "scene": "Toxtricity active (HP ~40-100% depending on Scald hit), Pelipper fainted or at 0% next turn. Rain active. Opponent will send out replacement after Pelipper dies.",
+     "checks": "verify Pelipper's actual move (Scald vs Hurricane vs coverage) — refute my Hurricane-resist read only if it uses an Electric/other super-effective move on Toxtricity; check whether Toxtricity actually outspeeds Pelipper (Pelipper base 65, Toxtricity 249 speed, near-certain)."
+    },
+    "rounds": 7,
+    "ms": 39171,
+    "fallback": false
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 2,
+    "targetName": "Toxtricity",
+    "worst": {
+     "pctMin": 81,
+     "pctMax": 96,
+     "ko": "guaranteed 2HKO",
+     "move": "Hydro Pump",
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 9,
+   "battleId": "A-0412-R9",
+   "ms": 67701,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 2
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "Rotom-Heat -> Pelipper : Thunderbolt"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Toxtricity -> Pelipper : Wild Charge"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Weezing-Galar : Scald"
+     }
+    ],
+    "inbound": [
+     "Pelipper -> Weezing-Galar : Scald"
+    ],
+    "outbound": [
+     "Rotom-Heat -> Pelipper : Thunderbolt",
+     "Toxtricity -> Pelipper : Wild Charge"
+    ],
+    "strategy": {
+     "text": "(1) ATTACK? Pelipper likely attacks — Scald (Water, boosted in rain, burn chance) or Hurricane (Flying, 100% acc in rain). Confident ~70% it clicks Scald (rain boosted, burn fishing) vs Hurricane 30%. It has no reason to U-turn out immediately since my Weezing-Galar can't threaten it (Flamethrower 0.5x, others 1x).\n\n(2) SWITCH? Pelipper unlikely to switch — it just came in to set rain and my active is not a threat to it.\n\n(3) THEIR READ OF ME — Opponent saw my Weezing-Galar use Strange Steam (missed). They know nothing else of my team. They'll assume I may either stay in (chip) or bring a check to Pelipper (likely Electric or Grass).\n\n(4) MY OPTIONS & SWITCH COST — Staying in with Weezing is bad: Flamethrower/Sludge Bomb/Strange Steam all fail to 2HKO Pelipper, while Pelipper 2HKOs me with rain Scald. Switch candidates: Rotom-Heat (Thunderbolt OHKO via Special STAB) but is 2x weak to Water, so a predicted Scald hits hard; also Choice-locked, so a Claydol switch-in walls it. Toxtricity (Wild Charge is Physical/Atk 244, still OHKO 147-174%) takes Scald 1x (resists Hurricane 0.5x), is NOT Choice-locked so has Fire Punch vs Claydol; cost = eats one hit on switch-in + Wild Charge recoil + Life Orb. Toxtricity is the safer, more flexible switch-in.\n\n(5) MOST LIKELY ACTION + RESPONSE — Pelipper clicks Scald; I switch to Toxtricity, eat the hit at 1x (survive comfortably), then OHKO Pelipper with Wild Charge next turn. Falsifier: if opponent U-turns out on my switch (predicting the switch), Toxtricity eats a U-turn and they gain momentum.\n\n(6) SEQUENCE — Pelipper attacks (likely Scald ~moderate on Toxtricity); my Toxtricity switches in; next turn Toxtricity outspeeds Pelipper (249 vs ~239 max) and OHKOs with Wild Charge (or Fire Punch if Claydol switches in).",
+     "scene": "My Toxtricity active at ~65-75% HP (ate one rain Scald) vs Pelipper 100%. Rain up. I am about to move first next turn (outspeed) with a killing Electric Wild Charge.",
+     "checks": "verify Pelipper's revealed move this turn (Scald vs Hurricane vs U-turn) to pin its set; check whether Pelipper is faster than Toxtricity (refuted if Toxtricity moves first next turn); confirm Wild Charge OHKO (refuted if Pelipper survives)."
+    },
+    "rounds": 7,
+    "ms": 67686,
+    "fallback": false
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 2,
+    "targetName": "Toxtricity",
+    "worst": {
+     "pctMin": 81,
+     "pctMax": 96,
+     "ko": "guaranteed 2HKO",
+     "move": "Hydro Pump",
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 10,
+   "battleId": "A-0412-R10",
+   "ms": 72354,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 4
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "me:8 -> opp : Thunderbolt"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Rotom-Heat -> opp : Thunderbolt"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Rotom-Heat : Scald"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Rotom-Heat : Hurricane"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Toxtricity -> opp : Wild Charge"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Toxtricity : Scald"
+     },
+     {
+      "side": "INBOUND",
+      "label": "Pelipper -> Toxtricity : Hurricane"
+     }
+    ],
+    "inbound": [
+     "Pelipper -> Rotom-Heat : Scald",
+     "Pelipper -> Rotom-Heat : Hurricane",
+     "Pelipper -> Toxtricity : Scald",
+     "Pelipper -> Toxtricity : Hurricane"
+    ],
+    "outbound": [
+     "me:8 -> opp : Thunderbolt",
+     "Rotom-Heat -> opp : Thunderbolt",
+     "Toxtricity -> opp : Wild Charge"
+    ],
+    "strategy": {
+     "text": "(1) ATTACK? Pelipper likely attacks or pivots. Candidates: Hurricane (1x on Weezing-Galar, 100% acc in rain, confusion chance), Scald (1x, 30% burn), or U-turn (pivot). No hazards on their side so Defog pointless. I expect Hurricane or U-turn more than Scald on a defensive set; Scald more likely if it's a Specs set. Confidence: medium-low since set is unrevealed.\n(2) SWITCH? Opponent just manual-switched in Pelipper this turn, unlikely to switch again immediately; may U-turn out later.\n(3) THEIR READ OF ME: They saw Weezing-Galar and switched Claydol out (Claydol weak-ish vs Fairy Sludge Bomb). They don't know my Rotom-Heat/Toxtricity exist. They may expect me to stay in or switch to an Electric answer.\n(4) MY OPTIONS & COST: Staying in (Sludge Bomb/Strange Steam = 1x, ~30-35% to Pelipper) is low value, Weezing-Galar SpA is weak and can't pressure. Switching to Rotom-Heat: costs the turn + eats the incoming move. If Specs Scald, Rotom-Heat is OHKO'd (184-217% rain Specs Scald) — huge risk; if Hurricane it takes only 42-49%; if U-turn negligible. GAIN: Rotom-Heat Scarf Thunderbolt is a guaranteed OHKO on Pelipper and gives me speed control + Volt Switch momentum + Levitate nullifying Claydol's Ground. Toxtricity (Wild Charge OHKO, takes Scald 1x) is safer vs Scald but lacks a Scarf and recoils. Weighing: defensive Pelipper (most common alongside a bulky Claydol partner) usually runs NO Scald, making Rotom-Heat switch nearly free and instantly winning the matchup. I'm not behind; this is a proactive winning line.\n(5) MOST LIKELY + RESPONSE: Pelipper uses Hurricane or U-turn; I switch Rotom-Heat, survive comfortably, and OHKO next turn. Falsifier: if a rain-boosted Scald hits and OHKOs Rotom-Heat (reveals Specs + Scald).\n(6) SEQUENCE: I switch Rotom-Heat (Pelipper acts first, Hurricane ~42-49% or Scald OHKO or U-turn). Next turn Rotom-Heat outspeeds (Scarf 271) and Thunderbolt OHKOs Pelipper unless they switch out.",
+     "scene": "Expect: Rotom-Heat active at ~full HP (if Pelipper used Hurricane/U-turn) vs Pelipper, rain up. Next turn I Thunderbolt for OHKO. If Specs Scald, Rotom-Heat fainted and I pick a replacement.",
+     "checks": "check whether Pelipper carries Scald (refuted if it uses Hurricane/U-turn/Defog this turn); check Pelipper item (Specs revealed only if a move does unusually high damage); verify Rotom-Heat outspeeds Pelipper next turn."
+    },
+    "rounds": 10,
+    "ms": 72334,
+    "fallback": false
+   },
+   "verdict": {
+    "verdict": "LETHAL",
+    "targetSlot": 4,
+    "targetName": "Rotom-Heat",
+    "worst": {
+     "pctMin": 137,
+     "pctMax": 162,
+     "ko": "guaranteed OHKO",
+     "move": "Hydro Pump",
+     "error": null
+    },
+    "isSwitch": true
+   }
+  }
+ ]
+}
