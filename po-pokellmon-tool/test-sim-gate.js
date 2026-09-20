@@ -199,5 +199,26 @@ var giC = tools.runTool('get_pokemon_info', { pokemon: 'Claydol' }, { state: {} 
 chk('Claydol 列出 Cosmic Power / Iron Defense', !!(giC.notable_status_moves && giC.notable_status_moves.self_setup && giC.notable_status_moves.self_setup.indexOf('Cosmic Power') >= 0), JSON.stringify(giC.notable_status_moves));
 chk('只含 Status 招（不含伤害招）', !JSON.stringify(giD.notable_status_moves).match(/(Hydro Pump|Body Slam|Earthquake)/), JSON.stringify(giD.notable_status_moves));
 
+console.log('默认值的偏向必须显式给出（打落 ×1.5 / 对手 EV 锚点）');
+// 打落需要「当前场上这只真的会这招」，用一份浅拷贝把 Weezing 的招式表换掉
+function ctxMoves(mv) {
+    var s = JSON.parse(JSON.stringify(state));
+    s.me.moves = [{ name: mv, used: 0 }];
+    return { state: s, notes: notes, turn: 1, ledger: tools.newLedger(), simGateOn: true };
+}
+var r18 = sim(ctxMoves('Knock Off'), { move: 'Knock Off' }, [{ move: 'Dragon Dance' }]);
+chk('打落·对手道具未知 → 给「有道具/无道具」两个值', !!r18.rows[0].item_note && /if the target holds an item/.test(r18.rows[0].item_note) && /if it holds none/.test(r18.rows[0].item_note), String(r18.rows[0].item_note).slice(0, 150));
+chk('打落·两个值不同（确认 ×1.5 生效）', (function () { var m = String(r18.rows[0].item_note).match(/Knock Off = ([\d-]+)% if the target holds an item \/ ([\d-]+)% if it holds none/); return !!m && m[1] !== m[2]; })(), String(r18.rows[0].item_note).slice(0, 90));
+// 对手当攻击方、EV 未假设 → 两个锚点 + 保守化 faints
+var c19 = ctx();
+var r19 = sim(c19, { switch: 2 }, [{ move: 'Scald' }]);
+chk('对手攻击·EV 未假设 → 给 0EV 与 252+ 两个锚点', !!r19.rows[0].ev_note && /at 0 EV/.test(r19.rows[0].ev_note) && /252 in its attacking stat/.test(r19.rows[0].ev_note), String(r19.rows[0].ev_note).slice(0, 160));
+chk('给定 hp_after_max_investment', !!r19.rows[0].mine.hp_after_max_investment, String(r19.rows[0].mine.hp_after_max_investment));
+chk('summary 里也标出两个 (see ev_note)', /their spread unassumed/.test(r19.rows[0].mine.summary), r19.rows[0].mine.summary.slice(0, 200));
+// 传了 assume → 锚点消失
+var c20 = ctx();
+var r20 = sim(c20, { switch: 2 }, [{ move: 'Scald' }], { opp_spread: '252 SpA / Modest' });
+chk('传了 assume 后不再给锚点', !r20.rows[0].ev_note, String(r20.rows[0].ev_note));
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

@@ -806,10 +806,103 @@ function applyFromStateSpec(state, who, slot, extra) {
     for (var k in (extra || {})) spec[k] = extra[k];
     return spec;
 }
-function simLeg(state, atkSpec, defSpec, moveName) {
+// 对手 EV 未假设时的第二个锚点：进攻向满投资（252 + 升性格）。
+// 动机（battle98-T0 实测）：默认 0EV 在「它打我」的方向上是**低估**的——
+// Amoonguss 打 Crawdaunt 0EV=95-113%，252SpA/Modest=135-160% → 会把「必杀」读成「有几率活」。
+function oppAnchorSpec(moveName, baseSpec) {
+    var rm = resolveMoveInput({ name: moveName });
+    var cat = rm && rm.category ? String(rm.category) : '';
+    var ev = [0, 0, 0, 0, 0, 0], nat = 'Serious';
+    if (cat === 'Physical') { ev[1] = 252; nat = 'Adamant'; }
+    else if (cat === 'Special') { ev[3] = 252; nat = 'Modest'; }
+    else return null;                       // 变化招不受攻击向 EV 影响 → 不给锚点
+    var out = {};
+    for (var k in baseSpec) out[k] = baseSpec[k];
+    out.ev = ev; out.nature = nat;
+    return out;
+}
+
+// 该侧道具是否已被系统知道（我方通常知道；对手要已暴露/已推断）。
+// 用于决定要不要给"有道具/无道具"两个打落数值——已知就给一个，未知才给两个。
+function sideItemKnown(state, spec) {
+    if (!spec) return false;
+    if (spec.item !== undefined) return true;
+    var fs2 = String(spec.from_state || '');
+    if (fs2.indexOf('me') === 0) {
+        if (fs2.indexOf(':') < 0) return !!(state.me && state.me.item);
+        var msl = Number(fs2.slice(fs2.indexOf(':') + 1));
+        var mt = state.myStats || [];
+        for (var a = 0; a < mt.length; a++) { if (Number(mt[a].slot) === msl) return !!mt[a].item; }
+        return false;
+    }
+    if (fs2.indexOf('opp') === 0) {
+        if (fs2.indexOf(':') < 0) return !!((state.opp || {}).item || (state.opp || {}).itemInferred);
+        var osl = Number(fs2.slice(fs2.indexOf(':') + 1));
+        var ot = state.oppTeam || [];
+        for (var b = 0; b < ot.length; b++) { if (Number(ot[b].slot) === osl) return !!(ot[b].item || ot[b].itemInferred); }
+        return false;
+    }
+    return false;
+}
+
+function simLeg(state, atkSpec, defSpec, moveName, opts) {
     var r = calcOneLeg({ attacker: atkSpec, defender: defSpec, move: { name: moveName } }, 0, { state: state });
     if (!r || r.percent_max === undefined) return { error: (r && r.error) || 'calc failed' };
+    var lname = String(moveName || '').toLowerCase();
+
+    // (A) 目标**持道具会改变威力**的招：打落 ×1.5；灵骚（Poltergeist）没道具直接失效。
+    // 目标道具**未知**时**两个值都给**（不猜）；已知就给一个（否则会刷出两个一样的数字）。
+    if ((lname === 'knock off' || lname === 'poltergeist') && defSpec && defSpec.item === undefined && !sideItemKnown(state, defSpec)) {
+        var alt = calcOneLeg({ attacker: atkSpec, defender: Object.assign({}, defSpec, { item: 'Leftovers' }), move: { name: moveName } }, 0, { state: state });
+        if (alt && alt.percent_max !== undefined && !(alt.percent_min === r.percent_min && alt.percent_max === r.percent_max)) {
+            r.item_unknown = {
+                move: moveName,
+                if_target_holds_item: alt.percent_min + '-' + alt.percent_max + '%',
+                if_target_holds_nothing: r.percent_min + '-' + r.percent_max + '%',
+                note: (lname === 'knock off' ? 'Knock Off gains x1.5 when the target holds an item' : 'Poltergeist fails outright if the target holds no item') +
+                    '; the target item is not known, so BOTH numbers are given. Almost every competitive set holds an item, so the first number is the realistic one.'
+            };
+        }
+    }
+
+    // (B) 对手当攻击方、且本回合没传过对手配速假设 → 再算一个「满投资」锚点（见上面 oppAnchorSpec 的动机）
+    if (opts && opts.oppAnchor && atkSpec && String(atkSpec.from_state || '').indexOf('opp') === 0) {
+        var altSpec = oppAnchorSpec(moveName, atkSpec);
+        if (altSpec) {
+            var alt2 = calcOneLeg({ attacker: altSpec, defender: defSpec, move: { name: moveName } }, 0, { state: state });
+            if (alt2 && alt2.percent_max !== undefined) {
+                r.ev_anchor = {
+                    move: moveName,
+                    unassumed_0ev: r.percent_min + '-' + r.percent_max + '%',
+                    max_investment: alt2.percent_min + '-' + alt2.percent_max + '%',
+                    _altMin: alt2.percent_min, _altMax: alt2.percent_max,
+                    note: 'their EV spread is NOT assumed — 0 EV UNDERSTATES what it deals to you. The second number assumes 252 in its attacking stat with a boosting nature. Use the range, not the first number.'
+                };
+            }
+        }
+    }
     return r;
+}
+
+// 把 simLeg 挂上的两条附加信息（道具未知 / EV 未假设）落到 row 上。
+// role 用来指明这条伤害是「它打我」还是「我打它」，避免把误差方向说反。
+function applyLegNotes(row, leg, myHpPct, role) {
+    if (!leg || leg.error) return;
+    if (leg.item_unknown) {
+        var it = leg.item_unknown;
+        row.item_note = (row.item_note ? row.item_note + '  |  ' : '') + role + ': ' + it.move + ' = ' +
+            it.if_target_holds_item + ' if the target holds an item / ' + it.if_target_holds_nothing + ' if it holds none. ' + it.note;
+    }
+    if (leg.ev_anchor && row.mine) {
+        var ev = leg.ev_anchor;
+        var altLo = Math.round(myHpPct - ev._altMax), altHi = Math.round(myHpPct - ev._altMin);
+        var altF = (altHi <= 0 ? true : (altLo <= 0 ? 'possible' : false));
+        // 保守化 faints：两个锚点里更坏的那个算（不能因为默认 0EV 就报"活得下来"）
+        if (altF === true || (altF === 'possible' && row.mine.faints === false)) row.mine.faints = altF;
+        row.mine.hp_after_max_investment = altLo + '-' + altHi + '%';
+        row.ev_note = role + ': ' + ev.move + ' = ' + ev.unassumed_0ev + ' at 0 EV (unassumed) / ' + ev.max_investment +
+            ' with 252 in its attacking stat + boosting nature. ' + ev.note;
+    }
 }
 
 // 招式命中率（含天气修正）：返回 0-100 的数字；101/必中 视作 100；查不到返回 null。
@@ -1074,13 +1167,17 @@ function simulateTurn(args, ctx) {
         }
 
         // ---- 伤害 ----
+        // 对手 EV 未假设时，凡「它打我」的那条 leg 都附一个「满投资」锚点（见 oppAnchorSpec 动机）
+        var simOpts = { oppAnchor: !(args.assume && (args.assume.opp_spread || args.assume.opp_spread_off)) };
         if (iSwitch) {
             if (br.kind === 'move') {
-                var legA = simLeg(state, applyFromStateSpec(state, 'opp', null), applyFromStateSpec(state, 'me', mySlot), br.move);
+                var legA = simLeg(state, applyFromStateSpec(state, 'opp', null), applyFromStateSpec(state, 'me', mySlot), br.move, simOpts);
                 if (legA.error) row.unknown.push('incoming damage could not be computed (' + legA.error + ')');
                 else {
                     var hpLo = Math.round(myHpPct - legA.percent_max), hpHi = Math.round(myHpPct - legA.percent_min);
                     row.mine = { takes: legA.percent_min + '-' + legA.percent_max + '%', hp_after: hpLo + '-' + hpHi + '%', faints: (hpHi <= 0 ? true : (hpLo <= 0 ? 'possible' : false)), summary: myName + ' takes ' + legA.percent_min + '-' + legA.percent_max + '% from ' + br.move + ' → ' + hpLo + '-' + hpHi + '% left' };
+                    applyLegNotes(row, legA, myHpPct, 'their move on you');
+                    if (row.ev_note) row.mine.summary += '  [their spread unassumed: ' + row.mine.hp_after + ' @0EV | ' + row.mine.hp_after_max_investment + ' @252+ — see ev_note]';
                 }
             } else {
                 row.mine = { takes: '0%', hp_after: myHpPct + '%', faints: false, summary: myName + ' comes in untouched (they also switched)' };
@@ -1089,8 +1186,8 @@ function simulateTurn(args, ctx) {
         } else {
             // 我出招 + 他们出招 → 两边都算，并按 orderModes 逐种顺序给出结果
             if (br.kind === 'move') {
-                var legOut = simLeg(state, applyFromStateSpec(state, 'me', null), applyFromStateSpec(state, 'opp', null), mine.move);
-                var legIn2 = simLeg(state, applyFromStateSpec(state, 'opp', null), applyFromStateSpec(state, 'me', null), br.move);
+                var legOut = simLeg(state, applyFromStateSpec(state, 'me', null), applyFromStateSpec(state, 'opp', null), mine.move, simOpts);
+                var legIn2 = simLeg(state, applyFromStateSpec(state, 'opp', null), applyFromStateSpec(state, 'me', null), br.move, simOpts);
                 if (legOut.error) row.unknown.push('your outgoing damage could not be computed (' + legOut.error + ')');
                 if (legIn2.error) row.unknown.push('incoming damage could not be computed (' + legIn2.error + ')');
                 if (!legOut.error && !legIn2.error) {
@@ -1133,6 +1230,9 @@ function simulateTurn(args, ctx) {
                         summary: (orderUnresolved ? 'ORDER UNRESOLVED (both simulated — do NOT assume you move first) ' : '') + worstCase.summary +
                             (orderUnresolved ? '  [by order: ' + row.cases.map(function (x) { return x.order + ' = ' + x.mine_hp_after + ' (' + x.you_take + ' in)'; }).join(' | ') + ']' : '')
                     };
+                    applyLegNotes(row, legIn2, myHpPct, 'their move on you');
+                    applyLegNotes(row, legOut, myHpPct, 'your move on them');
+                    if (row.ev_note) row.mine.summary += '  [their spread unassumed: ' + row.mine.hp_after + ' @0EV | ' + row.mine.hp_after_max_investment + ' @252+ — see ev_note]';
                 }
             } else {
                 var incomingName = slotName(oppTeam, br.slot);

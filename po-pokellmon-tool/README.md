@@ -86,6 +86,10 @@
   - **分工理由（用户 2026-09-20）**：变化招在 `simulate_turn` 里只会显示 `0%`（我们已把变化招从"可能性空间补全"里明确排除），所以"它可能剑舞/冥想"这种**物种级知识必须在查图鉴时给**，塞进单回合表只会污染它。
   - 实测分类：`Diggersby → self_setup:[Swords Dance, Bulk Up, Work Up] + Spikes`；`Aromatisse → [Calm Mind, Nasty Plot]`；`Claydol → [Cosmic Power, Iron Defense, Calm Mind] + Stealth Rock`；`Blissey → [Soft-Boiled, Sing, Thunder Wave, Toxic]`。
   - tool 描述里也加了一句：**"状态招永远不会出现在 simulate_turn 里，所以只看伤害表会低估带强化招的对手"**。
+- **默认值的偏向必须给出来（0.6.0）**：两类"默认值会给出自信的错误数字"的情况，不再让模型自己猜：
+  - `item_note`：**打落（Knock Off）/ 灵骚（Poltergeist）** 这类「目标持道具会改变威力」的招，**目标道具未知时两个值都给**（`if the target holds an item` / `if it holds none`）；道具已知时只给一个（由 `sideItemKnown` 判定，并去掉两个值相同的冗余情况）。
+  - `ev_note` + `mine.hp_after_max_investment`：**对手当攻击方**且本回合没传 `assume` 时，除默认 0EV 外**再给一个「252 + 升性格」锚点**，并把 `faints` **保守化**（两个锚点里更坏的算）。
+  - **动机（battle98-T0/T1 实测）**：默认 0EV 在「它打我」的方向上是**低估**的——Amoonguss 打 Crawdaunt `0EV 95-113%` vs `252SpA+Modest 135-160%`，会把「必杀」读成「有几率活」；而打落漏掉道具加成（`70-83%` vs `105-124%`）会把 OHKO 读成打不死。**两者方向相反、会部分抵消**，所以单看默认值既不是上界也不是下界——必须把两个值都摆出来。
 - **顺序未定必须写明（0.5.9）**：`row.mine.summary` 在「速度区间重叠、两种顺序都仿」时会在最前面加 `ORDER UNRESOLVED (both simulated — do NOT assume you move first)` 并逐顺序列出（`[by order: you first = … | they first = …]`）。
   - 修的原因（实测 battle98-T0）：两种顺序的 HP 结果相同时，summary 只显示其中一个 case 的 `you first → …`，**会被读成"我先手"**（同一行的 `order` 字段其实写着 UNRESOLVED，但 summary 更显眼）。
 - `simulate_turn` 还会校验 `i_do` 的招式**确实是当前场上这只会的**。
