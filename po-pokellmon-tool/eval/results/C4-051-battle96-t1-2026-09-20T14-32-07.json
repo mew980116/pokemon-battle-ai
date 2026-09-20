@@ -1,0 +1,483 @@
+{
+ "fixture": "battle96-t1",
+ "arm": "C4-051",
+ "url": "http://127.0.0.1:8098",
+ "n": 5,
+ "when": "2026-09-20T14-32-07",
+ "summary": {
+  "byAction": {
+   "SWITCH→Toxtricity": 3,
+   "SWITCH→Noivern": 1,
+   "ATK(stay)": 1
+  },
+  "byVerdict": {
+   "SAFE": 4,
+   "RISKY": 1
+  },
+  "inboundTotal": 0,
+  "simCalls": 11,
+  "branchTotal": 34,
+  "strategyRejections": 3,
+  "gateRejections": 1,
+  "gateUnmet": 0,
+  "gateBypassed": 0,
+  "honestFaints": 0,
+  "behaviorHits": 0,
+  "accident": 0,
+  "nOk": 5
+ },
+ "samples": [
+  {
+   "i": 1,
+   "battleId": "C4-051-R1",
+   "ms": 63512,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 2
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "Toxtricity -> Pelipper : Wild Charge"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Rotom-Heat -> Pelipper : Thunderbolt"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Rotom-Heat -> Pelipper : Thunderbolt"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":2} vs [\"Hydro Pump\",\"Scald\",\"Hurricane\"]"
+     }
+    ],
+    "inbound": [],
+    "outbound": [
+     "Toxtricity -> Pelipper : Wild Charge",
+     "Rotom-Heat -> Pelipper : Thunderbolt",
+     "Rotom-Heat -> Pelipper : Thunderbolt"
+    ],
+    "strategy": {
+     "action": "switch 2",
+     "branch": "Hydro Pump",
+     "outcome": "survives",
+     "text": "(1) ATTACK? Pelipper just switched in with Drizzle; likely Rain-boosted Hydro Pump/Scald or Hurricane. Confident it attacks rather than switching again (just entered).\n(2) SWITCH? Unlikely to switch immediately after entering.\n(3) THEIR READ OF ME: Sees Weezing-Galar; may expect a status or switch.\n(4) MY OPTIONS: Stay and chip (1x/0.5x weak) vs switch to Electric attacker for 4x OHKO. Toxtricity (Electric/Poison) takes Water/Flying neutrally, survives even a max Hydro Pump (81-96%), and Wild Charge OHKOs Pelipper next turn. Rotom-Heat also OHKOs but is 2x weak to Water. Toxtricity is the steadier pick.\n(5) MOST LIKELY: Pelipper Rain-boosted Water/Hurricane → Toxtricity survives, then Wild Charge OHKO. Falsifier: Pelipper U-turns out.\n(6) SEQUENCE: Switch Toxtricity (eats neutral hit, survives), next turn Wild Charge OHKO Pelipper.",
+     "scene": "My Toxtricity active at ~4-73% HP (survived Pelipper hit), Pelipper fainted, Rain active, opponent sends replacement.",
+     "checks": "verify Pelipper attacked (not U-turn/switch); confirm Wild Charge OHKOs Pelipper (refute if survives)."
+    },
+    "rounds": 10,
+    "ms": 63329,
+    "fallback": false,
+    "simCalls": 1,
+    "sims": [
+     {
+      "actionKey": "switch 2",
+      "opp_does": [
+       "Hydro Pump",
+       "Scald",
+       "Hurricane"
+      ]
+     }
+    ],
+    "strategyRejections": 1,
+    "warningCount": 1,
+    "lastWarning": "WARNING (not blocking) — your `text` asserts a type-multiplier (Flying: \"KO. Toxtricity (Electric/Poison) takes Water/Flying neutrally, survive\" | Poison: \"c attacker for 4x OHKO. Toxtricity (Electric/Poison) takes Water/Flyin\" | Water: \"4x OHKO. Toxtricity (Electric/Poison) takes Water/Flying neutr",
+    "multMentions": 3,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "switch 2",
+    "declaredBranch": "Hydro Pump",
+    "declaredOutcome": "survives",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 2,
+    "targetName": "Toxtricity",
+    "worst": {
+     "pctMin": 81,
+     "pctMax": 96,
+     "ko": "guaranteed 2HKO",
+     "move": "Hydro Pump",
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 2,
+   "battleId": "C4-051-R2",
+   "ms": 69419,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 3
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "SIM",
+      "label": "{\"switch\":8} vs [\"Scald\",\"Hurricane\",\"U-turn\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":4} vs [\"Scald\",\"Hurricane\",\"U-turn\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":2} vs [\"Scald\",\"Hurricane\",\"U-turn\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":3} vs [\"Scald\",\"Hurricane\",\"U-turn\"]"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Toxtricity -> Pelipper : Wild Charge"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Rotom-Heat -> Pelipper : Thunderbolt"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Noivern -> Pelipper : Draco Meteor"
+     }
+    ],
+    "inbound": [],
+    "outbound": [
+     "Toxtricity -> Pelipper : Wild Charge",
+     "Rotom-Heat -> Pelipper : Thunderbolt",
+     "Noivern -> Pelipper : Draco Meteor"
+    ],
+    "strategy": {
+     "action": "switch 3",
+     "branch": "Hurricane",
+     "outcome": "survives",
+     "text": "(4) Switch to Noivern (Choice Specs): Draco Meteor guarantees OHKO on Pelipper. Cost: Noivern eats one hit; worst real branch is Hurricane (45-53%, leaves 47-55%) or Scald (24-29%); Noivern survives both. The only true fear is a non-standard Ice Beam (x4) which standard Drizzle Pelipper does not carry — I am betting against that. No hazards on my side. (5) Pelipper most likely clicks rain Scald or Hurricane/U-turn; Noivern survives all standard moves and outspeeds to OHKO with Draco Meteor.",
+     "scene": "Noivern active at ~47-76% (worst Hurricane 45-53%, Scald 24-29%), Pelipper 100%, rain up",
+     "checks": "verify Pelipper Drizzle; watch for Ice Beam (x4 vs Noivern) as falsifier; confirm Draco Meteor OHKO"
+    },
+    "rounds": 13,
+    "ms": 69269,
+    "fallback": false,
+    "simCalls": 4,
+    "sims": [
+     {
+      "actionKey": "switch 4",
+      "opp_does": [
+       "Scald",
+       "Hurricane",
+       "U-turn"
+      ]
+     },
+     {
+      "actionKey": "switch 2",
+      "opp_does": [
+       "Scald",
+       "Hurricane",
+       "U-turn"
+      ]
+     },
+     {
+      "actionKey": "switch 3",
+      "opp_does": [
+       "Scald",
+       "Hurricane",
+       "U-turn"
+      ]
+     }
+    ],
+    "strategyRejections": 1,
+    "warningCount": 1,
+    "lastWarning": "REMINDER (not blocking) — the branch you declared (Scald) is NOT the worst branch for that action. Worst is \"Hurricane\": Noivern takes 45-53% from Hurricane → 47-55% left  If you are deliberately betting against that branch, say so explicitly in `text` (which branch you are betting against, and what",
+    "multMentions": 0,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "switch 3",
+    "declaredBranch": "Hurricane",
+    "declaredOutcome": "survives",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 3,
+    "targetName": "Noivern",
+    "worst": {
+     "pctMin": 45,
+     "pctMax": 53,
+     "ko": "39.5% chance to 2HKO",
+     "move": "Hurricane",
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 3,
+   "battleId": "C4-051-R3",
+   "ms": 78105,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 2
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "Rotom-Heat -> Pelipper : Thunderbolt"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":4} vs [\"Hurricane\",\"Scald\",\"Hydro Pump\"]"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "Toxtricity -> Pelipper : Wild Charge"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":2} vs [\"Hurricane\",\"Scald\",\"Hydro Pump\"]"
+     }
+    ],
+    "inbound": [],
+    "outbound": [
+     "Rotom-Heat -> Pelipper : Thunderbolt",
+     "Toxtricity -> Pelipper : Wild Charge"
+    ],
+    "strategy": {
+     "text": "(1) ATTACK? Pelipper in rain will almost certainly attack: Hurricane (Flying STAB, 100% acc in rain), Scald, or Hydro Pump (rain-boosted 1.5x Water). I expect a Water move or Hurricane since my Weezing-Galar walls it poorly and it wants chip on the switch-in. Confidence: high that it attacks rather than switches (it just came in to set rain and threaten). (2) SWITCH? Unlikely to switch — it's already in position to abuse rain; Claydol would be its only revealed switch and it forfeits the rain advantage. (3) THEIR READ OF ME: it knows only Weezing-Galar (Strange Steam missed, Poison/Fairy). It does not know my Electric attackers, so a Water/Hurricane move aimed at chipping or KOing Weezing is its natural line — good for my switch-in. (4) MY OPTIONS & SWITCH COST: Rotom-Heat (Scarf Thunderbolt, 4x) guarantees the outspeed AND the OHKO but is ELECTRIC/FIRE = 2x weak to Water; switching in vs Scald (99-118%, possible OHKO) or Hydro Pump (guaranteed OHKO) is far too risky. Toxtricity (Emel/Fire... Electric/Poison) takes Water NEUTRALLY and Flying RESISTED (0.5x), survives EVERYTHING Pelipper has (Hurricane 27-32%, Scald 59-70%, Hydro Pump 81-96% — survives all). Its Wild Charge (Electric, 4x) is a guaranteed OHKO on Pelipper even with Life Orb. Cost: it eats one hit on switch-in (min 4% HP). I am NOT behind — this wins the exchange cleanly. (5) MOST LIKELY ACTION + MY RESPONSE: Pelipper uses Scald/Hydro Pump/Hurricane into my switch; Toxtricity survives, then next turn Wild Charge OHKOs Pelipper (4x). Falsifier: if Pelipper switches out or reveals a Ground move (unlikely). (6) SEQUENCE: I switch Toxtricity in (eats one hit), next turn Toxtricity Wild Charge OHKOs Pelipper (recoil + Life Orb may KO Toxtricity if it ate Hydro Pump, but Pelipper dies regardless = favorable trade).",
+     "scene": "My Toxtricity in vs Pelipper at ~30-73% HP (depends on which move it used), Pelipper 100% but about to be OHKO'd by Wild Charge.",
+     "checks": "verify Pelipper did NOT outspeed Toxtricity (a max-speed Pelipper ~251 could move first — refuted if Toxtricity's Wild Charge lands before Pelipper acts next turn); verify Pelipper's ability is Drizzle (rain was already up, so Drizzle confirmed unless it was set by another source — logs would show it).",
+     "action": "switch 2",
+     "branch": "Scald",
+     "outcome": "30-41%"
+    },
+    "rounds": 13,
+    "ms": 77946,
+    "fallback": false,
+    "simCalls": 2,
+    "sims": [
+     {
+      "actionKey": "switch 4",
+      "opp_does": [
+       "Hurricane",
+       "Scald",
+       "Hydro Pump"
+      ]
+     },
+     {
+      "actionKey": "switch 2",
+      "opp_does": [
+       "Hurricane",
+       "Scald",
+       "Hydro Pump"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 1,
+    "lastWarning": "REMINDER (not blocking) — the branch you declared (Scald) is NOT the worst branch for that action. Worst is \"Hydro Pump\": Toxtricity takes 81-96% from Hydro Pump → 4-19% left  If you are deliberately betting against that branch, say so explicitly in `text` (which branch you are betting against, and ",
+    "multMentions": 3,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "switch 2",
+    "declaredBranch": "Scald",
+    "declaredOutcome": "30-41%",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 2,
+    "targetName": "Toxtricity",
+    "worst": {
+     "pctMin": 81,
+     "pctMax": 96,
+     "ko": "guaranteed 2HKO",
+     "move": "Hydro Pump",
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 4,
+   "battleId": "C4-051-R4",
+   "ms": 42807,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 2
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "Toxtricity -> Pelipper : Wild Charge"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":2} vs [\"Hurricane\",\"Hydro Pump\",\"Scald\",\"Ice Beam\"]"
+     }
+    ],
+    "inbound": [],
+    "outbound": [
+     "Toxtricity -> Pelipper : Wild Charge"
+    ],
+    "strategy": {
+     "action": "switch 2",
+     "branch": "Hydro Pump",
+     "outcome": "survives",
+     "text": "(1) ATTACK? Pelipper likely attacks: Hurricane (0.5x, 27-32%), Hydro Pump (Rain-boosted, 81-96%), Scald, or Ice Beam. Confident it stays in and attacks (rain setter + wallbreaker, no chip on it). (2) SWITCH? unlikely, just switched in. (3) THEIR READ OF ME: only knows Weezing-Galar is Poison/Fairy; hasn't seen my bench. (4) MY OPTIONS & COST: staying in only 1x/0.5x hits — bad. Switching to Toxtricity forfeits the turn; Toxtricity survives even the worst case (Hydro Pump 81-96% → 4-19%) and OHKOs Pelipper next turn with Wild Charge (203-239%). No entry hazards on my side. Rotom-Heat risky (Water 2x in rain). (5) MOST LIKELY ACTION + RESPONSE: Pelipper attacks; I switch Toxtricity and survive regardless of which attack, then OHKO. (6) SEQUENCE: Pelipper attacks (Toxtricity survives), Toxtricity Wild Charge OHKOs Pelipper.",
+     "scene": "Toxtricity active at 4-73% HP (depends on Pelipper's move), Rain up, Pelipper likely about to faint to Wild Charge.",
+     "checks": "verify Pelipper ability = Drizzle; confirm Toxtricity survives the incoming hit and KOs Pelipper next turn."
+    },
+    "rounds": 8,
+    "ms": 42573,
+    "fallback": false,
+    "simCalls": 1,
+    "sims": [
+     {
+      "actionKey": "switch 2",
+      "opp_does": [
+       "Hurricane",
+       "Hydro Pump",
+       "Scald",
+       "Ice Beam"
+      ]
+     }
+    ],
+    "strategyRejections": 1,
+    "warningCount": 0,
+    "lastWarning": null,
+    "multMentions": 1,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "switch 2",
+    "declaredBranch": "Hydro Pump",
+    "declaredOutcome": "survives",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 2,
+    "targetName": "Toxtricity",
+    "worst": {
+     "pctMin": 81,
+     "pctMax": 96,
+     "ko": "guaranteed 2HKO",
+     "move": "Hydro Pump",
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 5,
+   "battleId": "C4-051-R5",
+   "ms": 56027,
+   "action": {
+    "type": "attack",
+    "attackSlot": 1
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "SIM",
+      "label": "{\"switch\":2} vs [\"Scald\",\"Hurricane\",\"U-turn\",\"Hydro Pump\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":4} vs [\"Scald\",\"Hurricane\",\"U-turn\",\"Hydro Pump\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Flamethrower\"} vs [\"Scald\",\"Hydro Pump\",\"Hurricane\",\"U-turn\"]"
+     }
+    ],
+    "inbound": [],
+    "outbound": [],
+    "strategy": {
+     "action": "switch 2",
+     "branch": "Hydro Pump",
+     "outcome": "survives",
+     "text": "(1) ATTACK? — Pelipper (Drizzle, rain team) will attack: Scald/Hydro Pump (rain-boosted) or Hurricane (100% acc in rain), or U-turn pivot. With Weezing-Galar active it may just U-turn for momentum. (2) SWITCH? — unlikely, just switched in to set rain. (3) THEIR READ — knows only Weezing-Galar (Poison/Fairy, Levitate); doesn't know my Electric threats. (4) MY OPTIONS & COST — Staying to attack is BAD: Flamethrower does 7-8% (rain halves Fire + Water resist) while Weezing eats Scald 64-75%, and Hydro Pump risks KO (87-103%). Rotom-Heat is a TRAP: 2x weak to Water, OHKO'd by Scald (99-118%) and Hydro Pump (137-162%). Toxtricity (slot 2) is the clean counter: survives Scald 59-70%, Hydro Pump 81-96% (lives), Hurricane 27-32%, U-turn 6-8% — and next turn Wild Charge is 4x SE (Electric vs Water/Flying), an OHKO. Switch cost: forfeit turn + eat one hit, no hazards on my side. Confident read: Toxtricity survives the worst case and forces the kill. (5) MOST LIKELY + RESPONSE — Pelipper attacks (Scald/Hydro Pump); Toxtricity survives and next-turn Wild Charge OHKOs; falsifier = Pelipper pivoting via U-turn. (6) SEQUENCE — switch Toxtricity in, Pelipper attacks (Toxtricity ~30-70% HP), next turn Wild Charge OHKO Pelipper or force it out.",
+     "scene": "Toxtricity active at ~4-73% HP (Hydro Pump worst ~4%, Scald ~30-70%, Hurricane ~68-73%); Pelipper still in at ~100% or pivoted out; Weezing-Galar benched at 100%. Rain active.",
+     "checks": "verify which move Pelipper used (Scald/Hydro Pump/Hurricane/U-turn) and Toxtricity's resulting HP; confirm Wild Charge OHKOs Pelipper next turn (refuted if survives); check if Pelipper pivoted out."
+    },
+    "rounds": 9,
+    "ms": 55797,
+    "fallback": false,
+    "simCalls": 3,
+    "sims": [
+     {
+      "actionKey": "switch 2",
+      "opp_does": [
+       "Scald",
+       "Hurricane",
+       "U-turn",
+       "Hydro Pump"
+      ]
+     },
+     {
+      "actionKey": "switch 4",
+      "opp_does": [
+       "Scald",
+       "Hurricane",
+       "U-turn",
+       "Hydro Pump"
+      ]
+     },
+     {
+      "actionKey": "move Flamethrower",
+      "opp_does": [
+       "Scald",
+       "Hydro Pump",
+       "Hurricane",
+       "U-turn"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 1,
+    "lastWarning": "WARNING (not blocking) — your `text` asserts a type-multiplier (Flying: \"arge is 4x SE on Pelipper (Electric vs Water/Flying), an OHKO. Cost of\" | Fire: \"x, Sludge Bomb/Bs 1x). Rotom-Heat is a TRAP: Fire weak to Water, gets \" | Water: \"b/Bs 1x). Rotom-Heat is a TRAP: Fire weak to Water, gets OHKO'd ",
+    "multMentions": 6,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 1,
+    "declaredAction": "switch 2",
+    "declaredBranch": "Hydro Pump",
+    "declaredOutcome": "survives",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "RISKY",
+    "targetSlot": 0,
+    "targetName": "Weezing-Galar",
+    "worst": {
+     "pctMin": 87,
+     "pctMax": 103,
+     "ko": "25% chance to OHKO",
+     "move": "Hydro Pump",
+     "error": null
+    },
+    "isSwitch": false
+   }
+  }
+ ]
+}

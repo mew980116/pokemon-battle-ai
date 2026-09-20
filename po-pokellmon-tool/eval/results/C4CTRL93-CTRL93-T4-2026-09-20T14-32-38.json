@@ -1,0 +1,235 @@
+{
+ "fixture": "CTRL93-T4",
+ "arm": "C4CTRL93",
+ "url": "http://127.0.0.1:8098",
+ "n": 3,
+ "when": "2026-09-20T14-32-38",
+ "summary": {
+  "byAction": {
+   "ATK(stay)": 3
+  },
+  "byVerdict": {
+   "SAFE": 3
+  },
+  "inboundTotal": 0,
+  "simCalls": 3,
+  "branchTotal": 9,
+  "strategyRejections": 0,
+  "gateRejections": 0,
+  "gateUnmet": 0,
+  "gateBypassed": 0,
+  "honestFaints": 0,
+  "behaviorHits": 0,
+  "accident": 0,
+  "nOk": 3
+ },
+ "samples": [
+  {
+   "i": 1,
+   "battleId": "C4CTRL93-R1",
+   "ms": 23211,
+   "action": {
+    "type": "attack",
+    "attackSlot": 1
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Double Iron Bash\"} vs [\"Soft-Boiled\",\"switch2\",\"Seismic Toss\",\"Toxic\"]"
+     }
+    ],
+    "inbound": [],
+    "outbound": [],
+    "strategy": {
+     "text": "(1) ATTACK? Blissey likely Soft-Boileds again or stays. (2) SWITCH? Possible switch to Magearna but staying to heal is more likely. (3) THEIR READ: Melmetal is an unanswerable physical threat to Blissey. (4) MY OPTIONS: DIB KOs (179-211%) in every branch. I am NOT betting against any branch — even the worst case (Seismic Toss = 24% chip) is harmless, so attacking is strictly best. (5) MOST LIKELY ACTION: Blissey stays/heals → DIB KOs. (6) SEQUENCE: DIB → Blissey faints → opponent sends replacement.",
+     "scene": "Blissey fainted (or chip if it switched). Melmetal at 76-100% HP, Electric Terrain up, no hazards.",
+     "checks": "verify Blissey is KO'd, not Focus Sash; watch for the replacement.",
+     "action": "move Double Iron Bash",
+     "branch": "Seismic Toss",
+     "outcome": "76-76%"
+    },
+    "rounds": 5,
+    "ms": 23068,
+    "fallback": false,
+    "simCalls": 1,
+    "sims": [
+     {
+      "actionKey": "move Double Iron Bash",
+      "opp_does": [
+       "Soft-Boiled",
+       "switch 2",
+       "Seismic Toss",
+       "Toxic"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 1,
+    "lastWarning": "REMINDER (not blocking) — the branch you declared (Soft-Boiled) is NOT the worst branch for that action. Worst is \"Seismic Toss\": they first → Melmetal: 179-211% out, 24-24% in → 76-76% left  If you are deliberately betting against that branch, say so explicitly in `text` (which branch you are betti",
+    "multMentions": 0,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "move Double Iron Bash",
+    "declaredBranch": "Seismic Toss",
+    "declaredOutcome": "76-76%",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 0,
+    "targetName": "Melmetal",
+    "worst": {
+     "pctMin": 25,
+     "pctMax": 30,
+     "ko": "guaranteed 4HKO",
+     "move": "Flamethrower",
+     "error": null
+    },
+    "isSwitch": false
+   }
+  },
+  {
+   "i": 2,
+   "battleId": "C4CTRL93-R2",
+   "ms": 13093,
+   "action": {
+    "type": "attack",
+    "attackSlot": 1
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Double Iron Bash\"} vs [\"Soft-Boiled\",\"Seismic Toss\"]"
+     }
+    ],
+    "inbound": [],
+    "outbound": [],
+    "strategy": {
+     "action": "move Double Iron Bash",
+     "branch": "Soft-Boiled",
+     "outcome": "survives",
+     "text": "(1) Blissey at 24% will either Soft-Boiled (heal) or switch; it cannot survive Double Iron Bash. (4) No switch needed — Melmetal is healthy and DIB KOs Blissey; switching forfeits a free KO. (5) Most likely Soft-Boiled; my DIB still punishes heavily and Melmetal stays safe.",
+     "scene": "Blissey fainted or switched out; Melmetal active at 76-100% HP, terrain Electric.",
+     "checks": "verify Blissey faints to DIB (move KOs at 179-211%)"
+    },
+    "rounds": 4,
+    "ms": 12948,
+    "fallback": false,
+    "simCalls": 1,
+    "sims": [
+     {
+      "actionKey": "move Double Iron Bash",
+      "opp_does": [
+       "Soft-Boiled",
+       "Seismic Toss"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 1,
+    "lastWarning": "REMINDER (not blocking) — the branch you declared (Soft-Boiled) is NOT the worst branch for that action. Worst is \"Seismic Toss\": they first → Melmetal: 179-211% out, 24-24% in → 76-76% left  If you are deliberately betting against that branch, say so explicitly in `text` (which branch you are betti",
+    "multMentions": 0,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "move Double Iron Bash",
+    "declaredBranch": "Soft-Boiled",
+    "declaredOutcome": "survives",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 0,
+    "targetName": "Melmetal",
+    "worst": {
+     "pctMin": 25,
+     "pctMax": 30,
+     "ko": "guaranteed 4HKO",
+     "move": "Flamethrower",
+     "error": null
+    },
+    "isSwitch": false
+   }
+  },
+  {
+   "i": 3,
+   "battleId": "C4CTRL93-R3",
+   "ms": 21074,
+   "action": {
+    "type": "attack",
+    "attackSlot": 1
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Double Iron Bash"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Double Iron Bash\"} vs [\"Soft-Boiled\",\"Seismic Toss\",\"switch1\"]"
+     }
+    ],
+    "inbound": [],
+    "outbound": [
+     "me -> opp : Double Iron Bash"
+    ],
+    "strategy": {
+     "text": "(1) ATTACK? Blissey likely Soft-Boiled (stall) or a weak move like Seismic Toss. It deals near-zero damage to Melmetal either way. Confidence: high on Soft-Boiled ~60%, but it doesn't matter — all branches are safe. (2) SWITCH? Possible, but if it switches I still apply DIB pressure to the switch-in. (3) THEIR READ: they've seen Melmetal + Tapu Koko + Toxapex + Volt Switch. Blissey is their special wall answer; they're stalling to heal. (4) MY OPTIONS: DIB is a guaranteed OHKO on Blissey (179-211% vs max, already at 24%) and Melmetal survives everything Blissey can do. No switch needed — Blissey is a free KO and switching risks giving it a free Soft-Boiled. (5) MOST LIKELY: Soft-Boiled → DIB still OHKOs; falsifier would be a switch into an offensive threat. (6) Sequence: Blissey acts (Soft-Boiled/move), then DIB KOs Blissey; opponent forced to send replacement, I keep Melmetal at ~76-100%.",
+     "scene": "Blissey fainted; opponent forced to reveal a replacement next turn. Melmetal active at 76-100% HP. Weather none, Electric Terrain active. No hazards either side.",
+     "checks": "verify Blissey is KO'd by DIB (refuted if it survives at >0%); note the opposing replacement species on next turn.",
+     "action": "move Double Iron Bash",
+     "branch": "Soft-Boiled",
+     "outcome": "survives"
+    },
+    "rounds": 5,
+    "ms": 20918,
+    "fallback": false,
+    "simCalls": 1,
+    "sims": [
+     {
+      "actionKey": "move Double Iron Bash",
+      "opp_does": [
+       "Soft-Boiled",
+       "Seismic Toss",
+       "switch 1"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 1,
+    "lastWarning": "REMINDER (not blocking) — the branch you declared (Soft-Boiled) is NOT the worst branch for that action. Worst is \"Seismic Toss\": they first → Melmetal: 179-211% out, 24-24% in → 76-76% left  If you are deliberately betting against that branch, say so explicitly in `text` (which branch you are betti",
+    "multMentions": 0,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "move Double Iron Bash",
+    "declaredBranch": "Soft-Boiled",
+    "declaredOutcome": "survives",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 0,
+    "targetName": "Melmetal",
+    "worst": {
+     "pctMin": 25,
+     "pctMax": 30,
+     "ko": "guaranteed 4HKO",
+     "move": "Flamethrower",
+     "error": null
+    },
+    "isSwitch": false
+   }
+  }
+ ]
+}
