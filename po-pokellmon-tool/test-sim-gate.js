@@ -148,5 +148,13 @@ chk('Hydro Pump 行标出 80% 命中 + 落空分支', /connects 80% of the time/
 chk('Scald 行（100%）不出命中率提醒', !sc12.accuracy_note, String(sc12.accuracy_note));
 chk('unknown 里声明不建模命中类特性', (hp12.unknown || []).some(function (x) { return /accuracy-changing abilities/.test(x); }), JSON.stringify(hp12.unknown));
 
+console.log('crit 不建分支但必须声明（含会心率）');
+chk('普通招 crit 1/24', /1\/24/.test(tools.moveCritStage('Draco Meteor') || ''), String(tools.moveCritStage('Draco Meteor')));
+chk('高会心招 crit 1/8', /1\/8/.test(tools.moveCritStage('Stone Edge') || ''), String(tools.moveCritStage('Stone Edge')));
+var c13 = ctx();
+var r13 = sim(c13, { move: 'Sludge Bomb' }, [{ move: 'Hydro Pump' }]);
+chk('行里带 crit_note（声明未计入）', /critical hits are NOT included/.test(r13.rows[0].crit_note || ''), String(r13.rows[0].crit_note).slice(0, 160));
+chk('unknown 也声明 crit/附加效果未建模', (r13.rows[0].unknown || []).some(function (x) { return /critical hits and secondary effects/.test(x); }), JSON.stringify(r13.rows[0].unknown));
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

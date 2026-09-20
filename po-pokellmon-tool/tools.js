@@ -834,6 +834,21 @@ function moveAccuracy(name, weather) {
     return acc;
 }
 
+// 会心率（Gen7+ 表）：crit_rate 0 → 1/24，1 → 1/8，2 → 1/2，≥3（含 6=必会心）→ 必定。
+// 注意：simulate_turn **不把 crit 展开成分支**（那会指数爆炸），只把"它没被计入"这件事写清楚。
+function moveCritStage(name) {
+    var rm = resolveMoveInput({ name: name });
+    if (!rm || rm.error || rm.num === undefined || rm.num === null) return null;
+    var rec = MOVES[String(rm.num)] || (MOVES.byNum ? MOVES.byNum[String(rm.num)] : null) || {};
+    var r = Number(rec.crit_rate || 0);
+    if (isNaN(r)) return null;
+    if (r >= 6) return 'ALWAYS crits';
+    if (r >= 3) return 'crit every time';
+    if (r === 2) return 'crit rate 1/2 (50%)';
+    if (r === 1) return 'crit rate 1/8 (12.5%)';
+    return 'crit rate 1/24 (4.2%)';
+}
+
 function simulateTurn(args, ctx) {
     var state = ctx && ctx.state;
     if (!state) return { error: 'no state' };
@@ -1033,9 +1048,18 @@ function simulateTurn(args, ctx) {
         }
         if (accNotes.length) row.accuracy_note = accNotes.join('; ') + '  [weather=' + (state.weather || 'None') + ']';
 
+        // crit / 附加效果：**不展开成分支**，但必须声明它们没被计入（否则"余量很薄"的分支会被读成安全）
+        var critNotes = [];
+        if (mine.kind === 'move') { var mc = moveCritStage(mine.move); if (mc) critNotes.push('your ' + mine.move + ' — ' + mc); }
+        if (br.kind === 'move') { var tcr = moveCritStage(br.move); if (tcr) critNotes.push('their ' + br.move + ' — ' + tcr); }
+        if (critNotes.length) {
+            row.crit_note = 'critical hits are NOT included in the numbers above (' + critNotes.join('; ') + '). A crit only ever makes a branch MORE lethal, never less — so treat a thin margin as thinner.';
+        }
+
         if (row.legal !== 'ok') row.unknown.push('legality: ' + row.legal);
         row.unknown.push('unrevealed items/abilities are NOT modelled (no Leftovers/Rain Dish/Intimidate-on-entry/etc.)');
         row.unknown.push('accuracy-changing abilities (Hustle / Compound Eyes / No Guard / Sand Veil …) are NOT modelled');
+        row.unknown.push('critical hits and secondary effects (burn/paralysis/flinch/drops) are NOT modelled — see crit_note');
         out.rows.push(row);
     }
 
@@ -2991,5 +3015,6 @@ module.exports = {
     runTool: runTool,
     newLedger: newLedger,
     actionGateCheck: actionGateCheck,
-    moveAccuracy: moveAccuracy
+    moveAccuracy: moveAccuracy,
+    moveCritStage: moveCritStage
 };
