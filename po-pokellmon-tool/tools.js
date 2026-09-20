@@ -1010,10 +1010,12 @@ function simulateTurn(args, ctx) {
                         row.cases.push(c);
                         if (!worstCase || cHpLo < worstCase._lo) { worstCase = c; worstCase._lo = cHpLo; }
                     }
-                    // row.mine 取**最坏的那个顺序**（门禁按它比对，保持保守）
+                    if (worstCase) delete worstCase._lo;   // 内部打分字段，不往外传
+                    // row.mine 取**最坏的那个顺序**（门禁按它比对，保持保守）；两种顺序结果相同时不加冗余后缀
+                    var allSame = row.cases.length > 1 && row.cases.every(function (x) { return x.mine_hp_after === row.cases[0].mine_hp_after; });
                     row.mine = {
                         takes: worstCase.you_take, hp_after: worstCase.mine_hp_after, faints: worstCase.mine_faints,
-                        summary: worstCase.summary + (row.cases.length > 1 ? '  [worst of ' + row.cases.length + ' order cases: ' + row.cases.map(function (x) { return x.order + ' = ' + x.mine_hp_after; }).join(' | ') + ']' : '')
+                        summary: worstCase.summary + ((row.cases.length > 1 && !allSame) ? '  [worst of ' + row.cases.length + ' order cases: ' + row.cases.map(function (x) { return x.order + ' = ' + x.mine_hp_after; }).join(' | ') + ']' : '')
                     };
                 }
             } else {
