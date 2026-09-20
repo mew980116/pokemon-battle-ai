@@ -7,8 +7,9 @@
 
 | | po-pokellmon（无思考） | po-pokellmon-tool（本目录） |
 |---|---|---|
+| 模型 | `deepseek-v4-flash` | `deepseek-v4-flash`（0.6.3 起；`POKELLMON_MODEL=deepseek-v4-pro` 可改回） |
 | 思考模式 | `thinking:disabled` | 默认 `disabled`；仅首回合（turn 0）单独开 `reasoning_effort:low` |
-| 超时 | 20s | 240s（放宽，tool 多轮往返慢） |
+| 超时 | 20s | 单请求硬墙钟 240s + 整回合上限 120s（首回合 180s） |
 | max_tokens | null | null（不限制） |
 | tool | 无 | 有（function calling，19 个） |
 | 端口 | 8091 | 8092 |
@@ -89,6 +90,7 @@
 - **DeepSeek 请求必须压「硬墙钟」超时（0.6.1，真 bug）**：原来只有 `req.setTimeout(TIMEOUT_MS)`——那是**空闲超时**（socket idle），连接上只要有零星保活/分块流量就**永远不触发**。
   - 实测（2026-09-20 battle98 T11）：`api.deepseek.com`（117.185.125.154）的连接从 23:42:00 建起到 23:51:24 **仍 Established（564s）**，240s 空闲超时没掐，PO 侧 `sys.synchronousWebCall` 一直阻塞，面板停在「实时 503s 思考中…」。
   - 现在另加一个 `setTimeout` 硬墙钟 deadline（同一时长，`done()` 保证 cb 只回调一次、`res.on('error')` 也接住）。PO 侧兜底：**单次失败→`pklmFallbackAttack()`**，连续 3 次且跨度 >15s 才会认输。
+- **模型改回 `deepseek-v4-flash`（0.6.3）**：这个场景是「计算量极大 + 幻觉高发」，pro 的深想收益主要体现在先读（读心）上，但门禁压幻觉的同时也把这类发挥空间压掉了 —— 不值得。实测 flash 同样支持 `thinking:{type:'enabled'}` + `reasoning_effort`（返回 `reasoning_content`），首回合思考不受影响。改回 pro：`$env:POKELLMON_MODEL="deepseek-v4-pro"`。
 - **整回合时长上限（0.6.2）**：单请求硬超时管不住"一个回合跑很多轮"，battle98 T11 实测整回合 663s（9 轮里 2 个"无 tool 的纯生成轮"各占 ~300s）。
   - `MAX_TURN_MS = 120000`（首回合 `MAX_TURN_MS_T0 = 180000`，因为 T0 是唯一开思考的回合、实测最坏 118s）。到点走 `finalizeNoThink('turn_deadline')`，如实标 `gateBypassed = true`。
   - 选 120s 的依据（当前架构 battle93-98，n=137）：中位 36s、平均 54s，**>120s 只有 5%**（7 个，都是轮数最多的最难回合）。

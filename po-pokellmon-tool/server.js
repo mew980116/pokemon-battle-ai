@@ -65,12 +65,13 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.6.2';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
+var SERVER_VERSION = '0.6.3';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
 
 // ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
-// 对战主脑用 v4-pro（闭卷深想强，决策更深）；一键回 flash：POKELLMON_MODEL=deepseek-v4-flash
-var MODEL = process.env.POKELLMON_MODEL || 'deepseek-v4-pro';
-var THINKING_ENABLED = false;           // 关闭 reasoning（v4-pro 思考链过长/慢，先关；需要时改回 true）
+// 对战主脑用 v4-flash：这个场景（超大计算量 + 幻觉高发）里 pro 的"深想"反而被门禁压制，
+// 先读收益被抵消；改回 pro 只需 POKELLMON_MODEL=deepseek-v4-pro
+var MODEL = process.env.POKELLMON_MODEL || 'deepseek-v4-flash';
+var THINKING_ENABLED = false;           // 关闭 reasoning（思考链过长/慢，且 tool 结果本身已提供依据；需要时改回 true）
 var REASONING_EFFORT = 'low';           // 仅在 THINKING_ENABLED=true 时生效
 var FIRST_TURN_THINKING = true;         // 首回合（turn 0）单独开思考，之后沿用上面的全局设置
 var FIRST_TURN_EFFORT = 'low';          // 首回合思考强度（low/high/max）
