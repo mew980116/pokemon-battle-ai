@@ -63,6 +63,17 @@
 
 **动态路由（生产方向，待 1/2/3 全跑通后再看）**：在 无LLM / 1 / 2 / 3 之间按局面动态路由，平衡用时与水平。
 
+- [ ] 🟡 **给我方精灵加「角色 tag」（用户 2026-09-21 提出，待办）**：当前 prompt 只给我方每只的种族/招/道具/HP，没有任何"它在这支队里是干嘛的"语义。用户设想：给每只挂 `check xxx` / `counter xxx` / `炮灰` / `sweeper` 之类的 tag，**由 LLM 在对局中用 tool 动态更新**（新增/修改/删除），再注入 prompt。
+  - **价值**：让"谁负责挡谁、谁是可以牺牲的、谁是残局要保的"变成显式状态，而不是每回合靠 LLM 从零重推；对 T19 那类补位决策（选谁吃刀）尤其直接。
+  - **注意**：tag 是 LLM 自己的判断，**必须标注 [estimated]/[proved]** 并允许被后续信息推翻（与 `save_observation` 的 threat level 同一套可信度口径）；另外 tag 会随对局变化（对手某只倒了 → 对应的 check 失效），需要有失效机制，否则会变成另一种"陈旧数据"。
+  - **依赖**：可以先复用 `save_observation` 的结构（每只一条、可覆盖），不一定要新开 tool。
+
+- [ ] 🔴 **`simulate_turn` 不建模「入场特性」→ 会把某条线的全部价值漏算掉（2026-09-21 battle99 T19 实测）**：
+  - **现场**：Sandaconda 倒下要补位，对手 Barraskewda 100%（408 速物理水系），我方剩 Escavalier 11% / Ninetales 59% / Slurpuff 72%。工具算 `Liquidation → Ninetales = 100-118% guaranteed OHKO`，于是 LLM 判"换 Ninetales 就是白送"、否掉了「换九尾开晴天」这条线，改选 Slurpuff（吃 42-49%）。
+  - **实际数值**（同一 state，只把 weather 改成 Sun 复算）：Ninetales **Drought 是入场特性**，换入即开晴天 → Liquidation 变 **49-59%（仅 6.3% 概率 OHKO，93.7% 活）**；同时 Slurpuff 只吃 **20-24%**（而非 42-49%）。也就是说用户那条线在数值上明显更优，而 LLM 用它自己算出的"必死"数字否掉了它 —— **不是幻觉**，`unknown[]` 里确实写了 `ability triggers on switch-in (Intimidate / weather setters / etc.) are NOT modelled`，但它没手动补 ×0.5。
+  - **候选修法**：① `simulate_turn` 的 `i_do` 为换人且换入者的 **ability 已知**（state 的 `bench[i].ability` 有值，PO 直接给）时，自动把 field 换成该天气/场地并在行内写明 `assumed weather after switch-in: Sun (Ninetales's Drought)` —— 这不算猜测，是确定性机制；② 或给 `assume` 加 `{"weather":"Sun"}` 让模型显式声明；③ 至少在 `unknown[]` 里对"换入者是入场特性持有者"给一句强警告，别让它读成必死。
+  - **更一般**：任何"入场触发"的确定性机制（威吓 -1Atk、天气/场地特性、下载、无形/preview…）都会以同样方式歪掉"换人分支"的结论，修的时候按同一类处理。
+
 - [ ] **服务版 LLM 完全失败降级为非 LLM 规则 AI**：多次 retry 完全 fallback 后，退化为主脚本 [20201227.js](20201227.js) 那样的非 LLM 运行——在 PO 侧本地计算伤害/换人/出招，不依赖 server / DeepSeek。目的是服务版在 DeepSeek 不可用 / 断网时仍能持续对战，不卡死、不摆烂（复用主脚本 `attemptCommand` 那一套评估逻辑作为兜底决策器）。
   - **主脚本那套是完整规则 AI，理论上能独立打完一整局**（不依赖 server/LLM），所以降级后不是「等死」，而是切到一条可持续的决策路径，可以撑到终局。
   - **降级期间持续重试连接 server**：进入兜底模式后不放弃 LLM 路线，每回合（或按间隔）探测 server 是否恢复（如轻量 `/health` 或直接重发 `/choice`）；一旦恢复则切回 LLM 决策。降级是「可逆的降级」，而非一次性判死。

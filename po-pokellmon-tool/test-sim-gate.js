@@ -220,5 +220,57 @@ var c20 = ctx();
 var r20 = sim(c20, { switch: 2 }, [{ move: 'Scald' }], { opp_spread: '252 SpA / Modest' });
 chk('传了 assume 后不再给锚点', !r20.rows[0].ev_note, String(r20.rows[0].ev_note));
 
+console.log('\n动作编号 → 动作（choiceToAction，与 server.parseAction 同源）');
+var nMv = state.me.moves.length, nBn = state.bench.length;
+chk('choice 1 → 第 1 个招式的 slot', tools.choiceToAction(1, state).attackSlot === state.me.moves[0].slot && tools.choiceToAction(1, state).type === 'attack');
+var firstSw = tools.choiceToAction(nMv + 1, state);
+chk('choice moves+1 → bench[0]（换人）', firstSw.type === 'switch' && firstSw.pokeSlot === state.bench[0].slot && firstSw.switchName === state.bench[0].name, JSON.stringify(firstSw));
+chk('choice 末项 → bench 最后一只', tools.choiceToAction(nMv + nBn, state).switchName === state.bench[nBn - 1].name);
+chk('choice 越界 → null', tools.choiceToAction(nMv + nBn + 1, state) === null && tools.choiceToAction(0, state) === null);
+
+console.log('\n门禁必须按 slot 找招（回归：bannedMoves 过滤后 slot != 数组下标）');
+// battle99 T7 实际形态：专爱锁招 Megahorn 被 PO 拒 → 从 me.moves 过滤掉，剩下的 slot 保留原值（1/2/3）
+var filtered = JSON.parse(JSON.stringify(state));
+filtered.me.moves = [{ name: 'Iron Head', slot: 1 }, { name: 'Close Combat', slot: 2 }, { name: 'Knock Off', slot: 3 }];
+var ledEmpty = tools.newLedger();
+var ledIH = tools.newLedger();
+ledIH.sims.push({ actionKey: 'move Iron Head' });
+var ledCC = tools.newLedger();
+ledCC.sims.push({ actionKey: 'move Close Combat' });
+// 旧代码：moves[3] 越界 → need=null → 静默放行
+var g1 = tools.actionGateCheck(ledEmpty, { type: 'attack', attackSlot: 3 }, filtered);
+chk('slot 越界（Knock Off, slot3）→ 仍然拦（旧代码放行）', !!g1 && /Knock Off/.test(g1), String(g1).slice(0, 120));
+// 旧代码：moves[1] = Close Combat → 错拦
+var g2 = tools.actionGateCheck(ledIH, { type: 'attack', attackSlot: 1 }, filtered);
+chk('已仿真 Iron Head 且选 slot1 → 放行（旧代码错查 Close Combat 而拦）', g2 === null, String(g2).slice(0, 140));
+var g3 = tools.actionGateCheck(ledCC, { type: 'attack', attackSlot: 1 }, filtered);
+chk('只仿真了 Close Combat 而选 slot1 → 拦的是 Iron Head', /about to answer "move Iron Head"/.test(String(g3)), String(g3).slice(0, 140));
+
+console.log('\nresolve_choice：把编号翻成动作并与 save_strategy 声明比对');
+// battle99 T1 的真实形态：4 招 + 5 换人；声明写 switch 5(=Escavalier)，实际吐 {"choice":5}(=Slurpuff)
+var t1state = {
+    me: { moves: [{ name: 'Earthquake', slot: 0 }, { name: 'Stone Edge', slot: 1 }, { name: 'Stealth Rock', slot: 2 }, { name: 'Glare', slot: 3 }] },
+    bench: [
+        { name: 'Slurpuff', slot: 1, hpPct: 100 }, { name: 'Runerigus', slot: 2, hpPct: 100 }, { name: 'Accelgor', slot: 3, hpPct: 100 },
+        { name: 'Ninetales', slot: 4, hpPct: 100 }, { name: 'Escavalier', slot: 5, hpPct: 100 }
+    ]
+};
+function rctx(turnAction) {
+    return { state: t1state, notes: { turns: { '1': { action: turnAction } } }, turn: 1 };
+}
+var rc1 = tools.runTool('resolve_choice', { choice: 5 }, rctx('switch 5'));
+chk('MISMATCH：choice 5 其实是 Slurpuff', rc1.match === false && /Slurpuff/.test(rc1.resolves_to), JSON.stringify(rc1).slice(0, 200));
+chk('MISMATCH 提示正确编号 9（Escavalier）', /\{"choice":9\}/.test(rc1.note) && /Escavalier/.test(rc1.note), String(rc1.note).slice(0, 260));
+var rc2 = tools.runTool('resolve_choice', { choice: 9 }, rctx('switch 5'));
+chk('MATCH：choice 9 = 声明的 switch 5', rc2.match === true && /Escavalier/.test(rc2.resolves_to), JSON.stringify(rc2).slice(0, 200));
+var rc3 = tools.runTool('resolve_choice', { choice: 1 }, rctx('move Earthquake'));
+chk('MATCH：招式按名字比对（choice 1 = Earthquake）', rc3.match === true, JSON.stringify(rc3).slice(0, 200));
+var rc4 = tools.runTool('resolve_choice', { choice: 9 }, rctx('move Earthquake'));
+chk('MISMATCH：声明是招式却答了换人', rc4.match === false && /\{"choice":1\}/.test(rc4.note), String(rc4.note).slice(0, 200));
+var rc5 = tools.runTool('resolve_choice', { choice: 99 }, rctx('switch 5'));
+chk('越界编号 → 报错并给出合法范围 1-9', !!rc5.error && /1-9/.test(rc5.error), String(rc5.error).slice(0, 160));
+var rc6 = tools.runTool('resolve_choice', { choice: 1 }, { state: t1state, notes: { turns: {} }, turn: 1 });
+chk('没存过 strategy → match=null 且提示先 save_strategy', rc6.match === null && /save_strategy/.test(rc6.note), String(rc6.note).slice(0, 160));
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

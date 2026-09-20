@@ -24,7 +24,7 @@
 3. 若返回 `tool_calls` → 执行 tool → 结果追加进 messages → 再调（最多 `MAX_TOOL_ROUNDS=35` 轮）
 4. 直到返回最终 `{"choice":N}` → 解析成 slot 动作
 
-**tool**（[tools.js](tools.js)，20 个；当前暴露 19 个）：
+**tool**（[tools.js](tools.js)，22 个；当前暴露 20 个 —— `update_worklog` 与 `predict` 已关）：
 
 *战场 / 笔记*
 
@@ -35,6 +35,7 @@
 - `get_strategy(turn?)` —— 读思路（不传返回全部）
 - `update_worklog(text)` —— 本轮工作暂存（覆盖式），server 每轮注入回 system。**当前已屏蔽**（server.js `ENABLE_WORKLOG=false`：不暴露给模型、WORKFLOW 不提、system 不注入）。屏蔽依据（battle93/94/95 实测）：约 28% 的 tool 轮次被它独占一次 LLM 往返（从不与其他 tool 合并），且 LLM 把它当思考通道的替代品，中段常写成千字内心独白、夹带未清洗的 thinking / DSML 残留。改回 `true` 即恢复
 - `submit_feedback(text)` —— 反馈「想要的 tool」/ 报告伤害计算异常
+- `resolve_choice(choice)` —— 把「你准备答的编号」翻成它**实际会执行的动作**，并和 `save_strategy` 声明的 `action` 比一下，回 `MATCH` / `MISMATCH`（MISMATCH 时直接给出正确编号）。动机：动作列表的编号（**先数招式、再数换人**）与「队伍槽位号」是两套编号，`{"choice":5}` 不一定是你想要的那只（见下 0.7.0）
 - `predict(claims)` —— **幻觉门禁的入口**（见下节）：先写下你打算依赖的数字（`expects`：`"22-26%"` / `"survives"` / `"2x"` / `"I move first"`），再用 `calc_damage` / `get_type_matchup` / `calc_stats` 带 `claim_id` 去裁决，结果回 `MATCH` / `MISMATCH`
 
 *确定计算*
@@ -90,6 +91,11 @@
 - **DeepSeek 请求必须压「硬墙钟」超时（0.6.1，真 bug）**：原来只有 `req.setTimeout(TIMEOUT_MS)`——那是**空闲超时**（socket idle），连接上只要有零星保活/分块流量就**永远不触发**。
   - 实测（2026-09-20 battle98 T11）：`api.deepseek.com`（117.185.125.154）的连接从 23:42:00 建起到 23:51:24 **仍 Established（564s）**，240s 空闲超时没掐，PO 侧 `sys.synchronousWebCall` 一直阻塞，面板停在「实时 503s 思考中…」。
   - 现在另加一个 `setTimeout` 硬墙钟 deadline（同一时长，`done()` 保证 cb 只回调一次、`res.on('error')` 也接住）。PO 侧兜底：**单次失败→`pklmFallbackAttack()`**，连续 3 次且跨度 >15s 才会认输。
+- **`resolve_choice` tool + 修「门禁按数组下标找招」的真 bug（0.7.0）**
+  - **编号 ≠ 槽位**（battle99 T1 实测）：prompt 的 `Available actions` 列表是**先数招式、再数换人**，和队伍槽位号是两套编号。模型 strategy 写 `action=switch 5`（Escavalier）、散文也说 "Escavalier is the clear play"，却输出 `{"choice":5}` —— 列表第 5 项是 **Slurpuff**（它把槽位号当成了序号；正确答案应是 9 = 4 个招 + 第 5 个后备）。结果换上来的不是它推理的那只，而门禁没拦。
+  - 新增 `resolve_choice(choice)`：把编号翻成**实际会执行的动作**并与 `save_strategy` 声明的 `action` 比对 → `MATCH` / `MISMATCH`（MISMATCH 时直接把「你声明的那个动作是第几号」告诉它）。已写进 WORKFLOW 第 5 步（答之前先确认）。
+  - **同时修一个真 bug**（battle99 T7 两个症状都出现）：`actionGateCheck` 原本用 `moves[action.attackSlot]` 当**数组下标**查招式，但 `attackSlot` 是条目的 **`slot` 字段**。平时 `slot === 下标` 所以看不出；一旦有招被 PO 拒（`bannedMoves` 非空，数组被过滤、slot 保留原值，如 `[Iron Head(1), Close Combat(2), Knock Off(3)]`）就错位：**slot 越界 → `need=null` → 门禁静默放行**（T7 重决策那次它 `rounds=1`、1 秒、零仿真、无 strategy 就出答案，本该拦下）；**slot 在范围内但 ≠ 下标 → 门禁去查另一只招** → 错拦到打满 2 次 `gateUnmet` 放行。现按 `slot` 查。
+  - 编号映射收成**单一来源** `tools.choiceToAction()`（`server.parseAction` 与 `resolve_choice` 共用），避免"自检结果"和"实际执行"再次分叉。
 - **模型改回 `deepseek-v4-flash`（0.6.3）**：这个场景是「计算量极大 + 幻觉高发」，pro 的深想收益主要体现在先读（读心）上，但门禁压幻觉的同时也把这类发挥空间压掉了 —— 不值得。实测 flash 同样支持 `thinking:{type:'enabled'}` + `reasoning_effort`（返回 `reasoning_content`），首回合思考不受影响。改回 pro：`$env:POKELLMON_MODEL="deepseek-v4-pro"`。
 - **整回合时长上限（0.6.2）**：单请求硬超时管不住"一个回合跑很多轮"，battle98 T11 实测整回合 663s（9 轮里 2 个"无 tool 的纯生成轮"各占 ~300s）。
   - `MAX_TURN_MS = 120000`（首回合 `MAX_TURN_MS_T0 = 180000`，因为 T0 是唯一开思考的回合、实测最坏 118s）。到点走 `finalizeNoThink('turn_deadline')`，如实标 `gateBypassed = true`。

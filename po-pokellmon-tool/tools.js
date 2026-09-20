@@ -185,6 +185,20 @@ var TOOL_DEFS = [
     {
         type: 'function',
         function: {
+            name: 'resolve_choice',
+            description: 'Translate the action NUMBER you are about to answer with into the action it actually plays, and compare it against the action you declared in save_strategy. Call this right before you emit the final {"choice": N}. The numbered list in the prompt is NOT the team-slot numbering: it lists your moves first and the switches after them, so a switch sits at a different number than its team slot. If the number you pass does not play what you declared, this replies MISMATCH and tells you the correct number.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    choice: { type: 'integer', description: 'The action number you intend to answer with (as shown in the prompt under "Available actions").' }
+                },
+                required: ['choice']
+            }
+        }
+    },
+    {
+        type: 'function',
+        function: {
             name: 'update_worklog',
             description: 'Set/OVERWRITE the WORKLOG for the CURRENT turn — a running scratchpad of your working state, which stays in your context for the rest of this turn. Use it like a harness worklog to make your reasoning explicit and durable even without a thinking channel: (a) after reading the battle state, write the task you are solving and how you break it into steps; (b) after each tool call, refresh it with what you confirmed, how your plan changed, and what is still open; (c) mark it done when you commit to an action. Because it is overwritten, always write the FULL current state, not a delta. It is cleared at the start of every new turn.',
             parameters: {
@@ -1444,15 +1458,47 @@ function simGate(ledger, args) {
     return null;
 }
 
-// 最终答案前的门禁：你选中的动作必须已经被仿真过（不要求活下来，只要求"你没在没仿真的情况下下结论"）
+// 把 prompt 里的「动作编号」解析成动作（**单一来源**：server.parseAction 与 resolve_choice tool 都走这里）。
+// 编号规则 = buildPrompt 的列表顺序：先 me.moves（0..n-1 → 1..n），再 bench（→ n+1..）。
+// 注意 attackSlot / pokeSlot 取的是条目自己的 slot 字段（与数组下标不一定相等，见下面 actionGateCheck 的坑）。
+function choiceToAction(num, state) {
+    var n = parseInt(num, 10);
+    if (isNaN(n)) return null;
+    var me = (state && state.me) || {};
+    var moves = me.moves || [];
+    var bench = (state && state.bench) || [];
+    if (n >= 1 && n <= moves.length) {
+        var m = moves[n - 1];
+        return {
+            type: 'attack', attackSlot: m.slot, moveName: m.name,
+            desc: 'attack with ' + m.name + ' (move slot ' + m.slot + ')'
+        };
+    }
+    var switchIdx = n - moves.length - 1;
+    if (switchIdx >= 0 && switchIdx < bench.length) {
+        var b = bench[switchIdx];
+        return {
+            type: 'switch', pokeSlot: b.slot, switchName: b.name,
+            desc: 'switch to ' + b.name + ' (team slot ' + b.slot + ', ' + (b.hpPct || 0) + '% HP)'
+        };
+    }
+    return null;
+}
+
 function actionGateCheck(ledger, action, state) {
     if (!ledger || !action) return null;
     var sims = ledger.sims || [];
     var need = null;
     if (action.type === 'switch') need = 'switch ' + Number(action.pokeSlot);
     else {
+        // 按 slot 查，**不能**用 moves[attackSlot] 当下标：state.me.moves 会被 bannedMoves 过滤，
+        // 过滤后 slot 保留原值（如 [Iron Head(1), Close Combat(2), Knock Off(3)]），下标 ≠ slot。
+        // 旧写法在这种情况下要么越界 → need=null → 门禁静默放行，要么查到**另一只招** → 错拦到 gateUnmet。
         var moves = (state && state.me && state.me.moves) || [];
-        var mv = moves[Number(action.attackSlot)];
+        var mv = null;
+        for (var mi = 0; mi < moves.length; mi++) {
+            if (moves[mi] && Number(moves[mi].slot) === Number(action.attackSlot)) { mv = moves[mi]; break; }
+        }
         if (mv && mv.name) need = 'move ' + mv.name;
     }
     if (!need) return null;   // 解析不到招式名 → 不拦（避免误伤）
@@ -1462,6 +1508,90 @@ function actionGateCheck(ledger, action, state) {
     return 'NOT READY — you are about to answer "' + need + '" but you never simulated it. Call simulate_turn with i_do = {"' +
         (action.type === 'switch' ? ('switch":' + Number(action.pokeSlot)) : ('move":"' + need.replace(/^move /, ''))) +
         '} and the opponent branches you are playing around, then re-save the strategy and answer.' + (sims.length ? (' Simulated so far: ' + sims.map(function (s) { return s.actionKey; }).join(', ') + '.') : '');
+}
+
+// 把 save_strategy 的 action 字符串（"switch 3" / "move Thunderbolt"）换算成 prompt 里的动作编号；
+// 顺便带回该动作是什么（便于在 MISMATCH 提示里写出名字）。对不上返回 null。
+function declaredToChoice(declared, state) {
+    var d = String(declared || '').trim().toLowerCase();
+    var moves = (state && state.me && state.me.moves) || [];
+    var bench = (state && state.bench) || [];
+    var i;
+    var sm = d.match(/^switch\s+(-?\d+)$/);
+    if (sm) {
+        var slot = Number(sm[1]);
+        for (i = 0; i < bench.length; i++) {
+            if (Number(bench[i].slot) === slot) {
+                return { num: moves.length + i + 1, desc: bench[i].name + ' (team slot ' + slot + ')' };
+            }
+        }
+        return null;
+    }
+    var mm = d.match(/^move\s+(.+)$/);
+    if (mm) {
+        var want = mm[1].trim().toLowerCase();
+        for (i = 0; i < moves.length; i++) {
+            if (String(moves[i].name).toLowerCase() === want) {
+                return { num: i + 1, desc: moves[i].name + ' (move slot ' + moves[i].slot + ')' };
+            }
+        }
+    }
+    return null;
+}
+
+// resolve_choice tool：把「你准备答的编号」翻成实际动作，并和你 save_strategy 声明的动作对一下。
+// 动机（battle99 T1）：动作列表的编号（先数招式、再数换人）与「队伍槽位号」是两套编号。
+// 模型写下 action=switch 5（Escavalier）、散文也说 Escavalier，却输出 {"choice":5} —— 列表第 5 项是 Slurpuff。
+function resolveChoice(args, ctx) {
+    var state = ctx && ctx.state;
+    if (!state) return { error: 'no battle state' };
+    var moves = (state.me && state.me.moves) || [];
+    var bench = state.bench || [];
+    var n = parseInt(args.choice, 10);
+    if (isNaN(n)) return { error: '"choice" must be the action number you are about to answer with' };
+    var a = choiceToAction(n, state);
+    if (!a) {
+        return {
+            error: 'choice ' + n + ' is NOT a valid action number this turn. This turn the list has ' + (moves.length + bench.length) +
+                ' numbered actions (1-' + (moves.length + bench.length) + '): the ' + moves.length + ' moves come first, then the ' +
+                bench.length + ' switches.'
+        };
+    }
+    var declared = null;
+    if (ctx.notes && ctx.notes.turns) {
+        var t = ctx.notes.turns[String(ctx.turn)];
+        if (t && t.action) declared = String(t.action);
+    }
+    var out = { choice: n, resolves_to: a.desc };
+    if (!declared) {
+        out.match = null;
+        out.declared_action = null;
+        out.note = 'Nothing to compare against yet — you have not saved a strategy for this turn. Call save_strategy first ' +
+            '(it also checks your numbers against the simulation), then confirm the number again.';
+        return out;
+    }
+    out.declared_action = declared;
+    var match;
+    if (a.type === 'switch') {
+        var sm = declared.trim().toLowerCase().match(/^switch\s+(-?\d+)$/);
+        match = !!sm && Number(sm[1]) === Number(a.pokeSlot);
+    } else {
+        var mm = declared.trim().toLowerCase().match(/^move\s+(.+)$/);
+        match = !!mm && mm[1].trim().toLowerCase() === String(a.moveName).toLowerCase();
+    }
+    out.match = match;
+    if (match) {
+        out.note = 'MATCH — choice ' + n + ' plays ' + a.desc + ', exactly the action you declared in save_strategy (' + declared +
+            '). Answer {"choice":' + n + '}.';
+        return out;
+    }
+    var want = declaredToChoice(declared, state);
+    out.note = 'MISMATCH — your save_strategy declared "' + declared + '", but choice ' + n + ' actually plays ' + a.desc + '. ' +
+        'The numbered action list is NOT the team-slot numbering: it counts your ' + moves.length + ' moves first and lists the switches after them, ' +
+        'so a switch sits at a different number than its team slot.' +
+        (want ? (' To play the action you declared (' + want.desc + ') answer {"choice":' + want.num + '} — or overwrite save_strategy if you have changed your mind.')
+              : ' The action you declared does not appear as a numbered option this turn — rewrite save_strategy to match what you can actually choose.');
+    return out;
 }
 
 // 记录当前回合的战略思路（默认用当前 turn；可显式指定 turn）
@@ -3263,6 +3393,7 @@ function runTool(name, args, ctx) {
     if (name === 'save_observation') return saveObservation(args, ctx);
     if (name === 'save_strategy') return saveStrategy(args, ctx);
     if (name === 'simulate_turn') return simulateTurn(args, ctx);
+    if (name === 'resolve_choice') return resolveChoice(args, ctx);
     if (name === 'predict') return registerClaims(args, ctx);
     if (name === 'update_worklog') return updateWorklog(args, ctx);
     if (name === 'get_observation') return getObservation(args, ctx);
@@ -3289,6 +3420,7 @@ module.exports = {
     runTool: runTool,
     newLedger: newLedger,
     actionGateCheck: actionGateCheck,
+    choiceToAction: choiceToAction,
     moveAccuracy: moveAccuracy,
     moveCritStage: moveCritStage
 };

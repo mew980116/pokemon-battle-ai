@@ -65,7 +65,7 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.6.3';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
+var SERVER_VERSION = '0.7.0';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
 
 // ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
 // 对战主脑用 v4-flash：这个场景（超大计算量 + 幻觉高发）里 pro 的"深想"反而被门禁压制，
@@ -123,7 +123,7 @@ var WORKFLOW = 'WORKFLOW — follow this order every turn: ' +
     '(' + (WF_N + 1) + ') SIMULATE: before you commit to any action, run simulate_turn for that action against the opponent branches you are playing around. One call takes your action (`i_do`) plus several candidate opponent actions (`opp_does`, up to 8) and returns, per branch: who acts first, the damage both ways, the resulting HP, who faints — plus an explicit list of what it could NOT know (unrevealed items/abilities, unknown EV, hazards, residual damage). The branch list is YOURS: the tool never guesses what the opponent carries and never ranks your options. Then save_strategy takes three more fields — `action` (your i_do), `branch` (which opponent branch this plan plays around) and `outcome` (what happens to the pokemon your action leaves on the field under that branch: "survives" / "faints" / "<a-b>%") — and it is REJECTED when any of them contradicts the simulation. State the outcome honestly: a SACRIFICE play is fine as long as you write "faints"; what is not allowed is asserting an outcome you never simulated, or quoting a number the engine did not produce. Only the CURRENT turn is simulated — for later turns state your assumptions in `assume`, or reason in prose (that part is not gated). ' +
     '(' + (WF_N + 2) + ') PLAN: re-read your previous save_strategy notes, look at the actions you are offered, and run the simulations you need (get_my_stats / calc_stats / calc_damage) plus the tactical guidance you need (battle_tips). ' +
     '(' + (WF_N + 3) + ') VERIFY: never trust memory for a move / ability / item effect, power or accuracy — call get_move_info / get_ability_info / get_item_info unless that detail is already present in the context. Never trust memory for a species base stats / types / abilities / weight either — call get_pokemon_info. Always call get_knowledge for the switch rules before switching unless they are already present in the context. Check the opponent against its legal movepool: if it has used a move it cannot learn (see the CAUTION line in the prompt, or verify with get_pokemon_info), the species is either misread or disguised (Illusion / Transform / Mimic / Ditto) — stop assuming that species and re-read the battle log. ' +
-    '(' + (WF_N + 4) + ') DECIDE: choose the action, then record it with save_strategy. `text` = the labeled lines (1) likely attack, (2) likely switch, (3) their read of my team, (4) my own options AND, for any voluntary switch, the full cost (forfeit the turn + the switch-in eats the hit + may take entry hazards) together with how much it actually gains (forces a kill / starts a setup / chunks a threat, or only chips), how confident my read of their action is and why, whether I am already behind (only winning if they play exactly my prediction, or by assuming an unrevealed threat is not carried, or by hoping they err), and whether a steadier line exists (a switch-in that takes little or heals, or simply attacking), (5) their most likely action + my response + falsifier, (6) the action sequence until my next decision — that step is there to SPOT DANGER, not to avoid losing pokemon, so if every option loses the active pokemon anyway, take the most valuable line instead of dragging the team down to save it. In REPLACEMENT MODE (see the NOTE in the prompt) write `text` as (R1)-(R3) instead and skip the opponent-prediction lines. `scene` = the board you expect at your next decision. `checks` = your uncertain assumptions phrased as tests for later turns. Only `scene` (latest one) and `checks` (latest two) are re-injected later, never `text`. Never skip save_strategy.';
+    '(' + (WF_N + 4) + ') DECIDE: choose the action, then record it with save_strategy. `text` = the labeled lines (1) likely attack, (2) likely switch, (3) their read of my team, (4) my own options AND, for any voluntary switch, the full cost (forfeit the turn + the switch-in eats the hit + may take entry hazards) together with how much it actually gains (forces a kill / starts a setup / chunks a threat, or only chips), how confident my read of their action is and why, whether I am already behind (only winning if they play exactly my prediction, or by assuming an unrevealed threat is not carried, or by hoping they err), and whether a steadier line exists (a switch-in that takes little or heals, or simply attacking), (5) their most likely action + my response + falsifier, (6) the action sequence until my next decision — that step is there to SPOT DANGER, not to avoid losing pokemon, so if every option loses the active pokemon anyway, take the most valuable line instead of dragging the team down to save it. In REPLACEMENT MODE (see the NOTE in the prompt) write `text` as (R1)-(R3) instead and skip the opponent-prediction lines. `scene` = the board you expect at your next decision. `checks` = your uncertain assumptions phrased as tests for later turns. Only `scene` (latest one) and `checks` (latest two) are re-injected later, never `text`. Never skip save_strategy. Before you answer, call resolve_choice with the number you intend to output: the numbered option list is NOT the team-slot numbering (it counts your moves first, then the switches), so answering a switch by its slot number would switch in the wrong pokemon — resolve_choice replies MATCH or MISMATCH against your declared action and gives you the correct number.';
 
 var SYSTEM_PROMPT = require('../po-pokellmon/prompts.js').BATTLE_TIPS +
     ' You decide by calling the tools you have been given; every tool description states when to call it, so follow the workflow below and that guidance. get_pokemon_info is the pokedex lookup (base stats / types / abilities / weight + legal movepool) — use it instead of memory, and to validate a surprising opponent move, since a move outside that movepool means a disguise or a misread species.' +
@@ -590,17 +590,12 @@ function extractNumber(content) {
 function parseAction(content, state) {
     var num = extractNumber(content);
     if (num === null) return null;
-    var me = state.me || {};
-    var moves = me.moves || [];
-    var bench = state.bench || [];
-    if (num >= 1 && num <= moves.length) {
-        return { type: 'attack', attackSlot: moves[num - 1].slot };
-    }
-    var switchIdx = num - moves.length - 1;
-    if (switchIdx >= 0 && switchIdx < bench.length) {
-        return { type: 'switch', pokeSlot: bench[switchIdx].slot };
-    }
-    return null;
+    // 编号 → 动作的映射只在 tools.choiceToAction 里维护一份（buildPrompt 的列表顺序：先招式、再换人），
+    // resolve_choice tool 与这里必须完全同源，否则模型自检的结果会和实际执行的不一致。
+    var a = tools.choiceToAction(num, state);
+    if (!a) return null;
+    if (a.type === 'attack') return { type: 'attack', attackSlot: a.attackSlot };
+    return { type: 'switch', pokeSlot: a.pokeSlot };
 }
 
 function fallbackMove(state) {
