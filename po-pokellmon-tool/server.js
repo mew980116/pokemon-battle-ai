@@ -65,7 +65,7 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.7.1';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
+var SERVER_VERSION = '0.7.2';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
 
 // ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
 // 对战主脑用 v4-flash：这个场景（超大计算量 + 幻觉高发）里 pro 的"深想"反而被门禁压制，
@@ -844,7 +844,17 @@ function handleChoice(res, state) {
                     var tc = toolCalls[i];
                     var args = {};
                     try { args = JSON.parse(tc.function.arguments || '{}'); } catch (e) {}
-                    var result = tools.runTool(tc.function.name, args, { state: state, notes: notes, turn: state.turn, ledger: ledger, simGateOn: ENABLE_PREDICT_GATE, setWorklog: function (t) { worklog = t; } });
+                    // tool 自己抛异常**不能**带走整个 server：uncaughtException 会 process.exit(1)，
+                    // 一次坏调用就会让 PO 侧连续 webCall 失败 → 判 server 不可用 → 认输（2026-09-21 battle100 实测）。
+                    var result;
+                    try {
+                        result = tools.runTool(tc.function.name, args, { state: state, notes: notes, turn: state.turn, ledger: ledger, simGateOn: ENABLE_PREDICT_GATE, setWorklog: function (t) { worklog = t; } });
+                    } catch (te) {
+                        var tmsg = (te && te.message) ? te.message : String(te);
+                        console.log('[tool] ' + tc.function.name + ' THREW: ' + tmsg);
+                        appendCrashLog('toolThrew ' + tc.function.name + ': ' + tmsg);
+                        result = { error: 'the tool crashed: ' + tmsg + ' — retry with different arguments, do not repeat the same call' };
+                    }
                     called.push({ name: tc.function.name, args: args, result: result });
                     messages.push({ role: 'tool', tool_call_id: tc.id, content: JSON.stringify(result) });
                 }

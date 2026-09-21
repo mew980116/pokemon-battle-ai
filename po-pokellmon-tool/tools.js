@@ -1937,7 +1937,20 @@ function toCalcPokemon(spec) {
         return { error: 'attacker/defender needs poke name or base_stats' };
     }
 
-    var pk = new SMOGON.Pokemon(PKLM_GEN, name, opts);
+    // 构造前先确认计算器里真有这个物种。@smogon/calc 遇到未知物种**不会报错**，而是崩在 calcStat 读 undefined.hp，
+    // 而 server 的 uncaughtException 会 process.exit(1) —— 2026-09-21 实测：一次 simulate_turn 直接把整个 server 带走
+    // （crash.log / battle100 卡死 + 之后连不上 8092 认输）。PO 中文服会给中文名，一旦某只没被映射成 PS 英文名就会走到这里。
+    var spc = null;
+    try { spc = GEN8DEX.species.get(SMOGON.toID(String(name))); } catch (e) { spc = null; }
+    if (!spc || !spc.baseStats || spc.baseStats.hp === undefined) {
+        return { error: 'unknown species "' + name + '" — the damage calculator has no data for it. Use the English/PS name, or pass base_stats explicitly.' };
+    }
+    var pk;
+    try {
+        pk = new SMOGON.Pokemon(PKLM_GEN, name, opts);
+    } catch (e) {
+        return { error: 'failed to build the calculator Pokemon for "' + name + '": ' + (e && e.message ? e.message : String(e)) };
+    }
 
     // 直接能力值：当作「未计入能力等级的最终值」（如 get_my_stats 的读数），能力等级仍照常生效
     pk.__directKeys = [];

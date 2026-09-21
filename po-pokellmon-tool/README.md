@@ -91,6 +91,10 @@
 - **DeepSeek 请求必须压「硬墙钟」超时（0.6.1，真 bug）**：原来只有 `req.setTimeout(TIMEOUT_MS)`——那是**空闲超时**（socket idle），连接上只要有零星保活/分块流量就**永远不触发**。
   - 实测（2026-09-20 battle98 T11）：`api.deepseek.com`（117.185.125.154）的连接从 23:42:00 建起到 23:51:24 **仍 Established（564s）**，240s 空闲超时没掐，PO 侧 `sys.synchronousWebCall` 一直阻塞，面板停在「实时 503s 思考中…」。
   - 现在另加一个 `setTimeout` 硬墙钟 deadline（同一时长，`done()` 保证 cb 只回调一次、`res.on('error')` 也接住）。PO 侧兜底：**单次失败→`pklmFallbackAttack()`**，连续 3 次且跨度 >15s 才会认输。
+- **修「一次坏 tool 调用把整个 server 带走」（0.7.2，真 bug）**
+  - 实测（2026-09-21 battle100）：`simulate_turn` → `toCalcPokemon` 用了一个**计算器里没有的物种**构造 `new SMOGON.Pokemon(...)`。`@smogon/calc` 对未知物种**不报错**，而是崩在 `calcStat` 读 `undefined.hp` → `uncaughtException` → `process.exit(1)` → **8092 直接死**。后果链：PO 侧 `webCall` 连续失败 → 判「server 不可用」→ 认输（battle100 卡在 re-decide，下一局 3 次失败直接 forfeit）。
+  - **修两层**：① `toCalcPokemon` 构造前先查 `GEN8DEX.species.get(toID(name))`，拿不到 `baseStats` 就返回明确的 `error`（附带物种名）；构造本身也包 try/catch。② server 的 tool 分发**整段包 try/catch** —— tool 抛异常只回一条 `{error: 'the tool crashed: …'}` 给模型，不再让它带走进程（同时写 `crash.log` 的 `toolThrew` 行便于定位）。
+  - **教训**：`process.exit(1)` 的 uncaughtException 兜底对"服务型 BOT"太狠 —— 任何一处未捕获异常都会变成一次判负。以后新 tool 一律要在分发层有兜底。
 - **`checks` 的语义写死成「未验证假设」+ 我方道具为空时不再沉默（0.7.1）**
   - **动机**（battle99 T20，见 [错题集.md](错题集.md) E003）：模型在 `checks` 里写了「verify Ninetales moves first vs Barra (**Scarf present**)」，**同一回合的正文却把它当既成事实**用了（"My Scarf gives 448 Spe > Barra 408 → I move first"），而 `state.me.item` 从 T16 起就是空的 —— 直接送掉 Ninetales。
   - `checks` 字段的 tool 描述改为「UNVERIFIED HYPOTHESES … 用**战报里能不能看到**来表述（check if the log shows …）」，并明确：**同回合不得把 check 当已证实前提**；凡是当前 prompt 已经写了的东西（我方道具/能力等级/HP、对手已亮招式）必须读 prompt，不能读自己的旧笔记。
