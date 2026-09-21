@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8092";
-var PKLM_VERSION = "0.6.19";      // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.6.20";      // 脚本版本（改动时 bump，随日志记录）
 var pklmLastWebFailTime = 0;       // 上次 webCall 失败时间戳（ms），用于断线时节流重发
 var pklmSilent = false;            // 静默模式：清分少女等无人值守 BOT 账号不向 PO 窗口 print 任何脚本输出
 var pklmFailCount = 0;             // 连续 webCall 失败次数（成功即归零）
@@ -406,7 +406,7 @@ function pklmRenderMsg(kind, fileName, msgNum, part, ctx) {
     // 先替换三字符占位符（%st/%ts/%tf），避免被 %s/%t/%f 误伤
     var order = [['%st', ctx.st], ['%ts', ctx.ts], ['%tf', ctx.tf],
                  ['%s', ctx.s], ['%f', ctx.f], ['%m', ctx.m], ['%i', ctx.i],
-                 ['%t', ctx.t], ['%a', ctx.a], ['%q', ctx.q], ['%d', ctx.d], ['%p', ctx.p]];
+                 ['%t', ctx.t], ['%a', ctx.a], ['%q', ctx.q], ['%d', ctx.d], ['%p', ctx.p], ['%e', ctx.e]];
     for (var k = 0; k < order.length; k++) {
         var val = order[k][1];
         if (val === undefined || val === null) val = '';
@@ -531,6 +531,18 @@ var PKLM_MOVE_MSG_LOSE_FOE = { 16: 1, 70: 1, 160: 1 };  // 虫咬·啄食（吃�
 var PKLM_MOVE_MSG_SWAP = { 132: 1 };              // 戏法 / 掉包：part1 spot 得到
 // 这几条是「道具被销毁」，文本里出现的那个名字恰恰说明它**已经没了** → 不能用文本回填对手道具
 var PKLM_MOVE_MSG_ITEM_GONE = { 16: 1, 70: 1, 160: 1 };
+// 招式消息里「白送对方特性」的几条（用户指出：吸盘这种特性 **没有专属特性消息**，只有对应的招式消息能暴露它）。
+// 主脚本 analyseCurrentMoveMess 的 case 1/43/114/144 挖了一部分，**case 107 part0 没挖**（它只处理 part1）。
+// owner 按**模板语义**写死，不依赖 PO 的 spot 约定 —— 这几条消息的 spot 到底是谁并不统一：
+//   `%s's Sturdy …!` 明显是 %s 的；`%s sucked up the Liquid Ooze!` 里的污泥浆却属于**目标** `%f`。
+// 实测依据：64=Liquid Ooze 污泥浆 / 5=Sturdy 结实 / 6=Damp 湿气 / 21=Suction Cups 吸盘（po-data/abilities）。
+var PKLM_MOVE_ABILITY_REVEAL = {
+    1: { part: 2, owner: 'f', ab: 64 },            // %s sucked up the Liquid Ooze!  → 污泥浆在目标身上
+    43: { part: 0, owner: 's', ab: 5 },            // %s's Sturdy made the attack fail!
+    107: { part: 0, owner: 'f', ab: 21 },          // %f held on to the ground using its Suction Cups!
+    114: { part: null, owner: 's', ab: 6 },        // %s's Damp prevents it from working!
+    144: { part: 2, owner: 's', ab: 0, fromOther: true }  // %s's %a made it ineffective! → other 即特性编号
+};
 var PKLM_ABIL_MSG_STEAL = { 78: 1 };              // 顺手牵羊：spot 得到 + foe 失去
 var PKLM_ABIL_MSG_REGAIN = { 88: 1, 93: 1 };      // 收获 / 捡拾：spot 单方得到
 var PKLM_ABIL_MSG_FRISK = { 23: 1 };              // 察觉：**只是暴露** foe 的道具，不改变归属
@@ -621,7 +633,12 @@ function pklmMsgCtx(spot, type, other, q, abilityId) {
         st: PKLM_STAT_NAMES[other] || '',
         p: pklmActiveName(spot),
         ts: pklmActiveName(spot),
-        tf: pklmActiveName(pklmOtherSpot(spot))
+        tf: pklmActiveName(pklmOtherSpot(spot)),
+        // %e 只在 `107 part2 %e was dragged out!`（吼叫/吹飞/龙尾/巴投）出现。用户判定：part0/part1 是
+        // 「吹不走的两种 case」（吸盘 / 扎根）单独写了，part2 就是**吹走成功、把场下那只拉上场**的 case
+        // → %e = 被拖**上场**的那只 = 对侧的新上场者。**待 probe 实战验证**（要看 PO 原文写的是哪只，
+        // 以及消息触发时对侧的 numRef 是否已经换成新的那只）。
+        e: pklmActiveName(pklmOtherSpot(spot))
     };
 }
 
@@ -1424,6 +1441,16 @@ function pklmSpotLabel(spot) {
                 pklmItemGain(spot, other, 'msg' + move + ' (recycled)');
             } else if (PKLM_MOVE_MSG_GIVE_FOE[move]) {
                 pklmItemGain(foe, other, 'msg' + move + ' (given)');
+            }
+            // 招式消息里「白送对方特性」的几条（吸盘/结实/湿气/污泥浆…）：归属按上表 owner 决定，
+            // 属于对手就记进 pklmOppAbility（= state.abilityInferred，喂给 prompt 与 from_state）。
+            var rev = PKLM_MOVE_ABILITY_REVEAL[move];
+            if (rev && (rev.part === null || rev.part === part)) {
+                var ownerSide = (rev.owner === 'f') ? foe : spot;
+                if (ownerSide === battle.opp) {
+                    var revAb = rev.fromOther ? other : rev.ab;
+                    if (revAb > 0) pklmOppAbility[pklmCurrentOppSlot] = revAb;
+                }
             }
             // 招式消息里也可能暴露对手道具（如察觉类/道具被点名的那些）。
             // **销毁类消息要排除**：文本里出现那个名字恰恰说明它已经没了，回填等于把错数据喂给 LLM。

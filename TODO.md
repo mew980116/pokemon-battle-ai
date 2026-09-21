@@ -123,8 +123,9 @@
     | `%ts` / `%tf` | 这一侧 / 对侧 | ⚠️ 由 case 133/109/236/102 的用法 + 我们的双墙归属推的，未实测 |
     | `%q` | 回调 `q`（原样数字） | ⚠️ 连击数/减 PP 数/许愿回合，主脚本完全不取 `q` → 无对照 |
     | `%p` | 变身/进化后的形态名 —— **取值未验证**（137 Transform / 66 Mega / 特性 81） | ❌ 主脚本不碰；我们暂填 spot 自己的名字（对 Mega 可能恰好对、对 Transform 必错） |
-    | `%e` | 被拖出来的那只（107 part2）—— **无证据** | ❌ 保持字面不替换 |
+    | `%e` | **被拖上场的那只**（107 part2，吼叫/吹飞/龙尾/巴投）→ 取对侧新上场者（0.6.20） | ⚠️ 用户判定（part0/part1 是「吹不走」的两个 case 单独写了，part2 = 吹走成功）＋ probe 验证中 |
   - **待实测/待澄清**：① **主脚本 case 107 疑似笔误** —— `if (foe === battle.opp && part === 1) info.specialStatus.rooted = true;`，而模板 part1 是 `%s is solidly rooted to the ground!`（按全表一致的 `%s`=spot，扎根的应是 spot 这一侧）→ 可能主脚本把 `spot`/`foe` 写反了，打一局遇到扎根即可判；② `%p` 一局实测（Mega 进化那一刻 `numRef` 是否已换成新形态）；③ `%q`/`%d` 的 78/125 两条实测。
+  - **✅ 已做（script 0.6.20）：`%e` + 「招式消息白送对方特性」这一族** —— 用户判定 `%e` = **被拖上场的那只**（吼叫/吹飞/龙尾/巴投：part0/part1 是「吹不走」的吸盘/扎根两个 case 单独写了，part2 就是吹走成功的 case）→ 已填 `pklmActiveName(对侧)`，**待 probe 验证**（看 PO 原文是哪只 + 触发时对侧 numRef 是否已换）。另外**吸盘这类特性 `has_msg: false`，没有专属特性消息**，只有招式消息能暴露 → 顺着补了 `PKLM_MOVE_ABILITY_REVEAL`：`1 part2 → 64 污泥浆（归属 %f）`、`43 part0 → 5 结实（%s）`、`**107 part0 → 21 吸盘（%f）**`、`114 → 6 湿气（%s）`、`144 part2 → other（%s）`；**归属按模板语义写死**（这几条消息的 spot 并不统一：`%s's Sturdy` 是 %s 的，而 `%s sucked up the Liquid Ooze!` 的污泥浆属于目标 `%f`）。主脚本只挖了 1/43/114/144，**107 part0（吸盘）它也漏了**。
   - **✅ 已做（script 0.6.19）：渲染探针 —— 让渲染结果与 PO 战报并排**（用户提案：「你渲染了就发出来到 po，然后我直接把 po 战报连着 probe 一起贴回来」）。`onMoveMessage`/`onItemMessage`/`onAbilityMessage` 三处各打一行 `[PKLMP]`：
     ```
     [PKLMP] move=70/0 spot=ME foe=OPP type=0 other=15(item:Leftovers) q=0 m=Darkest Lariat | T=%s knocked off %f's %i! | R=Snorlax knocked off the foe's Leftovers!
