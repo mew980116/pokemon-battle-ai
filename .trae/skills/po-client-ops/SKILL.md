@@ -84,7 +84,9 @@ PO 把两样东西落到磁盘上，都能直接读文件 —— **比剪贴板 
 
 - 路径来源：`SettingsPlugin\settings.ini` 里的 `logs_directory=`（本机 = `C:/Users/85145/Documents/Pokemon Online/Logs/`）、`SaveLogs=true`；脚本目录来自 PO 脚本 API 的 `sys.scriptsFolder`。
 - ⚠️ 两点限制：① 战报 HTML **只在结束时**写 → 不能当实时状态源；② 它**不含脚本 `print()` 的内容**（我们打窗口的东西不会进去）→ 需要自己的落盘通道（见下）。
-- **可选（未实测）**：既然 PO 启动会加载 `battlescripts.js`，理论上可以「**写这个文件 + 重启 PO**」替代「剪贴板粘贴」这条脆弱链路（重启后脚本即生效）。没验证过，用之前先在无对局时试一次。
+- ⛔ **agent 不能直接写 PO 的脚本文件**（2026-09-21 实测）：Trae 沙箱只允许**读**工作区外的路径，写 `C:\Users\85145\AppData\Local\Dreambelievers\...` 会报 `TRAE Sandbox Error: hit restricted / Not allow operate files`（`requirements_approval` 也不解除）。要用这条路得先在 Settings → Permission & Approval → Custom Configuration 放行该目录。**读**任意路径是允许的（`settings.ini` / `battlescripts.js` / `Logs/*.html` 都能读）。
+- 💡 **首选新路（待验证）**：PO 脚本 API 自带 `sys.changeBattleScript(QString)`（更改对战脚本）、`sys.getScript()`、`sys.scriptsChanged(QString)` → 可以让 **PO 自己**拉取并切换脚本：脚本里有 `sys.synchronousWebCall(url)`（下载）+ `sys.writeToFile()`（落盘），所以中间态**只需要一次人工动作**（往聊天框打一行 `/eval ...`，或先贴一次带自更新的版本），之后部署可全自动 —— 既不用剪贴板，也不用重启登录。验证手段：脚本顶层会往 `Scripts\pklm-load.log` 追加一行 `… loaded PKLM_VERSION=x.y.z`（0.6.23 起）→ 读这个文件就知道「PO 现在加载的是哪版」。
+- ⚠️ 重启 PO 自己也要 GUI（登录/选服务器要人手点）→ 锁屏时**做不了**重启类操作；只有文件读写、进程查询与 kill 不需要 GUI。
 - **我们脚本自己的落盘**：po-script 0.6.22 (script) 起，消息渲染探针（`/llm probe`）会**同时** `print` 到窗口并 `sys.appendToFile` 到 `Scripts\pklm-msg-probe.log`（每局开头清空、写一行表头带脚本版本与局号）。于是验证流程可以做到**零人工**：PO 文本读 HTML + 我们的原始参数/渲染结果读 probe 文件 + state/history 读 `po-pokellmon-tool/logs/deepseek_tool_*.log`，三份自己对齐。
 
 ## 2. 开对战

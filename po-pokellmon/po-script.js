@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8092";
-var PKLM_VERSION = "0.6.22";      // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.6.23";      // 脚本版本（改动时 bump，随日志记录）
 var pklmLastWebFailTime = 0;       // 上次 webCall 失败时间戳（ms），用于断线时节流重发
 var pklmSilent = false;            // 静默模式：清分少女等无人值守 BOT 账号不向 PO 窗口 print 任何脚本输出
 var pklmFailCount = 0;             // 连续 webCall 失败次数（成功即归零）
@@ -1178,6 +1178,20 @@ function pklmTurnSnapshot() {
 function pklmSpotLabel(spot) {
     return spot === battle.me ? "You" : "opposing";
 }
+
+// ==== 装载标记（部署验证用）====
+// PO **启动时**会加载本文件（`Scripts/battlescripts.js`，见 po-client-ops skill §1.5）。
+// 这里在顶层往 `Scripts/pklm-load.log` 追加一行 → **不看界面**就能确认「PO 到底加载了哪个版本、何时加载」，
+// 用来验证「写文件 + 重启 PO」这条替代剪贴板粘贴的部署路径（2026-09-21 加）。
+// ⚠ 必须 try/catch：装载期若 `sys.scriptsFolder` 之类不可用，抛异常会让整个脚本求值失败 → PO 绑不上任何回调。
+try {
+    var pklmLoadDir = sys.scriptsFolder;
+    if (pklmLoadDir && pklmLoadDir.charAt(pklmLoadDir.length - 1) !== '/') pklmLoadDir += '/';
+    if (pklmLoadDir) {
+        sys.appendToFile(pklmLoadDir + 'pklm-load.log',
+            new Date().toString() + '  loaded  PKLM_VERSION=' + PKLM_VERSION + '\n');
+    }
+} catch (pklmLoadErr) {}
 
 ({
     onPlayerMessage: function (player, message) {
