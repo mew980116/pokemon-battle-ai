@@ -293,5 +293,27 @@ chk('越界编号 → 报错并给出合法范围 1-9', !!rc5.error && /1-9/.tes
 var rc6 = tools.runTool('resolve_choice', { choice: 1 }, { state: t1state, notes: { turns: {} }, turn: 1 });
 chk('没存过 strategy → match=null 且提示先 save_strategy', rc6.match === null && /save_strategy/.test(rc6.note), String(rc6.note).slice(0, 160));
 
+console.log('\nREPLACEMENT MODE 事实块（tool 0.8.2：给事实，不加限制）');
+// 复刻 battle108 PO T7 的局面：我方 Throh 已倒，对手 Bouffalant 86% @ Atk+2，候补里有 Mienshao
+var rfState = {
+    weather: 'None', terrain: 'None', myHazards: [], oppHazards: [],
+    myTeam: [{ slot: 0, name: 'Throh', hpPct: 0, ko: true }, { slot: 3, name: 'Mienshao', hpPct: 100, ko: false }],
+    myStats: [{ slot: 3, name: 'Mienshao', level: 100, ev: [0, 0, 0, 0, 0, 252], iv: [31, 31, 31, 31, 31, 31], nature: 0 }],
+    bench: [{ slot: 3, name: 'Mienshao', hpPct: 100, types: ['Fighting'], moves: [{ name: 'Close Combat', type: 'Fighting' }] }],
+    me: { name: 'Throh', hpPct: 0, fainted: true, moves: [], boosts: [] },
+    opp: { name: 'Bouffalant', hpPct: 86, moves: [{ name: 'Body Slam', type: 'Normal' }, { name: 'Throat Chop', type: 'Dark' }], boosts: [] },
+    oppTeam: [{ slot: 0, name: 'Bouffalant', hpPct: 86, ko: false, revealed: true }]
+};
+var rf = tools.replacementFacts(rfState);
+chk('事实①：写明替补不吃招（TIMING）',
+    (rf.block || []).some(function (x) { return /takes NO damage this turn/.test(x) && /DOES NOT EXIST here/.test(x); }),
+    JSON.stringify(rf.block).slice(0, 160));
+chk('事实②：速度声明为区间 + 先制单独说', (rf.block || []).some(function (x) { return /Speed is a RANGE/.test(x); }) && (rf.block || []).some(function (x) { return /priority/.test(x); }));
+chk('事实③：候补行给出 承伤 / 输出 / 速度对比', /takes .+% from its Body Slam/.test(rf.perSlot[3] || '') && /deals .+% with its Close Combat/.test(rf.perSlot[3] || '') && /CLEARLY faster/.test(rf.perSlot[3] || ''), String(rf.perSlot[3]));
+chk('事实③：输出带 KO 判定', /guaranteed OHKO/.test(rf.perSlot[3] || ''), String(rf.perSlot[3]));
+chk('只给事实：不含任何"必须/应当选谁"的措辞',
+    !/must pick|you should switch to|pick slot|required/i.test(rf.block.join(' ') + JSON.stringify(rf.perSlot)),
+    (rf.block.join(' ') + JSON.stringify(rf.perSlot)).slice(0, 200));
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

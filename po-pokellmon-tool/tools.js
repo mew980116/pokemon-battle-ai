@@ -1070,6 +1070,83 @@ function unlistedThreats(state, oppName, mySlot, myHpPct, listed, ctx) {
     };
 }
 
+// ---- REPLACEMENT MODE 的确定性事实（用户 2026-09-21：给事实、不加限制）----
+// 动机（battle108 实测）：生产配置把"强制替补"当成"主动换入"来算代价（`Mienshao OHKO'd by Body
+// Slam — no`），而 flash+低推理 / pro 两个配置的原文里都**自己写出了**这条事实
+// （"the replacement enters in the end-of-turn phase … it never eats a hit" + "339 Spe … Close Combat
+// is a guaranteed OHKO"）。⇒ 把它从"要自己想起来"变成"摆在眼前"。
+// 本函数只输出**事实**：不改判定、不给排序、不禁止任何选择（选谁仍由模型按战术取舍）。
+// 返回 { block: [事实行...], perSlot: { slot: '附加到该 bench 行动行尾的文本' } }
+function replacementFacts(state) {
+    var me = (state && state.me) || {};
+    var opp = (state && state.opp) || {};
+    var bench = (state && state.bench) || [];
+    var res = { block: [], perSlot: {} };
+    if (!bench.length) return res;
+
+    var oppName = opp.name || 'the opponent';
+    var oppHp = (opp.hpPct === undefined || opp.hpPct === null) ? 100 : opp.hpPct;
+    var oppMoves = opp.moves || [];
+    var revealed = oppMoves.map(function (m) { return m.name; });
+    var myHazards = state.myHazards || [];
+
+    res.block.push('REPLACEMENT FACTS — facts about THIS phase, not advice (weigh them however you like):');
+    // ① 定时（② 的病根：主动换入才吃招，强制替补不吃）
+    res.block.push('- TIMING: the replacement is sent in the END-OF-TURN phase, AFTER the opponent has already acted. It takes NO damage this turn and does NOT act this turn. This is NOT a voluntary switch (a voluntary switch resolves BEFORE the attack phase, so its switch-in eats the incoming attack) — "it would be KO-ed on entry" is a cost that DOES NOT EXIST here.');
+    res.block.push('- The only cost it pays now: entry hazards on your side (' + (myHazards.length ? JSON.stringify(myHazards) : 'none') + ').');
+    res.block.push('- Next turn it faces ' + oppName + ' at ' + oppHp + '% (revealed moves: ' + (revealed.join(', ') || 'none revealed yet') + ').');
+    // ② 速度是区间（只有不重叠时才能当事实说）+ 先制
+    var osr = oppSpeedRange(oppName);
+    if (osr) {
+        res.block.push('- ' + oppName + "'s Speed is a RANGE " + osr.min + '-' + osr.max + ' (base stats + max investment): a Choice Scarf / boost / Tailwind / paralysis is NOT inside it, so do not read the range as a claim about who is faster — only a candidate whose own exact Speed falls OUTSIDE that range can be called first, and when the ranges overlap, both orders happen.');
+    }
+    var prioList = [];
+    for (var pi = 0; pi < oppMoves.length; pi++) {
+        var pr = movePriorityByName(oppMoves[pi].name);
+        if (pr > 0) prioList.push(oppMoves[pi].name + ' (priority +' + pr + ')');
+    }
+    res.block.push(prioList.length
+        ? ('- It has ALREADY REVEALED a priority move: ' + prioList.join(', ') + ' — that one acts before any non-priority candidate no matter the Speed.')
+        : '- None of its REVEALED moves has priority (an unrevealed priority move would still act first).');
+
+    // ③ 每个候补：最坏承伤（只扫已暴露招）/ 最好输出 / 速度对比
+    var oppSpec = applyFromStateSpec(state, 'opp', null);
+    for (var b = 0; b < bench.length; b++) {
+        var bk = bench[b], slot = bk.slot, parts = [];
+        var worst = null, worstName = null;
+        for (var j = 0; j < oppMoves.length; j++) {
+            var leg = simLeg(state, oppSpec, applyFromStateSpec(state, 'me', slot), oppMoves[j].name, { oppAnchor: true });
+            if (leg.error || leg.percent_max === undefined) continue;
+            if (!worst || leg.percent_max > worst.percent_max) { worst = leg; worstName = oppMoves[j].name; }
+        }
+        if (worst) {
+            var wko = String(worst.ko || worst.ko_verdict || '');
+            var wAnchor = (worst.ev_anchor && worst.ev_anchor.max_investment !== worst.ev_anchor.unassumed_0ev)
+                ? ' [or ' + worst.ev_anchor.max_investment + ' if it is max-invested]' : '';
+            parts.push('takes ' + worst.percent_min + '-' + worst.percent_max + '% from its ' + worstName +
+                (/guaranteed OHKO/i.test(wko) ? ' (= KO)' : (/possible OHKO/i.test(wko) ? ' (may KO)' : '')) + wAnchor);
+        }
+        var best = null, bestName = null, cms = bk.moves || [];
+        for (var k = 0; k < cms.length; k++) {
+            var lg = simLeg(state, applyFromStateSpec(state, 'me', slot), oppSpec, cms[k].name);
+            if (lg.error || lg.percent_max === undefined) continue;
+            if (!best || lg.percent_max > best.percent_max) { best = lg; bestName = cms[k].name; }
+        }
+        if (best) {
+            var bko = String(best.ko || best.ko_verdict || '');
+            parts.push('deals ' + best.percent_min + '-' + best.percent_max + '% with its ' + bestName + (bko ? ' (' + bko + ')' : ''));
+        }
+        var mySpe = mySpeedOf(state, slot, null);
+        if (mySpe && osr) {
+            parts.push('spe ' + mySpe + ' vs their range ' + osr.min + '-' + osr.max + ' → ' +
+                (mySpe > osr.max ? 'CLEARLY faster' : (mySpe < osr.min ? 'clearly slower' : 'inside their range (order NOT decidable)')));
+        }
+        if (parts.length) res.perSlot[slot] = ',' + parts.join(',');
+    }
+    res.block.push('- Per-candidate numbers are below, appended to each switch line. "takes" counts only moves it has ALREADY revealed (an unrevealed coverage move may hit harder). "deals" assumes the opponent has no defensive investment unless stated.');
+    return res;
+}
+
 function simulateTurn(args, ctx) {
     var state = ctx && ctx.state;
     if (!state) return { error: 'no state' };
@@ -1205,7 +1282,7 @@ function simulateTurn(args, ctx) {
                 if (legIn2.error) row.unknown.push('incoming damage could not be computed (' + legIn2.error + ')');
                 if (!legOut.error && !legIn2.error) {
                     var theirHp = (opp.hpPct === undefined || opp.hpPct === null) ? 100 : opp.hpPct;
-                    row.theirs = { takes: legOut.percent_min + '-' + legOut.percent_max + '%', ko: legOut.ko_verdict || '', summary: oppActive + ' takes ' + legOut.percent_min + '-' + legOut.percent_max + '% from ' + mine.move };
+                    row.theirs = { takes: legOut.percent_min + '-' + legOut.percent_max + '%', ko: legOut.ko_verdict || legOut.ko || '', summary: oppActive + ' takes ' + legOut.percent_min + '-' + legOut.percent_max + '% from ' + mine.move };
                     row.cases = [];
                     var worstCase = null;
                     for (var oc = 0; oc < orderModes.length; oc++) {
@@ -1254,7 +1331,7 @@ function simulateTurn(args, ctx) {
                     row.unknown.push('your move vs the pokemon they bring in could not be computed (' + legOut3.error + ')');
                     row.theirs = { takes: 'unknown', summary: 'cannot compute ' + mine.move + ' vs ' + (incomingName || ('slot ' + br.slot)) };
                 } else {
-                    row.theirs = { takes: legOut3.percent_min + '-' + legOut3.percent_max + '%', ko: legOut3.ko_verdict || '', summary: (incomingName || ('slot ' + br.slot)) + ' takes ' + legOut3.percent_min + '-' + legOut3.percent_max + '% from ' + mine.move };
+                    row.theirs = { takes: legOut3.percent_min + '-' + legOut3.percent_max + '%', ko: legOut3.ko_verdict || legOut3.ko || '', summary: (incomingName || ('slot ' + br.slot)) + ' takes ' + legOut3.percent_min + '-' + legOut3.percent_max + '% from ' + mine.move };
                 }
                 row.mine = { takes: '0%', hp_after: myHpPct + '%', faints: false, summary: myName + ' untouched (they switched instead of attacking)' };
                 row.unknown.push('the switch-in\'s defensive spread is unknown — number assumes the spread you passed / defaults');
@@ -3460,6 +3537,7 @@ module.exports = {
     newLedger: newLedger,
     actionGateCheck: actionGateCheck,
     choiceToAction: choiceToAction,
+    replacementFacts: replacementFacts,
     moveAccuracy: moveAccuracy,
     moveCritStage: moveCritStage
 };

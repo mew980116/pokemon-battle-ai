@@ -65,7 +65,7 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.8.1';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
+var SERVER_VERSION = '0.8.2';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
 
 // ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
 // 对战主脑用 v4-flash：这个场景（超大计算量 + 幻觉高发）里 pro 的"深想"反而被门禁压制，
@@ -507,6 +507,7 @@ function buildPrompt(state, notes) {
             meItem = 'Item:(none / nothing readable — if an earlier turn told you this pokemon held an item (Choice Scarf/Band/Specs, Leftovers …), that is now STALE: Knock Off / Trick / Switcheroo / consumption all clear or change this field. Re-derive any item-dependent speed or damage from the current state, not from your notes),';
         }
         p += 'Your current pokemon:' + me.name + ',Type:' + (me.types || []).join('&') + ',HP:' + (me.hpPct || 0) + '%,' + meAbi + meItem + meStatus + meBoosts + '\n';
+        var replFacts = null;
         if (me.fainted) {
             p += 'NOTE: Your current pokemon has fainted — REPLACEMENT MODE. Only the switch options are legal (the move entries listed above belong to the fainted pokemon and cannot be used). ' +
                 'This is a FORCED replacement in the end-of-turn phase, so the opponent gets NO extra action — do not predict its behaviour here. Answer only: ' +
@@ -514,6 +515,11 @@ function buildPrompt(state, notes) {
                 '(R2) for each candidate: can it take that hit plus any entry hazards on the way in, and what can it do on the very next turn; ' +
                 '(R3) your pick. Do NOT simply send out your freshest / still-unrevealed pokemon and then switch it out again next turn — that throws away a whole turn. ' +
                 'In save_strategy write `text` as (R1)-(R3) (skip the normal lines), and still fill `scene` and `checks`.\n';
+            // 事实块（tool 0.8.2）：把「替补不吃招 / 速度区间 / 每个候补的承伤与输出」摆到眼前。
+            // 起因 battle108：生产配置把强制替补当主动换入算代价（"OHKO'd by Body Slam — no"）。
+            // 只给事实 —— 不排序、不禁止、不参与判定（选谁仍由模型取舍）。
+            replFacts = tools.replacementFacts(state);
+            if (replFacts && replFacts.block.length) p += replFacts.block.join('\n') + '\n';
         }
         // 我方已倒下的宝可梦：bench 只含存活者，这里显式列出，避免 LLM 不知道谁已阵亡（也不用从战报里自己数）
         var myTeam = state.myTeam || [];
@@ -570,6 +576,7 @@ function buildPrompt(state, notes) {
             if (state.teamPreview === false && bk.unrevealed) {
                 sw += ' [opponent has not seen this pokemon]';
             }
+            if (replFacts && replFacts.perSlot[bk.slot]) sw += replFacts.perSlot[bk.slot];
             p += sw + '\n';
         }
     }

@@ -91,6 +91,16 @@
 - **DeepSeek 请求必须压「硬墙钟」超时（0.6.1，真 bug）**：原来只有 `req.setTimeout(TIMEOUT_MS)`——那是**空闲超时**（socket idle），连接上只要有零星保活/分块流量就**永远不触发**。
   - 实测（2026-09-20 battle98 T11）：`api.deepseek.com`（117.185.125.154）的连接从 23:42:00 建起到 23:51:24 **仍 Established（564s）**，240s 空闲超时没掐，PO 侧 `sys.synchronousWebCall` 一直阻塞，面板停在「实时 503s 思考中…」。
   - 现在另加一个 `setTimeout` 硬墙钟 deadline（同一时长，`done()` 保证 cb 只回调一次、`res.on('error')` 也接住）。PO 侧兜底：**单次失败→`pklmFallbackAttack()`**，连续 3 次且跨度 >15s 才会认输。
+- **REPLACEMENT MODE 给事实（tool 0.8.2）**
+  - 起因（battle108 复盘，用户点了三处）：**生产配置（flash+关思考）把"强制替补"当成"主动换入"来算代价** —— 它的原文是 `Mienshao OHKO'd by Body Slam — no`，于是选了 Sandaconda 挡、而不是用 Close Combat 直接收掉 Bouffalant。
+  - **证据（强配置自己写出了那条事实）**：`flash+低推理` 与 `pro+关思考` 在同一个局面上都写了 "the faint happens in the **end-of-turn phase, so Bouffalant gets NO free hit now**" + "Mienshao 339 Spe — FASTER than anything Bouffalant can be … Close Combat is a **guaranteed OHKO** … **it never eats a hit and nets a KO**"。⇒ 不是"不会"，是**事实缺席 + 生产配置时做时不做**。
+  - **做法（只给事实，不加限制）**：`tools.replacementFacts(state)` —— 仅在 `me.fainted`（REPLACEMENT MODE）时注入：
+    ① **TIMING**：替补在**回合结束阶段**上场，对手已行动完 ⇒ **本回合不吃任何伤害、也不出手**；**主动换入**才吃招（"KO on entry"这个代价在此**不存在**）；
+    ② 唯一成本 = 我方场地陷阱；③ 对手速度是**区间**（围巾/强化/顺风不在区间内）→ **只有候补自己的精确速度落在区间外**才能说"我先手"，重叠时两种顺序都会发生；④ 对手**已暴露招里有没有先制**单独写明；
+    ⑤ 每个候补的行动行尾追加引擎算出的 `takes <最坏 X-Y% from <招>>`、`deals <A-B% with <招>> (<KO 判定>)`、`spe <我方精确值> vs their range <min-max> → CLEARLY faster / clearly slower / inside their range`。
+  - **不限制操作**：不排序、不禁止、不参与判定 —— 选谁仍由模型按战术取舍（③ 那一手 flash+低推理 就是明知事实仍选 Jirachi 拖麻/怯，属合理取舍）。单测加 5 条断言（含一条"文案里不得出现 must pick / you should"），`test-sim-gate.js` 95 → **100 全绿**。
+  - **顺带修一个静默 bug**：`calcOneLeg` 的 KO 字段叫 `ko` 而 `simulateTurn` 读的是 `ko_verdict`（未定义）⇒ `row.theirs.ko` 一直是空串。两处改成 `ko_verdict || ko`。
+  - **口径**：`takes` **只扫对手已暴露的招**（未暴露的高威力招可能打得更重，文案里写明）；`deals` 用对手"未投资"的默认档，并**附 252 投入的锚点**（仅在两个值不同时给，避免免疫时刷出重复数字）。
 - **回合号对齐 PO（tool 0.8.1 + script 0.6.28）**
   - 起因（用户 2026-09-21："你的日志也可以对齐回合号了吧"）：复盘时每次都要把我们的日志回合号手动 +1 才能对上 PO 窗口/战报。
   - 根因：**PO 在回合开始之前就收指令** —— `onBeginTurn(N)` 是在指令收集之后、回合结算开始时才触发，所以决策那一刻 `pklmCurrentTurn` 还是「最后一个已开始的回合」= PO 回合号 − 1（首回合是 0）。这也解释了为什么**日志里的战报文本（`Turn 11:`）本来就对**：那时 `onBeginTurn` 已触发。
