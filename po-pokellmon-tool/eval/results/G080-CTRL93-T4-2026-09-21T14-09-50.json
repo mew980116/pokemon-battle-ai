@@ -1,0 +1,439 @@
+{
+ "fixture": "CTRL93-T4",
+ "arm": "G080",
+ "url": "http://127.0.0.1:8092",
+ "n": 5,
+ "when": "2026-09-21T14-09-50",
+ "summary": {
+  "byAction": {
+   "ATK(stay)": 5
+  },
+  "byVerdict": {
+   "SAFE": 5
+  },
+  "inboundTotal": 0,
+  "simCalls": 8,
+  "branchTotal": 22,
+  "strategyRejections": 1,
+  "gateRejections": 0,
+  "gateUnmet": 0,
+  "gateBypassed": 0,
+  "honestFaints": 0,
+  "behaviorHits": 1,
+  "accident": 0,
+  "nOk": 5
+ },
+ "samples": [
+  {
+   "i": 1,
+   "battleId": "G080-R1",
+   "ms": 9334,
+   "action": {
+    "type": "attack",
+    "attackSlot": 1
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Double Iron Bash\"} vs [\"Soft-Boiled\",\"Toxic\",\"Thunder Wave\",\"switch1\"]"
+     }
+    ],
+    "inbound": [],
+    "outbound": [],
+    "strategy": {
+     "action": "move Double Iron Bash",
+     "branch": "Soft-Boiled",
+     "outcome": "survives",
+     "text": "(1) ATTACK? Blissey at 24% HP. Its revealed move is Soft-Boiled; it may also carry Toxic/Thunder Wave (both non-damaging to Melmetal) [estimated]. I'm confident it can't KO Melmetal — max threat shown is Focus Blast 34-40%, and none of it KOs. (2) SWITCH? Unlikely — Blissey is at 24%, so it may hard-switch to preserve itself, but I can't rely on that. (3) THEIR READ: Melmetal is a physical wall-breaker; they may bring in Magearna/Dragon resist. (4) MY OPTIONS: Double Iron Bash KOs Blissey (179-211%) with me taking 0%. No reason to switch. (5) MOST LIKELY: Blissey stays or tries Soft-Boiled — either way double Iron Bash KOs. Falsifier: a switch to Magearna. (6) Attack, KO Blissey or damage switch-in.",
+     "scene": "Melmetal 100%, Blissey fainted (or a fresh switch-in damaged). Electric Terrain up. No hazards.",
+     "checks": "[\"Verify Double Iron Bash KOs Blissey this turn (log shows Blissey fainting) — confirms my read\", \"If opponent switched, note which pokemon came in to reveal their team slots\"]"
+    },
+    "rounds": 6,
+    "ms": 9155,
+    "fallback": false,
+    "simCalls": 1,
+    "sims": [
+     {
+      "actionKey": "move Double Iron Bash",
+      "opp_does": [
+       "Soft-Boiled",
+       "Toxic",
+       "Thunder Wave",
+       "switch 1"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 1,
+    "lastWarning": "WARNING (not blocking) — your `text` asserts a type-multiplier (Dragon: \"cal wall-breaker; they may bring in Magearna/Dragon resist. (4) MY OPT\") but you never called get_type_matchup this turn. Prose multipliers are a known hallucination source (e.g. \"Water is neutral to Fire/Electric\" when it is a",
+    "multMentions": 1,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "move Double Iron Bash",
+    "declaredBranch": "Soft-Boiled",
+    "declaredOutcome": "survives",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 0,
+    "targetName": "Melmetal",
+    "worst": {
+     "pctMin": 25,
+     "pctMax": 30,
+     "ko": "guaranteed 4HKO",
+     "move": "Flamethrower",
+     "acc": 100,
+     "error": null
+    },
+    "isSwitch": false
+   }
+  },
+  {
+   "i": 2,
+   "battleId": "G080-R2",
+   "ms": 21807,
+   "action": {
+    "type": "attack",
+    "attackSlot": 1
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Double Iron Bash"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Earthquake\"} vs [\"Soft-Boiled\",\"switch2\",\"switch5\",\"Toxic\",\"Thunder Wave\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Double Iron Bash\"} vs [\"Soft-Boiled\",\"switch2\",\"switch5\"]"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me -> Magearna : Earthquake"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me -> Magearna : Double Iron Bash"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me -> Hydreigon : Earthquake"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me -> Hydreigon : Double Iron Bash"
+     }
+    ],
+    "inbound": [],
+    "outbound": [
+     "me -> opp : Double Iron Bash",
+     "me -> Magearna : Earthquake",
+     "me -> Magearna : Double Iron Bash",
+     "me -> Hydreigon : Earthquake",
+     "me -> Hydreigon : Double Iron Bash"
+    ],
+    "strategy": {
+     "action": "move Double Iron Bash",
+     "branch": "Soft-Boiled",
+     "outcome": "survives",
+     "scene": "Melmetal 100% vs (Blissey fainted, or Magearna-Original ~20-32%, or Hydreigon ~0-6% or fainted). Electric Terrain up. No hazards. My Melmetal still active.",
+     "checks": [
+      "check if Blissey stays: if it faints to Double Iron Bash this turn, confirmed my KO read.",
+      "check what the opponent switches in on my DIB — if Magearna, confirm its role as Melmetal answer and its HP after; if Hydreigon, confirm whether DIB OHKOed it (validates Levitate/no bulk).",
+      "verify whether Magearna reveals a setup move (Calm Mind/Shift Gear) or an attack — informs whether I can leave Melmetal in next turn."
+     ],
+     "text": "(1) ATTACK? Blissey at 24% will either stay (Soft-Boiled, Thunder Wave, Toxic, or coverage Fire Blast/Focus Blast) or — more likely, being near-dead and their special wall — switch out to Magearna or Hydreigon. Confidence it does NOT meaningfully attack me: high; nothing it clicks KOs Melmetal (best Focus Blast 34-40%). (2) SWITCH? Blissey likely switches to Magearna-Original (Steel/Fairy, counters Melmetal) or Hydreigon. (3) THEIR READ OF ME — they know Melmetal is a physical Steel breaker; Magearna is the natural answer. (4) MY OPTION: Double Iron Bash while staying. No switch needed — Melmetal 100%, and DIB covers every branch: OHKOs Blissey if it stays (179-211%), 68-80% to Magearna on switch, 94-110% (possible OHKO) to Hydreigon on switch. Earthquake KOs Blissey too (82-97%) and 62-74% to Magearna but is 0 vs Hydreigon if Levitate — strictly worse coverage. Staying is the dominant line. (5) MOST LIKELY + REPLY — Blissey switches to Magearna; I DIB for 68-80%, chipping Mag into revenge-KO range. Falsifier: a switch-in that resists Steel. (6) SEQUENCE — I DIB: Blissey faints (free KO) OR Magearna/Hydreigon eats 68-80%/94-110%. Next turn I reassess vs Magearna ~20-32%. Result: Melmetal survives on 100%."
+    },
+    "rounds": 9,
+    "ms": 21603,
+    "fallback": false,
+    "simCalls": 2,
+    "sims": [
+     {
+      "actionKey": "move Earthquake",
+      "opp_does": [
+       "Soft-Boiled",
+       "switch 2",
+       "switch 5",
+       "Toxic",
+       "Thunder Wave"
+      ]
+     },
+     {
+      "actionKey": "move Double Iron Bash",
+      "opp_does": [
+       "Soft-Boiled",
+       "switch 2",
+       "switch 5"
+      ]
+     }
+    ],
+    "strategyRejections": 1,
+    "warningCount": 0,
+    "lastWarning": null,
+    "multMentions": 1,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "move Double Iron Bash",
+    "declaredBranch": "Soft-Boiled",
+    "declaredOutcome": "survives",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 0,
+    "targetName": "Melmetal",
+    "worst": {
+     "pctMin": 25,
+     "pctMax": 30,
+     "ko": "guaranteed 4HKO",
+     "move": "Flamethrower",
+     "acc": 100,
+     "error": null
+    },
+    "isSwitch": false
+   }
+  },
+  {
+   "i": 3,
+   "battleId": "G080-R3",
+   "ms": 8169,
+   "action": {
+    "type": "attack",
+    "attackSlot": 1
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Double Iron Bash\"} vs [\"Soft-Boiled\",\"Seismic Toss\",\"switchHydreigon\",\"switchMagearna-Original\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Double Iron Bash\"} vs [\"Soft-Boiled\",\"Seismic Toss\"]"
+     }
+    ],
+    "inbound": [],
+    "outbound": [],
+    "strategy": {
+     "text": "(1) Blissey is a support wall; its only offense is Seismic Toss (~24% to Melmetal) or status (Toxic/T-Wave/Sing). It will likely either Soft-Boiled again (futile — I KO through it) or switch out Hydreigon/Magearna to preserve it. (2) Possible switch to Hydreigon (91%) or Magearna (100%) to dodge the KO. (3) It knows Melmetal is on the field and hits hard; it knows my Tapu Koko set Electric Terrain. (4) No voluntary switch needed — attacking is free. (5) Most likely: it attacks with Seismic Toss or Soft-Boiled; either way Double Iron Bash KOs Blissey before/after (179-211% vs 24% HP). (6) DIB KOs Blissey; if it switches, DIB hits the incoming Hydreigon (neutral, Resisted? Steel vs Dragon=1x, vs Magearna Steel=Fairy/Steel 1x) — still chips hard or KOs.",
+     "scene": "Blissey faints to Double Iron Bash OR opponent switches to Hydreigon/Magearna taking DIB damage. Melmetal at 76-100%. Electric Terrain up.",
+     "checks": "[\"check log: if Blissey switched out, note which mon came in (Hydreigon/Magearna) to plan next turn\",\"confirm Double Iron Bash KOd Blissey (its 24% HP should drop to fainted)\"]",
+     "action": "move Double Iron Bash",
+     "branch": "Soft-Boiled",
+     "outcome": "survives"
+    },
+    "rounds": 5,
+    "ms": 7985,
+    "fallback": false,
+    "simCalls": 2,
+    "sims": [
+     {
+      "actionKey": "move Double Iron Bash",
+      "opp_does": [
+       "Soft-Boiled",
+       "Seismic Toss"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 1,
+    "lastWarning": "REMINDER (not blocking) — the branch you declared (Soft-Boiled) is NOT the worst branch for that action. Worst is \"Seismic Toss\": BOTH ORDERS SIMULATED (same priority — the speed comparison is not trusted, so do NOT assume you move first) they first → Melmetal: 179-211% out, 24-24% in → 76-76% left ",
+    "multMentions": 3,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "move Double Iron Bash",
+    "declaredBranch": "Soft-Boiled",
+    "declaredOutcome": "survives",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 0,
+    "targetName": "Melmetal",
+    "worst": {
+     "pctMin": 25,
+     "pctMax": 30,
+     "ko": "guaranteed 4HKO",
+     "move": "Flamethrower",
+     "acc": 100,
+     "error": null
+    },
+    "isSwitch": false
+   }
+  },
+  {
+   "i": 4,
+   "battleId": "G080-R4",
+   "ms": 15922,
+   "action": {
+    "type": "attack",
+    "attackSlot": 1
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Double Iron Bash"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Earthquake"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Double Iron Bash\"} vs [\"Soft-Boiled\",\"Toxic\",\"switchHydreigon\",\"switchMagearna-Original\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Double Iron Bash\"} vs [\"Soft-Boiled\",\"Toxic\",\"switch1\",\"switch2\"]"
+     }
+    ],
+    "inbound": [],
+    "outbound": [
+     "me -> opp : Double Iron Bash",
+     "me -> opp : Earthquake"
+    ],
+    "strategy": {
+     "action": "move Double Iron Bash",
+     "branch": "Soft-Boiled",
+     "outcome": "survives",
+     "scene": "Melmetal 100% (Leftovers) active, Electric Terrain up. Blissey fainted (if it stayed) OR opponent switched to a new mon (likely Hydreigon ~91% or Magearna 100%) that took Double Iron Bash damage. No hazards.",
+     "checks": "Verify who is active on the opponent's side after this turn: if Blissey is gone, it stayed and got KO'd; if a new mon is in, the opponent switched out Blissey (meaning they value preserving the wall) and I should note the switch-in's HP after DIB (94-110% on an assumed 0EV neutral slot — a bulky Steel like Magearna would take ~half). Track whether opponent's Blissey can return and Soft-Boiled back up.",
+     "text": "(1) ATTACK? Opponent Blissey at 24% cannot survive any of my hits — its realistic options are Soft-Boiled (heal, still dies to DIB) or switch out. It has no meaningful attack vs Melmetal (Focus Blast 34-40% only). Most likely it switches out to preserve the wall; otherwise it clicks Soft-Boiled/Toxic harmlessly. Confidence high on the damage math, moderate on whether they stay or switch. (2) SWITCH? Very plausible — Blissey is at 24% and useless offensively; opponent likely brings in Hydreigon (91%) or Magearna (100%) to check Melmetal. (3) THEIR READ OF ME — they see Melmetal as a slow bulky breaker that just ripped Blissey in half; they must respect Double Iron Bash and will try to wall it with a Steel-resistant mon (Magearna) or a Ground/Fire threat. (4) MY OPTIONS: Staying on Melmetal and attacking costs nothing — Melmetal is 100% and my win condition; no switch gains anything (all my mons are unrevealed/healthy bench, switching forfeits a turn of free damage). No cost to attacking. Not behind. Steadier line = attack. (5) MOST LIKELY ACTION + RESPONSE: opponent switches Blissey -> Magearna/Hydreigon; I attack with Double Iron Bash, KOing Blissey if it stays or chunking the switch-in. Falsifier: they stay with Soft-Boiled and survive (impossible at 24% vs DIB). (6) SEQUENCE: My DIB resolves -> Blissey faints (stayed) or switch-in takes 94-110% (bulky Steel ~half) -> next turn I assess the new matchup (likely consider Earthquake for a Magearna, or switch to a check)."
+    },
+    "rounds": 9,
+    "ms": 15708,
+    "fallback": false,
+    "simCalls": 2,
+    "sims": [
+     {
+      "actionKey": "move Double Iron Bash",
+      "opp_does": [
+       "Soft-Boiled",
+       "Toxic",
+       "switch 1",
+       "switch 2"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 1,
+    "lastWarning": "WARNING (not blocking) — your `text` asserts a type-multiplier (Ground: \"t with a Steel-resistant mon (Magearna) or a Ground/Fire threat. (4) M\" | Steel: \"ble Iron Bash and will try to wall it with a Steel-resistant mon (Mage\" | Fire: \"a Steel-resistant mon (Magearna) or a Ground/Fire threat. (4) MY",
+    "multMentions": 3,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "move Double Iron Bash",
+    "declaredBranch": "Soft-Boiled",
+    "declaredOutcome": "survives",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 0,
+    "targetName": "Melmetal",
+    "worst": {
+     "pctMin": 25,
+     "pctMax": 30,
+     "ko": "guaranteed 4HKO",
+     "move": "Flamethrower",
+     "acc": 100,
+     "error": null
+    },
+    "isSwitch": false
+   }
+  },
+  {
+   "i": 5,
+   "battleId": "G080-R5",
+   "ms": 9843,
+   "action": {
+    "type": "attack",
+    "attackSlot": 1
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Double Iron Bash"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Double Iron Bash\"} vs [\"Soft-Boiled\",\"Thunder Wave\",\"Toxic\",\"switch2\"]"
+     }
+    ],
+    "inbound": [],
+    "outbound": [
+     "me -> opp : Double Iron Bash"
+    ],
+    "strategy": {
+     "text": "(1) ATTACK? Blissey at 24% will most likely Soft-Boiled (it did last turn) or click Toxic/Thunder Wave. Regardless, DIB KOs it from 24%. (2) SWITCH? Unlikely — it's a wall that just healed. (3) THEIR READ: sees Melmetal as physical breaker; will try to status or heal. (4) No switch needed: DIB is a guaranteed KO and Melmetal takes 0% damage from Blissey. (5) Most likely: Soft-Boiled or status; my reply DIB kills. Falsifier: they switch to a resist. (6) DIB → Blissey faints; opponent sends next.",
+     "scene": "Blissey faints; opponent sends Hydreigon (91%) or Magearna (100%). Melmetal 100%, Electric Terrain still up.",
+     "checks": "[\"Confirm DIB KOs Blissey (log shows it faint) — validate base 10 Def calc.\", \"Note which pokemon opponent sends after Blissey faints.\"]",
+     "action": "move Double Iron Bash",
+     "branch": "Soft-Boiled",
+     "outcome": "survives"
+    },
+    "rounds": 8,
+    "ms": 9598,
+    "fallback": false,
+    "simCalls": 1,
+    "sims": [
+     {
+      "actionKey": "move Double Iron Bash",
+      "opp_does": [
+       "Soft-Boiled",
+       "Thunder Wave",
+       "Toxic",
+       "switch 2"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 0,
+    "lastWarning": null,
+    "multMentions": 0,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "move Double Iron Bash",
+    "declaredBranch": "Soft-Boiled",
+    "declaredOutcome": "survives",
+    "behaviorHits": 1
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 0,
+    "targetName": "Melmetal",
+    "worst": {
+     "pctMin": 25,
+     "pctMax": 30,
+     "ko": "guaranteed 4HKO",
+     "move": "Flamethrower",
+     "acc": 100,
+     "error": null
+    },
+    "isSwitch": false
+   }
+  }
+ ]
+}

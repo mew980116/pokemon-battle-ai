@@ -1,0 +1,600 @@
+{
+ "fixture": "battle98-T1",
+ "arm": "G080",
+ "url": "http://127.0.0.1:8092",
+ "n": 5,
+ "when": "2026-09-21T14-12-08",
+ "summary": {
+  "byAction": {
+   "SWITCH→Hatterene": 4,
+   "SWITCH→Scizor": 1
+  },
+  "byVerdict": {
+   "SAFE": 5
+  },
+  "inboundTotal": 7,
+  "simCalls": 13,
+  "branchTotal": 57,
+  "strategyRejections": 0,
+  "gateRejections": 0,
+  "gateUnmet": 0,
+  "gateBypassed": 0,
+  "honestFaints": 0,
+  "behaviorHits": 0,
+  "accident": 0,
+  "nOk": 5
+ },
+ "samples": [
+  {
+   "i": 1,
+   "battleId": "G080-R1",
+   "ms": 12595,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 4
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Knock Off\"} vs [\"Spore\",\"Sludge Bomb\",\"Giga Drain\",\"Foul Play\",\"switch 2\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":4} vs [\"Spore\",\"Giga Drain\",\"Sludge Bomb\",\"Foul Play\",\"Poison Powder\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":3} vs [\"Spore\",\"Giga Drain\",\"Sludge Bomb\",\"Foul Play\",\"Poison Powder\"]"
+     }
+    ],
+    "inbound": [],
+    "outbound": [],
+    "strategy": {
+     "text": "(1) ATTACK? Amoonguss likely clicks Spore (its signature) or Giga Drain on Crawdaunt; both ruin Crawdaunt (sleep or 95-113% kill). (2) SWITCH? It may stay — Grass/Poison mon. (3) THEIR READ: sees Crawdaunt, will Spore/Giga Drain. (4) I switch to Hatterene: Magic Bounce REFLECTS Spore/Poison Powder/Toxic back onto Amoonguss — completely blanks its main move. Giga Drain only 21-25%, Sludge Bomb 52-62%. (5) Most likely: Amoonguss clicks Spore, bounced by Magic Bounce. (6) Then I set Trick Room or hit with Mystical Fire (2x). (R) N/A.",
+     "scene": "Hatterene on field at ~75-100% HP. Amoonguss at 100% (possibly slept via its own reflected Spore). No hazards, no weather. Life Orb on Hatterene.",
+     "checks": "[\"Check if Amoonguss clicks Spore and whether Magic Bounce reflects it (log shows 'Hatterene's Magic Bounce' or Amoonguss falling asleep)\",\"Check which move Amoonguss actually used — if Giga Drain/Sludge Bomb, it is not Spore-only\",\"Check if Amoonguss heals on switch-out later (Regenerator) or triggers Effect Spore on contact\"]",
+     "action": "switch 4",
+     "branch": "Spore",
+     "outcome": "survives"
+    },
+    "rounds": 6,
+    "ms": 12448,
+    "fallback": false,
+    "simCalls": 3,
+    "sims": [
+     {
+      "actionKey": "move Knock Off",
+      "opp_does": [
+       "Spore",
+       "Sludge Bomb",
+       "Giga Drain",
+       "Foul Play",
+       "switch 2"
+      ]
+     },
+     {
+      "actionKey": "switch 4",
+      "opp_does": [
+       "Spore",
+       "Giga Drain",
+       "Sludge Bomb",
+       "Foul Play",
+       "Poison Powder"
+      ]
+     },
+     {
+      "actionKey": "switch 3",
+      "opp_does": [
+       "Spore",
+       "Giga Drain",
+       "Sludge Bomb",
+       "Foul Play",
+       "Poison Powder"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 1,
+    "lastWarning": "REMINDER (not blocking) — the branch you declared (Spore) is NOT the worst branch for that action. Worst is \"Sludge Bomb\": Hatterene takes 52-62% from Sludge Bomb → 38-48% left  If you are deliberately betting against that branch, say so explicitly in `text` (which branch you are betting against, an",
+    "multMentions": 1,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "switch 4",
+    "declaredBranch": "Spore",
+    "declaredOutcome": "survives",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 4,
+    "targetName": "Hatterene",
+    "worst": {
+     "pctMin": 52,
+     "pctMax": 62,
+     "ko": "guaranteed 2HKO",
+     "move": "Sludge Bomb",
+     "acc": 100,
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 2,
+   "battleId": "G080-R2",
+   "ms": 19465,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 4
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Knock Off"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Crabhammer"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Sludge Wave"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Knock Off\"} vs [\"Spore\",\"Sludge Bomb\",\"Giga Drain\",\"Toxic\",\"Clear Smog\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":4} vs [\"Spore\",\"Sludge Bomb\",\"Giga Drain\"]"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:4 -> opp : Psyshock"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:4 -> opp : Draining Kiss"
+     }
+    ],
+    "inbound": [],
+    "outbound": [
+     "me -> opp : Knock Off",
+     "me -> opp : Crabhammer",
+     "me -> opp : Sludge Wave",
+     "me:4 -> opp : Psyshock",
+     "me:4 -> opp : Draining Kiss"
+    ],
+    "strategy": {
+     "action": "switch 4",
+     "branch": "Sludge Bomb",
+     "outcome": "38-48%",
+     "text": "(1) ATTACK? Amoonguss likely attacks or sets status. Candidates: Spore (sleep), Sludge Bomb (Poison STAB), Giga Drain (Grass STAB, OHKOs Crawdaunt), Toxic. Against Crawdaunt, Giga Drain is the killer (95-113%). Amoonguss is slow (max ~174 Spe vs my 209), so Crawdaunt would move first — but it still dies to Giga Drain. (2) SWITCH? Amoonguss is a defensive pivot; unlikely to switch, it can't predict my Hatterene tech. (3) THEIR READ: they see Crawdaunt, a Life Orb attacker that just killed Gyarados; they'll expect a strong Dark/Water hit, not a Magic Bounce switch. (4) MY OPTIONS: staying with Knock Off does 69-81% (item removed) but Crawdaunt risks death to Giga Drain (95-113%) and even Sludge Bomb leaves it at 23-33%. Switching to Hatterene (slot 4): forfeits turn, Hatterene eats the hit but survives every branch (Giga Drain 21-25%, Sludge Bomb 52-62%, Spore/Toxic bounced by Magic Bounce). GAIN: neutralizes Amoonguss's status moves and next turn Hatterene's Psyshock does 88-104% (31% OHKO, else guaranteed 2HKO) — Amoonguss can't KO Hatterene back. This is the steadier line; Crawdaunt is too valuable to trade into a likely Giga Drain. (5) MOST LIKELY: Amoonguss clicks Spore or Sludge Bomb/Giga Drain; Magic Bounce reflects Spore back, or Hatterene simply tanks the attack. Falsifier: if Amoonguss switches out, I still have Hatterene in a good matchup. (6) SEQUENCE: switch in Hatterene → Amoonguss acts (Spore bounced / attack tanked) → next turn Hatterene fires Psyshock for 88-104%.",
+     "scene": "Hatterene ~38-100% (depends on branch) vs Amoonguss ~100% (item intact unless Spore bounce). No hazards. If Spore was used it's reflected onto Amoonguss (asleep). My Crawdaunt benched at 90%.",
+     "checks": "[\"Check if Amoonguss used Spore and whether the log shows 'Magic Bounce bounced back' — confirms Magic Bounce reflected it.\",\"Check what move Amoonguss actually uses this turn and its damage on Hatterene — confirms its set direction (Giga Drain vs Sludge Bomb vs status).\",\"Check if Amoonguss reveals Black Sludge/Leftovers via healing or item message on next hit.\"]"
+    },
+    "rounds": 8,
+    "ms": 19288,
+    "fallback": false,
+    "simCalls": 2,
+    "sims": [
+     {
+      "actionKey": "move Knock Off",
+      "opp_does": [
+       "Spore",
+       "Sludge Bomb",
+       "Giga Drain",
+       "Toxic",
+       "Clear Smog"
+      ]
+     },
+     {
+      "actionKey": "switch 4",
+      "opp_does": [
+       "Spore",
+       "Sludge Bomb",
+       "Giga Drain"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 0,
+    "lastWarning": null,
+    "multMentions": 0,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "switch 4",
+    "declaredBranch": "Sludge Bomb",
+    "declaredOutcome": "38-48%",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 4,
+    "targetName": "Hatterene",
+    "worst": {
+     "pctMin": 52,
+     "pctMax": 62,
+     "ko": "guaranteed 2HKO",
+     "move": "Sludge Bomb",
+     "acc": 100,
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 3,
+   "battleId": "G080-R3",
+   "ms": 35290,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 4
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Knock Off"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Sludge Wave"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Crabhammer"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":5} vs [\"Spore\",\"Giga Drain\",\"Sludge Bomb\",\"Foul Play\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Knock Off\"} vs [\"Spore\",\"Giga Drain\",\"Sludge Bomb\",\"Foul Play\"]"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me:4 : Sludge Bomb"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me:4 : Giga Drain"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me:3 : Giga Drain"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me:3 : Foul Play"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:4 -> opp : Psyshock"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":4} vs [\"Spore\",\"Giga Drain\",\"Sludge Bomb\",\"Foul Play\",\"switch1\"]"
+     }
+    ],
+    "inbound": [
+     "opp -> me:4 : Sludge Bomb",
+     "opp -> me:4 : Giga Drain",
+     "opp -> me:3 : Giga Drain",
+     "opp -> me:3 : Foul Play"
+    ],
+    "outbound": [
+     "me -> opp : Knock Off",
+     "me -> opp : Sludge Wave",
+     "me -> opp : Crabhammer",
+     "me:4 -> opp : Psyshock"
+    ],
+    "strategy": {
+     "action": "switch 4",
+     "branch": "Spore",
+     "outcome": "100%",
+     "text": "(1) ATTACK? — Amoonguss almost certainly acts. Candidates vs a Crawdaunt that just KO'd Gyarados: Spore (put the threat to sleep — most likely), Giga Drain (2x vs Water Crawdaunt), Sludge Bomb (neutral, up to 82-96% with investment). I expect Spore first, then Giga Drain. (2) SWITCH? — Amoonguss is a Regenerator pivot and could double-switch, but it just came in; unlikely to leave immediately. (3) THEIR READ — they see only Crawdaunt and expect me to stay/Knock Off; they do NOT know I carry Hatterene with Magic Bounce or that Psyshock OHKOs (110-130%). (4) MY OPTIONS: staying with Crawdaunt is a losing line — it can't break Amoonguss (Knock Off 46-81%, and only if no Spore), and it dies outright to Giga Drain (95-113%) and can be slept by Spore. Switching to Hatterene: hard-blocks Spore/Toxic via Magic Bounce (bounces Spore back → Amoonguss sleeps) and Psyshock is a guaranteed OHKO on Amoonguss (110-130%). Cost: forfeits this turn, Hatterene eats the incoming move — worst case Sludge Bomb 52-62% (survives at 38-48%), Giga Drain 21-25%, Foul Play 20-24%, Spore 0% (bounced). No entry hazards on my side. (c) Confidence: HIGH that Amoonguss clicks Spore vs Crawdaunt; Magic Bounce makes the worst case survivable regardless. (d) Not behind — this is a positive line, not a hope. (e) Scizor pivot is steadier vs attacks (Giga Drain 10-12%, immune to Sludge Bomb) but can't break Amoonguss and gets Spored; Hatterene is the higher-value, decisive line. (5) MOST LIKELY: Amoonguss Spore → bounced, Amoonguss asleep, Hatterene 100%. Response next turn: Psyshock OHKO. Falsifier: Amoonguss clicks Sludge Bomb (Hatterene survives at 38-48% — then I must switch out rather than trade). (6) SEQUENCE: T2 switch Hatterene (eats one hit at most, survives). T3 Hatterene Psyshock → Amoonguss faints (if asleep or if it stays). Decide based on their T2 move.",
+     "scene": "Hatterene in at 75-100% (100% if Amoonguss used Spore — bounced, Amoonguss asleep; 38-48% if Sludge Bomb; 75-79% if Giga Drain). Amoonguss 100% unless slept. Crawdaunt preserved on bench at 90%. No hazards, no weather. Next turn Hatterene threatens Psyshock OHKO on Amoonguss.",
+     "checks": "[\"If Amoonguss clicked Spore and the log shows 'Magic Bounce bounced back' then Amoonguss is asleep and Psyshock OHKOs next turn — confirm no sleep landed on Hatterene\",\"If Amoonguss clicked Sludge Bomb instead (Hatterene ~38-48%), verify the log; then Hatterene is too low to stay — switch it out next turn\",\"Confirm Amoonguss did NOT switch out (if it did, note which mon replaced it and re-plan)\",\"Note which of Amoonguss's moves is revealed (Spore/Giga Drain/Sludge Bomb/Foul Play) to narrow its set and its ability (Effect Spore vs Regenerator)\"]"
+    },
+    "rounds": 10,
+    "ms": 35105,
+    "fallback": false,
+    "simCalls": 3,
+    "sims": [
+     {
+      "actionKey": "switch 5",
+      "opp_does": [
+       "Spore",
+       "Giga Drain",
+       "Sludge Bomb",
+       "Foul Play"
+      ]
+     },
+     {
+      "actionKey": "move Knock Off",
+      "opp_does": [
+       "Spore",
+       "Giga Drain",
+       "Sludge Bomb",
+       "Foul Play"
+      ]
+     },
+     {
+      "actionKey": "switch 4",
+      "opp_does": [
+       "Spore",
+       "Giga Drain",
+       "Sludge Bomb",
+       "Foul Play",
+       "switch 1"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 1,
+    "lastWarning": "REMINDER (not blocking) — the branch you declared (Spore) is NOT the worst branch for that action. Worst is \"Sludge Bomb\": Hatterene takes 52-62% from Sludge Bomb → 38-48% left  If you are deliberately betting against that branch, say so explicitly in `text` (which branch you are betting against, an",
+    "multMentions": 1,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "switch 4",
+    "declaredBranch": "Spore",
+    "declaredOutcome": "100%",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 4,
+    "targetName": "Hatterene",
+    "worst": {
+     "pctMin": 52,
+     "pctMax": 62,
+     "ko": "guaranteed 2HKO",
+     "move": "Sludge Bomb",
+     "acc": 100,
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 4,
+   "battleId": "G080-R4",
+   "ms": 32047,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 4
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Sludge Wave"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Knock Off"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Crabhammer"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Knock Off\"} vs [\"Spore\",\"Giga Drain\",\"Sludge Bomb\",\"Toxic\",\"Stun Spore\",\"Synthesis\"]"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:4 -> opp : Psyshock"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:4 -> opp : Psychic"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:4 -> opp : Mystical Fire"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me:4 : Sludge Bomb"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me:4 : Giga Drain"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":4} vs [\"Spore\",\"Sludge Bomb\",\"Giga Drain\",\"Toxic\",\"Stun Spore\",\"Synthesis\"]"
+     }
+    ],
+    "inbound": [
+     "opp -> me:4 : Sludge Bomb",
+     "opp -> me:4 : Giga Drain"
+    ],
+    "outbound": [
+     "me -> opp : Sludge Wave",
+     "me -> opp : Knock Off",
+     "me -> opp : Crabhammer",
+     "me:4 -> opp : Psyshock",
+     "me:4 -> opp : Psychic",
+     "me:4 -> opp : Mystical Fire"
+    ],
+    "strategy": {
+     "text": "(1) ATTACK? Amoonguss is fresh at 100% and slower than Crawdaunt. Its likely actions: Spore (sleep, very common), Giga Drain (KO on Crawdaunt 95-113%), Sludge Bomb (57-67% on Crawdaunt), possibly Toxic/Stun Spore/Synthesis/Clear Smog. Most likely Spore or Giga Drain — both bad for staying Crawdaunt. (2) SWITCH? Amoonguss unlikely to switch; it just came in to check my Water/Dark breaker and walls Crawdaunt (Water 0.5x, Dark 1x). (3) THEIR READ OF ME — they see a Life-Orb Adaptability Crawdaunt that just OHKO'd their Gyarados; Amoonguss is their answer (resists Water, threatens Spore/Giga Drain). They expect Crawdaunt to attack or switch. (4) MY OPTIONS & COST OF SWITCHING: Staying = Knock Off (46-55%, removes item) but then Crawdaunt faints to Giga Drain (95-113%) or gets slept by Spore → bad trade of my breaker for ~half a Regenerator mon. Sludge Wave only 26-31%, useless. Switching to Hatterene (slot4): forfeits turn, Hatterene eats the move — worst case Sludge Bomb 52-62% (survives ~40%), Giga Drain only 21-25%, and Magic Bounce REFLECTS Spore/Toxic/Stun Spore back onto Amoonguss. Gain: next turn Hatterene OHKOs Amoonguss with Psyshock (140-167%, 2x Psychic on Grass/Poison). Hatterene is the clear winner of this matchup. Not behind (I'm up a mon). Confidence high — Hatterene survives all Amoonguss branches. (5) MOST LIKELY ACTION: Spore or Giga Drain. My response: switch to Hatterene (bounces Spore / shrugs Giga Drain). Falsifier: Amoonguss attacks with a strong Poison move that 2HKOs Hatterene or a move that isn't reflected — calc says worst-case Sludge Bomb 62%, still survives. (6) SEQUENCE: I switch to Hatterene (takes ≤62%) → Amoonguss's Spore bounces or its attack lands → next turn Hatterene Psyshock OHKOs Amoonguss. Danger: if Amoonguss Sludge Bombs twice Hatterene survives but low (~40% then needs the KO — Hatterene is slower at 56 Spe vs Amoonguss ~86-174, so Amoonguss moves first; after my switch-in hit, next turn Amoonguss moves first again before Hatterene's Psyshock. If Amoonguss Sludge Bombs twice: 40% → faints before Psyshock. So if it Sludge Bombs now, next turn may be a trade; Psyshock still resolves only if Hatterene survives turn-2 Sludge Bomb, which it won't at 40%. Better: if it Sludge Bombs now, I may need to attack immediately — but Hatterene is slower. Risk noted; still the best line.)",
+     "scene": "Hatterene on field (~38-100% depending on branch: 100% if Spore/Toxic/Stun Spore/Synthesis, 75-79% if Giga Drain, 38-48% if Sludge Bomb). Amoonguss 100% (Spore may be bounced back → Amoonguss asleep; or Amoonguss poisoned from bounced Toxic). Crawdaunt benched at 90%. No hazards. Next turn: Hatterene Psyshock vs Amoonguss (need to check if Hatterene survives a second Sludge Bomb).",
+     "checks": "Confirm from log: did Magic Bounce bounce a status move back onto Amoonguss (log shows \"Magic Bounce bounced back\")? | Which move did Amoonguss actually use — if Spore/Toxic/Stun Spore it is bounced (so Amoonguss is now statused and Hatterene untouched); if Sludge Bomb Hatterene is at ~40-48% and I must decide whether to attack or switch next turn (a second Sludge Bomb would KO Hatterene before Psyshock since Hatterene is slower). | What item does Amoonguss hold (if any Knock Off happens) / was it a Regenerator set (did it heal on switch-out later)?",
+     "action": "switch 4",
+     "branch": "Sludge Bomb",
+     "outcome": "38-48%"
+    },
+    "rounds": 11,
+    "ms": 31842,
+    "fallback": false,
+    "simCalls": 2,
+    "sims": [
+     {
+      "actionKey": "move Knock Off",
+      "opp_does": [
+       "Spore",
+       "Giga Drain",
+       "Sludge Bomb",
+       "Toxic",
+       "Stun Spore",
+       "Synthesis"
+      ]
+     },
+     {
+      "actionKey": "switch 4",
+      "opp_does": [
+       "Spore",
+       "Sludge Bomb",
+       "Giga Drain",
+       "Toxic",
+       "Stun Spore",
+       "Synthesis"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 0,
+    "lastWarning": null,
+    "multMentions": 3,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "switch 4",
+    "declaredBranch": "Sludge Bomb",
+    "declaredOutcome": "38-48%",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 4,
+    "targetName": "Hatterene",
+    "worst": {
+     "pctMin": 52,
+     "pctMax": 62,
+     "ko": "guaranteed 2HKO",
+     "move": "Sludge Bomb",
+     "acc": 100,
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 5,
+   "battleId": "G080-R5",
+   "ms": 27758,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 3
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Knock Off\"} vs [\"Spore\",\"Sludge Bomb\",\"Giga Drain\",\"Foul Play\",\"switch2\"]"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me : Giga Drain"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Knock Off"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":7} vs [\"Spore\",\"Giga Drain\",\"Sludge Bomb\",\"Foul Play\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":3} vs [\"Spore\",\"Giga Drain\",\"Sludge Bomb\",\"Foul Play\"]"
+     }
+    ],
+    "inbound": [
+     "opp -> me : Giga Drain"
+    ],
+    "outbound": [
+     "me -> opp : Knock Off"
+    ],
+    "strategy": {
+     "text": "(1) ATTACK? Amoonguss vs Crawdaunt: most likely Spore (its signature, ~100% on a fresh target) or Giga Drain (95-113% OHKO on my 90% Crawdaunt — real). Sludge Bomb 57-96%. Foul Play minor. Confidence moderate that Spore is chosen first, but Giga Drain KO is a live risk. (2) SWITCH? Amoonguss unlikely to switch; it walls Crawdaunt and wants to click Spore/attack. (3) THEIR READ: sees my Crawdaunt (Water/Dark breaker, killed Gyarados). Amoonguss treats it as a target for Spore/status, not a threat (Knock Off does only ~50% and it Regenerates that back). (4) MY OPTIONS & COST: Crawdaunt is faster (209 vs max 174) so STAYING always lands Knock Off first (46-55% + removes its item), but then eats Spore (sleep) or dies to Giga Drain (95-113%) — KO risk. SWITCH to Scizor: forfeits turn, Scizor eats the move — Spore (sleep, 0% dmg), Giga Drain 7-8% (0.25x resist), Sludge Bomb immune (0%), Foul Play 40-48%. Scizor hard-walls Amoonguss's STAB but is slow so can't break it either. No entry hazards. GAIN: preserves my best breaker Crawdaunt and puts a hard counter on the field; next turn Scizor can U-turn-pivot to a real answer (Hatterene/Primarina) without eating the wall's STAB. Not behind: even trade, I have the scarer. Steadier line = switch to Scizor (only Spore/Foul Play hurt it). (5) MOST LIKELY ACTION: Amoonguss clicks Spore (or Giga Drain). My reply: switch to Scizor, which shrugs off everything except Spore/Foul Play. Falsifier: if Scizor gets Spored, I have a sleeping wall-stopper — still no KO, recoverable. (6) SEQ: I switch Scizor; Amoonguss acts (Spore likely). Next turn: if Scizor awake, U-turn out to Hatterene/Primarina to pressure Amoonguss; if asleep, I stay and absorb while it Regenerates, then pivot.",
+     "scene": "Scizor active at ~52-100% (Foul Play worst 40-48%; Spore would sleep it). Crawdaunt benched at 90%. Amoonguss 100%. No hazards either side. Amoonguss ability/item still unknown.",
+     "checks": "[\"Check what move Amoonguss uses on the Scizor switch-in — if Spore, confirm it targets switch-ins (Spore is its go-to); if Giga Drain, confirm Scizor takes ~7-8% (Grass 0.25x resist confirmed).\", \"Confirm Amoonguss's ability: if it switches out later and heals, Regenerator [proved]; if a contact move triggers a status on my mon, Effect Spore [proved].\", \"Check whether Amoonguss reveals Foul Play (would hit Scizor ~40-48%) or holds Black Sludge (Knock Off item removal matters).\"]",
+     "action": "switch 3",
+     "branch": "Spore",
+     "outcome": "survives"
+    },
+    "rounds": 10,
+    "ms": 27572,
+    "fallback": false,
+    "simCalls": 3,
+    "sims": [
+     {
+      "actionKey": "move Knock Off",
+      "opp_does": [
+       "Spore",
+       "Sludge Bomb",
+       "Giga Drain",
+       "Foul Play",
+       "switch 2"
+      ]
+     },
+     {
+      "actionKey": "switch 3",
+      "opp_does": [
+       "Spore",
+       "Giga Drain",
+       "Sludge Bomb",
+       "Foul Play"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 1,
+    "lastWarning": "REMINDER (not blocking) — the branch you declared (Spore) is NOT the worst branch for that action. Worst is \"Foul Play\": Scizor takes 40-48% from Foul Play → 52-60% left  [their spread unassumed: 52-60% @0EV | 52-60% @252+ — see ev_note]  If you are deliberately betting against that branch, say so e",
+    "multMentions": 0,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "switch 3",
+    "declaredBranch": "Spore",
+    "declaredOutcome": "survives",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 3,
+    "targetName": "Scizor",
+    "worst": {
+     "pctMin": 8,
+     "pctMax": 10,
+     "ko": "not a 9HKO",
+     "move": "Energy Ball",
+     "acc": 100,
+     "error": null
+    },
+    "isSwitch": true
+   }
+  }
+ ]
+}

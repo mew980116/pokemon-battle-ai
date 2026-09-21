@@ -1,0 +1,1139 @@
+{
+ "fixture": "battle96-t1",
+ "arm": "G080",
+ "url": "http://127.0.0.1:8092",
+ "n": 10,
+ "when": "2026-09-21T14-09-13",
+ "summary": {
+  "byAction": {
+   "ATK(stay)": 6,
+   "SWITCH→Noivern": 3,
+   "SWITCH→Toxtricity": 1
+  },
+  "byVerdict": {
+   "RISKY": 6,
+   "SAFE": 4
+  },
+  "inboundTotal": 19,
+  "simCalls": 25,
+  "branchTotal": 122,
+  "strategyRejections": 0,
+  "gateRejections": 0,
+  "gateUnmet": 0,
+  "gateBypassed": 0,
+  "honestFaints": 1,
+  "behaviorHits": 1,
+  "accident": 0,
+  "nOk": 10
+ },
+ "samples": [
+  {
+   "i": 1,
+   "battleId": "G080-R1",
+   "ms": 13573,
+   "action": {
+    "type": "attack",
+    "attackSlot": 0
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Strange Steam\"} vs [\"Scald\",\"Hurricane\",\"Hydro Pump\",\"Roost\",\"Toxic\",\"switch1\"]"
+     }
+    ],
+    "inbound": [],
+    "outbound": [],
+    "strategy": {
+     "action": "move Strange Steam",
+     "branch": "Hydro Pump",
+     "outcome": "faints",
+     "text": "(1) ATTACK? Almost certainly attacks with Hydro Pump [estimated]. Likely 2/3 at most from full — but Pelipper might have switched in on Turn 1 under no prior info; it's a rain setter that primarily sets weather. Risky to assume it doesn't attack. If it does attack, worst case Hydro Pump: Weezing-Galar takes 87-103%, faints (possible); Scald: 64-75%; Hurricane: 58-68%. Best case it uses Roost/Toxic (0%).(2) SWITCH? Possible, but nothing revealed from its bench. It may bring something in to counter Weezing-Galar.(3) THEIR READ: They know Weezing-Galar (my lead, missed a Strange Steam on Turn 1). They've shown Pelipper. They know nothing else of my team. They will try to whittle my Weezing-Galar down with water/flying attacks. (4) MY OPTIONS: (a) Stay and Strange Steam — Weezing-Galar has decent HP, but Hydro Pump kills. If it faints, I get a free replacement, which is valuable (a fresh switch-in takes no hit). (b) Switch: e.g. Vespiquen (Bug/Flying) is neutral to Water but 2x weak to Flying; Noivern is 2x weak to nothing but frail to Hurricane; switching forfeits the turn and the switch-in eats the move. (c) My best line: Weezing-Galar is Poison/Fairy — neutral to Water and Flying. It's not a great pivot into Pelipper anyway. But since I can't cleanly KO it this turn, the play is to attack. If it dies, I get a free replacement at no cost. (5) MOST LIKELY: Pelipper uses Hydro Pump → Weezing-Galar likely faints (87-103%). If it uses Scald, Weezing survives at 25-36% and Pelipper is at 46-55% after Strange Steam. (6) SEQUENCE: I click Strange Steam → Pelipper likely clicks Hydro Pump → if Weezing faints, I get free replacement in end-of-turn. If Weezing survives, I take another hit next turn and likely faint. Either way, Weezing is on its way out; getting this shot in before it dies is the correct value. Not switching: switching forfeits the Strange Steam, and my switch-in would eat the same move anyway. So staying and attacking is strictly better.",
+     "scene": "Pelipper damaged to ~46-55% (if Strange Steam lands); Weezing-Galar at 0% (faints from Hydro Pump) OR 25-36% (if Scald/Hurricane). If Weezing faints, I choose a free replacement with no incoming hit. Rain still active.",
+     "checks": "[\"Check whether Pelipper's revealed move is Hydro Pump (proves 87-103% kill) vs Scald (proves 64-75% survival) — if Scald, I'm at 25-36% and must switch or sacrifice Weezing next.\",\"Check whether Weezing-Galar's Strange Steam lands and how much Pelipper takes: 45-54% confirms a Fairy special set; a wildly different number means an EV/eitem surprise.\"]"
+    },
+    "rounds": 9,
+    "ms": 13351,
+    "fallback": false,
+    "simCalls": 1,
+    "sims": [
+     {
+      "actionKey": "move Strange Steam",
+      "opp_does": [
+       "Scald",
+       "Hurricane",
+       "Hydro Pump",
+       "Roost",
+       "Toxic",
+       "switch 1"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 1,
+    "lastWarning": "WARNING (not blocking) — your `text` asserts a type-multiplier (Flying: \"kes no hit). (b) Switch: e.g. Vespiquen (Bug/Flying) is neutral to Wat\" | Poison: \"the move. (c) My best line: Weezing-Galar is Poison/Fairy — neutral to\" | Bug: \"n takes no hit). (b) Switch: e.g. Vespiquen (Bug/Flying) is neut",
+    "multMentions": 3,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "move Strange Steam",
+    "declaredBranch": "Hydro Pump",
+    "declaredOutcome": "faints",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "RISKY",
+    "targetSlot": 0,
+    "targetName": "Weezing-Galar",
+    "worst": {
+     "pctMin": 87,
+     "pctMax": 103,
+     "ko": "25% chance to OHKO",
+     "move": "Hydro Pump",
+     "acc": 80,
+     "error": null
+    },
+    "isSwitch": false
+   }
+  },
+  {
+   "i": 2,
+   "battleId": "G080-R2",
+   "ms": 45657,
+   "action": {
+    "type": "attack",
+    "attackSlot": 0
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Strange Steam\"} vs [\"Scald\",\"Hurricane\",\"Knock Off\",\"Roost\",\"U-turn\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":2} vs [\"Scald\",\"Hurricane\",\"Knock Off\",\"U-turn\",\"Roost\"]"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:2 -> opp : Wild Charge"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:2 -> opp : Shift Gear"
+     },
+     {
+      "side": "STATS",
+      "label": "Pelipper spe,Toxtricity spe,Toxtricity spe"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":2} vs [\"Hydro Pump\",\"Scald\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Strange Steam\"} vs [\"Scald\",\"Roost\",\"switch 1\"]"
+     }
+    ],
+    "inbound": [],
+    "outbound": [
+     "me:2 -> opp : Wild Charge",
+     "me:2 -> opp : Shift Gear"
+    ],
+    "strategy": {
+     "action": "move Strange Steam",
+     "branch": "Scald",
+     "outcome": "25-36%",
+     "text": "(1) ATTACK? Pelipper most likely attacks: Scald (100% acc, [proved] it did 64-75% to Weezing earlier calc) is the safe STAB; Hydro Pump (80% acc, 87-103% = possible OHKO) is possible but risky for them; Hurricane (100% in rain, 58-68%) also possible. I expect Scald. Confidence medium — Pelipper is a full SpA setter. (2) SWITCH? Possibly, rain is set; they may bring a Swift Swim sweeper, but Pelipper often stays to attack while rain is up. (3) THEIR READ OF ME — they know Weezing-Galar is my lead (Poison/Fairy, Levitate). They'll see it can't break them and may Roost or attack. (4) MY OPTIONS & THE COST OF SWITCHING — Weezing stays: survives all but a Hydro Pump high roll, outspeeds Pelipper (219 vs ~166), does 45-54% = 2HKO threat, and loses nothing if they switch. Switching to Toxtricity (4x Wild Charge OHKO next turn) is aggressive BUT eats 59-70% (Scald) or 81-96% (Hydro Pump) on entry and is a dead-weight matchup if Pelipper switches to a Swift Swim sweeper. Staying is the steadier line and keeps my wall healthy-ish. (5) MOST LIKELY ACTION + MY RESPONSE — Scald; I fire Strange Steam (45-54%), Weezing ends 25-36%, Pelipper 46-55%. Falsifier: if Pelipper is faster than Weezing or clicks Roost (then I need to reassess the exchange). (6) ACTION SEQUENCE — T2: I lead with Strange Steam again (Weezing faster) → Pelipper ~0-10%; Pelipper Scalds → Weezing 25-36% takes another 64-75% → Weezing may faint. Weezing likely trades for Pelipper or falls to Scald. VALUE: chipping the rain setter to near-death is worth it since Weezing has limited value vs a rain team.",
+     "scene": "Weezing-Galar ~25-36% vs Pelipper ~46-55%, rain up. If Pelipper Roosted it stays ~100% and I'm at 25-36% (bad). My Toxtricity (fresh) is the answer to Pelipper if it faints or I get a free switch.",
+     "checks": "[\"check T2 log: did Weezing move before Pelipper? If yes, Weezing is confirmed faster and can 2HKO; if Pelipper moved first, it may hold a Scarf/speed investment and my plan changes.\", \"check whether Pelipper uses Hydro Pump (its higher roll can OHKO Weezing) — if seen, treat Pelipper as a threat that can OHKO my current active.\", \"check what Pelipper's 2nd revealed move is — confirms its set (Scald vs Hydro Pump vs Hurricane) and whether Roost is carried (if it Roosts at low HP, my chip is wasted).\"]"
+    },
+    "rounds": 8,
+    "ms": 45395,
+    "fallback": false,
+    "simCalls": 4,
+    "sims": [
+     {
+      "actionKey": "move Strange Steam",
+      "opp_does": [
+       "Scald",
+       "Hurricane",
+       "Knock Off",
+       "Roost",
+       "U-turn"
+      ]
+     },
+     {
+      "actionKey": "switch 2",
+      "opp_does": [
+       "Scald",
+       "Hurricane",
+       "Knock Off",
+       "U-turn",
+       "Roost"
+      ]
+     },
+     {
+      "actionKey": "switch 2",
+      "opp_does": [
+       "Hydro Pump",
+       "Scald"
+      ]
+     },
+     {
+      "actionKey": "move Strange Steam",
+      "opp_does": [
+       "Scald",
+       "Roost",
+       "switch 1"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 0,
+    "lastWarning": null,
+    "multMentions": 0,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "move Strange Steam",
+    "declaredBranch": "Scald",
+    "declaredOutcome": "25-36%",
+    "behaviorHits": 1
+   },
+   "verdict": {
+    "verdict": "RISKY",
+    "targetSlot": 0,
+    "targetName": "Weezing-Galar",
+    "worst": {
+     "pctMin": 87,
+     "pctMax": 103,
+     "ko": "25% chance to OHKO",
+     "move": "Hydro Pump",
+     "acc": 80,
+     "error": null
+    },
+    "isSwitch": false
+   }
+  },
+  {
+   "i": 3,
+   "battleId": "G080-R3",
+   "ms": 19795,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 3
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Sludge Bomb\"} vs [\"Hurricane\",\"Scald\",\"Hydro Pump\",\"Roost\",\"U-turn\",\"Knock Off\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Strange Steam\"} vs [\"Hurricane\",\"Scald\",\"Hydro Pump\",\"Roost\"]"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:3 -> opp : Hurricane"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:4 -> opp : Thunderbolt"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":4} vs [\"Hydro Pump\",\"Scald\",\"Hurricane\",\"U-turn\",\"Knock Off\",\"Roost\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":3} vs [\"Hydro Pump\",\"Scald\",\"Hurricane\",\"Knock Off\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Sludge Bomb\"} vs [\"Hydro Pump\",\"Scald\",\"Hurricane\",\"Roost\"]"
+     }
+    ],
+    "inbound": [],
+    "outbound": [
+     "me:3 -> opp : Hurricane",
+     "me:4 -> opp : Thunderbolt"
+    ],
+    "strategy": {
+     "text": "(1) ATTACK? Pelipper almost certainly attacks. It set rain (Drizzle), so rain-boosted Water (Hydro Pump/Scald) is its strongest. Against Weezing it also has Hurricane. Most likely a Water move to remove my Fairy/Poison wall. Confidence moderate — it may also Roost on a predicted switch or U-turn.\n(2) SWITCH? Unlikely; it just came in and wants to attack.\n(3) THEIR READ: sees only Weezing-Galar, missed a Strange Steam. Will expect me to stay/attack, not switch to a faster Flying attacker.\n(4) MY OPTIONS: Staying with Weezing = Sludge Bomb 45-54% (no KO) while eating 87-103% Hydro Pump / 64-75% Scald → Weezing likely faints for free replacement. Switching to Rotom-Heat is BAD — it eats 99-162% (dies). Switching to Noivern: it takes only 24-53% from any Pelipper move and CANNOT be outrun-killed; next turn Noivern (345 Spe) outspeeds Pelipper and OHKOs with rain-100%-acc Specs Hurricane (~93-110%). This is the win line: kill the rain setter and break the archetype. Sacrifice cost is small, gain is a guaranteed kill. Confident because Noivern's survival margins are wide.\n(5) MOST LIKELY ACTION: Pelipper uses a Water move. My reply: switch Noivern in now, then Hurricane next turn. Falsifier: if Pelipper switches out as I switch, I still hold tempo with a fast attacker.\n(6) SEQUENCE: T2 I switch Noivern (eats the hit, survives). T3 Noivern outspeeds and Hurricanes for the KO. Then face its rain abuser.",
+     "scene": "Noivern in at ~50-75% HP, Pelipper at 100%, rain still up. My Weezing switched out safely at 100%. Next turn I Hurricane to KO Pelipper.",
+     "checks": "[\"Verify log shows Noivern took a Water/Flying hit and survived (confirms my switch-in margin). If it took far more, my 252+ SpA assumption was wrong.\",\"Check whether Pelipper stayed in or switched on the switch turn — if it switched, Hurricane hits whoever came in.\"]",
+     "action": "switch 3",
+     "branch": "Hydro Pump",
+     "outcome": "60-66%"
+    },
+    "rounds": 9,
+    "ms": 19574,
+    "fallback": false,
+    "simCalls": 5,
+    "sims": [
+     {
+      "actionKey": "move Sludge Bomb",
+      "opp_does": [
+       "Hurricane",
+       "Scald",
+       "Hydro Pump",
+       "Roost",
+       "U-turn",
+       "Knock Off"
+      ]
+     },
+     {
+      "actionKey": "move Strange Steam",
+      "opp_does": [
+       "Hurricane",
+       "Scald",
+       "Hydro Pump",
+       "Roost"
+      ]
+     },
+     {
+      "actionKey": "switch 4",
+      "opp_does": [
+       "Hydro Pump",
+       "Scald",
+       "Hurricane",
+       "U-turn",
+       "Knock Off",
+       "Roost"
+      ]
+     },
+     {
+      "actionKey": "switch 3",
+      "opp_does": [
+       "Hydro Pump",
+       "Scald",
+       "Hurricane",
+       "Knock Off"
+      ]
+     },
+     {
+      "actionKey": "move Sludge Bomb",
+      "opp_does": [
+       "Hydro Pump",
+       "Scald",
+       "Hurricane",
+       "Roost"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 1,
+    "lastWarning": "REMINDER (not blocking) — the branch you declared (Hydro Pump) is NOT the worst branch for that action. Worst is \"Hurricane\": Noivern takes 45-53% from Hurricane → 47-55% left  [their spread unassumed: 47-55% @0EV | 25-37% @252+ — see ev_note]  If you are deliberately betting against that branch, sa",
+    "multMentions": 0,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "switch 3",
+    "declaredBranch": "Hydro Pump",
+    "declaredOutcome": "60-66%",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 3,
+    "targetName": "Noivern",
+    "worst": {
+     "pctMin": 45,
+     "pctMax": 53,
+     "ko": "39.5% chance to 2HKO",
+     "move": "Hurricane",
+     "acc": 100,
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 4,
+   "battleId": "G080-R4",
+   "ms": 18505,
+   "action": {
+    "type": "attack",
+    "attackSlot": 0
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Strange Steam\"} vs [\"Scald\",\"Hurricane\",\"U-turn\",\"Roost\",\"Knock Off\",\"Defog\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":4} vs [\"Scald\",\"Hurricane\",\"U-turn\",\"Roost\",\"Knock Off\",\"Defog\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":2} vs [\"Scald\",\"Hurricane\",\"U-turn\",\"Roost\",\"Knock Off\",\"Defog\"]"
+     }
+    ],
+    "inbound": [],
+    "outbound": [],
+    "strategy": {
+     "text": "(1) ATTACK? Pelipper almost certainly attacks or sets support. Candidates: Scald (64-75% on Weezing), Hurricane (58-68%), U-turn (2%), Roost/Defog (status). Most likely Scald or Hurricane (its damage output), but Roost/U-turn plausible as a slow pivot. Confidence moderate — no moves revealed yet. (2) SWITCH? Pelipper unlikely to switch first turn it's active; it wants to pivot with U-turn later or set rain support. (3) THEIR READ OF ME — Weezing-Galar is Poison/Fairy, they know Levitate. They'll treat it as a bulky chip mon with Strange Steam; nothing forces them out. (4) MY OPTIONS & COST: Switching to Rotom-Heat = OHKO by Water (99-118% Scald / 137-162% Hydro) — unacceptable. Switch to Toxtricity = eats 59-70% Scald, bad. Weezing staying = takes 58-75% but survives (25-42%) and deals 45-54% back; keeps all frailer mons away from rain Water moves. Not clearly behind; steadier line = stay and attack. (5) MOST LIKELY ACTION + RESPONSE: Pelipper clicks Scald/Hurricane; I respond with Strange Steam. Falsifier: log shows a status move (Roost/Defog) or U-turn — meaning it's pivoting, still fine. (6) SEQUENCE: Weezing Strange Steam (95% acc) → Pelipper Scald/Hurricane → Weezing ~25-42% → next turn decide (likely sacrifice Weezing or pivot to a healthy mon as Pelipper's moves are known then).",
+     "scene": "Rain up. Weezing ~25-42% (or 100% if they Roost/Defog), Pelipper 46-55% (or healed if Roost). No hazards. Both healthy bench.",
+     "checks": "Verify Pelipper's actual move this turn from the log: Scald/Hurricane confirms offensive set + damage rolls; Roost/Defog confirms support pivot; U-turn confirms pivot (then see who switches in). Confirm whether Weezing survives at expected range (25-42%) — if much lower, Pelipper has a boosting item or is offensive EV'd. If a rain-abuser (Swift Swim) switches in, that reveals the team archetype.",
+     "action": "move Strange Steam",
+     "branch": "Scald",
+     "outcome": "25-36%"
+    },
+    "rounds": 7,
+    "ms": 18283,
+    "fallback": false,
+    "simCalls": 3,
+    "sims": [
+     {
+      "actionKey": "move Strange Steam",
+      "opp_does": [
+       "Scald",
+       "Hurricane",
+       "U-turn",
+       "Roost",
+       "Knock Off",
+       "Defog"
+      ]
+     },
+     {
+      "actionKey": "switch 4",
+      "opp_does": [
+       "Scald",
+       "Hurricane",
+       "U-turn",
+       "Roost",
+       "Knock Off",
+       "Defog"
+      ]
+     },
+     {
+      "actionKey": "switch 2",
+      "opp_does": [
+       "Scald",
+       "Hurricane",
+       "U-turn",
+       "Roost",
+       "Knock Off",
+       "Defog"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 0,
+    "lastWarning": null,
+    "multMentions": 0,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "move Strange Steam",
+    "declaredBranch": "Scald",
+    "declaredOutcome": "25-36%",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "RISKY",
+    "targetSlot": 0,
+    "targetName": "Weezing-Galar",
+    "worst": {
+     "pctMin": 87,
+     "pctMax": 103,
+     "ko": "25% chance to OHKO",
+     "move": "Hydro Pump",
+     "acc": 80,
+     "error": null
+    },
+    "isSwitch": false
+   }
+  },
+  {
+   "i": 5,
+   "battleId": "G080-R5",
+   "ms": 22092,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 3
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Strange Steam"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me : Scald"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me : Hurricane"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":4} vs [\"Scald\",\"Hurricane\",\"U-turn\",\"Knock Off\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Strange Steam\"} vs [\"Scald\",\"Hurricane\",\"U-turn\"]"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me:2 : Scald"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:2 -> opp : Wild Charge"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me:3 : Scald"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:3 -> opp : Hurricane"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":3} vs [\"Scald\",\"Hurricane\",\"U-turn\",\"Knock Off\",\"Roost\"]"
+     }
+    ],
+    "inbound": [
+     "opp -> me : Scald",
+     "opp -> me : Hurricane",
+     "opp -> me:2 : Scald",
+     "opp -> me:3 : Scald"
+    ],
+    "outbound": [
+     "me -> opp : Strange Steam",
+     "me:2 -> opp : Wild Charge",
+     "me:3 -> opp : Hurricane"
+    ],
+    "strategy": {
+     "text": "(1) ATTACK? Pelipper is a rain setter; likely to click a Water move (Scald, 100% acc, rain-boosted) or utility (Roost/U-turn/Defog). Confident it attacks Weezing if I stay — Scald does 64-75% to Weezing, so Weezing would faint next turn regardless.\n(2) SWITCH? Pelipper unlikely to switch; it just came in. If it U-turns it may bring in Claydol.\n(3) THEIR READ OF ME — they know Weezing-Galar (Poison/Fairy, used Strange Steam) + a switched-out lead. Rest of my team unrevealed.\n(4) MY OPTIONS & COST OF SWITCHING: Switching to Noivern costs the turn; Noivern eats the hit (Scald 24-29% — it RESISTS Water 0.5x; Hurricane 45-53% worst case) and survives every branch (>47%). GAIN: Noivern (345 Spe, faster than Pelipper's max 251) then OHKOs Pelipper with rain-boosted Hurricane (100% acc, 62.5% to OHKO vs 0EVD)... reliable KO removing their rain setter. Staying with Weezing costs 64-75% and Weezing dies next turn for only ~50% chip. Noivern switch is clearly superior.\n(5) MOST LIKELY ACTION: Pelipper clicks Scald (rain-boosted STAB) at Weezing. My reply: switch to Noivern (takes 24-29%). Falsifier: if it uses Hurricane instead, Noivern takes 45-53% but still survives.\n(6) SEQUENCE: I switch Noivern; Pelipper attacks (Scald 24-29%); next turn Noivern outspeeds and Hurricanes Pelipper for the KO (rain acc 100%).",
+     "scene": "Noivern active at ~71-76% (if Scald) vs Pelipper 100%; rain still up. Noivern Choice Specs-locked into whatever it uses next. Fainted: none. My bench: Weezing-Galar 100%, others full.",
+     "checks": "[\"If log shows Pelipper used Scald on switch-in: confirm ~24-29% to Noivern (Water resist confirmed).\", \"If Pelipper U-turned, check who it brought in (likely Claydol) and whether Noivern's Hurricane still KOs.\", \"Check Noivern outspeeds Pelipper next turn (it should, 345 vs max 251) — if it does not, Pelipper holds Choice Scarf.\"]",
+     "action": "switch 3",
+     "branch": "Scald",
+     "outcome": "71-76%"
+    },
+    "rounds": 9,
+    "ms": 21845,
+    "fallback": false,
+    "simCalls": 3,
+    "sims": [
+     {
+      "actionKey": "switch 4",
+      "opp_does": [
+       "Scald",
+       "Hurricane",
+       "U-turn",
+       "Knock Off"
+      ]
+     },
+     {
+      "actionKey": "move Strange Steam",
+      "opp_does": [
+       "Scald",
+       "Hurricane",
+       "U-turn"
+      ]
+     },
+     {
+      "actionKey": "switch 3",
+      "opp_does": [
+       "Scald",
+       "Hurricane",
+       "U-turn",
+       "Knock Off",
+       "Roost"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 1,
+    "lastWarning": "REMINDER (not blocking) — the branch you declared (Scald) is NOT the worst branch for that action. Worst is \"Hurricane\": Noivern takes 45-53% from Hurricane → 47-55% left  If you are deliberately betting against that branch, say so explicitly in `text` (which branch you are betting against, and what",
+    "multMentions": 1,
+    "assumeConflicts": [
+     "inconsistent assumptions for Pelipper within one turn: an earlier simulate_turn used {\"opp_spread\":\"252 HP / 4 SpD, Modest\"} (from switch 4), this one uses {\"opp_spread\":\"252 HP / 4 SpA Bold\"}. Options evaluated under different assumptions are not comparable — re-run them all with ONE shared assumption set."
+    ],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "switch 3",
+    "declaredBranch": "Scald",
+    "declaredOutcome": "71-76%",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 3,
+    "targetName": "Noivern",
+    "worst": {
+     "pctMin": 45,
+     "pctMax": 53,
+     "ko": "39.5% chance to 2HKO",
+     "move": "Hurricane",
+     "acc": 100,
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 6,
+   "battleId": "G080-R6",
+   "ms": 22231,
+   "action": {
+    "type": "attack",
+    "attackSlot": 3
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Sludge Bomb\"} vs [\"Scald\",\"Hurricane\",\"Knock Off\",\"Roost\",\"switch2\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":3} vs [\"Scald\",\"Hurricane\",\"Hydro Pump\",\"Knock Off\",\"Roost\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":2} vs [\"Scald\",\"Hurricane\",\"Hydro Pump\",\"Knock Off\",\"Roost\"]"
+     }
+    ],
+    "inbound": [],
+    "outbound": [],
+    "strategy": {
+     "text": "(1) ATTACK? Pelipper is a rain setter lead already revealed Drizzle (rain up). Likely moves vs Weezing: Scald (rain-boosted, burn chance) most likely, or Hurricane; Hydro Pump possible but less common. From sim: Scald deals 64-75% to me, Hurricane 58-68%, Hydro Pump 87-103% (possible OHKO, ~80% acc). I'm confident it attacks with a Water move (Scald) but cannot exclude a pivot (U-turn) or Roost. (2) SWITCH? Unlikely — Pelipper just set rain; it will either attack to chip/burn or pivot out. Its bench is unknown except Claydol. (3) THEIR READ: they know nothing of my set (Strange Steam missed). They see Galarian Weezing which is a defensive Fairy/Poison — they'll likely try to chip it with Scald for the burn. (4) MY OPTIONS: A) Sludge Bomb — survives Scald at 25-36%, deals 45-54%, 30% poison. B) switch to Noivern (takes 24-29% Scald / 45-53% Hurricane) but brings nothing offensively here (Choice Specs Noivern's best vs Pelipper is neutral). C) switch to Toxtricity (Wild Charge 4x) but eats 59-70% from Scald to become a near-sac. Staying with Weezing is the steadiest: it keeps my bulkiest mon on the field and it survives the common Scald. No option resists Water, so switching just hands a free hit. (5) MOST LIKELY: Pelipper Scalds. My response: Sludge Bomb, then reassess; falsifier = it pivots (U-turn) or Roosts. (6) Sequence: I Sludge Bomb (45-54%) → Pelipper Scald (I drop to 25-36%) → next turn I must decide whether Weezing can stay (likely no more) → I switch or trade. Danger: another Scald faints Weezing, so plan a pivot next turn.",
+     "scene": "Pelipper ~46-55% HP (if it stayed and ate Sludge Bomb), rain up. Weezing-Galar ~25-36% HP with Black Sludge. No hazards/screens. Pelipper likely revealed Scald/Hurricane.",
+     "checks": "[\"Check the log: if Pelipper used Scald, confirm Water move and its damage (~64-75%) — validates its offensive spread. If it used Hydro Pump, its set is more offensive than assumed.\",\"Check if Pelipper Roosted or U-turned instead of attacking — if Roost, it's a bulky pivot; if U-turn, expect a rain abuser to come in.\",\"Verify Weezing-Galar's remaining HP after the hit; if below ~30%, do NOT keep it in next turn — switch to a healthy mon.\"]",
+     "action": "move Sludge Bomb",
+     "branch": "Scald",
+     "outcome": "25-36%"
+    },
+    "rounds": 7,
+    "ms": 22126,
+    "fallback": false,
+    "simCalls": 3,
+    "sims": [
+     {
+      "actionKey": "move Sludge Bomb",
+      "opp_does": [
+       "Scald",
+       "Hurricane",
+       "Knock Off",
+       "Roost",
+       "switch 2"
+      ]
+     },
+     {
+      "actionKey": "switch 3",
+      "opp_does": [
+       "Scald",
+       "Hurricane",
+       "Hydro Pump",
+       "Knock Off",
+       "Roost"
+      ]
+     },
+     {
+      "actionKey": "switch 2",
+      "opp_does": [
+       "Scald",
+       "Hurricane",
+       "Hydro Pump",
+       "Knock Off",
+       "Roost"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 1,
+    "lastWarning": "WARNING (not blocking) — your `text` asserts a type-multiplier (Water: \"survives the common Scald. No option resists Water, so switching just \" | Ice: \"ane) but brings nothing offensively here (Choice Specs Noivern's best \") but you never called get_type_matchup this turn. Prose multipliers are a kn",
+    "multMentions": 2,
+    "assumeConflicts": [
+     "inconsistent assumptions for Pelipper within one turn: an earlier simulate_turn used {\"opp_spread\":\"252 HP / 252 Def Bold or similar\",\"opp_spread_off\":\"0 SpA neutral\"} (from move Sludge Bomb), this one uses {\"opp_spread\":\"252 HP / 0 SpA\",\"opp_spread_off\":\"0 SpA neutral\"}. Options evaluated under different assumptions are not comparable — re-run them all with ONE shared assumption set.",
+     "inconsistent assumptions for Pelipper within one turn: an earlier simulate_turn used {\"opp_spread\":\"252 HP / 252 Def Bold or similar\",\"opp_spread_off\":\"0 SpA neutral\"} (from move Sludge Bomb), this one uses {\"opp_spread\":\"252 HP / 252 Def Bold\",\"opp_spread_off\":\"0 SpA neutral\"}. Options evaluated under different assumptions are not comparable — re-run them all with ONE shared assumption set."
+    ],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "move Sludge Bomb",
+    "declaredBranch": "Scald",
+    "declaredOutcome": "25-36%",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "RISKY",
+    "targetSlot": 0,
+    "targetName": "Weezing-Galar",
+    "worst": {
+     "pctMin": 87,
+     "pctMax": 103,
+     "ko": "25% chance to OHKO",
+     "move": "Hydro Pump",
+     "acc": 80,
+     "error": null
+    },
+    "isSwitch": false
+   }
+  },
+  {
+   "i": 7,
+   "battleId": "G080-R7",
+   "ms": 17960,
+   "action": {
+    "type": "attack",
+    "attackSlot": 0
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Strange Steam\"} vs [\"Hurricane\",\"Scald\",\"Roost\",\"U-turn\",\"Knock Off\"]"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me:7 : Scald"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me:7 : Hurricane"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:7 -> opp : Thunderbolt"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me:4 : Scald"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me:4 : Hurricane"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:4 -> opp : Thunderbolt"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me:3 : Scald"
+     }
+    ],
+    "inbound": [
+     "opp -> me:7 : Scald",
+     "opp -> me:7 : Hurricane",
+     "opp -> me:4 : Scald",
+     "opp -> me:4 : Hurricane",
+     "opp -> me:3 : Scald"
+    ],
+    "outbound": [
+     "me:7 -> opp : Thunderbolt",
+     "me:4 -> opp : Thunderbolt"
+    ],
+    "strategy": {
+     "text": "(1) ATTACK? Pelipper likely attacks with a Water attack — Scald (very common on Pelipper) is the biggest threat; Hurricane also possible; Roost/U-turn/Knock Off are utility options. I lean it attacks with Scald or Roosts. Confidence moderate — it has used no move yet (missed turn was mine). (2) SWITCH? It just came in and set rain; unlikely to switch out immediately (it just gained rain value), but could U-turn out after attacking. (3) THEIR READ: They know I'm Weezing-Galar (Poison/Fairy, Levitate). They'll see me as a passive wall that can't beat Pelipper 1v1; my Strange Steam does ~50%. (4) MY OPTIONS: Staying with Strange Steam: Weezing survives ALL branches (worst 25-36% vs Scald, better against Hurricane/U-turn/Knock Off), deals 45-54% to Pelipper. Switching Rotom-Heat to Thunderbolt (4x OHKO) is tempting, but rain Scald OHKOs Rotom-Heat 141-167% — a blind switch into a Water attacker is a coin-flip on death, not worth it. Noivern switches safely (Scald 34-41%) but can't hit Pelipper super-effectively (Draco 1x). So staying is the steadier line. (5) MOST LIKELY: Pelipper Scalds me for ~64-75%, I take it and hit Strange Steam for ~50%. Falsifier: if it Roosts and I don't out-pace the healing, or if it U-turns into a rain sweeper. (6) SEQUENCE: I Strange Steam (~50% to Pelipper), it Scalds/Roosts. Next turn: Pelipper at ~50% or healed — I can pivot to Rotom-Heat once Pelipper is chipped/if rain threat handled, or keep chipping with Weezing. Do NOT switch Rotom-Heat in while Pelipper is healthy and rain is up.",
+     "scene": "Turn 3: Weezing-Galar at ~25-42% (rain), Pelipper at ~45-55% (rain). Rain still up. No hazards. Both alive.",
+     "checks": "Priority of overrides: (1) Verify what Pelipper actually used Turn 2 — if log shows Scald, Weezing HP should be ~25-36%; if Hurricane, ~32-42%; if Roost, Pelipper heals and Weezing stays 100%. (2) If Pelipper attacks with a Water move, confirm my read that it's the offensive Threat (Scald). (3) Check whether Pelipper U-turns into a Rain sweeper (Swift Swim) — that changes Weezing's value.",
+     "action": "move Strange Steam",
+     "branch": "Scald",
+     "outcome": "25-36%"
+    },
+    "rounds": 7,
+    "ms": 17819,
+    "fallback": false,
+    "simCalls": 1,
+    "sims": [
+     {
+      "actionKey": "move Strange Steam",
+      "opp_does": [
+       "Hurricane",
+       "Scald",
+       "Roost",
+       "U-turn",
+       "Knock Off"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 0,
+    "lastWarning": null,
+    "multMentions": 0,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "move Strange Steam",
+    "declaredBranch": "Scald",
+    "declaredOutcome": "25-36%",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "RISKY",
+    "targetSlot": 0,
+    "targetName": "Weezing-Galar",
+    "worst": {
+     "pctMin": 87,
+     "pctMax": 103,
+     "ko": "25% chance to OHKO",
+     "move": "Hydro Pump",
+     "acc": 80,
+     "error": null
+    },
+    "isSwitch": false
+   }
+  },
+  {
+   "i": 8,
+   "battleId": "G080-R8",
+   "ms": 47586,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 2
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Strange Steam\"} vs [\"Scald\",\"Hurricane\",\"Knock Off\",\"Roost\",\"U-turn\",\"switch 1\"]"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me : Scald"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me : Hurricane"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me : Knock Off"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":2} vs [\"Scald\",\"Hurricane\",\"U-turn\",\"Knock Off\",\"Roost\",\"switch 1\"]"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Sludge Bomb"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Strange Steam"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:2 -> Pelipper : Wild Charge"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:2 -> Pelipper : Drain Punch"
+     }
+    ],
+    "inbound": [
+     "opp -> me : Scald",
+     "opp -> me : Hurricane",
+     "opp -> me : Knock Off"
+    ],
+    "outbound": [
+     "me -> opp : Sludge Bomb",
+     "me -> opp : Strange Steam",
+     "me:2 -> Pelipper : Wild Charge",
+     "me:2 -> Pelipper : Drain Punch"
+    ],
+    "strategy": {
+     "action": "switch 2",
+     "branch": "Scald",
+     "outcome": "30-41%",
+     "text": "(1) ATTACK? Likely. Pelipper is a rain pivot now active with Drizzle triggered. Candidates: Scald (utility+STAB, 1.5x in rain), Hurricane (100% acc in rain), U-turn (pivot), Roost/Knock Off. Most likely Scald or U-turn; confidence moderate. (2) SWITCH? Possible but it just came in to set rain; it may pivot OUT via U-turn to a sweeper. (3) THEIR READ OF ME: Weezing-Galar revealed Stule... nothing revealed (Strange Steam missed, so they saw the move but no effect noticed). They'll treat Weezing as a bulky Fairy/Poison wall and may try to pivot to a rain abuser that beats it. (4) MY OPTIONS: Staying and attacking is a LOSING trade — Sludge Bomb/Strange Steam only does 37-44% to a 252 HP Pelipper (3HKO), while Scald does 64-75% back (2HKO), so I'd lose Weezing for ~80% chip. SWITCH to Toxtricity (slot 2): cost = forfeit turn + eats their move now. Toxtricity survives Scald (30-41% left worst case 0 SpA; ~3-18% vs unrealistic max SpA Pelipper), and its Wild Charge is a GUARANTEED OHKO on Pelipper (4x, 149-175%). Gain = forces Pelipper out or removes it next turn, preserving my Weezing. If Pelipper U-turns instead, Toxtricity takes only 6-8% and faces the incoming sweeper near-full while threatening 4x. (5) MOST LIKELY ACTION: Scald or U-turn; my reply is to bring Toxtricity in now. Falsifier: if Pelipper stays and Hydro Pumps (81-96% on Toxtricity) I'm in danger — but Hydro Pump on a defensive pivot is uncommon. (6) SEQUENCE: I switch Toxtricity in (eats move). Next turn Toxtricity Wild Charge → OHKO Pelipper (if it stays), or faces their pivot-in target. Watch for Scald burn (30%) halving Wild Charge, and Ground-types that punish Toxtricity.",
+     "scene": "Rain still up (5-turn). My Toxtricity at ~35-100% (depending on Pelipper's move), possibly burned. Opponent Pelipper either at ~100% (if it attacked) or ~50%+ (if U-turn hit Weezing's... no, U-turn chips Toxtricity 6-8%). Opponent may have a fresh rain sweeper in if Pelipper U-turned. No hazards yet.",
+     "checks": "Check the log: did Toxtricity take ~60-70% (Scald) or only ~7% (U-turn)? If Scald, confirm Toxtricity's HP is 30-41% and that rain is still up. Also verify Toxtricity outspeeds Pelipper next turn (does it move first with Wild Charge). Watch whether Toxtricity got burned by Scald - if so, its Wild Charge no longer OHKOs and plan must change. Also check for any hazard Pelipper's pivot or a teammate sets."
+    },
+    "rounds": 11,
+    "ms": 47390,
+    "fallback": false,
+    "simCalls": 2,
+    "sims": [
+     {
+      "actionKey": "move Strange Steam",
+      "opp_does": [
+       "Scald",
+       "Hurricane",
+       "Knock Off",
+       "Roost",
+       "U-turn",
+       "switch 1"
+      ]
+     },
+     {
+      "actionKey": "switch 2",
+      "opp_does": [
+       "Scald",
+       "Hurricane",
+       "U-turn",
+       "Knock Off",
+       "Roost",
+       "switch 1"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 0,
+    "lastWarning": null,
+    "multMentions": 0,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "switch 2",
+    "declaredBranch": "Scald",
+    "declaredOutcome": "30-41%",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 2,
+    "targetName": "Toxtricity",
+    "worst": {
+     "pctMin": 81,
+     "pctMax": 96,
+     "ko": "guaranteed 2HKO",
+     "move": "Hydro Pump",
+     "acc": 80,
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 9,
+   "battleId": "G080-R9",
+   "ms": 20440,
+   "action": {
+    "type": "attack",
+    "attackSlot": 3
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Sludge Bomb\"} vs [\"Hurricane\",\"Scald\",\"U-turn\",\"Roost\"]"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Thunderbolt"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me:4 : Scald"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me:4 : Hurricane"
+     }
+    ],
+    "inbound": [
+     "opp -> me:4 : Scald",
+     "opp -> me:4 : Hurricane"
+    ],
+    "outbound": [
+     "me -> opp : Thunderbolt"
+    ],
+    "strategy": {
+     "text": "(1) ATTACK? Pelipper is a rain support setter (Drizzle proved). Most likely it clicks Scald (64-75% on Weezing, up to 88-104% at 252+) or Hurricane (58-68%, up to 82-96%), or it U-turns out (2-4%) or Roosts. I lean Scald/Hurricane as it wants to chunk; U-turn/Roost also plausible as it just set rain and may pivot. Moderate confidence.\n(2) SWITCH? Possible — Pelipper often pivots with U-turn to bring in a Swift Swim sweeper, but it just set rain and Weezing is a slowish bulky target it may want to damage first. Rice.\n(3) THEIR READ OF ME — Weezing-Galar is a bulky Fairy/Poison wall; Pelipper will want it gone or pivot. They don't know my back team at all.\n(4) MY OPTIONS & COST — Switching Rotom-Heat in eats a rain Scald (~99-119%, near OHKO) — too risky. Noivern resists Water but can't OHKO Pelipper and gives up my Weezing's bulk. STAYING and firing Sludge Bomb (100% acc, 45-54%) chunks Pelipper to ~50%; if Weezing faints I get a FREE replacement (Rotom-Heat) that OHKOs the weakened Pelipper with Thunderbolt. This is the sacrifice-for-free-entry line the tips endorse.\n(5) MOST LIKELY ACTION + RESPONSE — Scald/Hurricane into Weezing; I click Sludge Bomb. Falsifier: if log shows Pelipper clicked U-turn/Roost, it pivoted or healed.\n(6) SEQUENCE — Weezing uses Sludge Bomb (Pelipper to ~50%), Pelipper hits Weezing (Weezing to ~25-36% or faints). If faints → free switch to Rotom-Heat → Thunderbolt OHKO. If survives → I decide next turn.",
+     "scene": "Weezing-Galar ~25-36% (or fainted) vs Pelipper ~46-55%, rain up. No hazards. If Weezing fainted, I have a free switch to Rotom-Heat (full HP) to revenge-kill with Thunderbolt.",
+     "checks": "[\"Check if Pelipper's move this turn was Scald/Hurricane (chunks Weezing) vs U-turn/Roost (pivot/heal) — reveals its role and movepool.\",\"Check whether Weezing survived (then I keep it, likely to sack or chunk again) or fainted (free Rotom-Heat entry).\",\"Verify Pelipper's item/ability — if a second mon sets rain it may hold Damp Rock; if Leftovers/Rain Dish appears, adjust.\"]",
+     "action": "move Sludge Bomb",
+     "branch": "Scald",
+     "outcome": "25-36%"
+    },
+    "rounds": 9,
+    "ms": 20275,
+    "fallback": false,
+    "simCalls": 1,
+    "sims": [
+     {
+      "actionKey": "move Sludge Bomb",
+      "opp_does": [
+       "Hurricane",
+       "Scald",
+       "U-turn",
+       "Roost"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 1,
+    "lastWarning": "WARNING (not blocking) — your `text` asserts a type-multiplier (Water: \"19%, near OHKO) — too risky. Noivern resists Water but can't OHKO Peli\") but you never called get_type_matchup this turn. Prose multipliers are a known hallucination source (e.g. \"Water is neutral to Fire/Electric\" when it is ac",
+    "multMentions": 1,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "move Sludge Bomb",
+    "declaredBranch": "Scald",
+    "declaredOutcome": "25-36%",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "RISKY",
+    "targetSlot": 0,
+    "targetName": "Weezing-Galar",
+    "worst": {
+     "pctMin": 87,
+     "pctMax": 103,
+     "ko": "25% chance to OHKO",
+     "move": "Hydro Pump",
+     "acc": 80,
+     "error": null
+    },
+    "isSwitch": false
+   }
+  },
+  {
+   "i": 10,
+   "battleId": "G080-R10",
+   "ms": 18570,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 3
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Strange Steam\"} vs [\"Hurricane\",\"Scald\",\"Hydro Pump\",\"Roost\",\"Hurricane\",\"switch1\"]"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:6 -> opp : Hurricane"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me:2 : Hurricane"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me:2 : Scald"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me:7 : Hydro Pump"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:3 -> opp : Hurricane"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:3 -> opp : Draco Meteor"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me:3 : Hurricane"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me:3 : Scald"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":3} vs [\"Hurricane\",\"Scald\",\"Hydro Pump\",\"Roost\",\"Knock Off\"]"
+     }
+    ],
+    "inbound": [
+     "opp -> me:2 : Hurricane",
+     "opp -> me:2 : Scald",
+     "opp -> me:7 : Hydro Pump",
+     "opp -> me:3 : Hurricane",
+     "opp -> me:3 : Scald"
+    ],
+    "outbound": [
+     "me:6 -> opp : Hurricane",
+     "me:3 -> opp : Hurricane",
+     "me:3 -> opp : Draco Meteor"
+    ],
+    "strategy": {
+     "text": "(1) ATTACK? Pelipper likely attacks: most likely Scald/Hurricane (~50% chance each of being the click), possibly Hydro Pump (KO threat on Weezing) or Knock Off/Tailwind/Roost. Confidence moderate — standard Pelipper support set.\n(2) SWITCH? No reason for Pelipper to switch; it wants to keep rain up.\n(3) THEIR READ OF ME — they've only seen Weezing (Strange Steam missed) and know I have 5 unknowns. They likely treat Weezing as a bulky support mon and press with a Water/Flying attack.\n(4) MY OPTIONS & COST: Staying with Weezing — Strange Steam deals 45-54%, no KO, and Hydro Pump (80% acc) KOs Weezing 87-103%. Bad. Switching to Noivern (slot 3): forfeit turn, Noivern eats a hit — worst case Hurricane 45-53% (leaves 47-55%), Scald 24-29%, Hydro Pump 34-40%; survives all. GAIN: Noivern outspeeds Pelipper (345 vs ≤251) and Choice Specs Draco Meteor GUARANTEED OHKOs Pelipper, removing the rain setter. Risk: Knock Off (16-19%) strips my Specs, weakening the follow-up KO — but even then ~222-262 still likely KOs. Confident in read; steadier than risking Weezing's death.\n(5) MOST LIKELY: Pelipper clicks Scald or Hurricane. My reply: switch Noivern in, survives, then OHKO with Draco Meteor/Hurricane. Falsifier: they KO Noivern (needs a crit Blizzard, unlikely) or strip Specs and I calc short.\n(6) SEQUENCE: I switch to Noivern → Pelipper attacks Noivern (survives) → my turn: Draco Meteor guaranteed OHKO on Pelipper.",
+     "scene": "Noivern on field at ~47-84% HP (Choice Specs intact unless Knock Off). Pelipper at 100%. Rain still up. My Weezing at 100%. No hazards either side.",
+     "checks": "[\"Check log: does Noivern move out first and does Draco Meteor KO Pelipper next turn (confirming Specs not knocked off)?\", \"Check whether Pelipper reveals Knock Off — if it did and stripped Specs, re-verify Draco Meteor still KOs vs Pelipper's actual HP.\", \"Check what move Pelipper clicks — a Water move confirms offensive set; Tailwind/Roost reveals support set.\"]",
+     "action": "switch 3",
+     "branch": "Hurricane",
+     "outcome": "47-55%"
+    },
+    "rounds": 11,
+    "ms": 18354,
+    "fallback": false,
+    "simCalls": 2,
+    "sims": [
+     {
+      "actionKey": "move Strange Steam",
+      "opp_does": [
+       "Hurricane",
+       "Scald",
+       "Hydro Pump",
+       "Roost",
+       "Hurricane",
+       "switch 1"
+      ]
+     },
+     {
+      "actionKey": "switch 3",
+      "opp_does": [
+       "Hurricane",
+       "Scald",
+       "Hydro Pump",
+       "Roost",
+       "Knock Off"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 0,
+    "lastWarning": null,
+    "multMentions": 0,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "switch 3",
+    "declaredBranch": "Hurricane",
+    "declaredOutcome": "47-55%",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 3,
+    "targetName": "Noivern",
+    "worst": {
+     "pctMin": 45,
+     "pctMax": 53,
+     "ko": "39.5% chance to 2HKO",
+     "move": "Hurricane",
+     "acc": 100,
+     "error": null
+    },
+    "isSwitch": true
+   }
+  }
+ ]
+}

@@ -1,0 +1,570 @@
+{
+ "fixture": "CTRL94-T2",
+ "arm": "G080",
+ "url": "http://127.0.0.1:8092",
+ "n": 5,
+ "when": "2026-09-21T14-10-19",
+ "summary": {
+  "byAction": {
+   "SWITCH→Rotom-Wash": 2,
+   "SWITCH→Jirachi": 2,
+   "ATK(stay)": 1
+  },
+  "byVerdict": {
+   "SAFE": 5
+  },
+  "inboundTotal": 4,
+  "simCalls": 12,
+  "branchTotal": 53,
+  "strategyRejections": 0,
+  "gateRejections": 0,
+  "gateUnmet": 0,
+  "gateBypassed": 0,
+  "honestFaints": 0,
+  "behaviorHits": 0,
+  "accident": 0,
+  "nOk": 5
+ },
+ "samples": [
+  {
+   "i": 1,
+   "battleId": "G080-R1",
+   "ms": 17956,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 4
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Psychic\"} vs [\"Scald\",\"Surf\",\"Toxic\",\"Recover\",\"Ice Beam\"]"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:4 -> opp : Volt Switch"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:3 -> opp : Strange Steam"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":4} vs [\"Scald\",\"Surf\",\"Toxic\",\"Recover\",\"Ice Beam\",\"Hydro Pump\"]"
+     }
+    ],
+    "inbound": [],
+    "outbound": [
+     "me:4 -> opp : Volt Switch",
+     "me:3 -> opp : Strange Steam"
+    ],
+    "strategy": {
+     "text": "(1) ATTACK? — Milotic will likely attack or status. Candidates: Scald (I resist), Surf, Ice Beam, or a status move (Toxic/Recover). Since I'm switching, none threaten me much — worst realistic is Hydro Pump 33-39% to Rotom-W with +SpA investment. Confidence medium; its set is unrevealed.\n(2) SWITCH? — Might Recover off any chip, or stay and attack.\n(3) THEIR READ OF ME — It saw Oranguru as an offensive Focus Blast user and switched Beartic out only by fainting; it now faces Oranguru and will likely try to wall/chip it (Recover + Toxic stall).\n(4) MY OPTIONS & THE COST OF SWITCHING — Switching to Rotom-Wash forfeits this turn and Rotom eats Milotic's move (17-28%, up to ~39% Hydro Pump), but Rotom resists Water and gains the good matchup: Volt Switch is SE STAB ~41-49% to force Milotic out/pivot. Staying with Oranguru Psychic only chips 23-28% vs a 125-SpD Recover wall — futile stall. The switch clearly gains a kill-forcing threat. Steadier than Oranguru-attacking because it converts a losing stall matchup into pressure.\n(5) MOST LIKELY ACTION + RESPONSE — Milotic uses Scald/Surf (~25-32% to Rotom-W). My response next turn: Volt Switch to chunk and pivot. Falsifier: if Milotic uses a boosting/phazing move or reveals a coverage I didn't expect, reassess.\n(6) ACTION SEQUENCE — Switch to Rotom-Wash, eat Scald/Surf (→ ~70-80%), then Volt Switch next turn dealing 41-49% while pivoting out.",
+     "scene": "Rotom-Wash on field ~72-83% HP, Milotic ~100% HP. No hazards/weather. Rotom-W is Choice Scarf locked (likely into Volt Switch after use). My bench: Oranguru 63%, Jirachi/Hitmonlee/Weezing/Primarina 100%.",
+     "checks": "[\"Check whether Milotic reveals item/ability (e.g. Leftovers heal, Marvel Scale on status, Competitive on a stat drop) — confirms/excludes ability candidates\",\"Check whether Milotic carries Recover or Toxic by whether it heals/statuses over the coming turns — determines if it's a stall wall I must out-pressure\",\"Check whether Rotom-Wash's Volt Switch does ~41-49% — confirms its SpA spread and my kill pressure\"]",
+     "action": "switch 4",
+     "branch": "Scald",
+     "outcome": "80-83%"
+    },
+    "rounds": 8,
+    "ms": 17815,
+    "fallback": false,
+    "simCalls": 2,
+    "sims": [
+     {
+      "actionKey": "move Psychic",
+      "opp_does": [
+       "Scald",
+       "Surf",
+       "Toxic",
+       "Recover",
+       "Ice Beam"
+      ]
+     },
+     {
+      "actionKey": "switch 4",
+      "opp_does": [
+       "Scald",
+       "Surf",
+       "Toxic",
+       "Recover",
+       "Ice Beam",
+       "Hydro Pump"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 1,
+    "lastWarning": "REMINDER (not blocking) — the branch you declared (Scald) is NOT the worst branch for that action. Worst is \"Hydro Pump\": Rotom-Wash takes 24-28% from Hydro Pump → 72-76% left  [their spread unassumed: 72-76% @0EV | 61-67% @252+ — see ev_note]  If you are deliberately betting against that branch, sa",
+    "multMentions": 2,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "switch 4",
+    "declaredBranch": "Scald",
+    "declaredOutcome": "80-83%",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 4,
+    "targetName": "Rotom-Wash",
+    "worst": {
+     "pctMin": 17,
+     "pctMax": 20,
+     "ko": "possible 5HKO",
+     "move": "Scald",
+     "acc": 100,
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 2,
+   "battleId": "G080-R2",
+   "ms": 19685,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 1
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Focus Blast"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Psychic"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Shadow Ball"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me : Scald"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me : Ice Beam"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:2 -> opp : High Jump Kick"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:2 -> opp : Knock Off"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":2} vs [\"Scald\",\"Ice Beam\",\"Recover\",\"Toxic\",\"switch1\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":1} vs [\"Scald\",\"Ice Beam\",\"Recover\",\"Toxic\",\"switch1\"]"
+     }
+    ],
+    "inbound": [
+     "opp -> me : Scald",
+     "opp -> me : Ice Beam"
+    ],
+    "outbound": [
+     "me -> opp : Focus Blast",
+     "me -> opp : Psychic",
+     "me -> opp : Shadow Ball",
+     "me:2 -> opp : High Jump Kick",
+     "me:2 -> opp : Knock Off"
+    ],
+    "strategy": {
+     "action": "switch 1",
+     "branch": "Scald",
+     "outcome": "69-74%",
+     "text": "(1) ATTACK? Milotic is a wall with no revealed moveset; most likely it clicks Scald (STAB, 100% acc, 2HKOs Oranguru). Ice Beam/Recover/Toxic all possible; expecting Scald, medium confidence.\n(2) SWITCH? Unlikely — Milotic just came in and walls my special Oranguru.\n(3) THEIR READ OF ME — they know Oranguru is a special attacker that OHKO'd Beartic with Focus Blast, so Milotic walls it. They may expect me to stay and chip or to switch.\n(4) MY OPTIONS & COST OF SWITCHING — Oranguru cannot beat Milotic (14-19%/hit, 6HKO) and dies to Scald in 2. Staying is a losing line. Switch to Jirachi: costs the turn, Jirachi eats Scald (26-31%, survives at ~70%), gains a Toxic-immune Steel pivot that can Stealth Rock/Thunder Wave. Alternative Hitmonlee is the real Milotic answer (HJK 2HKO) but Scald risks burn on a physical attacker, so bring it in later. No steadier line exists — staying loses Oranguru for nothing.\n(5) MOST LIKELY ACTION + MY RESPONSE — Milotic Scald → I switch Jirachi in, take ~26-31%. Falsified if Milotic Recover/Toxic/attacks Jirachi for more.\n(6) ACTION SEQUENCE — switch Jirachi in (eats Scald ~70% left), T5 I set Stealth Rock or Thunder Wave while Milotic Scalds again (Jirachi ~40-45% after two Scalds), then pivot to Hitmonlee to HJK the Milotic.",
+     "scene": "Jirachi on field at ~69-74% (or 89-91% if Ice Beam), Milotic 100%, no hazards, no boosts. Oranguru benched at 63%.",
+     "checks": "[\"Check T5 log: what move did Milotic use and for how much on Jirachi — if ~26-31% it is Scald (confirms Water attack, confirms Milotic set direction); if less, Ice Beam; if 0 with a message, Recover/Toxic/Haze.\", \"Check whether Milotic reveals Recover when damaged later — if it Recovers, my chip on it is wasted and I need Hitmonlee's HJK to out-race; if no Recover, attrition with Jirachi+Lee is fine.\", \"Check Milotic's ability trigger — if a stat-drop on me causes a SpA rise, Competitive [would be proved]; if no message on contact, exclude Cute Charm.\"]"
+    },
+    "rounds": 10,
+    "ms": 19542,
+    "fallback": false,
+    "simCalls": 2,
+    "sims": [
+     {
+      "actionKey": "switch 2",
+      "opp_does": [
+       "Scald",
+       "Ice Beam",
+       "Recover",
+       "Toxic",
+       "switch 1"
+      ]
+     },
+     {
+      "actionKey": "switch 1",
+      "opp_does": [
+       "Scald",
+       "Ice Beam",
+       "Recover",
+       "Toxic",
+       "switch 1"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 1,
+    "lastWarning": "WARNING (not blocking) — your `text` asserts a type-multiplier (Rock: \"a Toxic-immune Steel pivot that can Stealth Rock/Thunder Wave. Alterna\" | Steel: \"31%, survives at ~70%), gains a Toxic-immune Steel pivot that can Stea\") but you never called get_type_matchup this turn. Prose multipliers are a k",
+    "multMentions": 2,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "switch 1",
+    "declaredBranch": "Scald",
+    "declaredOutcome": "69-74%",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 1,
+    "targetName": "Jirachi",
+    "worst": {
+     "pctMin": 26,
+     "pctMax": 31,
+     "ko": "guaranteed 4HKO",
+     "move": "Scald",
+     "acc": 100,
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 3,
+   "battleId": "G080-R3",
+   "ms": 17007,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 1
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Psychic"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Shadow Ball"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Focus Blast"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":1} vs [\"Scald\",\"Ice Beam\",\"Toxic\",\"Recover\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Psychic\"} vs [\"Scald\",\"Ice Beam\",\"Toxic\",\"Recover\"]"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:1 -> opp : Iron Head"
+     }
+    ],
+    "inbound": [],
+    "outbound": [
+     "me -> opp : Psychic",
+     "me -> opp : Shadow Ball",
+     "me -> opp : Focus Blast",
+     "me:1 -> opp : Iron Head"
+    ],
+    "strategy": {
+     "text": "(1) ATTACK? Milotic is a special wall; it will likely attack (Scald 25-30% to Oranguru, or Ice Beam 19-22%) or use Toxic/Recover. Its offense is weak, so it may also set up or Toxic. Confident it targets Oranguru if I stay — Psychic only does 23-28% and it Recovers it back, a losing exchange.\\n(2) SWITCH? Milotic just came in full HP; unlikely to switch immediately.\\n(3) THEIR READ: sees only Oranguru (Normal/Psychic). Will expect me to attack or stay; may try Toxic.\\n(4) MY OPTIONS: Staying with Psychic = Oranguru ends 33-44%, Milotic only 23-28% and Recovers → pure loss to a Recover wall. Switching to Jirachi = it takes only 26-31% from Scald, 9-11% from Ice Beam, and is IMMUNE to Toxic (Steel). Cost: forfeit this turn, Jirachi eats one hit (survives comfortably with Leftovers). Gain: Jirachi hard-walls Milotic and enables Stealth Rock/Thunder Wave/U-turn progress. Steadier and higher-value than grinding with Oranguru. No entry hazards on my side.\\n(5) MOST LIKELY ACTION: Milotic uses Scald or Toxic. My reply: switch Jirachi in; it survives. Falsifier: if it uses Hydro Pump (35-42%), Jirachi still survives.\\n(6) SEQUENCE: T3 I switch Jirachi (eats ~26-31%). T4 Jirachi faces Milotic: I can set Stealth Rock or Thunder Wave, or Iron Head. Milotic can't break Jirachi quickly.",
+     "scene": "Jirachi in at ~69-91% HP (Leftovers), Milotic at 100%. No hazards, no weather. My Oranguru preserved at 63%.",
+     "checks": "[\"Check whether Milotic attacked with Scald/Ice Beam (confirms its offensive set) or revealed a status move (Toxic/Recover) — note which moves it exposes\",\"Verify Milotic's ability: if I later drop its stats and SpA rises, it's Competitive; if a contact move inflicts infatuation, Cute Charm; Marvel Scale otherwise\",\"Confirm Jirachi switched in cleanly (no entry hazards on my side)\"]",
+     "action": "switch 1",
+     "branch": "Scald",
+     "outcome": "69-74%"
+    },
+    "rounds": 9,
+    "ms": 16841,
+    "fallback": false,
+    "simCalls": 2,
+    "sims": [
+     {
+      "actionKey": "switch 1",
+      "opp_does": [
+       "Scald",
+       "Ice Beam",
+       "Toxic",
+       "Recover"
+      ]
+     },
+     {
+      "actionKey": "move Psychic",
+      "opp_does": [
+       "Scald",
+       "Ice Beam",
+       "Toxic",
+       "Recover"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 0,
+    "lastWarning": null,
+    "multMentions": 2,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "switch 1",
+    "declaredBranch": "Scald",
+    "declaredOutcome": "69-74%",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 1,
+    "targetName": "Jirachi",
+    "worst": {
+     "pctMin": 26,
+     "pctMax": 31,
+     "ko": "guaranteed 4HKO",
+     "move": "Scald",
+     "acc": 100,
+     "error": null
+    },
+    "isSwitch": true
+   }
+  },
+  {
+   "i": 4,
+   "battleId": "G080-R4",
+   "ms": 21139,
+   "action": {
+    "type": "attack",
+    "attackSlot": 0
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Psychic\"} vs [\"Scald\",\"Ice Beam\",\"Recover\",\"Toxic\",\"Dragon Dance\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":6} vs [\"Scald\",\"Ice Beam\",\"Toxic\",\"Dragon Dance\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":2} vs [\"Scald\",\"Ice Beam\",\"Toxic\",\"Recover\"]"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:2 -> opp : High Jump Kick"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me -> opp : Shadow Ball"
+     }
+    ],
+    "inbound": [],
+    "outbound": [
+     "me:2 -> opp : High Jump Kick",
+     "me -> opp : Shadow Ball"
+    ],
+    "strategy": {
+     "action": "move Psychic",
+     "branch": "Scald",
+     "outcome": "33-38%",
+     "text": "(1) ATTACK? — Milotic's set is unrevealed. Most likely it attacks with Scald (Water) for 25-30% on Oranguru, or uses a utility move (Recover/Toxic/Coil). I expect an attack or Recover; confident it is NOT a boosting sweep threat (Milotic's Atk is 60 base — Coil/DD sets stay weak). (2) SWITCH? — opponent unlikely to switch; Milotic at 100% is a fresh wall meant to answer my special attackers. Might switch if it fears Trick but I have not revealed it. (3) THEIR READ OF ME — Oranguru has shown Focus Blast (Fighting) that KO'd Beartic; they may expect a Fighting move again (irrelevant vs Milotic) or a switch to a breaker. They likely treat Oranguru as a slow special attacker they can wall. (4) MY OPTIONS & THE COST OF SWITCHING — switching Hitmonlee in forfeits the turn, Hitmonlee eats Scald (34-40%, up to 56%), and only THEN can it HJK for 75-88% — Milotic survives at ~15-25% and KOs Hitmonlee. Bad trade for a fresh Scarf revenge-killer. Weezing/Rotom-W also eat a hit for no immediate kill. Staying and attacking with Psychic is the steadiest line: chips Milotic 23-28% while Oranguru only takes 25-30% and has Leftovers. I am not behind; safest is to chip and reveal Milotic's set. (5) MOST LIKELY ACTION — Milotic uses Scald (or Recover/Toxic). My reply: Psychic, staying in. Falsifier: if Milotic shows Dragon Dance/Coil I must immediately reconsider (switch Hitmonlee or hit harder). (6) SEQUENCE — Oranguru Psychic chips Milotic to ~72-77%; Milotic Scald/Ice Beam/Recover. Next decision: keep chipping unless Milotic set up or revealed a threat (Toxic on Oranguru = time pressure).",
+     "scene": "Oranguru ~33-44% (Leftovers) vs Milotic ~72-80% after Psychic (or ~100% if Recover). No hazards. Milotic set partially revealed by its move.",
+     "checks": "Turn 5: check what Milotic actually used — Scald/Ice Beam confirms offensive-ish (with Recover needed), Recover confirms wall, Dragon Dance/Coil confirms setup threat (then switch Hitmonlee to force it out). Check whether Milotic is faster or slower than Oranguru (219 Spe) from move order. Check if Milotic reveals Toxic (time pressure on Oranguru)."
+    },
+    "rounds": 8,
+    "ms": 20923,
+    "fallback": false,
+    "simCalls": 3,
+    "sims": [
+     {
+      "actionKey": "move Psychic",
+      "opp_does": [
+       "Scald",
+       "Ice Beam",
+       "Recover",
+       "Toxic",
+       "Dragon Dance"
+      ]
+     },
+     {
+      "actionKey": "switch 2",
+      "opp_does": [
+       "Scald",
+       "Ice Beam",
+       "Toxic",
+       "Recover"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 0,
+    "lastWarning": null,
+    "multMentions": 0,
+    "assumeConflicts": [],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "move Psychic",
+    "declaredBranch": "Scald",
+    "declaredOutcome": "33-38%",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 0,
+    "targetName": "Oranguru",
+    "worst": {
+     "pctMin": 25,
+     "pctMax": 30,
+     "ko": "guaranteed 3HKO",
+     "move": "Scald",
+     "acc": 100,
+     "error": null
+    },
+    "isSwitch": false
+   }
+  },
+  {
+   "i": 5,
+   "battleId": "G080-R5",
+   "ms": 17704,
+   "action": {
+    "type": "switch",
+    "pokeSlot": 4
+   },
+   "err": null,
+   "proc": {
+    "calcs": [
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Psychic\"} vs [\"Scald\",\"Recover\",\"Toxic\",\"Dragon Dance\",\"Coil\",\"Ice Beam\"]"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"move\":\"Trick\"} vs [\"Scald\",\"Recover\",\"Toxic\",\"Dragon Dance\"]"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me:4 : Scald"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:4 -> opp : Volt Switch"
+     },
+     {
+      "side": "INBOUND",
+      "label": "opp -> me:5 : Scald"
+     },
+     {
+      "side": "OUTBOUND",
+      "label": "me:3 -> opp : Strange Steam"
+     },
+     {
+      "side": "SIM",
+      "label": "{\"switch\":4} vs [\"Scald\",\"Ice Beam\",\"Toxic\",\"Dragon Dance\",\"Recover\"]"
+     }
+    ],
+    "inbound": [
+     "opp -> me:4 : Scald",
+     "opp -> me:5 : Scald"
+    ],
+    "outbound": [
+     "me:4 -> opp : Volt Switch",
+     "me:3 -> opp : Strange Steam"
+    ],
+    "strategy": {
+     "text": "(1) ATTACK? Milotic likely attacks or stays passive. Candidates: Scald (Water STAB, 100% acc, burn chance), Ice Beam, or utility (Recover/Toxic/Dragon Dance). It has no revealed moves yet — treat Scald as most likely but Recover/Coil/Dragon Dance possible. Confidence low (set unknown). (2) SWITCH? Unlikely — Milotic just came in on my kill. (3) THEIR READ: sees Oranguru (slow special wall) at 63%; Milotic happily walls Psychic (23-28%). (4) MY OPTIONS & COST: Oranguru cannot break Milotic — Psychic is a 4-5HKO and Recover out-heals it, while Scald grinds Oranguru down. Oranguru already killed Beartic; its job is done. Switching to Rotom-Wash costs the turn but Rotom resists Scald (17-20%) and Ice Beam (13-15%) with worst-case Modest 252 SpA Milotic — survives at 80-87% — and gains a super-effective Volt Switch (41-49%, guaranteed 3HKO) that pivots. No hazard on my side. This is the steadiest line: minimal risk, real offensive gain (Rotom threatens a 3HKO that no other mon does). (5) MOST LIKELY ACTION: Milotic clicks Scald at Oranguru. My reply: switch Rotom-Wash, takes 17-20%. Falsifier: if Milotic sets up (Coil/Dragon Dance) I need to re-evaluate — but Rotom still handles it fine. (6) SEQUENCE: I switch Rotom-Wash; Milotic acts (Scald 17-20% / Ice Beam 13-15% / setup). Next turn Rotom Volt Switches for ~41-49% (pivots out) or Hydro Pump.",
+     "scene": "Rotom-Wash active at ~80-87% vs Milotic 100%. No hazards either side. Oranguru benched at 63%. Milotic's item/ability still unknown.",
+     "checks": "[\"Check what move Milotic uses T3 — if Scald, confirm Rotom takes ~17-20% (Water resist confirmed); if it reveals Ice Beam ~13-15%.\", \"Check if Milotic has Recover/Coil/Dragon Dance by its behaviour (healing or boosting).\", \"Confirm Rotom-Wash's Volt Switch deals ~41-49% to Milotic next turn (validates 252 SpA assumption).\"]",
+     "action": "switch 4",
+     "branch": "Scald",
+     "outcome": "80-83%"
+    },
+    "rounds": 9,
+    "ms": 17520,
+    "fallback": false,
+    "simCalls": 3,
+    "sims": [
+     {
+      "actionKey": "move Psychic",
+      "opp_does": [
+       "Scald",
+       "Recover",
+       "Toxic",
+       "Dragon Dance",
+       "Coil",
+       "Ice Beam"
+      ]
+     },
+     {
+      "actionKey": "move Trick",
+      "opp_does": [
+       "Scald",
+       "Recover",
+       "Toxic",
+       "Dragon Dance"
+      ]
+     },
+     {
+      "actionKey": "switch 4",
+      "opp_does": [
+       "Scald",
+       "Ice Beam",
+       "Toxic",
+       "Dragon Dance",
+       "Recover"
+      ]
+     }
+    ],
+    "strategyRejections": 0,
+    "warningCount": 1,
+    "lastWarning": "WARNING (not blocking) — your `text` asserts a type-multiplier (Ice: \"he turn but Rotom resists Scald (17-20%) and Ice Beam (13-15%) with wo\") but you never called get_type_matchup this turn. Prose multipliers are a known hallucination source (e.g. \"Water is neutral to Fire/Electric\" when it is actu",
+    "multMentions": 1,
+    "assumeConflicts": [
+     "inconsistent assumptions for Milotic within one turn: an earlier simulate_turn used {\"opp_spread\":\"252 HP / 252 Def Bold\"} (from move Psychic), this one uses {\"opp_spread_off\":\"Modest 252 SpA\"}. Options evaluated under different assumptions are not comparable — re-run them all with ONE shared assumption set."
+    ],
+    "gateUnmet": false,
+    "gateBypassed": false,
+    "gateRejections": 0,
+    "declaredAction": "switch 4",
+    "declaredBranch": "Scald",
+    "declaredOutcome": "80-83%",
+    "behaviorHits": 0
+   },
+   "verdict": {
+    "verdict": "SAFE",
+    "targetSlot": 4,
+    "targetName": "Rotom-Wash",
+    "worst": {
+     "pctMin": 17,
+     "pctMax": 20,
+     "ko": "possible 5HKO",
+     "move": "Scald",
+     "acc": 100,
+     "error": null
+    },
+    "isSwitch": true
+   }
+  }
+ ]
+}
