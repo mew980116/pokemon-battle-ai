@@ -131,7 +131,12 @@
     [PKLMP] move=70/0 spot=ME foe=OPP type=0 other=15(item:Leftovers) q=0 m=Darkest Lariat | T=%s knocked off %f's %i! | R=Snorlax knocked off the foe's Leftovers!
     ```
     `T`=命中的模板原文（`(NO TEMPLATE)` = 表里没这条）、`R`=我们渲染出的文本（`(null)` = 没渲染）、`other=..(..)` 把该数字同时按 道具/招式/特性 解码（帮助判 `other` 语义）。**PO 自己那行战报就在相邻行** → 逐行对照即可判定每个占位符是谁、方向对不对、哪些消息我们根本没渲染。开关 `/llm probe`（默认 ON），走 `pklmPrint` 所以静默账号不出。
-  - **贴回来之后的动作**：按对照结果勾掉上面「待实测」三项 + 占位符表里 ⚠️/❌ 的行（`%ts`/`%tf`/`%q`/`%p`/`%e`），并把「`(NO TEMPLATE)`/`(null)`」暴露出来的消息号补进 message 表或明确标注为「不渲染」（预期：不会有大错，最多是主脚本 case 107 那条笔误）。
+  - **[ ] 🔴 待做：特性「被复制 / 被改」的链条没有分开建模（用户 2026-09-21 追问「trace 复制了对手特性、触发的又是复制过的特性、然后下场再上场，整个过程你怎么解析、会记成什么状态」）**。现状是**一个槽位 `pklmOppAbility[slot]` 被反复覆盖**，含义在链条中不断变化，于是三种错法：
+    - **① 复制到手的那条特性被丢掉**：Trace 触发是 ability msg **66** `%s traced %f's %a!`，`%a` ← `other` = **被复制到的特性 id**。我们的 `pklmAnalyseAbility(66) → 36(Trace)`，于是 `abilityInferred = "Trace"`，而 `other`（真正当场的特性）**只在 turnLog 文本里活着、没进 state**。
+    - **② 复制到的特性若有消息会覆盖、若无消息就停在 Trace**：复制到威吓 → msg 34 → 覆盖成 `Intimidate`（此刻正确，但"它本来是 Trace"丢了）；复制到**无消息特性**（Levitate/Magic Guard/Multiscale…`has_msg:false`）→ 没有任何后续消息 → state **永远停在 "Trace"**，而它此刻实际持有的是 Levitate —— 对「地面招能不能打 / 伤害要不要减半」的判断是**错的**（而且 prompt 用的是 `Ability:Trace` 这种**已证实**的口吻）。
+    - **③ 下场再上场不自清**：`pklmOppSwap` **复用同一个记录槽**，而 `onSendOut(opp)` **不清 `pklmOppAbility[slot]`** → 上一段在场时记的值会残留（靠 Trace 与新特性的消息自愈，遇到无消息特性就自愈不了）。
+    - **建议修法**：把「**种族特性**」与「**当前生效特性**」拆成两个字段（`abilityInferred` / `abilityCurrent`），msg 66 的 `other` 写进 current、Trace 本身写进 species；`onSendOut(opp)` 时把 current 清空（species 保留）；prompt 写成 `Ability:Trace (species; currently copied: Levitate)`，`from_state` 用 **current**（机制相关）。同族还要一起处理：**47 Mummy**（`%s's ability became Mummy!`）、**161 Wandering Spirit**（`%s's Wandering Spirit swapped Abilities with %f!`，我们**没有这个 case**）、**143 Receiver**（`%f's %a was taken over by %s!`，`%a`=继承来的特性）、**move 112 Skill Swap / 108 Role Play / 143 / 158**（主脚本用 `tempability` 表达）。
+    - **我方侧**：`ItemProved` 那套对我方**特性**不存在，因为我们直读 `tp.ability`（PO 会不会在木乃伊/特性交换后更新这个字段 = **未验证**，值得进 probe）。
 
 - [ ] 🔴 **`simulate_turn` 不建模「入场特性」→ 会把某条线的全部价值漏算掉（2026-09-21 battle99 T19 实测）**：
   - **现场**：Sandaconda 倒下要补位，对手 Barraskewda 100%（408 速物理水系），我方剩 Escavalier 11% / Ninetales 59% / Slurpuff 72%。工具算 `Liquidation → Ninetales = 100-118% guaranteed OHKO`，于是 LLM 判"换 Ninetales 就是白送"、否掉了「换九尾开晴天」这条线，改选 Slurpuff（吃 42-49%）。

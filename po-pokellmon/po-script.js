@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8092";
-var PKLM_VERSION = "0.6.20";      // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.6.21";      // 脚本版本（改动时 bump，随日志记录）
 var pklmLastWebFailTime = 0;       // 上次 webCall 失败时间戳（ms），用于断线时节流重发
 var pklmSilent = false;            // 静默模式：清分少女等无人值守 BOT 账号不向 PO 窗口 print 任何脚本输出
 var pklmFailCount = 0;             // 连续 webCall 失败次数（成功即归零）
@@ -192,7 +192,7 @@ function pklmAnalyseAbility(ab, part, other, type) {
         case 38: ability = other; break;
         case 40: ability = other; break;
         case 41: ability = 78; break;
-        case 44: ability = 22; break;
+        case 44: ability = 20; break;   // Own Tempo 我行我素（模板自证 `%s's Own Tempo cures its confusion!`；原移植值 22=Intimidate 是错的，已由 test-ability-table.js 抓出）
         case 45: ability = 90; break;
         case 46: ability = 46; break;
         case 47: ability = 152; break;
@@ -201,7 +201,7 @@ function pklmAnalyseAbility(ab, part, other, type) {
         case 55: ability = 112; break;
         case 56: ability = 94; break;
         case 57: ability = 43; break;
-        case 58: ability = 3; break;
+        case 58: ability = [3, 154][part]; break;   // 加速 Speed Boost / 正义之心 Justified（同一条消息的两个变体是**不同特性**）
         case 60: ability = 80; break;
         case 61: ability = 28; break;
         case 66: ability = 36; break;
@@ -231,7 +231,7 @@ function pklmAnalyseAbility(ab, part, other, type) {
         case 104: ability = other; break;
         case 107: ability = 175; break;
         case 110: ability = 177; break;
-        case 112: ability = 179; break;
+        case 112: ability = [179, 184][part]; break; // 香甜气息 Sweet Veil / 芳香气息 Aroma Veil（同一条消息两个变体是不同特性；模板用「气息」指代，审计脚本抓不到）
         case 115: ability = 183; break;
         case 117: ability = 166; break;
         case 118: ability = 185; break;
@@ -243,7 +243,7 @@ function pklmAnalyseAbility(ab, part, other, type) {
         case 127: ability = 194; break;
         case 128: ability = [198, 219, 220, 218][part]; break;
         case 129: ability = 199; break;
-        case 133: ability = 205; break;
+        case 133: ability = 205; break;  // ⚠ 死条目：消息 133 在 po-data 的英/中两张 ability_messages 表里都不存在 → 永远不会命中（保留以防 PO 版本差异，别当成已覆盖）
         case 138: ability = 203; break;
         case 139: ability = 210; break;
         case 140: ability = 208; break;
