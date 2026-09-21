@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8092";
-var PKLM_VERSION = "0.6.25";      // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.6.26";      // 脚本版本（改动时 bump，随日志记录）
 var pklmLastWebFailTime = 0;       // 上次 webCall 失败时间戳（ms），用于断线时节流重发
 var pklmSilent = false;            // 静默模式：清分少女等无人值守 BOT 账号不向 PO 窗口 print 任何脚本输出
 var pklmFailCount = 0;             // 连续 webCall 失败次数（成功即归零）
@@ -1197,13 +1197,28 @@ function pklmLogLine(txt) {
 // 「PO 自己去 8092 拉仓库里的 po-script.js 并切过去」，**不用剪贴板、不用重启 PO**。
 // 这样每次改完脚本只要新开一局（或手动 `/llm update now`）就会自动生效。
 //
-// 安全/防呆（自我替换属于敏感操作，所以做了几道护栏）：
+// 护栏（自我替换属敏感操作，所以做了几道护栏）：
 //   ① 只认 `127.0.0.1:8092`（我们的本地服务，且服务本身只绑 loopback）；
 //   ② 下载内容必须**含 `PKLM_VERSION` 且长度 > 20KB**，否则不落盘（避免把错误页/半截响应写成脚本）；
-//   ③ 版本号相同就什么都不做（不会来回切）；
-//   ④ 默认 **OFF** —— 要开：`/llm update`；只开一次：`/llm update now`。
-var PKLM_AUTOUPDATE = false;
+//   ③ **只升不降**：服务端版本必须**大于**当前版本才切（避免仓库忘了 bump 时被反向降级）；
+//   ④ **默认 ON**（贴一次就永久自动）；关掉：`/llm update`；立刻检查一次：`/llm update now`；
+//   ⑤ 触发点 = **对局结束时**（onBattleEnd），不在局中打断。
+var PKLM_AUTOUPDATE = true;
 var PKLM_UPDATE_BASE = 'http://127.0.0.1:8092';
+
+// 版本比较：a>b 返回 1；按 `.` 分段数值比（0.6.26 > 0.6.9）
+function pklmVerCmp(a, b) {
+    var A = String(a).split('.'), B = String(b).split('.');
+    var n = Math.max(A.length, B.length);
+    for (var i = 0; i < n; i++) {
+        var x = Number(A[i] || 0), y = Number(B[i] || 0);
+        if (isNaN(x)) x = 0;
+        if (isNaN(y)) y = 0;
+        if (x > y) return 1;
+        if (x < y) return -1;
+    }
+    return 0;
+}
 
 function pklmAutoUpdate(force) {
     if (!PKLM_AUTOUPDATE && !force) return;
@@ -1212,7 +1227,7 @@ function pklmAutoUpdate(force) {
         if (v === undefined || v === null) { pklmPrint("autoupdate: /pklm/version 无响应（8092 在跑吗？）"); return; }
         v = String(v).replace(/[\s\r\n]/g, '');
         if (!v) { pklmPrint("autoupdate: 服务端读不到 PKLM_VERSION"); return; }
-        if (v === PKLM_VERSION) { pklmPrint("autoupdate: 已是最新 " + v); return; }
+        if (pklmVerCmp(v, PKLM_VERSION) <= 0) { pklmPrint("autoupdate: 无需更新（当前 " + PKLM_VERSION + "，服务端 " + v + "）"); return; }
         var body = sys.synchronousWebCall(PKLM_UPDATE_BASE + '/pklm/po-script.js');
         if (!body || String(body).length < 20000 || String(body).indexOf('PKLM_VERSION') < 0) {
             pklmPrint("autoupdate: 拉到的内容可疑（长度/内容不对），放弃"); return;
@@ -1388,6 +1403,7 @@ try {
         pklmDecideAndAct();
     },
     onBattleEnd: function (result, winner) {
+        pklmAutoUpdate();   // 自更新：对局结束是干净的时机（默认 ON，只升不降；`/llm update` 可关）
         battleEnd = true;
         // 对战结束：通知 server 追加 LLM 笔记汇总到 log 末尾（fire-and-forget，404 也无妨）
         try {
@@ -1631,7 +1647,6 @@ try {
         } catch (e) {}
     },
     onTierNotification: function (tier) {
-        pklmAutoUpdate();      // 自更新：默认 OFF，`/llm update` 打开（开战时检查一次，已是最新则什么都不做）
         pklmAutoEnable();
         pklmCheckMsgFiles();   // 对战启动扫描消息表文件依赖，缺失则提示
         pklmProbeReset();      // 每局清空 probe 落盘文件（写一行带版本/局号的表头）
