@@ -91,6 +91,11 @@
 - **DeepSeek 请求必须压「硬墙钟」超时（0.6.1，真 bug）**：原来只有 `req.setTimeout(TIMEOUT_MS)`——那是**空闲超时**（socket idle），连接上只要有零星保活/分块流量就**永远不触发**。
   - 实测（2026-09-20 battle98 T11）：`api.deepseek.com`（117.185.125.154）的连接从 23:42:00 建起到 23:51:24 **仍 Established（564s）**，240s 空闲超时没掐，PO 侧 `sys.synchronousWebCall` 一直阻塞，面板停在「实时 503s 思考中…」。
   - 现在另加一个 `setTimeout` 硬墙钟 deadline（同一时长，`done()` 保证 cb 只回调一次、`res.on('error')` 也接住）。PO 侧兜底：**单次失败→`pklmFallbackAttack()`**，连续 3 次且跨度 >15s 才会认输。
+- **回复手段识别补漏：`Pain Split` 归入 `healing` 分类（tool 0.8.4）**
+  - 起因（用户问 battle111 里「他的配置里有哪些有回复招式的」）：`get_pokemon_info` 的 `notable_status_moves.healing` 靠 `moves.json` 的 `desc` 正则（`recovers|restores|heals` + `user`）分类，而 **Pain Split 的 desc 是「把双方 HP 加总后平分」→ 抓不到** ⇒ 洗衣机的回复手段只列出 `Rest`（对所有物种都成立，等于没有信号），漏掉了真正相关的 `Pain Split`。
+  - 为什么这条要紧：battle111 T2 我们「垫伤害到半血 → 吃死水炮 → 拿免费替补收残血」的计划**正建立在「它不能回血」上**；而洗衣机当时是**剩饭已暴露 + 会 Pain Split**（模型自己在候选招里写了 Pain Split，是**我们这边**的工具漏了）。
+  - 修：`roleOfStatusMoves` 的 healing 分支加一条显式名（`^pain split$`），并在注释里写明理由。实测：`Rotom-Wash → ["Rest","Pain Split"]`、`Tapu Fini → ["Rest","Aqua Ring"]`、`Excadrill → ["Rest"]`、`Clefable → [Soft-Boiled, Rest, Moonlight, Wish, Healing Wish, Life Dew]`、`Jirachi → [Rest, Wish, Healing Wish, Life Dew]`、`Zapdos → [Rest, Roost]`。
+  - 回归：`test-species-alias.js` 18/18、`test-sim-gate.js` 100/0、`test-calc-compare.js` 全组不变。
 - **PO 物种名 → PS/计算器名：常见形态别名表 + 两级回退（tool 0.8.3）**
   - 起因（battle111 T2 实测）：`simulate_turn { i_do: { switch: 5 } }` 换入 `Magearna-Original` 时整行 `mine: null` —— 报错 `incoming damage could not be computed (unknown pokemon: Magearna-Original …)`。候补的承伤数直接缺失 ⇒ 模型**少一个候选的成本数**。battle108 的 `Zarude-Aba`（我们自己的萨戮德整场无伤害数据）同源。
   - **全库审计**（`knowledge/pokemon.json` 1002 条 `name_en`）实测 **21 个**计算器认不出：`Aegislash`（PS 无裸名 → `Aegislash-Shield`）、`Alcremie-*` 8 种奶油（→ `Alcremie`）、`Blacephelon`（PO 拼写 → `Blacephalon`）、`Greninja-Unbonded`（→ `Greninja`）、`Meowstic-M`（→ `Meowstic`）、`Minior-*` 7 色（→ `Minior`）、`Zarude-Aba`（→ `Zarude`）、`Missingno`（**故意不映射**：不是真实物种）。

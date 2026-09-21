@@ -3483,7 +3483,10 @@ function classifyStatusMoves(list) {
         var d = String(m.desc || '');
         if (/raises the user.s (attack|defense|special attack|special defense|speed|accuracy|evasion)/i.test(d)) { if (roles.self_setup.length < CAP) roles.self_setup.push(m.name); }
         else if (/as they switch in|switch in for/i.test(d)) { if (roles.hazards.length < CAP) roles.hazards.push(m.name); }
-        else if (/recovers|restores|heals/i.test(d) && /user/i.test(d)) { if (roles.healing.length < CAP) roles.healing.push(m.name); }
+        // Pain Split 的 desc 是「把双方 HP 加总后平分」，不含 recovers/restores/heals → 正则抓不到；
+        // 但它是不折不扣的**抵消消耗**手段（battle111 T2 的洗衣机：剩饭 + 会 Pain Split，而我们「垫伤害到半血」
+        // 的计划正建立在"它不能回血"上）→ 单独列出。
+        else if ((/recovers|restores|heals/i.test(d) && /user/i.test(d)) || /^pain split$/i.test(String(m.name))) { if (roles.healing.length < CAP) roles.healing.push(m.name); }
         else if (/resets all stat stages|prevent(ed|s)?\b.{0,24}from using|reduces the target/i.test(d)) { if (roles.blocking.length < CAP) roles.blocking.push(m.name); }
         else if (/(badly poisons|poisons|burns|paralyses|paralyzes|freezes|puts the target to sleep)/i.test(d)) { if (roles.status_inflict.length < CAP) roles.status_inflict.push(m.name); }
     }
