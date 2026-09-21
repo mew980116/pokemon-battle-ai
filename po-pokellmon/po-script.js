@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8092";
-var PKLM_VERSION = "0.6.31";      // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.6.32";      // 脚本版本（改动时 bump，随日志记录）
 var pklmLastWebFailTime = 0;       // 上次 webCall 失败时间戳（ms），用于断线时节流重发
 var pklmSilent = false;            // 静默模式：清分少女等无人值守 BOT 账号不向 PO 窗口 print 任何脚本输出
 var pklmFailCount = 0;             // 连续 webCall 失败次数（成功即归零）
@@ -1691,6 +1691,11 @@ try {
         pklmOppAbilityTriggered = false;
         pklmOppSeen = [];
         pklmMyRevealed = [];
+        // 开战自更新（0.6.32）：把「检查版本 + 热更」也放到开战回调 —— 这样**跨版本的第一局就不用再赔一局**
+        // （旧版只在 onBattleEnd 检查，结果是"我提交完，你必须先打完一局旧版才会升"）。
+        // 前提：`changeBattleScript` 的参数是**脚本源码**（0.6.31 修）。若热更就在本局开战这一刻发生，
+        // 新实例的 `useLLM` 默认 false 且不会再收到 onTierNotification → 靠 onBeginTurn 里的 `pklmAutoEnable()` 兜底。
+        pklmAutoUpdate();
     },
     onClauseActivated: function (clause) {},
     onEffectiveness: function (spot, effectiveness) {
