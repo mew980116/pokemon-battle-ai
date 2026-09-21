@@ -91,6 +91,15 @@
 - **DeepSeek 请求必须压「硬墙钟」超时（0.6.1，真 bug）**：原来只有 `req.setTimeout(TIMEOUT_MS)`——那是**空闲超时**（socket idle），连接上只要有零星保活/分块流量就**永远不触发**。
   - 实测（2026-09-20 battle98 T11）：`api.deepseek.com`（117.185.125.154）的连接从 23:42:00 建起到 23:51:24 **仍 Established（564s）**，240s 空闲超时没掐，PO 侧 `sys.synchronousWebCall` 一直阻塞，面板停在「实时 503s 思考中…」。
   - 现在另加一个 `setTimeout` 硬墙钟 deadline（同一时长，`done()` 保证 cb 只回调一次、`res.on('error')` 也接住）。PO 侧兜底：**单次失败→`pklmFallbackAttack()`**，连续 3 次且跨度 >15s 才会认输。
+- **模型/思考参数支持环境变量覆盖，可做 A/B 复测（0.7.5）**
+  - 起因：battle106 的 T13/T14（我方场上必死时该"留场换免费替补"还是"主动换人"）在生产配置（flash + 关思考）下**复测 2 次给出相反动作**（样本 A 两回合都主动换人 ✗、样本 B 两回合都留场 ✓）→ 判断是"缺回合发展趋势推演"而非"不会"。为做配置对比，把思考/模型参数改成可用环境变量注入（**默认行为完全不变**）：
+    ```
+    POKELLMON_MODEL=deepseek-v4-flash  POKELLMON_THINKING=1  POKELLMON_EFFORT=low  POKELLMON_TOOL_PORT=8096  node server.js
+    POKELLMON_MODEL=deepseek-v4-pro    POKELLMON_THINKING=0                        POKELLMON_TOOL_PORT=8095  node server.js
+    ```
+    （另外 `POKELLMON_FIRST_THINKING` / `POKELLMON_FIRST_EFFORT` 可覆盖首回合设置）
+  - 用法：起多个不同配置的 server（不同端口、各自 `*>` 到独立日志），再用 `replay.js --url=http://127.0.0.1:<port> --tag=<标签>` 对同一批历史回合各跑几遍，比较动作一致率与耗时。
+  - 首轮结果（battle106 的 turn 12/13，各 2 个样本）：**生产配置（flash+关思考）2 错 / 2 对**（抛硬币）；**flash+低推理 4/4 对**、**pro+关思考 4/4 对**，且新配置的推理里都出现了关键判断（"letting it faint gives me a **FREE replacement** … switching would make my switch-in eat a hit"）。代价是时延：新配置 38-120s，其中 2 次触到 120s 回合上限走了 `budget_exhausted` fallback（仍选对）。
 - **自更新通道 `GET /pklm/version` + `GET /pklm/po-script.js`（0.7.4）**
   - 背景：PO 有运行期切换脚本的官方 API `sys.changeBattleScript`（`docs/reference/sys-object.md`），而 PO 脚本能 `sys.synchronousWebCall` 下载、`sys.writeToFile` 落盘 → 部署可以做成「PO 自己去拉仓库里的 `po-script.js` 并切过去」，**不用剪贴板、不用重启 PO**（对应 po-pokellmon 0.6.24 的 `pklmAutoUpdate`）。
   - 两个路由都从**仓库文件**现读现算：`/pklm/version` 返回从 `po-script.js` 里解析出的 `PKLM_VERSION`，`/pklm/po-script.js` 返回全文（附带 `X-PKLM-Version` 响应头）。**读不出/解析不出就返回 500** —— 不把垃圾内容发出去让脚本写进自己。

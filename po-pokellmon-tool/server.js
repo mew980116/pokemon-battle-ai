@@ -65,16 +65,19 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.7.4';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
+var SERVER_VERSION = '0.7.5';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
 
 // ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
 // 对战主脑用 v4-flash：这个场景（超大计算量 + 幻觉高发）里 pro 的"深想"反而被门禁压制，
 // 先读收益被抵消；改回 pro 只需 POKELLMON_MODEL=deepseek-v4-pro
 var MODEL = process.env.POKELLMON_MODEL || 'deepseek-v4-flash';
-var THINKING_ENABLED = false;           // 关闭 reasoning（思考链过长/慢，且 tool 结果本身已提供依据；需要时改回 true）
-var REASONING_EFFORT = 'low';           // 仅在 THINKING_ENABLED=true 时生效
-var FIRST_TURN_THINKING = true;         // 首回合（turn 0）单独开思考，之后沿用上面的全局设置
-var FIRST_TURN_EFFORT = 'low';          // 首回合思考强度（low/high/max）
+// 思考/模型都可用环境变量覆盖 —— 目的是能同时起多个不同配置的 server 做 A/B 复测
+// （例：`POKELLMON_MODEL=deepseek-v4-flash POKELLMON_THINKING=1 POKELLMON_EFFORT=low POKELLMON_TOOL_PORT=8094 node server.js`）
+// ⚠ 无环境变量时行为与以前完全一致（思考默认关闭）。
+var THINKING_ENABLED = (process.env.POKELLMON_THINKING === '1' || process.env.POKELLMON_THINKING === 'true');
+var REASONING_EFFORT = process.env.POKELLMON_EFFORT || 'low';
+var FIRST_TURN_THINKING = process.env.POKELLMON_FIRST_THINKING ? (process.env.POKELLMON_FIRST_THINKING === '1') : true;
+var FIRST_TURN_EFFORT = process.env.POKELLMON_FIRST_EFFORT || 'low';
 var MAX_TOKENS = null;                  // 不限制输出 token（思考链 + 最终答案）
 var TIMEOUT_MS = 240000;                // 单次请求的硬墙钟上限（不设 max_tokens，8192 是服务端默认）
 var MAX_TOOL_ROUNDS = 35;               // 最多 function calling 轮数，超过则 no-think 收敛（门禁要 predict+验算+可能打回，25 实测会被打满）
