@@ -74,6 +74,15 @@
   - **主脚本（[20201227.js](20201227.js)）的做法完全不同 —— 不读 `poke.item`，而是从消息回调的参数维护**：`analyseCurrentItem(itemMess, part)`，其中 `case 23 / 105 / 162: info.item = other`（道具被公开）、`case 132: part 0 → poke(foe).item, part 1 → other`（**Trick/Switcheroo 的交换**）、`case 70 / 160: info.item = 0`（被拿走/消耗）。这就是用户说的「围巾解析」→ **给我方也建一条「从消息 / 回调 `other` 参数维护道具」的路**。
   - **并加一条原则（用户提议）**：**已 [proved] 的信息不允许被「空读 / 未知读」简单覆盖**。采集时建议两个字段都给：`item`（当前直读）+ `itemProved`（最后一次被消息证实的值）+ 不一致时给 `itemNote`（直读为空而 proved 存在 → **报 proved 并注明来源**，而不是静默变空）；**只有消息证明变化时才更新 proved**。同一原则适用于招式表 / 特性。
   - **待确认（要先跑一次探针）**：`team(me).poke(0).item` 在 Switcheroo 之后到底是「PO 读不到」还是「真的没道具」。把 `poke(0).item` 的**原始编号**和回调的 `other` 参数一起打进 `pklmCb` 日志即可判定 —— 若是前者，这是**采集 bug**（系统喂错数据）；若是后者，模型读到空是对的，那就只需 proved 保护。
+  - ✅ **探针跑完了（battle104，26 回合，script 0.6.12/0.6.13 + server 0.7.2）—— 结论如下：**
+    - **两条直读路都会错，且方向相反**（`itemRaw` vs `itemField` 在 4 个回合不一致）：
+      - T0→T1 Snorlax 的 Iapapa Berry 被吃：`raw=0`（**对**，确实没了）／`fld=8015`（**陈旧**，还报着果子）。
+      - T10→T11 我方 Indeedee 用 Trick：`raw=0`／`fld=5`（陈旧，Trick 前的围巾）。真值应是 Espeon 的道具，**两条路都读不出来**。
+    - ⇒ **`field.poke(me).pokemon.item` 不能当替代源**（它在「失去/消耗」时不回退）。
+    - ⇒ **`team(me).poke(0).item` 只在「失去」时可信**（变 0），**拿到新道具时读不出来** —— 这正是 battle99 T16 那个空值的来源。
+    - **换道具（Trick/Switcheroo）不走 `onItemMessage`**：全 26 回合里 `itemProbe` 的 msg 分布 `{5:1, 12:7, 21:4, 8000:1, 8006:1}`（剩饭回血 / 命玉反伤 / 吃果子 / 果子消耗 / 道具暴露），**Trick 那回合一条都没有**，而战报文本里明明出现了 "switched items with …!. obtained one …!"。→ 换道具的提示是走 **`onMoveMessage`**（move = Trick / Switcheroo / Bestow）渲染的，所以**移植的落点在 `onMoveMessage` 而不是 `onItemMessage`**（主脚本 case 132 的 `part 0 → poke(foe).item / part 1 → other` 对应的应该是它）。
+    - **消息文本同样不可信**：Trick 那句 "Indeedee obtained one **Choice Scarf**!" 用的是**我方当前/旧道具**渲染的（同一来源），是假话 —— 与 battle99 T16 的 "Ninetales obtained one Choice Scarf!" 同一个 bug。
+    - **下一步**：① 给探针加一个 `onMoveMessage` 记录点（只记换道具类招式的原始参数 `move/part/foe/other`），跑一把确认 `other` 里到底带不带道具编号；② 再加「消息驱动 + [proved] 不被空读覆盖」的我方道具维护。
 
 - [ ] 🔴 **`simulate_turn` 不建模「入场特性」→ 会把某条线的全部价值漏算掉（2026-09-21 battle99 T19 实测）**：
   - **现场**：Sandaconda 倒下要补位，对手 Barraskewda 100%（408 速物理水系），我方剩 Escavalier 11% / Ninetales 59% / Slurpuff 72%。工具算 `Liquidation → Ninetales = 100-118% guaranteed OHKO`，于是 LLM 判"换 Ninetales 就是白送"、否掉了「换九尾开晴天」这条线，改选 Slurpuff（吃 42-49%）。
