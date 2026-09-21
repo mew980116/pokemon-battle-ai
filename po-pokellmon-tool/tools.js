@@ -1152,7 +1152,11 @@ function simulateTurn(args, ctx) {
         if (br.kind === 'switch') oppAfterName = slotName(oppTeam, br.slot) || oppActive;
 
         // ---- 出手顺序：PO 的换人阶段先于出招阶段 ----
-        // orderModes = 谁先动：['you'] / ['they'] / ['you','they']（速度重叠或解析不出时**两种情况都算**，不猜）
+        // orderModes = 谁先动：['you'] / ['they'] / ['you','they']
+        // 规则（用户 2026-09-21 定）：**只有先制度能定顺序**；同先制度一律算正反手，不判"谁快"。
+        // 起因（battle106 T15 实测）：sim 输出 "you move first (your spe 309 vs their 194-306)"，实际 Zarude 是
+        // **后手**死的（Roserade 全程先手、一点血没掉 ⇒ 它带专爱围巾 306×1.5，而我们的上限只算到"252 速 + 正性格"）。
+        // 速度对比一旦错，"我先手白杀它"这类结论会整个反过来 —— 而它的错法系统性偏向"我快"（围巾/强化/顺风都看不见）。
         var orderModes = [];
         if (iSwitch || br.kind === 'switch') {
             if (iSwitch && br.kind === 'switch') { row.order = 'both switch (switch phase): no damage either way this turn'; orderModes = ['none']; }
@@ -1163,21 +1167,16 @@ function simulateTurn(args, ctx) {
             var mySpe = mySpeedOf(state, 0, null);
             var osr = oppSpeedRange(oppActive);
             if (myPrio !== theirPrio) {
+                // 先制度不同 → 顺序是硬事实（先制永远先出手），只算一种
                 var prioYou = (myPrio > theirPrio);
                 row.order = (prioYou ? 'you move first' : 'they move first') + ' (priority ' + myPrio + ' vs ' + theirPrio + ')';
                 orderModes = [prioYou ? 'you' : 'they'];
-            } else if (mySpe && osr) {
-                if (mySpe > osr.max) { row.order = 'you move first (your spe ' + mySpe + ' vs their ' + osr.min + '-' + osr.max + ')'; orderModes = ['you']; }
-                else if (mySpe < osr.min) { row.order = 'they move first (your spe ' + mySpe + ' vs their ' + osr.min + '-' + osr.max + ')'; orderModes = ['they']; }
-                else {
-                    row.order = 'speed UNRESOLVED: your spe ' + mySpe + ' is inside their possible range ' + osr.min + '-' + osr.max + ' → BOTH orders simulated (see cases[])';
-                    orderModes = ['you', 'they'];
-                }
             } else {
-                row.order = 'speed unknown (could not resolve) → BOTH orders simulated (see cases[])';
+                row.order = 'same priority → BOTH orders simulated (the speed comparison is NOT trusted: the opponent may hold a Choice Scarf, sit behind Tailwind, be paralysed, or have Speed boosts we cannot see)'
+                    + (mySpe && osr ? '  [reference only: your spe ' + mySpe + ' vs their possible range ' + osr.min + '-' + osr.max + ']' : '');
                 orderModes = ['you', 'they'];
             }
-            if (osr) row.unknown.push('opponent speed range ' + osr.min + '-' + osr.max + ' (EV/nature unrevealed)');
+            if (osr) row.unknown.push('opponent speed range ' + osr.min + '-' + osr.max + ' (EV/nature unrevealed — a Choice Scarf or a boost is NOT inside this range, so it cannot be used to decide move order)');
         }
 
         // ---- 伤害 ----
@@ -1237,11 +1236,11 @@ function simulateTurn(args, ctx) {
                     }
                     if (worstCase) delete worstCase._lo;   // 内部打分字段，不往外传
                     // row.mine 取**最坏的那个顺序**（门禁按它比对，保持保守）。
-                    // ⚠ 顺序未定时**必须显式写明**：否则只看到最坏那个 case 的 "you first" 会被读成"我先手"（实测踩过）。
+                    // ⚠ 同先制度时**必须显式写明"两种顺序都算了"**：否则只看到最坏那个 case 的 "you first" 会被读成"我先手"（实测踩过）。
                     var orderUnresolved = (row.cases.length > 1);
                     row.mine = {
                         takes: worstCase.you_take, hp_after: worstCase.mine_hp_after, faints: worstCase.mine_faints,
-                        summary: (orderUnresolved ? 'ORDER UNRESOLVED (both simulated — do NOT assume you move first) ' : '') + worstCase.summary +
+                        summary: (orderUnresolved ? 'BOTH ORDERS SIMULATED (same priority — the speed comparison is not trusted, so do NOT assume you move first) ' : '') + worstCase.summary +
                             (orderUnresolved ? '  [by order: ' + row.cases.map(function (x) { return x.order + ' = ' + x.mine_hp_after + ' (' + x.you_take + ' in)'; }).join(' | ') + ']' : '')
                     };
                     applyLegNotes(row, legIn2, myHpPct, 'their move on you');

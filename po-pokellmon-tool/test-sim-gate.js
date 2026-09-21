@@ -85,15 +85,25 @@ chk('留场且我方会倒的行 → 带 trajectory，写明 FREE replacement / 
 chk('留场但打不到我（对手换人）→ 不给 trajectory（不误导）', stayRows['switch 2'].trajectory === undefined, String(stayRows['switch 2'].trajectory).slice(0, 120));
 chk('换人分支本身不给 trajectory（不是"你被免费换下去"）', (function () { var rr = sim(ctx(), { switch: 3 }, [{ move: 'Hydro Pump' }]); return rr.rows[0].trajectory === undefined; })());
 
-console.log('速度重叠 → 正反两种情况都仿（不猜）');
+console.log('同先制度 → 一律正反手都算（不判谁快；0.8.0 起）');
 var c6 = ctx();
 var r6 = sim(c6, { move: 'Sludge Bomb' }, [{ move: 'Hydro Pump' }]);
-chk('order 明说 BOTH orders', /BOTH orders/.test(r6.rows[0].order), r6.rows[0].order);
+chk('order 明说 BOTH orders + 速度不可信', /BOTH orders/.test(r6.rows[0].order) && /speed comparison is NOT trusted/.test(r6.rows[0].order), r6.rows[0].order);
+chk('order 里保留速度区间但只作参考', /reference only: your spe/.test(r6.rows[0].order), r6.rows[0].order);
 chk('cases 给了两种顺序', (r6.rows[0].cases || []).length === 2, JSON.stringify(r6.rows[0].cases));
 chk('cases 里两种 order 都出现', (r6.rows[0].cases || []).map(function (x) { return x.order; }).join('|') === 'you first|they first', JSON.stringify((r6.rows[0].cases || []).map(function (x) { return x.order; })));
-chk('【顺序未定】summary 必须显式写明，不能只显示 you first', /ORDER UNRESOLVED/.test(r6.rows[0].mine.summary) && /do NOT assume you move first/.test(r6.rows[0].mine.summary), r6.rows[0].mine.summary.slice(0, 160));
-chk('【顺序未定】逐顺序都列出来', /by order:/.test(r6.rows[0].mine.summary) && /they first/.test(r6.rows[0].mine.summary), r6.rows[0].mine.summary.slice(0, 200));
+chk('【正反手】summary 必须显式写明，不能只显示 you first', /BOTH ORDERS SIMULATED/.test(r6.rows[0].mine.summary) && /do NOT assume you move first/.test(r6.rows[0].mine.summary), r6.rows[0].mine.summary.slice(0, 160));
+chk('【正反手】逐顺序都列出来', /by order:/.test(r6.rows[0].mine.summary) && /they first/.test(r6.rows[0].mine.summary), r6.rows[0].mine.summary.slice(0, 200));
 chk('cases 里不泄漏内部打分字段 _lo', JSON.stringify(r6.rows[0].cases).indexOf('_lo') < 0, JSON.stringify(r6.rows[0].cases).slice(0, 120));
+chk('unknown 里声明速度区间不能用来定顺序（围巾不在区间内）', (r6.rows[0].unknown || []).some(function (x) { return /cannot be used to decide move order/.test(x); }), JSON.stringify(r6.rows[0].unknown));
+
+console.log('先手度数不同 → 顺序是硬事实，仍只算一种');
+var stPrio = JSON.parse(JSON.stringify(state));
+stPrio.me.moves = [{ name: 'Aqua Jet', slot: 0, used: 0 }];
+var cPrio = { state: stPrio, notes: notes, turn: 1, ledger: tools.newLedger(), simGateOn: true };
+var rPrio = tools.runTool('simulate_turn', { i_do: { move: 'Aqua Jet' }, opp_does: [{ move: 'Hydro Pump' }] }, cPrio);
+chk('先制 vs 非先制 → 单一时序，且明写 priority 1 vs 0', /priority 1 vs 0/.test(rPrio.rows[0].order || '') && (rPrio.rows[0].cases || []).length === 1, rPrio.rows[0].order);
+chk('先制那一侧不出现 BOTH ORDERS', !/BOTH ORDERS SIMULATED/.test((rPrio.rows[0].mine || {}).summary || ''), String((rPrio.rows[0].mine || {}).summary).slice(0, 160));
 
 console.log('先手方打死对手 → 对手不还手（顺序真正影响结果之处）');
 // 用一份最小合成 state，让「我方明显更快 + 招能杀」成立（CTRL93 里 Melmetal 比 Blissey 慢，构造不出 you-first）
@@ -108,7 +118,7 @@ var mini = {
 };
 var c7 = { state: mini, notes: notes, turn: 1, ledger: tools.newLedger(), simGateOn: true };
 var r7 = tools.runTool('simulate_turn', { i_do: { move: 'Icicle Crash' }, opp_does: [{ move: 'Hurricane' }] }, c7);
-chk('更快的我方 → 单一 you-first 顺序', /you move first/.test(r7.rows[0].order || ''), r7.rows[0].order);
+chk('我方明显更快也照样给两种顺序（0.8.0 起不判谁快）', /BOTH orders/.test(r7.rows[0].order || '') && (r7.rows[0].cases || []).length === 2, r7.rows[0].order);
 var youCase7 = (r7.rows[0].cases || []).filter(function (x) { return x.order === 'you first'; })[0];
 chk('对手残血被先手杀掉 → 它不还手（你吃 0%）', !!youCase7 && /faints before it can act/.test(youCase7.note || ''), JSON.stringify(youCase7));
 

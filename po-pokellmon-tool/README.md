@@ -91,6 +91,12 @@
 - **DeepSeek 请求必须压「硬墙钟」超时（0.6.1，真 bug）**：原来只有 `req.setTimeout(TIMEOUT_MS)`——那是**空闲超时**（socket idle），连接上只要有零星保活/分块流量就**永远不触发**。
   - 实测（2026-09-20 battle98 T11）：`api.deepseek.com`（117.185.125.154）的连接从 23:42:00 建起到 23:51:24 **仍 Established（564s）**，240s 空闲超时没掐，PO 侧 `sys.synchronousWebCall` 一直阻塞，面板停在「实时 503s 思考中…」。
   - 现在另加一个 `setTimeout` 硬墙钟 deadline（同一时长，`done()` 保证 cb 只回调一次、`res.on('error')` 也接住）。PO 侧兜底：**单次失败→`pklmFallbackAttack()`**，连续 3 次且跨度 >15s 才会认输。
+- **simulate_turn：同先制度一律「正反手都算」，不再判谁快（0.8.0）**
+  - 起因（用户 2026-09-21：**"只要是同先制度的操作你都算正反手吧…别直接 you move first 了"**）：battle106 T15 实测，sim 输出 `you move first (your spe 309 vs their 194-306)`，实际 Zarude 是**后手**死的 —— 对手 Roserade 全程先手、一点血没掉，一路 KO 掉 Basculin → Zarude → Vikavolt → Mew。唯一自洽解释是它带**专爱围巾**（306×1.5），而我们的速度上限只算到"252 速 + 正性格"（306）。
+  - **系统性偏差**：速度对比的错法**只往一个方向错**（围巾 / 顺风 / 速度强化 / 麻痹我们看不见，对手不可能比我们算的更慢）⇒ "我先手白杀它" 这类结论会被单方面放大。既然速度只能给出"可能范围"，就不该用它定顺序。
+  - **新规则**：① 先制度不同 → 顺序是硬事实（先制永远先出手），仍只算一种；② 同先制度 → **一律给 you-first / they-first 两块盘面**，`order` 里写明 `same priority → BOTH orders simulated (the speed comparison is NOT trusted…)`，速度区间降级为 `reference only`；`unknown[]` 里也写明「围巾/强化**不在**这个区间内，不能用来定顺序」。
+  - `row.mine` 仍取最坏顺序；前缀文案由 `ORDER UNRESOLVED` 改成 `BOTH ORDERS SIMULATED (same priority …)`（"未定"是被动，现在这是主动策略）。
+  - 回归：`test-sim-gate.js` 91 → **95 全绿**（新增：明显更快也给两种顺序、速度区间只作参考、unknown 声明围巾不在区间内、先制 vs 非先制仍是单一时序且明写 `priority 1 vs 0`）。
 - **撤掉「换人必须先仿真留场」这条硬判据（0.7.8）**
   - 起因（用户 2026-09-21：**"最好别搞门禁，我感觉门禁会搞出 bug"**）：盘「哪些回合没有留场这个选项」时发现，0.7.6 那条规则的判据是把"我们以为合法的动作集合"写成了硬判据，而那个集合恰好是**已知有洞的那块**。
   - **真正的清单**（只有第 1 条现在能判）：① 我方场上已倒 → 回合结束强制替补，`me.fainted=true` ✅；② 我方自己用换场招（U-turn / Volt Switch / Flip Turn / Baton Pass / Teleport / Parting Shot）→ 招式结算后**在出招阶段内**换人；③ 我方**逃生按钮**被击中触发；④ 我方**危险回避** Wimp Out / Emergency Exit 触发。②③④ 的 `me.fainted` **都是 false**，而 `state.me.moves` 照样列出 4 个招（`pklmCollectMoves` 只按 PP>0 过滤）→ 判据一错，门禁自己就成了新 bug 源（模型选唯一合法的换人 → 连拒 2 次 → 烧两轮 → `gateUnmet` 放行；选招式 → 被 PO 拒 → 进 `bannedMoves`）。
