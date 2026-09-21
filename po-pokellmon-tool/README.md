@@ -91,6 +91,14 @@
 - **DeepSeek 请求必须压「硬墙钟」超时（0.6.1，真 bug）**：原来只有 `req.setTimeout(TIMEOUT_MS)`——那是**空闲超时**（socket idle），连接上只要有零星保活/分块流量就**永远不触发**。
   - 实测（2026-09-20 battle98 T11）：`api.deepseek.com`（117.185.125.154）的连接从 23:42:00 建起到 23:51:24 **仍 Established（564s）**，240s 空闲超时没掐，PO 侧 `sys.synchronousWebCall` 一直阻塞，面板停在「实时 503s 思考中…」。
   - 现在另加一个 `setTimeout` 硬墙钟 deadline（同一时长，`done()` 保证 cb 只回调一次、`res.on('error')` 也接住）。PO 侧兜底：**单次失败→`pklmFallbackAttack()`**，连续 3 次且跨度 >15s 才会认输。
+- **PO 物种名 → PS/计算器名：常见形态别名表 + 两级回退（tool 0.8.3）**
+  - 起因（battle111 T2 实测）：`simulate_turn { i_do: { switch: 5 } }` 换入 `Magearna-Original` 时整行 `mine: null` —— 报错 `incoming damage could not be computed (unknown pokemon: Magearna-Original …)`。候补的承伤数直接缺失 ⇒ 模型**少一个候选的成本数**。battle108 的 `Zarude-Aba`（我们自己的萨戮德整场无伤害数据）同源。
+  - **全库审计**（`knowledge/pokemon.json` 1002 条 `name_en`）实测 **21 个**计算器认不出：`Aegislash`（PS 无裸名 → `Aegislash-Shield`）、`Alcremie-*` 8 种奶油（→ `Alcremie`）、`Blacephelon`（PO 拼写 → `Blacephalon`）、`Greninja-Unbonded`（→ `Greninja`）、`Meowstic-M`（→ `Meowstic`）、`Minior-*` 7 色（→ `Minior`）、`Zarude-Aba`（→ `Zarude`）、`Missingno`（**故意不映射**：不是真实物种）。
+  - **顺带挖出一个「认得出但算错」的静默 bug**：PO 的裸 `Minior` 是**彗星形态**（60/60/100/60/100/60），PS 的裸 `Minior` 是**核心形态**（60/100/60/100/60/120）—— 旧代码按原名算出来的种族值是错的，且没有任何提示。修：`SPECIES_ALIAS` 显式映射 `Minior → Minior-Meteor`，并把**别名表放在「原名可用」判断之前**（显式意图压过猜测）。
+  - **三个坑（都是实测踩出来的）**：① 别名表 key 必须用 `toID` 归一化 —— `toID('Zarude-Aba') = 'zarudeaba'`（**连字符被去掉**），不归一化则整张表永远 miss、只能靠"砍后缀"兜底（语义就错了）；② 别名表**不能放在"原名认得出就直接用"之后** —— 否则 `Minior` 这种"PS 认得出但语义相反"的条目永远进不去；③ 「砍末尾 `-形态名` 再试」必须留作**最后一级**（`Alcremie-CaramelSwirl` / `Meowstic-M` / `Minior-Blue` 全靠它）。
+  - **另一层的缺口（与计算器无关）**：PO 状态里的形态名可能**不在我们自己的表里** —— `Magearna-Original` 计算器其实认，但我们的 `knowledge/pokemon.json` 只有 `Magearna`，于是卡在 `resolvePokemonInput` 的 `unknown pokemon` 上。修：同一套「砍后缀重查」+ 回 `name_note`。
+  - **不许静默替换**：替换发生时显式说明 —— `calc_damage` 的 `notes` 里一句，`simulate_turn` 的行走 `row.species_note`（`applyLegNotes` 转发，与 `ev_note` / `item_note` 同一机制），文案写明"数字是拿基础物种算的"。
+  - 回归：新增 `test-species-alias.js` **18/18**（全库审计只该剩 `Missingno` + 11 条具体映射 + calc 路径 + sim 换入路径 + "不得出现 unknown pokemon"）；`test-sim-gate.js` **100/0**、`test-calc-compare.js` 全组（含 from_state 8/8、场下 4/4）、`test-ability-table.js` PASS。
 - **REPLACEMENT MODE 给事实（tool 0.8.2）**
   - 起因（battle108 复盘，用户点了三处）：**生产配置（flash+关思考）把"强制替补"当成"主动换入"来算代价** —— 它的原文是 `Mienshao OHKO'd by Body Slam — no`，于是选了 Sandaconda 挡、而不是用 Close Combat 直接收掉 Bouffalant。
   - **证据（强配置自己写出了那条事实）**：`flash+低推理` 与 `pro+关思考` 在同一个局面上都写了 "the faint happens in the **end-of-turn phase, so Bouffalant gets NO free hit now**" + "Mienshao 339 Spe — FASTER than anything Bouffalant can be … Close Combat is a **guaranteed OHKO** … **it never eats a hit and nets a KO**"。⇒ 不是"不会"，是**事实缺席 + 生产配置时做时不做**。

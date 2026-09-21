@@ -902,6 +902,10 @@ function simLeg(state, atkSpec, defSpec, moveName, opts) {
 // role 用来指明这条伤害是「它打我」还是「我打它」，避免把误差方向说反。
 function applyLegNotes(row, leg, myHpPct, role) {
     if (!leg || leg.error) return;
+    // PO 物种名被替换（如 Magearna-Original → Magearna）时说一句：数字是拿替换后的物种算的
+    if (leg.species_note) {
+        row.species_note = (row.species_note ? row.species_note + '  |  ' : '') + role + ': ' + leg.species_note;
+    }
     if (leg.item_unknown) {
         var it = leg.item_unknown;
         row.item_note = (row.item_note ? row.item_note + '  |  ' : '') + role + ': ' + it.move + ' = ' +
@@ -1792,14 +1796,33 @@ function resolvePokemonInput(spec) {
         return { baseStats: spec.base_stats, types: spec.types || [], name: null };
     }
     var key = null;
+    var asked = null;
+    function lookUp(v) {
+        if (POKEMON.byNum[v] !== undefined) return v;
+        return (POKEMON.byName[v.toLowerCase()] !== undefined) ? POKEMON.byName[v.toLowerCase()] : null;
+    }
     if (spec.poke !== undefined && spec.poke !== null) {
-        var s = String(spec.poke);
-        if (POKEMON.byNum[s] !== undefined) key = s;
-        else if (POKEMON.byName[s.toLowerCase()] !== undefined) key = POKEMON.byName[s.toLowerCase()];
+        asked = String(spec.poke);
+        key = lookUp(asked);
+        // PO 状态里的形态名可能**不在我们自己的表里**（如 `Magearna-Original` —— 计算器其实认这个名字，
+        // 但我们的表只有 `Magearna`；battle111 T2 的 `simulate_turn` 就是卡在这里，候补行整行 null）。
+        // → 砍末尾「-形态」再查；基础物种的种族值 = 该形态的种族值。
+        var cut = asked.lastIndexOf('-');
+        while (key === null && cut > 0) {
+            var trimmed = asked.slice(0, cut);
+            key = lookUp(trimmed);
+            if (key !== null) { asked = trimmed; break; }
+            cut = trimmed.lastIndexOf('-');
+        }
     }
     if (key === null || !POKEMON.byNum[key]) return { error: 'unknown pokemon: ' + (spec.poke || '(no name)') };
     var p = POKEMON.byNum[key];
-    return { baseStats: p.baseStats, types: p.types, name: p.name_en };
+    var out = { baseStats: p.baseStats, types: p.types, name: p.name_en };
+    var orig = (spec.poke !== undefined && spec.poke !== null) ? String(spec.poke) : null;
+    if (orig && p.name_en !== orig) {
+        out.name_note = 'PO form "' + orig + '" → "' + p.name_en + '" (not in our dex; the base species is used)';
+    }
+    return out;
 }
 
 // 解析招式输入：支持 {name}（英文或中文）或 {power, category, type}
@@ -2009,11 +2032,51 @@ SMOGON.Pokemon.prototype.clone = function () {
     return c;
 };
 
+// ===== PO 物种名 → PS/计算器名（0.8.3）=====
+// PO 有一批自己的形态名与拼写，计算器（PS 数据）只认 PS 名。不映射的两种后果：
+//   · 认不出 → 整条腿报废（自 0.6.31 起是明确 `unknown species` 报错，不再把 server 带走）；
+//   · **更坏：认得出但算错** —— PO 的裸 `Minior` 是彗星形态（60/60/100/60/100/60），PS 的裸 `Minior` 是核心形态（60/100/60/100/60/120）。
+// 全库审计（1002 条）实测 21 个认不出；本表 + 「砍形态后缀重试」把它们全覆盖。
+// `Missingno` **故意不映射**：它不是真实物种（PO 表里的占位），保持报错才是对的。
+var SPECIES_ALIAS = {
+    'aegislash': 'Aegislash-Shield',      // PS 没有裸 Aegislash（Shield 才是默认形态）
+    'blacephelon': 'Blacephalon',         // PO 拼写少一个 a
+    'greninja-unbonded': 'Greninja',      // PO「未羁绊」= 普通甲贺忍蛙（Ash 形态另有 Greninja-Ash）
+    'zarude-aba': 'Zarude',               // PO 的 Aba = 普通萨戮德（PS 另有 Zarude-Dada）
+    'minior': 'Minior-Meteor'             // ⚠ PO 裸 Minior = 彗星形态，与 PS 的裸 Minior（核心形态）**正好相反**
+};
+// 查表用 PS 的 toID 形式（**去连字符**）：toID('Zarude-Aba') = 'zarudeaba'，
+// 所以 key 必须归一化后再比 —— 否则别名表永远 miss（只靠「砍后缀」兜底，语义就错了）。
+var SPECIES_ALIAS_BYID = {};
+for (var _saKey in SPECIES_ALIAS) { SPECIES_ALIAS_BYID[String(SMOGON.toID(_saKey))] = SPECIES_ALIAS[_saKey]; }
+function psSpeciesExists(name) {
+    try {
+        var s = GEN8DEX.species.get(SMOGON.toID(String(name)));
+        return !!(s && s.baseStats && s.baseStats.hp !== undefined);
+    } catch (e) { return false; }
+}
+// ① **别名表优先**（表里全是「计算器认不出」或「认得出但语义不对」的 PO 名 —— 显式意图压过任何猜测；
+//    如 PO 的裸 `Minior`，PS 认得出这个名字，但那是**核心形态**，用原名就静默算错）；
+// ② 原名计算器认识 → 原样用；③ 砍掉末尾「-形态名」再试（Alcremie-CaramelSwirl / Meowstic-M / Minior-Blue …）
+function resolveSpeciesName(name) {
+    var n = String(name);
+    var a = SPECIES_ALIAS_BYID[String(SMOGON.toID(n))];
+    if (a && a !== n && psSpeciesExists(a)) return { name: a, note: 'PO species name "' + n + '" → "' + a + '" (PO form names differ from PS)' };
+    if (psSpeciesExists(n)) return { name: n, note: null };
+    var cut = n.lastIndexOf('-');
+    if (cut > 0) {
+        var base = n.slice(0, cut);
+        if (psSpeciesExists(base)) return { name: base, note: 'PO form "' + n + '" → base species "' + base + '" (the calculator has no separate entry)' };
+    }
+    return { name: n, note: null };
+}
+
 // 一个 leg 侧（attacker/defender）-> @smogon 的 Pokemon
 // 支持：poke 名/编号 或 base_stats+types；ev/iv/nature/boosts/level；ability/item/status；
 //       直接能力值（atk/def/spa/spd/hp/spe，当作**未计入能力等级**的数值，等级仍照常生效）；hpPct/curHp
 function toCalcPokemon(spec) {
     var opts = {};
+    var speciesNote = null;
     if (spec.level) opts.level = parseInt(spec.level, 10) || 100;
     opts.evs = evArrToObj(spec.ev);
     opts.ivs = ivArrToObj(spec.iv);
@@ -2034,6 +2097,7 @@ function toCalcPokemon(spec) {
         var rp = resolvePokemonInput({ poke: spec.poke });
         if (rp.error) return { error: rp.error };
         name = rp.name || String(spec.poke);
+        if (rp.name_note) speciesNote = rp.name_note;   // 我方表里没有该形态名、退到基础物种时说明一句
     } else {
         return { error: 'attacker/defender needs poke name or base_stats' };
     }
@@ -2043,6 +2107,15 @@ function toCalcPokemon(spec) {
     // （crash.log / battle100 卡死 + 之后连不上 8092 认输）。PO 中文服会给中文名，一旦某只没被映射成 PS 英文名就会走到这里。
     var spc = null;
     try { spc = GEN8DEX.species.get(SMOGON.toID(String(name))); } catch (e) { spc = null; }
+    if (!spc || !spc.baseStats || spc.baseStats.hp === undefined) {
+        // 计算器认不出 → 先过「PO 名 → PS 名」解析（别名表 / 砍形态后缀）。替换成功才改 name，原样可用时绝不动它。
+        var hit = resolveSpeciesName(name);
+        if (hit.name !== name) {
+            var spc2 = null;
+            try { spc2 = GEN8DEX.species.get(SMOGON.toID(String(hit.name))); } catch (e2) { spc2 = null; }
+            if (spc2 && spc2.baseStats && spc2.baseStats.hp !== undefined) { name = hit.name; spc = spc2; speciesNote = hit.note; }
+        }
+    }
     if (!spc || !spc.baseStats || spc.baseStats.hp === undefined) {
         return { error: 'unknown species "' + name + '" — the damage calculator has no data for it. Use the English/PS name, or pass base_stats explicitly.' };
     }
@@ -2070,7 +2143,7 @@ function toCalcPokemon(spec) {
     } else if (spec.hpPct !== undefined && spec.hpPct !== null) {
         pk.originalCurHP = Math.max(1, Math.min(Math.round(pk.rawStats.hp * Number(spec.hpPct) / 100), pk.rawStats.hp));
     }
-    return { pokemon: pk };
+    return { pokemon: pk, species_note: speciesNote };
 }
 
 // 招式 -> @smogon 的 Move。
@@ -2619,6 +2692,12 @@ function calcOneLeg(leg, idx, ctx) {
     if (calcAtk.error) return { index: idx, error: 'attacker: ' + calcAtk.error };
     var calcDef = toCalcPokemon(leg.defender);
     if (calcDef.error) return { index: idx, error: 'defender: ' + calcDef.error };
+    // PO 物种名被替换成 PS 名时说明一句（下面的数字是用替换后的物种算出来的）；同时挂到 leg 上，
+    // 让 simulate_turn 的行也能把这条带出去（否则"悄悄换了物种"没人看得见）
+    var speciesNotes = [];
+    if (calcAtk.species_note) speciesNotes.push('attacker ' + calcAtk.species_note);
+    if (calcDef.species_note) speciesNotes.push('defender ' + calcDef.species_note);
+    for (var sni = 0; sni < speciesNotes.length; sni++) notes.push(speciesNotes[sni]);
     var calcMove = toCalcMove(mv, leg);
     if (calcMove.error) return { index: idx, error: calcMove.error };
 
@@ -2809,6 +2888,7 @@ function calcOneLeg(leg, idx, ctx) {
         ko: ko,
         assumed: assumed,
         notes: notes,
+        species_note: speciesNotes.length ? speciesNotes.join('  |  ') : null,
         detail: {
             attack_stat: aStat,
             defense_stat: dStat,
@@ -3539,5 +3619,6 @@ module.exports = {
     choiceToAction: choiceToAction,
     replacementFacts: replacementFacts,
     moveAccuracy: moveAccuracy,
-    moveCritStage: moveCritStage
+    moveCritStage: moveCritStage,
+    resolveSpeciesName: resolveSpeciesName
 };
