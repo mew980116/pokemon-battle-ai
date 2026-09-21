@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8092";
-var PKLM_VERSION = "0.6.12";      // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.6.13";      // 脚本版本（改动时 bump，随日志记录）
 var pklmLastWebFailTime = 0;       // 上次 webCall 失败时间戳（ms），用于断线时节流重发
 var pklmSilent = false;            // 静默模式：清分少女等无人值守 BOT 账号不向 PO 窗口 print 任何脚本输出
 var pklmFailCount = 0;             // 连续 webCall 失败次数（成功即归零）
@@ -553,7 +553,8 @@ function pklmCollectMyActive() {
         o.boosts = pklmCollectBoosts(battle.me);
         o.ability = pklmAbilityName(tp.ability);
         o.item = pklmItemName(tp.item);
-        o.itemRaw = tp.item;   // 临时探针：道具原始编号（结案后删）
+        o.itemRaw = tp.item;                                  // 临时探针：team(me).poke(0).item 原始编号（结案后删）
+        o.itemField = pklmFpoke(battle.me).pokemon.item;       // 临时探针：field.poke(me).pokemon.item 原始编号（另一个来源，结案后删）
     } catch (e) {}
     return o;
 }
@@ -1163,7 +1164,15 @@ function pklmSpotLabel(spot) {
                 pklmItemProbe.push({
                     seq: pklmItemProbe.length + 1, spot: (spot === battle.me ? 'me' : 'opp'),
                     msg: item, part: part, foe: foe, berry: berry, other: other,
-                    otherName: pklmItemName(other), txt: txt, mine: snap.join(' ')
+                    otherName: pklmItemName(other), txt: txt, mine: snap.join(' '),
+                    // 两个来源各读一次：team(me).poke(0).item vs field.poke(me).pokemon.item
+                    // （若两者不一致，修法就是改用 field 那一侧 —— battle99 T16 我方实际拿到 Choice Specs 却两处都读成空/围巾）
+                    myself: (function () {
+                        try {
+                            var t0 = pklmTpoke(0).item, f0 = pklmFpoke(battle.me).pokemon.item;
+                            return 'team=' + t0 + '(' + pklmItemName(t0) + ') field=' + f0 + '(' + pklmItemName(f0) + ')';
+                        } catch (me2) { return 'err'; }
+                    })()
                 });
                 if (pklmItemProbe.length > 20) pklmItemProbe.shift();
             } catch (e2) {}
