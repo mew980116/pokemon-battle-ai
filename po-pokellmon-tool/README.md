@@ -97,6 +97,9 @@
   - **新规则**：① 先制度不同 → 顺序是硬事实（先制永远先出手），仍只算一种；② 同先制度 → **一律给 you-first / they-first 两块盘面**，`order` 里写明 `same priority → BOTH orders simulated (the speed comparison is NOT trusted…)`，速度区间降级为 `reference only`；`unknown[]` 里也写明「围巾/强化**不在**这个区间内，不能用来定顺序」。
   - `row.mine` 仍取最坏顺序；前缀文案由 `ORDER UNRESOLVED` 改成 `BOTH ORDERS SIMULATED (same priority …)`（"未定"是被动，现在这是主动策略）。
   - 回归：`test-sim-gate.js` 91 → **95 全绿**（新增：明显更快也给两种顺序、速度区间只作参考、unknown 声明围巾不在区间内、先制 vs 非先制仍是单一时序且明写 `priority 1 vs 0`）。
+  - **★ 新基线（2026-09-21）**：**PO script 0.6.27 + tool 0.8.0 + flash / 关思考**。之后实战与复测都以这套为准（评测集快照 arm `G080`，见 `eval/results/G080-*`）。
+  - **订正一处我判轻的地方（用户指出"aqua jet 可以赌 ct"）**：battle106 T14 我写成"Aqua Jet 45-54 < 73，局面本来也输了"——不对。**Aqua Jet 除了垫伤害还能赌会心**（CT 1.5x → 68-81，高骰过 73），而那一手只有 Aqua Jet 能落地（Basculin 295 比 Roserade 慢，Psychic Fangs 只有赢速度平局才落地），所以它是最优线，不是"没办法的选择"。0.8.0 正好把它选出来了。
+  - **顺带暴露一个缺口（未做）**：sim 的 `crit_note` 只往"会心让分支更致命"（防守方向）说，而**我方的会心能把"2HKO"翻成"KO"**（进攻方向）—— 这种"差一点就能杀、可以赌 CT"的行，表里没有任何提示，只能靠模型自己想。
 - **撤掉「换人必须先仿真留场」这条硬判据（0.7.8）**
   - 起因（用户 2026-09-21：**"最好别搞门禁，我感觉门禁会搞出 bug"**）：盘「哪些回合没有留场这个选项」时发现，0.7.6 那条规则的判据是把"我们以为合法的动作集合"写成了硬判据，而那个集合恰好是**已知有洞的那块**。
   - **真正的清单**（只有第 1 条现在能判）：① 我方场上已倒 → 回合结束强制替补，`me.fainted=true` ✅；② 我方自己用换场招（U-turn / Volt Switch / Flip Turn / Baton Pass / Teleport / Parting Shot）→ 招式结算后**在出招阶段内**换人；③ 我方**逃生按钮**被击中触发；④ 我方**危险回避** Wimp Out / Emergency Exit 触发。②③④ 的 `me.fainted` **都是 false**，而 `state.me.moves` 照样列出 4 个招（`pklmCollectMoves` 只按 PP>0 过滤）→ 判据一错，门禁自己就成了新 bug 源（模型选唯一合法的换人 → 连拒 2 次 → 烧两轮 → `gateUnmet` 放行；选招式 → 被 PO 拒 → 进 `bannedMoves`）。
