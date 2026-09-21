@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8092";
-var PKLM_VERSION = "0.6.16";      // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.6.17";      // 脚本版本（改动时 bump，随日志记录）
 var pklmLastWebFailTime = 0;       // 上次 webCall 失败时间戳（ms），用于断线时节流重发
 var pklmSilent = false;            // 静默模式：清分少女等无人值守 BOT 账号不向 PO 窗口 print 任何脚本输出
 var pklmFailCount = 0;             // 连续 webCall 失败次数（成功即归零）
@@ -394,10 +394,10 @@ function pklmMsgTemplate(kind, fileName, msgNum, part) {
     return variants[part] || null;
 }
 
-// 模板里有没有某个占位符（用来判断 `%i` 该不该用回调的 `other` 覆盖）
-function pklmMsgHasI(kind, fileName, msgNum, part) {
+// 模板里有没有某个占位符（用来判断该占位符要不要换成「别的来源」的值）
+function pklmMsgHas(kind, fileName, msgNum, part, ph) {
     var t = pklmMsgTemplate(kind, fileName, msgNum, part);
-    return !!(t && t.indexOf('%i') >= 0);
+    return !!(t && t.indexOf(ph) >= 0);
 }
 
 function pklmRenderMsg(kind, fileName, msgNum, part, ctx) {
@@ -1323,7 +1323,7 @@ function pklmSpotLabel(spot) {
             // 在我方侧渲染成我方的道具（方向可能正好相反）。battle104 T11 就是被这个坑写成
             // 「Indeedee obtained one Choice Scarf!」（它当场其实拿到的是 Choice Specs）。
             var mctx = pklmMsgCtx(spot, type, other, q);
-            if (pklmMsgHasI('move', 'move_message.txt', move, part)) {
+            if (pklmMsgHas('move', 'move_message.txt', move, part, '%i')) {
                 var inm = pklmItemArgName(other);
                 if (inm) mctx.i = inm;
             }
@@ -1373,11 +1373,21 @@ function pklmSpotLabel(spot) {
     onAbilityMessage: function (spot, ab, part, type, foe, other) {
         try {
             pklmCb("onAbilityMessage", "ab=" + ab + " part=" + part + " type=" + type + " foe=" + foe + " other=" + other);
-            // `%i` 同样取回调 `other`（察觉 23「frisked %f and found its %i」、顺手牵羊 78、收获 88、捡拾 93）
+            // `%i` 取回调 `other`（察觉 23「frisked %f and found its %i」、顺手牵羊 78、收获 88、捡拾 93）
             var actx = pklmMsgCtx(spot, type, other, undefined, other);
-            if (pklmMsgHasI('ability', 'ability_messages.txt', ab, part)) {
+            if (pklmMsgHas('ability', 'ability_messages.txt', ab, part, '%i')) {
                 var ainm = pklmItemArgName(other);
                 if (ainm) actx.i = ainm;
+            }
+            // `%m`（招式名）在**特性消息**里指的是「**对方**打过来的那一招」，不是持有者自己的招：
+            //   19 Flash Fire `%s's Flash Fire made %m ineffective!`（挡住的是对方那招）
+            //   22 Forewarn  `%s's Forewarn makes it wary of %m!`（对方最强的招）
+            //   129          `%f cannot use %m!`（`%f` = 对方，`%m` = 它的招）
+            // 默认 ctx.m = pklmLastMove[spot] 在这里会写出「持有者自己的招」，是假话 → 换成对侧。
+            // （招式/道具/树果消息里的 `%m` 反过来是**持有者自己**的招，例如 128 `%f's substitute blocked %m!`、
+            //   37 `%s's %i raised %m's power!`、berry 4/5 `%s's %i weakened %m's power!` → 那边保持默认。）
+            if (pklmMsgHas('ability', 'ability_messages.txt', ab, part, '%m')) {
+                actx.m = pklmLastMove[pklmOtherSpot(spot)] || '';
             }
             var txt = pklmRenderMsg('ability', 'ability_messages.txt', ab, part, actx);
             if (txt) pklmTurnLog += txt + ". ";

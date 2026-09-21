@@ -86,6 +86,30 @@
   - ✅ **已实现**：**0.6.14** 建 `pklmMyItemProved` 旁证表（只有消息能写）+ `pklmCollectMyActive` 输出 `itemProved`/`itemProvedSrc`（直读为空且有旁证时才用）+ tool 侧 prompt 三分支（`Item:(none … STALE)` 警告）与 `from_state` 兜底；**0.6.15** 把范围从戏法扩到**整个道具消息族**（招式 16/23/70/105/132/160/162 + 特性 23 察觉/78 顺手牵羊/88 收获/93 捡拾/122 黏着/156 熟成），统一走 `pklmItemGain` / `pklmItemLose`，并**显式登记「失去」**（否则 proved 会在道具被打落后复活）、`%i` 一律取回调 `other`、销毁类消息不再回填对手道具、旁证表每局重置。
   - ⚠️ **残余缺口**（不影响当前结论，记录备查）：① **190 最佳礼物**（`%f took the kind offer!`）模板里**没有 `%i`**，拿不到编号 → 该事件只记「失去」不记「得到」；② **Symbiosis/162** 在单打里几乎不出现，双打才有意义（暂按 foe 得到处理）；③ **po-script 没有 Node 侧测试脚手架**（`battle`/`sys` 全是 PO 运行时对象）→ 这套「得到/失去」逻辑目前只有 `node --check` 保护，**没有单测**；要做的话得先写一个 stub（`sys.item`/`pklmGetMsgTable`/`battle.me|opp`）再 `eval` 出回调对象，属于独立工程。
 
+- [ ] 🔴 **「PO 渲染 vs 信息获取」的总账：消息里还编码着大量我们没挖的状态（用户 2026-09-21 提出「这些问题主要还是 po 渲染跟信息获取有 gap…特性消息跟招式消息也都有解读其他内容的说法吧？对照下主脚本」）**：
+  - **前提（为什么要靠消息）**：`battle.data` 只暴露 `field.weather` / `field.terrain` / `field.zone(i)`（陷阱）/ `field.poke(spot).statBoost(i)`、`.substitute`、`.onTheField` / `field.poke(spot).pokemon.status|ability|item|move(i)`（见 [battle-object.md](docs/reference/battle-object.md)）。**挑拨/再来一次/定身法/寄生种子/哈欠/扎根/磁力/击坠/燃尽/顺风/神秘守护/属性替换/对手已用过哪些招**这些**读不到**，只能从消息重建 —— 主脚本 `analyseCurrentMoveMess` / `analyseCurrentAbility` / `analyseCurrentItem` 就是在干这件事。
+  - **招式消息对照（主脚本挖 20 类，我们只挖 2 类）**：
+    | 主脚本从 move 消息挖出 | 我们 |
+    |---|---|
+    | `item`（23 stole / 70 knocked off / 105 recycled / 132 trick / 160 burned / 162 gave） | ✅ 0.6.15 |
+    | 双墙/极光幕（73 / 236） | ✅ 0.6.6 |
+    | **顺风**（133）/ **神秘守护**（109） | ❌ |
+    | `lastMove` 记录与清空（11 / 13 / 104） | ❌ |
+    | **属性替换** `temptype`（14 / 19 / 20 / 157）—— 泡水/森林诅咒/万圣夜/羽栖/燃尽 会改属性 | ❌ |
+    | **定身法** `disabledMove`（28） | ❌ |
+    | **再来一次** encore（33）/ **挑拨** taunt（134） | ❌ |
+    | **寄生种子** seeded（72 / 103）/ **扎根** rooted（107 / 151） | ❌ |
+    | **哈欠** drowsy（144）/ **灭歌** perishSong（95） | ❌ |
+    | **混乱** confused（93）/ **诅咒** cursed（25） | ❌ |
+    | **磁力** magnetRise（68 / 174）/ **击坠** smackDown（175）/ **燃尽** burnUp（233） | ❌ |
+    | **特性被改/被压制** `tempability`（51 / 231 胃酸·烦恼种子 / 108 / 112 / 143 / 158 交换特性·木乃伊…） | ❌（我们另在 onAbilityMessage 做「消息→特性 id」识别） |
+    | **我方被迫换人** `needSwitch`（95 / 108 / 143 / 144 / 158，`other === 54`） | ❌（靠 PO 的 onOfferChoice 兜底，没显式建模） |
+  - **关键区别**：这些消息的**文本我们大多已经在渲染**（`pklmRenderMsg` 是通用的）→ LLM 在 history 里能读到散文（"X fell for the taunt!"），缺的是 ① **结构化状态**（能查、能当约束用）与 ② **占位符来源正确**（填错就变假话）—— 后者才是真 bug，本轮已修掉两类（`%i` 0.6.15 / 特性消息的 `%m` 0.6.17）。
+  - **道具消息对照（两种做法互补，不是谁对谁错）**：主脚本用「消息号 → 道具 id」硬表（3→白药草、12→剩饭、21→命玉…）**并且 default 分支 `info.item = 0`** —— 等于「凡是不在表里的道具消息 = 道具没了」，于是打折/烧尽/树果/气息腰带**全都**被清掉（歪打正着）；我们用「文本清单认名（`PKLM_ITEM_HINTS` 31 项）+ 消耗白名单」（0.6.16）。主脚本那种硬表在「名字不在文本里」时更稳，值得以后合并成**两张表都查**。
+  - **特性消息对照**：主脚本 `analyseCurrentAbility` **纯粹是「消息号 → 特性 id」**（+ 极少数 `temptype`/`tempability`），我们的 `pklmAnalyseAbility` 是它的逐条移植 → **识别侧没有 gap**。但主脚本**不从特性消息里挖道具** → 我们 0.6.15 加的 察觉23 / 顺手牵羊78 / 收获88 / 捡拾93 是**超出主脚本的新地面**，其中「`%i` ← 回调 `other`」是**按约定推的、尚未实测**（打一局遇到察觉/收获即可坐实或推翻）。
+  - **顺带一个高价值探针（未做）**：`battle-object.md` 在 `field.poke(0).pokemon` 上列了 `ev(int)` / `iv(int)` / `nature` / `hiddenPower` / `level`。当前我们**假设对手的 ev/iv/nature 读不到**（所以要做 EV 反推），但这个假设**只在 `move(i)` 上实测过**（对手恒 num=0/PP=0）。→ 值得试一把 `field.poke(opp).pokemon.ev(1)` / `.nature`：若能读到，对手伤害计算就不用再猜 EV 了。
+  - **建议优先级**：① 顺风/神秘守护（和已有双墙同一处，成本最低）→ ② 挑拨/再来一次/定身法（直接影响「它这回合能不能用变化招」这类判断）→ ③ 哈欠/灭歌/寄生种子（影响「还剩几回合」）→ ④ 属性替换 + 扎根/磁力/击坠/燃尽（影响克制与免疫）→ ⑤ `lastMove`/`tempability`/`needSwitch`。
+
 - [ ] 🔴 **`simulate_turn` 不建模「入场特性」→ 会把某条线的全部价值漏算掉（2026-09-21 battle99 T19 实测）**：
   - **现场**：Sandaconda 倒下要补位，对手 Barraskewda 100%（408 速物理水系），我方剩 Escavalier 11% / Ninetales 59% / Slurpuff 72%。工具算 `Liquidation → Ninetales = 100-118% guaranteed OHKO`，于是 LLM 判"换 Ninetales 就是白送"、否掉了「换九尾开晴天」这条线，改选 Slurpuff（吃 42-49%）。
   - **实际数值**（同一 state，只把 weather 改成 Sun 复算）：Ninetales **Drought 是入场特性**，换入即开晴天 → Liquidation 变 **49-59%（仅 6.3% 概率 OHKO，93.7% 活）**；同时 Slurpuff 只吃 **20-24%**（而非 42-49%）。也就是说用户那条线在数值上明显更优，而 LLM 用它自己算出的"必死"数字否掉了它 —— **不是幻觉**，`unknown[]` 里确实写了 `ability triggers on switch-in (Intimidate / weather setters / etc.) are NOT modelled`，但它没手动补 ×0.5。
