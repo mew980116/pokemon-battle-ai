@@ -68,7 +68,7 @@
   - **注意**：tag 是 LLM 自己的判断，**必须标注 [estimated]/[proved]** 并允许被后续信息推翻（与 `save_observation` 的 threat level 同一套可信度口径）；另外 tag 会随对局变化（对手某只倒了 → 对应的 check 失效），需要有失效机制，否则会变成另一种"陈旧数据"。
   - **依赖**：可以先复用 `save_observation` 的结构（每只一条、可覆盖），不一定要新开 tool。
 
-- [ ] 🔴 **我方道具只用 `poke.item` 直读 → Switcheroo/Trick 之后失真；按主脚本的做法改成「从消息维护」+「[proved] 不允许被空读覆盖」**（用户 2026-09-21 提出「主脚本当时还有围巾解析，要不移植一下？」/「能否 proved 的信息不允许简单覆盖」）：
+- [x] ✅ **我方道具只用 `poke.item` 直读 → Switcheroo/Trick 之后失真；按主脚本的做法改成「从消息维护」+「[proved] 不允许被空读覆盖」**（用户 2026-09-21 提出「主脚本当时还有围巾解析，要不移植一下？」/「能否 proved 的信息不允许简单覆盖」）—— **已完成（script 0.6.14 + 0.6.15）**：
   - **事实（battle99 T16）**：history 文本明确写了 `Ninetales obtained one Choice Scarf!`（**消息层拿到了**），但 `state.me.item` 从这一回合起变成空。T20 因此用陈旧的「我还有围巾」断言先手，实际被 408 速的 Barraskewda 先手秒掉 —— 见 [错题集.md](po-pokellmon-tool/错题集.md) E003。
   - **po-script 现状**：我方道具只读 `pklmPoke(me).item` → `sys.item(n)`（[po-script.js](po-pokellmon/po-script.js) `pklmCollectMyActive`）；`pklmInferItem(txt)`（从消息文本认道具名，0.6.8 加的）**只用在对手身上**。
   - **主脚本（[20201227.js](20201227.js)）的做法完全不同 —— 不读 `poke.item`，而是从消息回调的参数维护**：`analyseCurrentItem(itemMess, part)`，其中 `case 23 / 105 / 162: info.item = other`（道具被公开）、`case 132: part 0 → poke(foe).item, part 1 → other`（**Trick/Switcheroo 的交换**）、`case 70 / 160: info.item = 0`（被拿走/消耗）。这就是用户说的「围巾解析」→ **给我方也建一条「从消息 / 回调 `other` 参数维护道具」的路**。
@@ -83,6 +83,8 @@
     - **换道具（Trick/Switcheroo）不走 `onItemMessage`**：全 26 回合里 `itemProbe` 的 msg 分布 `{5:1, 12:7, 21:4, 8000:1, 8006:1}`（剩饭回血 / 命玉反伤 / 吃果子 / 果子消耗 / 道具暴露），**Trick 那回合一条都没有**，而战报文本里明明出现了 "switched items with …!. obtained one …!"。→ 换道具的提示是走 **`onMoveMessage`**（move = Trick / Switcheroo / Bestow）渲染的，所以**移植的落点在 `onMoveMessage` 而不是 `onItemMessage`**（主脚本 case 132 的 `part 0 → poke(foe).item / part 1 → other` 对应的应该是它）。
     - **消息文本同样不可信**：Trick 那句 "Indeedee obtained one **Choice Scarf**!" 用的是**我方当前/旧道具**渲染的（同一来源），是假话 —— 与 battle99 T16 的 "Ninetales obtained one Choice Scarf!" 同一个 bug。
     - **下一步**：① 给探针加一个 `onMoveMessage` 记录点（只记换道具类招式的原始参数 `move/part/foe/other`），跑一把确认 `other` 里到底带不带道具编号；② 再加「消息驱动 + [proved] 不被空读覆盖」的我方道具维护。
+  - ✅ **已实现**：**0.6.14** 建 `pklmMyItemProved` 旁证表（只有消息能写）+ `pklmCollectMyActive` 输出 `itemProved`/`itemProvedSrc`（直读为空且有旁证时才用）+ tool 侧 prompt 三分支（`Item:(none … STALE)` 警告）与 `from_state` 兜底；**0.6.15** 把范围从戏法扩到**整个道具消息族**（招式 16/23/70/105/132/160/162 + 特性 23 察觉/78 顺手牵羊/88 收获/93 捡拾/122 黏着/156 熟成），统一走 `pklmItemGain` / `pklmItemLose`，并**显式登记「失去」**（否则 proved 会在道具被打落后复活）、`%i` 一律取回调 `other`、销毁类消息不再回填对手道具、旁证表每局重置。
+  - ⚠️ **残余缺口**（不影响当前结论，记录备查）：① **190 最佳礼物**（`%f took the kind offer!`）模板里**没有 `%i`**，拿不到编号 → 该事件只记「失去」不记「得到」；② **Symbiosis/162** 在单打里几乎不出现，双打才有意义（暂按 foe 得到处理）；③ **po-script 没有 Node 侧测试脚手架**（`battle`/`sys` 全是 PO 运行时对象）→ 这套「得到/失去」逻辑目前只有 `node --check` 保护，**没有单测**；要做的话得先写一个 stub（`sys.item`/`pklmGetMsgTable`/`battle.me|opp`）再 `eval` 出回调对象，属于独立工程。
 
 - [ ] 🔴 **`simulate_turn` 不建模「入场特性」→ 会把某条线的全部价值漏算掉（2026-09-21 battle99 T19 实测）**：
   - **现场**：Sandaconda 倒下要补位，对手 Barraskewda 100%（408 速物理水系），我方剩 Escavalier 11% / Ninetales 59% / Slurpuff 72%。工具算 `Liquidation → Ninetales = 100-118% guaranteed OHKO`，于是 LLM 判"换 Ninetales 就是白送"、否掉了「换九尾开晴天」这条线，改选 Slurpuff（吃 42-49%）。

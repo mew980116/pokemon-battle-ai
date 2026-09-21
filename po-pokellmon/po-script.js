@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8092";
-var PKLM_VERSION = "0.6.14";      // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.6.15";      // 脚本版本（改动时 bump，随日志记录）
 var pklmLastWebFailTime = 0;       // 上次 webCall 失败时间戳（ms），用于断线时节流重发
 var pklmSilent = false;            // 静默模式：清分少女等无人值守 BOT 账号不向 PO 窗口 print 任何脚本输出
 var pklmFailCount = 0;             // 连续 webCall 失败次数（成功即归零）
@@ -384,13 +384,24 @@ function pklmCheckMsgFiles() {
 
 // 渲染一条消息：查表 -> 选变体 -> 替换占位符
 // ctx: { s,f,m,i,t,a,q,st,p,ts,tf }
-function pklmRenderMsg(kind, fileName, msgNum, part, ctx) {
+// 取消息模板原文（part 越界时退回 part 0）
+function pklmMsgTemplate(kind, fileName, msgNum, part) {
     if (msgNum === undefined || msgNum === null || msgNum === 0) return null;
     var map = pklmGetMsgTable(kind, fileName);
     var variants = map[msgNum];
     if (!variants || !variants.length) return null;
     if (part === undefined || part === null || part < 0 || part >= variants.length) part = 0;
-    var t = variants[part];
+    return variants[part] || null;
+}
+
+// 模板里有没有某个占位符（用来判断 `%i` 该不该用回调的 `other` 覆盖）
+function pklmMsgHasI(kind, fileName, msgNum, part) {
+    var t = pklmMsgTemplate(kind, fileName, msgNum, part);
+    return !!(t && t.indexOf('%i') >= 0);
+}
+
+function pklmRenderMsg(kind, fileName, msgNum, part, ctx) {
+    var t = pklmMsgTemplate(kind, fileName, msgNum, part);
     if (!t) return null;
     // 先替换三字符占位符（%st/%ts/%tf），避免被 %s/%t/%f 误伤
     var order = [['%st', ctx.st], ['%ts', ctx.ts], ['%tf', ctx.tf],
@@ -453,6 +464,8 @@ function pklmItemLabel(spot) {
 //   ② field.poke(me).pokemon.item：在「失去/消耗」时**不回退**（停在旧值），完全不可信。
 // 所以只能靠**消息**：换道具是 move 消息 **132**（`%s switched items with %f!` / `%s obtained one %i!`），
 // 其中 part 1 的回调参数 `other` 就是该侧**获得的道具编号** —— 主脚本 case 132 用的正是它。
+// （同族的还有打落 70 / 偷取 23 / 虫咬啄食 16 / 烧尽 160 / 回收 105 / 传递 162，以及特性侧的
+//  察觉 23 / 顺手牵羊 78 / 收获 88 / 捡拾 93 / 黏着 122 / 熟成 156 —— 统一走下面的「得到/失去」入口。）
 // 原则：只有消息能写这份旁证；直读为空且没有旁证时，如实回「读不到」，绝不猜。
 var pklmMyItemProved = {};   // numRef -> { raw, name, src }
 function pklmMyItemNumRef() {
@@ -463,6 +476,54 @@ function pklmMyItemProve(raw, src) {
     if (k === null || k === undefined) return;
     pklmMyItemProved[k] = { raw: raw, name: pklmItemName(raw), src: src };
     pklmPrint("my item PROVED: " + (pklmItemName(raw) || '(none)') + "  [" + src + "]");
+}
+
+// ==== 道具「得到 / 失去」事件（统一入口）====
+// 消息表里凡是模板带 `%i` 的，`%i` 就是回调的 `other`（与 %m / %st / %a 同一机制：other = 该消息的数字参数）。
+// 方向（谁得到、谁失去）逐条写死在下表，依据 = 主脚本 20201227.js `analyseCurrentMoveMess` 的
+//   case 23 stole → spot 得到 other / case 70 knocked off → foe 失去 / case 105 recycled → spot 得到 /
+//   case 132 part1 obtained one → spot 得到 / case 160 burned → foe 失去 / case 162 gave → foe 得到。
+// 注意：**招式表与特性表的编号是两套**（都叫 23，招式是「偷取」、特性是「察觉」），所以别共用同一张表。
+//
+// 「失去」必须显式登记：否则 itemProved 会在道具被打落/被偷/烧尽之后**复活**
+// （直读正确地变 0，但旧旁证还在 → 输出层 `!item && itemProved.raw` 成立 → 把早就不在的道具当权威值写进 prompt）。
+var PKLM_MOVE_MSG_STEAL = { 23: 1 };              // 小偷 / 索取：spot 得到 + foe 失去
+var PKLM_MOVE_MSG_REGAIN = { 105: 1 };            // 回收：spot 单方得到
+var PKLM_MOVE_MSG_GIVE_FOE = { 162: 1 };          // 传递类：foe 得到
+var PKLM_MOVE_MSG_LOSE_FOE = { 16: 1, 70: 1, 160: 1 };  // 虫咬·啄食（吃掉）/ 打落 / 烧尽：foe 失去
+var PKLM_MOVE_MSG_SWAP = { 132: 1 };              // 戏法 / 掉包：part1 spot 得到
+// 这几条是「道具被销毁」，文本里出现的那个名字恰恰说明它**已经没了** → 不能用文本回填对手道具
+var PKLM_MOVE_MSG_ITEM_GONE = { 16: 1, 70: 1, 160: 1 };
+var PKLM_ABIL_MSG_STEAL = { 78: 1 };              // 顺手牵羊：spot 得到 + foe 失去
+var PKLM_ABIL_MSG_REGAIN = { 88: 1, 93: 1 };      // 收获 / 捡拾：spot 单方得到
+var PKLM_ABIL_MSG_FRISK = { 23: 1 };              // 察觉：**只是暴露** foe 的道具，不改变归属
+var PKLM_ABIL_MSG_STICKY = { 122: 1 };            // 黏着：打落/戏法/偷取一律失败
+var PKLM_ABIL_MSG_LOSE_SPOT = { 156: 1 };         // 熟成：吃掉自己的果子
+
+var pklmStickyHold = {};   // 'me:<numRef>' / 'opp:<slot>' -> true
+
+// 消息里的 `%i` 取值：道具编号就是 `other`；读不出（0 / "(No Item)"）时返回空串，让上层保留原渲染
+function pklmItemArgName(other) {
+    if (!other) return '';
+    var n = pklmItemName(other);
+    if (!n || n === '(No Item)') return '';
+    return n;
+}
+
+// spot 这一侧**得到** raw 这个道具
+function pklmItemGain(spot, raw, src) {
+    if (!raw) return;
+    if (spot === battle.me) { pklmMyItemProve(raw, src); return; }
+    var nm = pklmItemName(raw);
+    if (nm) pklmOppItem[pklmCurrentOppSlot] = nm;
+}
+
+// side 这一侧**失去**道具（raw 未知，只知道没了）。黏着特性会让所有失去事件不成立 → 直接跳过。
+function pklmItemLose(side, src) {
+    var key = (side === battle.me) ? ('me:' + pklmMyItemNumRef()) : ('opp:' + pklmCurrentOppSlot);
+    if (pklmStickyHold[key]) return;
+    if (side === battle.me) { pklmMyItemProve(0, src); return; }
+    pklmOppItem[pklmCurrentOppSlot] = null;
 }
 
 
@@ -1165,7 +1226,13 @@ function pklmSpotLabel(spot) {
             var kind = (berry && berry !== 0) ? 'berry' : 'item';
             var file = (kind === 'berry') ? 'berry_messages.txt' : 'item_messages.txt';
             var msgNum = (kind === 'berry') ? berry : item;
-            var txt = pklmRenderMsg(kind, file, msgNum, part, pklmMsgCtx(spot, undefined, other, undefined));
+            // `%i` 用回调 `other`（消息的数字参数就是道具编号）；读不出时保留原渲染（不猜）
+            var ictx = pklmMsgCtx(spot, undefined, other, undefined);
+            if (pklmMsgHasI(kind, file, msgNum, part)) {
+                var inm = pklmItemArgName(other);
+                if (inm) ictx.i = inm;
+            }
+            var txt = pklmRenderMsg(kind, file, msgNum, part, ictx);
             if (txt) pklmTurnLog += txt + ". ";
             // 对手道具：道具消息一旦触发，说明该道具已被「公开暴露」→ 记下来供 use_state 用。
             // 注意：**不能**用 pklmPoke(battle.opp).item —— 实测 PO 对对手恒返回 0（sys.item(0)="(No Item)"），
@@ -1211,28 +1278,39 @@ function pklmSpotLabel(spot) {
     onMoveMessage: function (spot, move, part, type, foe, other, q) {
         try {
             pklmCb("onMoveMessage", "move=" + move + " part=" + part + " type=" + type + " foe=" + foe + " other=" + other + " q=" + q);
-            // 「obtained one %i」（msg 132 / part 1）里的 %i 必须是**获得的**那个道具 = 回调的 `other`；
-            // 用 pklmItemLabel(spot)（= 当前 poke.item）会写出自己换出去的那个，是假话（battle104 T11 实测）。
+            // 消息里的 `%i`（道具名）= 回调的 `other`，**不是**当前持有者的道具：
+            // 用 pklmItemLabel(spot) 会在对手侧渲染成 "[item hidden by PO]"（名字直接丢掉），
+            // 在我方侧渲染成我方的道具（方向可能正好相反）。battle104 T11 就是被这个坑写成
+            // 「Indeedee obtained one Choice Scarf!」（它当场其实拿到的是 Choice Specs）。
             var mctx = pklmMsgCtx(spot, type, other, q);
-            if (move === 132 && part === 1 && other) mctx.i = pklmItemName(other);
+            if (pklmMsgHasI('move', 'move_message.txt', move, part)) {
+                var inm = pklmItemArgName(other);
+                if (inm) mctx.i = inm;
+            }
             var txt = pklmRenderMsg('move', 'move_message.txt', move, part, mctx);
             if (txt) pklmTurnLog += txt + ". ";
-            // 换道具（move 消息 132）：part 0 = "%s switched items with %f!"，part 1 = "%s obtained one %i!"。
-            // 关键：**part 1 的 `other` 才是该侧「获得的」道具编号** —— 直接用 `poke.item` 渲染会写出
-            // 「我 obtained one 自己换出去的那个」（battle104 T11 实测：Indeedee 换出围巾、却写 "obtained one Choice Scarf"），
-            // 所以这里既用它维护我方道具，也用它覆盖渲染（见下）。
-            if (move === 132 && part === 1 && other) {
-                if (spot === battle.me) {
-                    // 我方获得了 other（我方用 Trick，或被对面 Trick 换到）→ 这是唯一可信的我方道具来源
-                    pklmMyItemProve(other, 'msg132 part1 (obtained by swap)');
-                } else if (spot === battle.opp) {
-                    // 对手获得了 other = **我们刚刚交出去的那个** → 顺带把对手道具记下来（本来读不到）
-                    var swappedAway = pklmItemName(other);
-                    if (swappedAway) pklmOppItem[pklmCurrentOppSlot] = swappedAway;
-                }
+            // 道具流向（依据 = 主脚本 analyseCurrentMoveMess 的 case 16/23/70/105/132/160/162）。
+            // 顺序要紧：**先登记失去、再登记得到** —— 戏法/偷取是同一事件里「一进一出」，
+            // 反过来的话 gain 会被紧随其后的 lose 抹掉。
+            if (PKLM_MOVE_MSG_SWAP[move] && part === 1) {
+                // 戏法 / 掉包：part1 `%s obtained one %i!` → spot 得到 other，对侧失去（对侧拿到的是我们换出去的）
+                pklmItemLose(spot === battle.me ? battle.opp : battle.me, 'msg' + move + ' part1 (swapped away)');
+                pklmItemGain(spot, other, 'msg' + move + ' part1 (obtained by swap)');
+            } else if (PKLM_MOVE_MSG_STEAL[move]) {
+                // 小偷 / 索取：spot 得到 other，foe 失去
+                pklmItemLose(foe, 'msg' + move + ' (stolen from)');
+                pklmItemGain(spot, other, 'msg' + move + ' (stole)');
+            } else if (PKLM_MOVE_MSG_LOSE_FOE[move]) {
+                // 虫咬·啄食 / 打落 / 烧尽：foe 的道具被吃掉或销毁，other 是那个（已不在的）道具
+                pklmItemLose(foe, 'msg' + move + ' (destroyed/consumed)');
+            } else if (PKLM_MOVE_MSG_REGAIN[move]) {
+                pklmItemGain(spot, other, 'msg' + move + ' (recycled)');
+            } else if (PKLM_MOVE_MSG_GIVE_FOE[move]) {
+                pklmItemGain(foe, other, 'msg' + move + ' (given)');
             }
-            // 招式消息里也可能暴露对手道具（如吹落："X knocked off the foe's Y's Choice Specs!"）
-            if ((foe || spot === battle.opp) && txt) {
+            // 招式消息里也可能暴露对手道具（如察觉类/道具被点名的那些）。
+            // **销毁类消息要排除**：文本里出现那个名字恰恰说明它已经没了，回填等于把错数据喂给 LLM。
+            if (!PKLM_MOVE_MSG_ITEM_GONE[move] && (foe || spot === battle.opp) && txt) {
                 var infItem2 = pklmInferItem(txt);
                 if (infItem2) pklmOppItem[pklmCurrentOppSlot] = infItem2;
             }
@@ -1255,7 +1333,13 @@ function pklmSpotLabel(spot) {
     onAbilityMessage: function (spot, ab, part, type, foe, other) {
         try {
             pklmCb("onAbilityMessage", "ab=" + ab + " part=" + part + " type=" + type + " foe=" + foe + " other=" + other);
-            var txt = pklmRenderMsg('ability', 'ability_messages.txt', ab, part, pklmMsgCtx(spot, type, other, undefined, other));
+            // `%i` 同样取回调 `other`（察觉 23「frisked %f and found its %i」、顺手牵羊 78、收获 88、捡拾 93）
+            var actx = pklmMsgCtx(spot, type, other, undefined, other);
+            if (pklmMsgHasI('ability', 'ability_messages.txt', ab, part)) {
+                var ainm = pklmItemArgName(other);
+                if (ainm) actx.i = ainm;
+            }
+            var txt = pklmRenderMsg('ability', 'ability_messages.txt', ab, part, actx);
             if (txt) pklmTurnLog += txt + ". ";
             if (spot === battle.opp) {
                 pklmOppAbilityTriggered = true;  // 本回合触发过特性消息（供反向排除）
@@ -1263,6 +1347,29 @@ function pklmSpotLabel(spot) {
                 if (ability > 0) {
                     pklmOppAbility[pklmCurrentOppSlot] = ability;
                 }
+            }
+            // 黏着（122）：这只的道具**永远不会**被拿走（打落/戏法/偷取全都失败）→ 记下来，
+            // 之后所有「失去」事件一律跳过。不记的话会把「黏着挡住了打落」误当成「道具被销毁」。
+            if (PKLM_ABIL_MSG_STICKY[ab]) {
+                var skey = (spot === battle.me) ? ('me:' + pklmMyItemNumRef()) : ('opp:' + pklmCurrentOppSlot);
+                pklmStickyHold[skey] = true;
+            }
+            // 察觉（23）：`%s frisked %f and found its %i!` —— 只是**暴露** foe 的道具，不改归属。
+            // 这是少数几个能直接读到对手道具的来源（PO 对对手 poke.item 恒返回 0），别浪费。
+            if (PKLM_ABIL_MSG_FRISK[ab] && foe === battle.opp) {
+                var fnm = pklmItemArgName(other);
+                if (fnm) pklmOppItem[pklmCurrentOppSlot] = fnm;
+            }
+            // 顺手牵羊（78）：spot 得到 + foe 失去（同「小偷」，先失去后得到）
+            if (PKLM_ABIL_MSG_STEAL[ab]) {
+                pklmItemLose(foe, 'ability msg ' + ab + ' (stolen from)');
+                pklmItemGain(spot, other, 'ability msg ' + ab + ' (stole)');
+            } else if (PKLM_ABIL_MSG_REGAIN[ab]) {
+                // 收获（88）/ 捡拾（93）：spot 单方面重新拿到道具，没有对侧失去
+                pklmItemGain(spot, other, 'ability msg ' + ab + ' (regained)');
+            } else if (PKLM_ABIL_MSG_LOSE_SPOT[ab]) {
+                // 熟成（156）：吃掉自己的果子 → spot 失去
+                pklmItemLose(spot, 'ability msg ' + ab + ' (berry eaten)');
             }
         } catch (e) {}
     },
@@ -1276,6 +1383,8 @@ function pklmSpotLabel(spot) {
         pklmCurrentOppSlot = 0;
         pklmOppAbility = [-1, -1, -1, -1, -1, -1];
         pklmOppItem = [null, null, null, null, null, null];
+        pklmMyItemProved = {};      // 我方道具旁证按 numRef 存 → **必须**每局重置，否则上一局换到的道具会漏到下一局
+        pklmStickyHold = {};        // 黏着记录同理
         pklmScreens = { me: {}, opp: {} };
         pklmOppPossible = [[], [], [], [], [], []];
         pklmOppJustSwitched = false;
