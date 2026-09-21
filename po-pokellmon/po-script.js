@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8092";
-var PKLM_VERSION = "0.6.15";      // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.6.16";      // 脚本版本（改动时 bump，随日志记录）
 var pklmLastWebFailTime = 0;       // 上次 webCall 失败时间戳（ms），用于断线时节流重发
 var pklmSilent = false;            // 静默模式：清分少女等无人值守 BOT 账号不向 PO 窗口 print 任何脚本输出
 var pklmFailCount = 0;             // 连续 webCall 失败次数（成功即归零）
@@ -499,6 +499,28 @@ var PKLM_ABIL_MSG_REGAIN = { 88: 1, 93: 1 };      // 收获 / 捡拾：spot 单�
 var PKLM_ABIL_MSG_FRISK = { 23: 1 };              // 察觉：**只是暴露** foe 的道具，不改变归属
 var PKLM_ABIL_MSG_STICKY = { 122: 1 };            // 黏着：打落/戏法/偷取一律失败
 var PKLM_ABIL_MSG_LOSE_SPOT = { 156: 1 };         // 熟成：吃掉自己的果子
+// 一次性消耗类**道具消息**（onItemMessage 的 `item`；触发即用完 → 该侧道具归零）。
+// 依据 po-data/items/item_messages.txt 逐条核对。**不消耗的那些绝不能进来**：
+//   4 气息头巾 / 12 剩饭 / 16 黑泥 / 17 快爪 / 19 火珠·毒珠 / 21 命玉 / 24 贝壳铃 / 29 附着针 /
+//   34 粗糙头盔 / 41 宿命绳 / 42 安全护目镜 / 78 万能伞 / 79 厚底靴（都是常驻或每次触发都还在）。
+var PKLM_ITEM_MSG_CONSUME = {
+    3: 1,    // 白药草 White Herb
+    5: 1,    // 气息腰带 Focus Sash
+    7: 1,    // 精神药草 Mental Herb
+    11: 1,   // 力量药草 Power Herb
+    18: 1,   // 果汁 Berry Juice
+    38: 1,   // 红牌 Red Card
+    39: 1,   // 逃脱按钮 Eject Button
+    40: 1,   // 狂暴基因 Berserk Gene
+    43: 1,   // 弱点保险 Weakness Policy
+    71: 1,   // 胆怯球 Adrenaline Orb
+    74: 1,   // 喉咙喷雾 Throat Spray
+    75: 1,   // 逃脱包 Eject Pack
+    76: 1,   // 大失误保险 Blunder Policy
+    77: 1    // 客房服务 Room Service
+};
+// 分 part 判断的：35 = 气球，只有 part0「popped!」才消耗（part1 是「is floating on a balloon」还带着）
+var PKLM_ITEM_MSG_CONSUME_PART = { 35: 0 };
 
 var pklmStickyHold = {};   // 'me:<numRef>' / 'opp:<slot>' -> true
 
@@ -1223,16 +1245,32 @@ function pklmSpotLabel(spot) {
     onItemMessage: function (spot, item, part, foe, berry, other) {
         try {
             pklmCb("onItemMessage", "item=" + item + " part=" + part + " foe=" + foe + " berry=" + berry + " other=" + other);
-            var kind = (berry && berry !== 0) ? 'berry' : 'item';
-            var file = (kind === 'berry') ? 'berry_messages.txt' : 'item_messages.txt';
-            var msgNum = (kind === 'berry') ? berry : item;
-            // `%i` 用回调 `other`（消息的数字参数就是道具编号）；读不出时保留原渲染（不猜）
+            // 树果事件判据（实测 battle104 itemProbe）：`berry` = 树果的**道具编号**（8015 = Iapapa Berry），
+            // `item` = 「树果消息号 + 8000」（8000 → berry_messages[0] `%s ate its %i!`；
+            // 8006 → [6] `%s restored some HP!` —— 两条都与战报原文吻合）。
+            // 旧代码拿 `berry` 当消息号查表 → 永远 txt:null；而且 berry=0 的那条（8006）会被误判成道具消息。
+            // 旁证：主脚本 onItemMessage 也是「berry!==0 → 走 berry 分支」，只是它把 berry 直接当消息号用，
+            // 于是落到 analyseCurrentItem 的 default → `info.item = 0`（歪打正着地做对了「树果一响就清道具」）。
+            var isBerry = (berry && berry !== 0) || item >= 8000;
+            var kind = isBerry ? 'berry' : 'item';
+            var file = isBerry ? 'berry_messages.txt' : 'item_messages.txt';
+            var msgNum = isBerry ? ((item >= 8000) ? (item - 8000) : berry) : item;
             var ictx = pklmMsgCtx(spot, undefined, other, undefined);
-            if (pklmMsgHasI(kind, file, msgNum, part)) {
-                var inm = pklmItemArgName(other);
-                if (inm) ictx.i = inm;
+            if (isBerry && berry) {
+                var bn = pklmItemName(berry);            // 树果名直接可读（不必靠文本清单）
+                if (bn) ictx.i = bn;
             }
+            // 注意：**非树果的道具消息不要**用 `other` 覆盖 `%i`。带 `%i` 的只有 36/37
+            // （`%s's %i raised its %st!` / `%s's %i raised %m's power!`），那里的 `%i` 是**持有者自己的道具**
+            // （同一个模板里 `%st` 才吃 `other` —— 与 berry msg 7 `The %i raised %s's %st!` 同构：一个 `other` 不能同时
+            // 表示两个东西）。所以这里保留 `pklmItemLabel(spot)` 的原渲染。
             var txt = pklmRenderMsg(kind, file, msgNum, part, ictx);
+            // 兜底：树果事件没查到模板时（消息编号不是 item-8000 而是别的编法），至少把「哪只吃掉了哪个果子」如实写出来，
+            // 别再静默吞掉（旧代码这里永远 txt:null，整条树果事件在战报里是空白）。
+            if (!txt && isBerry && berry) {
+                var bnm = pklmItemName(berry);
+                if (bnm) txt = pklmActiveName(spot) + " consumed its " + bnm + " (berry msg " + item + ", no template)";
+            }
             if (txt) pklmTurnLog += txt + ". ";
             // 对手道具：道具消息一旦触发，说明该道具已被「公开暴露」→ 记下来供 use_state 用。
             // 注意：**不能**用 pklmPoke(battle.opp).item —— 实测 PO 对对手恒返回 0（sys.item(0)="(No Item)"），
@@ -1241,12 +1279,14 @@ function pklmSpotLabel(spot) {
                 var infItem = pklmInferItem(txt);
                 if (infItem) pklmOppItem[pklmCurrentOppSlot] = infItem;
             }
-            // 我方道具的「失去」旁证：道具消息触发时若直读已经是 0，说明它确实没了
-            // （果子被吃掉/消耗、被打落…）→ 清掉 itemProved，别把已经失去的道具一直报下去。
-            if (spot === battle.me && item) {
-                var myNow = 1;
-                try { myNow = pklmPoke(battle.me).item; } catch (e3) {}
-                if (!myNow) pklmMyItemProve(0, 'item msg ' + item + ' (lost)');
+            // 一次性消耗（白药草/气息腰带/精神药草/力量药草/果汁/红牌/逃脱按钮/狂暴基因/弱点保险/
+            // 胆怯球/喉咙喷雾/逃脱包/大失误保险/客房服务 + 气球 part0 + 全部树果）：触发即用完 → 登记失去。
+            // **不看直读**：实测「吃掉」那一刻直读还是旧值（itemProbe: team=8015），真正变 0 要等紧随的
+            // 第二条消息 —— 靠直读会漏；而只发一条消息的道具（逃脱按钮/红牌）更是必然漏。
+            // 放在 inferItem **之后**：被消耗掉的道具不能留在「对手已暴露道具」里。
+            if (isBerry || PKLM_ITEM_MSG_CONSUME[item] || PKLM_ITEM_MSG_CONSUME_PART[item] === part) {
+                pklmItemLose(spot, isBerry ? ('berry msg ' + msgNum + ' (eaten)')
+                                           : ('item msg ' + item + ' (consumed)'));
             }
             // 临时探针（结案后删）：记录道具消息的原始参数 + 我方 6 只当时的 poke.item 原始编号，
             // 用来判 `team(me).poke(0).item` 在 Trick / Switcheroo / 打落 之后到底能不能读（battle99 T16 的疑点）。
