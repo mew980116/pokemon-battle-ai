@@ -91,6 +91,10 @@
 - **DeepSeek 请求必须压「硬墙钟」超时（0.6.1，真 bug）**：原来只有 `req.setTimeout(TIMEOUT_MS)`——那是**空闲超时**（socket idle），连接上只要有零星保活/分块流量就**永远不触发**。
   - 实测（2026-09-20 battle98 T11）：`api.deepseek.com`（117.185.125.154）的连接从 23:42:00 建起到 23:51:24 **仍 Established（564s）**，240s 空闲超时没掐，PO 侧 `sys.synchronousWebCall` 一直阻塞，面板停在「实时 503s 思考中…」。
   - 现在另加一个 `setTimeout` 硬墙钟 deadline（同一时长，`done()` 保证 cb 只回调一次、`res.on('error')` 也接住）。PO 侧兜底：**单次失败→`pklmFallbackAttack()`**，连续 3 次且跨度 >15s 才会认输。
+- **我方道具改用「消息证实值」(itemProved) 兜底（0.7.3）**
+  - 背景：po-script 0.6.14 起，我方道具的**两条直读路都不可用**（`team(me).poke(0).item` 换进来的读不到；`field.poke(me).pokemon.item` 失去时不回退），只能靠 `onMoveMessage` 的 msg 132 旁证。state 因此新增 `me.itemProved` / `me.itemProvedSrc`。
+  - prompt 的 `Item:` 于是分三支：**直读有值** → 正常写；**直读空、有旁证** → `Item:<名字> [PROVED by a swap message: <src> — the direct read returned nothing, this is what it actually obtained]`；**两者都空** → 保留 0.7.1 的 STALE 警告。
+  - `calc_damage` 的 `from_state` 同步：`state.me.item` 为空时改用 `me.itemProved` 并在 `inputs_used` 注明来源 —— 否则「刚用 Trick 换到 Choice Specs」会被算成**没道具**（速度和伤害一起算错）。
 - **修「一次坏 tool 调用把整个 server 带走」（0.7.2，真 bug）**
   - 实测（2026-09-21 battle100）：`simulate_turn` → `toCalcPokemon` 用了一个**计算器里没有的物种**构造 `new SMOGON.Pokemon(...)`。`@smogon/calc` 对未知物种**不报错**，而是崩在 `calcStat` 读 `undefined.hp` → `uncaughtException` → `process.exit(1)` → **8092 直接死**。后果链：PO 侧 `webCall` 连续失败 → 判「server 不可用」→ 认输（battle100 卡在 re-decide，下一局 3 次失败直接 forfeit）。
   - **修两层**：① `toCalcPokemon` 构造前先查 `GEN8DEX.species.get(toID(name))`，拿不到 `baseStats` 就返回明确的 `error`（附带物种名）；构造本身也包 try/catch。② server 的 tool 分发**整段包 try/catch** —— tool 抛异常只回一条 `{error: 'the tool crashed: …'}` 给模型，不再让它带走进程（同时写 `crash.log` 的 `toolThrew` 行便于定位）。

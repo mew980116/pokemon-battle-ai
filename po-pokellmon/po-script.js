@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8092";
-var PKLM_VERSION = "0.6.13";      // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.6.14";      // 脚本版本（改动时 bump，随日志记录）
 var pklmLastWebFailTime = 0;       // 上次 webCall 失败时间戳（ms），用于断线时节流重发
 var pklmSilent = false;            // 静默模式：清分少女等无人值守 BOT 账号不向 PO 窗口 print 任何脚本输出
 var pklmFailCount = 0;             // 连续 webCall 失败次数（成功即归零）
@@ -447,6 +447,25 @@ function pklmItemLabel(spot) {
     return n;
 }
 
+// ==== 我方道具的「消息证实值」(itemProved) ====
+// 实测（battle99 T16 / battle104 T11-T12）两条直读路都不能用：
+//   ① team(me).poke(0).item：**失去**道具时会正确变 0，但**换进来的**道具读不到（读成 0）；
+//   ② field.poke(me).pokemon.item：在「失去/消耗」时**不回退**（停在旧值），完全不可信。
+// 所以只能靠**消息**：换道具是 move 消息 **132**（`%s switched items with %f!` / `%s obtained one %i!`），
+// 其中 part 1 的回调参数 `other` 就是该侧**获得的道具编号** —— 主脚本 case 132 用的正是它。
+// 原则：只有消息能写这份旁证；直读为空且没有旁证时，如实回「读不到」，绝不猜。
+var pklmMyItemProved = {};   // numRef -> { raw, name, src }
+function pklmMyItemNumRef() {
+    try { return pklmTpoke(0).numRef; } catch (e) { return null; }
+}
+function pklmMyItemProve(raw, src) {
+    var k = pklmMyItemNumRef();
+    if (k === null || k === undefined) return;
+    pklmMyItemProved[k] = { raw: raw, name: pklmItemName(raw), src: src };
+    pklmPrint("my item PROVED: " + (pklmItemName(raw) || '(none)') + "  [" + src + "]");
+}
+
+
 function pklmMsgCtx(spot, type, other, q, abilityId) {
     return {
         s: pklmActiveName(spot),
@@ -553,6 +572,10 @@ function pklmCollectMyActive() {
         o.boosts = pklmCollectBoosts(battle.me);
         o.ability = pklmAbilityName(tp.ability);
         o.item = pklmItemName(tp.item);
+        // 直读拿不到（典型：道具被 Trick/Switcheroo 换走后又换进来一个）时，用「消息证实值」补上，
+        // 并如实标注来源，让 LLM 知道这不是直读、以及它是什么时候被证实的。
+        var ipv = pklmMyItemProved[tp.numRef];
+        if (!o.item && ipv && ipv.raw) { o.itemProved = ipv.name; o.itemProvedSrc = ipv.src; }
         o.itemRaw = tp.item;                                  // 临时探针：team(me).poke(0).item 原始编号（结案后删）
         o.itemField = pklmFpoke(battle.me).pokemon.item;       // 临时探针：field.poke(me).pokemon.item 原始编号（另一个来源，结案后删）
     } catch (e) {}
@@ -1151,6 +1174,13 @@ function pklmSpotLabel(spot) {
                 var infItem = pklmInferItem(txt);
                 if (infItem) pklmOppItem[pklmCurrentOppSlot] = infItem;
             }
+            // 我方道具的「失去」旁证：道具消息触发时若直读已经是 0，说明它确实没了
+            // （果子被吃掉/消耗、被打落…）→ 清掉 itemProved，别把已经失去的道具一直报下去。
+            if (spot === battle.me && item) {
+                var myNow = 1;
+                try { myNow = pklmPoke(battle.me).item; } catch (e3) {}
+                if (!myNow) pklmMyItemProve(0, 'item msg ' + item + ' (lost)');
+            }
             // 临时探针（结案后删）：记录道具消息的原始参数 + 我方 6 只当时的 poke.item 原始编号，
             // 用来判 `team(me).poke(0).item` 在 Trick / Switcheroo / 打落 之后到底能不能读（battle99 T16 的疑点）。
             try {
@@ -1181,8 +1211,26 @@ function pklmSpotLabel(spot) {
     onMoveMessage: function (spot, move, part, type, foe, other, q) {
         try {
             pklmCb("onMoveMessage", "move=" + move + " part=" + part + " type=" + type + " foe=" + foe + " other=" + other + " q=" + q);
-            var txt = pklmRenderMsg('move', 'move_message.txt', move, part, pklmMsgCtx(spot, type, other, q));
+            // 「obtained one %i」（msg 132 / part 1）里的 %i 必须是**获得的**那个道具 = 回调的 `other`；
+            // 用 pklmItemLabel(spot)（= 当前 poke.item）会写出自己换出去的那个，是假话（battle104 T11 实测）。
+            var mctx = pklmMsgCtx(spot, type, other, q);
+            if (move === 132 && part === 1 && other) mctx.i = pklmItemName(other);
+            var txt = pklmRenderMsg('move', 'move_message.txt', move, part, mctx);
             if (txt) pklmTurnLog += txt + ". ";
+            // 换道具（move 消息 132）：part 0 = "%s switched items with %f!"，part 1 = "%s obtained one %i!"。
+            // 关键：**part 1 的 `other` 才是该侧「获得的」道具编号** —— 直接用 `poke.item` 渲染会写出
+            // 「我 obtained one 自己换出去的那个」（battle104 T11 实测：Indeedee 换出围巾、却写 "obtained one Choice Scarf"），
+            // 所以这里既用它维护我方道具，也用它覆盖渲染（见下）。
+            if (move === 132 && part === 1 && other) {
+                if (spot === battle.me) {
+                    // 我方获得了 other（我方用 Trick，或被对面 Trick 换到）→ 这是唯一可信的我方道具来源
+                    pklmMyItemProve(other, 'msg132 part1 (obtained by swap)');
+                } else if (spot === battle.opp) {
+                    // 对手获得了 other = **我们刚刚交出去的那个** → 顺带把对手道具记下来（本来读不到）
+                    var swappedAway = pklmItemName(other);
+                    if (swappedAway) pklmOppItem[pklmCurrentOppSlot] = swappedAway;
+                }
+            }
             // 招式消息里也可能暴露对手道具（如吹落："X knocked off the foe's Y's Choice Specs!"）
             if ((foe || spot === battle.opp) && txt) {
                 var infItem2 = pklmInferItem(txt);

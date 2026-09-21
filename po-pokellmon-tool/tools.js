@@ -2252,7 +2252,9 @@ function applyFromState(state, spec, who, slot) {
         if (me.hpPct !== undefined && me.hpPct !== null) takeFromState(out, src, 'hpPct', me.hpPct, 'state.me.hpPct');
         if (me.status && STATE_STATUS_MAP[me.status]) takeFromState(out, src, 'status', STATE_STATUS_MAP[me.status], 'state.me.status');
         takeFromState(out, src, 'ability', me.ability, 'state.me.ability');
-        takeFromState(out, src, 'item', me.item, 'state.me.item');
+        // 我方道具：直读为空但换道具消息证实过 → 用 itemProved（并注明来源），否则会把「刚换到的道具」算成没道具
+        if (me.item) takeFromState(out, src, 'item', me.item, 'state.me.item');
+        else if (me.itemProved) takeFromState(out, src, 'item', me.itemProved, 'state.me.itemProved (direct read empty; proved by a swap message: ' + (me.itemProvedSrc || '?') + ')');
         if (out.ability === undefined) src.ability = 'NOT applied — state has no ability for my active pokemon';
         if (out.item === undefined) src.item = 'NOT applied — state has no item (none held?)';
     }

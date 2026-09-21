@@ -65,7 +65,7 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.7.2';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
+var SERVER_VERSION = '0.7.3';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
 
 // ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
 // 对战主脑用 v4-flash：这个场景（超大计算量 + 幻觉高发）里 pro 的"深想"反而被门禁压制，
@@ -486,9 +486,15 @@ function buildPrompt(state, notes) {
         var meStatus = me.status ? 'Status:' + me.status + ',' : '';
         var meBoosts = (me.boosts && me.boosts.length) ? 'Boosts:[' + me.boosts.join(',') + '],' : '';
         var meAbi = me.ability ? 'Ability:' + me.ability + ',' : '';
-        var meItem = me.item
-            ? 'Item:' + me.item + ','
-            : 'Item:(none / nothing readable — if an earlier turn told you this pokemon held an item (Choice Scarf/Band/Specs, Leftovers …), that is now STALE: Knock Off / Trick / Switcheroo / consumption all clear or change this field. Re-derive any item-dependent speed or damage from the current state, not from your notes),';
+        var meItem;
+        if (me.item) meItem = 'Item:' + me.item + ',';
+        else if (me.itemProved) {
+            // 直读读不到，但换道具的消息证实过它拿到了什么（Trick/Switcheroo）→ 这是权威值，且必须标明来源
+            meItem = 'Item:' + me.itemProved + ' [PROVED by a swap message: ' + (me.itemProvedSrc || '') +
+                ' — the direct read returned nothing, this is what it actually obtained],';
+        } else {
+            meItem = 'Item:(none / nothing readable — if an earlier turn told you this pokemon held an item (Choice Scarf/Band/Specs, Leftovers …), that is now STALE: Knock Off / Trick / Switcheroo / consumption all clear or change this field. Re-derive any item-dependent speed or damage from the current state, not from your notes),';
+        }
         p += 'Your current pokemon:' + me.name + ',Type:' + (me.types || []).join('&') + ',HP:' + (me.hpPct || 0) + '%,' + meAbi + meItem + meStatus + meBoosts + '\n';
         if (me.fainted) {
             p += 'NOTE: Your current pokemon has fainted — REPLACEMENT MODE. Only the switch options are legal (the move entries listed above belong to the fainted pokemon and cannot be used). ' +
