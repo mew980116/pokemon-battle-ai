@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8092";
-var PKLM_VERSION = "0.6.21";      // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.6.22";      // 脚本版本（改动时 bump，随日志记录）
 var pklmLastWebFailTime = 0;       // 上次 webCall 失败时间戳（ms），用于断线时节流重发
 var pklmSilent = false;            // 静默模式：清分少女等无人值守 BOT 账号不向 PO 窗口 print 任何脚本输出
 var pklmFailCount = 0;             // 连续 webCall 失败次数（成功即归零）
@@ -451,6 +451,26 @@ function pklmMoveName(n) {
 // 也能看出「我们渲染成 null（模板没命中）」「占位符没替换留下字面量」「方向反了」这几类问题。
 // 默认 ON（当前是占位符核对轮次）；`/llm probe` 可随时切。
 var pklmMsgProbe = true;
+// probe 同时**落盘**（`sys.appendToFile`）：PO 窗口的内容不会进它自己保存的战报 HTML，
+// 而 PO 原版战报（Logs/Battle Logs/<日期>/….html，含 class="MoveMessage"/"ItemMessage" 分类与
+// PO 自己填好的完整句子）只有 agent 侧能读 → 一边读 HTML、一边读这个 probe 文件，就能把
+// 「PO 的文本」与「我们的原始参数 + 渲染结果」逐行对齐，**不需要人工贴任何东西**。
+var PKLM_PROBE_FILE = '';
+function pklmProbeFilePath() {
+    if (PKLM_PROBE_FILE) return PKLM_PROBE_FILE;
+    var dir = '';
+    try { dir = sys.scriptsFolder; } catch (e) {}
+    if (!dir) { try { dir = sys.getCurrentDir(); } catch (e2) {} }
+    if (!dir) return '';
+    if (dir.charAt(dir.length - 1) !== '/') dir += '/';
+    PKLM_PROBE_FILE = dir + 'pklm-msg-probe.log';
+    return PKLM_PROBE_FILE;
+}
+function pklmProbeReset() {
+    var p = pklmProbeFilePath();
+    if (!p) return;
+    try { sys.writeToFile(p, "# PKLM msg probe  script=" + PKLM_VERSION + "  battle=" + battle.id + "\n"); } catch (e) {}
+}
 
 // 把一个数字按键位去猜它可能是道具/招式/特性哪个（只用于探针展示，帮助判断 other 的语义）
 function pklmDecodeNum(n) {
@@ -468,12 +488,15 @@ function pklmMsgProbeLine(kind, fileName, num, part, spot, foe, other, q, type, 
         var tmpl = pklmMsgTemplate(kind, fileName, num, part);
         var side = function (s) { return (s === battle.me) ? 'ME' : (s === battle.opp ? 'OPP' : String(s)); };
         var dec = pklmDecodeNum(other);
-        pklmPrint("[PKLMP] " + kind + "=" + num + "/" + part
+        var line = "[PKLMP] turn=" + pklmCurrentTurn + " " + kind + "=" + num + "/" + part
             + " spot=" + side(spot) + " foe=" + side(foe)
             + " type=" + type + " other=" + other + (dec ? '(' + dec + ')' : '')
             + " q=" + q + " m=" + (pklmLastMove[spot] || '-')
             + " | T=" + (tmpl === null ? '(NO TEMPLATE)' : tmpl)
-            + " | R=" + (txt === null ? '(null)' : txt));
+            + " | R=" + (txt === null ? '(null)' : txt);
+        pklmPrint(line);
+        var p = pklmProbeFilePath();
+        if (p) { try { sys.appendToFile(p, line + "\n"); } catch (e2) {} }
     } catch (e) {}
 }
 
@@ -1531,6 +1554,7 @@ function pklmSpotLabel(spot) {
     onTierNotification: function (tier) {
         pklmAutoEnable();
         pklmCheckMsgFiles();   // 对战启动扫描消息表文件依赖，缺失则提示
+        pklmProbeReset();      // 每局清空 probe 落盘文件（写一行带版本/局号的表头）
         // 重置对手记录（slot 追踪 + 特性解析）
         pklmOppMoves = [[], [], [], [], [], []];
         pklmOppMoveUse = [{}, {}, {}, {}, {}, {}];
