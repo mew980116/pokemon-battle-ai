@@ -91,10 +91,17 @@
 - **DeepSeek 请求必须压「硬墙钟」超时（0.6.1，真 bug）**：原来只有 `req.setTimeout(TIMEOUT_MS)`——那是**空闲超时**（socket idle），连接上只要有零星保活/分块流量就**永远不触发**。
   - 实测（2026-09-20 battle98 T11）：`api.deepseek.com`（117.185.125.154）的连接从 23:42:00 建起到 23:51:24 **仍 Established（564s）**，240s 空闲超时没掐，PO 侧 `sys.synchronousWebCall` 一直阻塞，面板停在「实时 503s 思考中…」。
   - 现在另加一个 `setTimeout` 硬墙钟 deadline（同一时长，`done()` 保证 cb 只回调一次、`res.on('error')` 也接住）。PO 侧兜底：**单次失败→`pklmFallbackAttack()`**，连续 3 次且跨度 >15s 才会认输。
-- **修复 0.7.6 门禁的潜在误拦：强制替补（REPLACEMENT MODE）跳过「必须仿真留场」（0.7.7）**
+- **撤掉「换人必须先仿真留场」这条硬判据（0.7.8）**
+  - 起因（用户 2026-09-21：**"最好别搞门禁，我感觉门禁会搞出 bug"**）：盘「哪些回合没有留场这个选项」时发现，0.7.6 那条规则的判据是把"我们以为合法的动作集合"写成了硬判据，而那个集合恰好是**已知有洞的那块**。
+  - **真正的清单**（只有第 1 条现在能判）：① 我方场上已倒 → 回合结束强制替补，`me.fainted=true` ✅；② 我方自己用换场招（U-turn / Volt Switch / Flip Turn / Baton Pass / Teleport / Parting Shot）→ 招式结算后**在出招阶段内**换人；③ 我方**逃生按钮**被击中触发；④ 我方**危险回避** Wimp Out / Emergency Exit 触发。②③④ 的 `me.fainted` **都是 false**，而 `state.me.moves` 照样列出 4 个招（`pklmCollectMoves` 只按 PP>0 过滤）→ 判据一错，门禁自己就成了新 bug 源（模型选唯一合法的换人 → 连拒 2 次 → 烧两轮 → `gateUnmet` 放行；选招式 → 被 PO 拒 → 进 `bannedMoves`）。
+  - **两条被排除的候选**（用户纠正）：**被拖下场**（吹飞 / 吼叫 / 龙尾 / 红牌）**不是决策点** —— PO 随机拉一只上来，我们脚本收不到"选人"的回合；`%e` 渲染的是结果不是 choice。**Emergency Exit** 那次没有 SendBack/SendOut 是**正常的**（当时对手只剩最后一只，无处可换），不是 PO 没实现。
+  - **撤掉的理由（收益未证实 + 风险已证实）**：battle106 复测**生产配置 6/6 全对时门禁一次都没触发**（模型自己就把两块盘面仿真了），真正起效的是 ① 的 `trajectory` 那句确定性事实；而只要判据漏一类就凭空多一个拦死回合的 bug。
+  - **改动**：`actionGateCheck` 删掉该分支（保留"没仿真过就不能下结论"）；`simulate_turn` / `save_strategy` 的描述里把"the gate requires both"改成建议（"strongly worth … that comparison is advice, not a rule"）。`trajectory` 字段本身**不动**（它仍是那句事实）。单测改写两条（只仿真换人 + 选已仿真过的换人 → **放行**；`save_strategy` 侧同样不要求留场线），删掉随规则一起失效的 REPLACEMENT MODE 那条。`test-sim-gate.js` 92 → **91 全绿**，`node --check` 通过。
+  - **仍未验证（挂着）**：PO 对②的交互到底是 **(a) 招式结算后单独问一次"只有换人"的 choice**、还是 **(b) 选招时就要一起交 `pokeSlot`**（合并下发）。我们的 `pklmSendCommand` 只填 `attackSlot` —— 若是 (b)，发出去会被 PO 拒。要开一局我方带 U-turn 的队实测才能定，结论会决定②要不要在 po-script 侧特殊处理。
+- **修复 0.7.6 门禁的潜在误拦：强制替补（REPLACEMENT MODE）跳过「必须仿真留场」（0.7.7）** —— ⚠ 这条规则已于 **0.7.8 整体撤掉**，本项仅作历史记录
   - 0.7.6 那条"声明换人前必须先仿真一条留场分支"用的是**机械判据**（ledger 里有 `move ...`），但**濒死后的强制替补**也表现为"换人"且**没有留场这个选项** → 会把合法的替补选择拦死。现在按 `state.me.fainted` 跳过（prompt 里对应 REPLACEMENT MODE 那一段）。单测补一条：`me.fainted=true` + 只仿真了换人分支 → 放行。`test-sim-gate.js` 91 → **92 全绿**。
   - 另记（教训）：**不要用 PowerShell 的 `Get-Content -Raw | -replace | Set-Content` 改这些源码** —— 这次顺手用它 bump 版本号，把 `server.js` 的中文注释写成乱码并弄出语法错误（`Get-Content` 默认按 ANSI 解码）。修法是 `git checkout -- server.js` 回滚后用编辑器改。源码改动一律用编辑器/Edit。
-- **针对「不推演回合走势」的两条改动：sim 出 `trajectory` + 换人必须先仿真留场（0.7.6）**
+- **针对「不推演回合走势」的两条改动：sim 出 `trajectory` + 换人必须先仿真留场（0.7.6）** —— ⚠ 后半条已于 **0.7.8 撤掉**，`trajectory` 保留
   - 起因（battle106 T13/T14 复盘 + 用户指出"禁换必死是治标，根子是他不理解回合发展趋势"）：同一局面复测，生产配置（flash+关思考）**2 错 2 对**（抛硬币），而 flash+低推理 / pro+关思考都是 **4/4 对**，且推理里都主动写出了关键判断（"letting it faint gives me a **FREE replacement** … switching would make my switch-in eat a hit"）。⇒ 知识在、**推演不稳定**：模型能把"换 vs 留"各自算清，但**从没并排比过**——自由推理里"留场"被读成"白白损失一只"，而"主动换人"的代价（换入者当回合白吃一发 + 放弃免费替补）没被摆到眼前。
   - **① `simulate_turn` 新增 per-row `trajectory`（确定性给事实）**：当某一行的我方结局是「会倒 / 可能倒」（且我方动作是留场）时，该行多一个 `trajectory` 字段，写明：*我方这只本回合必倒 → 死亡会在结束阶段换来**免费替补**（换入者当回合不吃招）；若主动换人，换入者**当回合就吃这一发**、且放弃那次免费替补；两者都是死，通常留场更好*。只在"留场"行给出（换人行的对比交给门禁那条），对手换人导致我方毫发无伤的行**不给**（不误导）。
   - **② 门禁新增：声明换人时，本回合必须也仿真过至少一条「留场」分支**（`ledger.sims` 里要有 `move ...`）。纯机械校验（不解析任何自然语言）：换人 = 拿"换完的盘面"和"留场的盘面"比，只仿真换人分支等于**从没把两块盘面并排**。拒绝信息里直接给出该对比说明 + 已有的仿真清单。**不是"不许换"** —— 合法的挡招换人照样能过，只是必须先把留场那块盘面摆出来。

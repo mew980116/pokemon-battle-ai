@@ -129,7 +129,7 @@ var TOOL_DEFS = [
                     text: { type: 'string', description: 'Labeled lines (1)-(6) as described — or the (R1)-(R3) replacement template when picking a replacement. Not carried over to later turns.' },
                     scene: { type: 'string', description: 'The board you EXPECT at your next decision: both HP ranges, who is fainted, key item/ability/boost/hazard/weather state. Carried into your next prompt and compared with reality.' },
                     checks: { type: 'string', description: 'UNVERIFIED HYPOTHESES for your later turns, each written as an explicit test against the battle log (e.g. "check if the log shows I moved first — if it does my Scarf is confirmed; if it shows I moved second, my item is gone and my speed must be re-derived"). They are NOT facts: a check is by definition something you have NOT confirmed, so never use one as an established premise while reasoning in the SAME turn you write it (battle99 T20 asserted "my Scarf gives 448 Spe" in `text` while its own `checks` asked to verify exactly that — and lost the game on it). Anything the CURRENT prompt already states (your own item / boosts / HP, the opponent\'s revealed moves) must be read from the prompt rather than from your earlier notes: if your own Item field says none/empty, any item-based speed or damage assumption from a previous turn is STALE. The most recent TWO turns\' checks are merged into later prompts; drop ones already resolved.' },
-                    action: { type: 'string', description: 'The action this plan commits to, in the same form simulate_turn takes: "move Thunderbolt" or "switch 3". Must match an i_do you already simulated. If it is a SWITCH, you must also have simulated the STAYING line this turn (some non-switch i_do): switching is a choice between two boards, and the gate wants both on the table before you commit — the staying board is where a doomed active turns into a free replacement.' },
+                    action: { type: 'string', description: 'The action this plan commits to, in the same form simulate_turn takes: "move Thunderbolt" or "switch 3". Must match an i_do you already simulated. (For a SWITCH it is strongly worth also simulating the STAYING line this turn and putting the two boards side by side — switching makes your switch-in eat their move now, while a doomed active that stays turns into a free replacement. That comparison is advice, not a rule.)' },
                     branch: { type: 'string', description: 'Which opponent branch your plan is playing around: "Hydro Pump" / "switch 2" — one of the opp_does entries you simulated.' },
                     outcome: { type: 'string', description: 'What happens to the pokemon YOUR action puts on the field, under that branch: "survives" / "faints" / "<a-b>%" (its remaining HP or the damage it takes). This is checked against the simulation, so state it honestly — a sacrifice play is fine as long as you write "faints".' }
                 },
@@ -170,7 +170,7 @@ var TOOL_DEFS = [
         type: 'function',
         function: {
             name: 'simulate_turn',
-            description: 'Simulate THIS turn for the branches YOU name: give your action and one or more candidate opponent actions, and get back what the engine computes for each branch (who acts first, damage both ways, resulting HP, who faints, each move\'s accuracy) plus an explicit list of what it could NOT know. Accuracy is weather-adjusted (Hurricane/Thunder are 100% in rain, 50% in sun; Blizzard never misses in hail/snow), and a move under 100% gets an explicit note that it can miss — a branch that only kills you because a low-accuracy move connects is NOT the same as a guaranteed kill. Use it BEFORE you commit: save_strategy checks your stated outcome against this table, so a number you did not simulate is a number you cannot use. It only projects the current turn from the live board — for later turns, state assumptions in `assume`. The branch list is yours to provide: this tool never guesses what the opponent carries, and it never ranks your options. If a branch shows that YOUR ACTIVE faints this turn, the row also carries a `trajectory` line: a faint hands you a free replacement in the end-of-turn phase (it enters taking no hit), whereas switching out makes your switch-in eat that move NOW. Compare those two boards (simulate the staying line as well as the switch) before you decide to switch — the gate requires both.',
+            description: 'Simulate THIS turn for the branches YOU name: give your action and one or more candidate opponent actions, and get back what the engine computes for each branch (who acts first, damage both ways, resulting HP, who faints, each move\'s accuracy) plus an explicit list of what it could NOT know. Accuracy is weather-adjusted (Hurricane/Thunder are 100% in rain, 50% in sun; Blizzard never misses in hail/snow), and a move under 100% gets an explicit note that it can miss — a branch that only kills you because a low-accuracy move connects is NOT the same as a guaranteed kill. Use it BEFORE you commit: save_strategy checks your stated outcome against this table, so a number you did not simulate is a number you cannot use. It only projects the current turn from the live board — for later turns, state assumptions in `assume`. The branch list is yours to provide: this tool never guesses what the opponent carries, and it never ranks your options. If a branch shows that YOUR ACTIVE faints this turn, the row also carries a `trajectory` line: a faint hands you a free replacement in the end-of-turn phase (it enters taking no hit), whereas switching out makes your switch-in eat that move NOW. Compare those two boards (simulate the staying line as well as the switch) before you decide to switch.',
             parameters: {
                 type: 'object',
                 properties: {
@@ -1265,7 +1265,9 @@ function simulateTurn(args, ctx) {
         // battle106 T13/T14 实测的坑：我方场上这只**本回合必倒**时，模型会在"留场"和"主动换人"之间摇摆
         // （同一局面复测两次给出相反动作），因为自由推理里"留场"被读成"白白损失一只"，而"主动换人"的代价
         // （换入者当回合白吃一发 + 放弃免费替补）没有被并排摆在眼前。这里由工具**确定性**给出这条事实，
-        // 不再依赖它自己想起来。（只在"留场"分支给出：换人分支的对比由门禁那条"必须先仿真留场"负责。）
+        // 不再依赖它自己想起来。只在"留场"分支给出（换人分支不该说"你被免费换下去了"）；
+        // 0.7.8 起不再有任何门禁逼它并排仿真 —— 这句事实本身就是那份"并排比较"。
+        // ⚠ 这个字段只在 `!iSwitch` 时可能出现，所以 `i_do` 是换人的时候拿不到它；要看到就必须自己仿真一条留场线。
         if (!iSwitch && row.mine && row.mine.faints) {
             var certain = (row.mine.faints === true);
             row.trajectory = 'YOUR ACTIVE (' + myName + ')' + (certain ? ' FAINTS THIS TURN ANYWAY' : ' MAY FAINT THIS TURN') + ' → if it faints, that hands you a FREE replacement in the end-of-turn phase: ' +
@@ -1524,23 +1526,12 @@ function actionGateCheck(ledger, action, state) {
             (action.type === 'switch' ? ('switch":' + Number(action.pokeSlot)) : ('move":"' + need.replace(/^move /, ''))) +
             '} and the opponent branches you are playing around, then re-save the strategy and answer.' + (sims.length ? (' Simulated so far: ' + sims.map(function (s) { return s.actionKey; }).join(', ') + '.') : '');
     }
-    // 换人 = 要拿"换完的盘面"和"留场的盘面"比。若本回合仿真过的**全是换人**，那就没有留场那块盘面，
-    // 也就看不到"我方这只反正要倒 → 留场能换来一次免费替补（不吃招），主动换人反而让换入者当回合白吃一发"。
-    // （battle106 T13/T14 的摇摆就出在这里：两种盘面各自都算过，但从没并排比过。）
-    // ⚠ 强制替补（我方已倒，REPLACEMENT MODE）**没有"留场"这个选项** → 跳过这条，否则会把合法的替补选择拦死。
-    var replacementMode = !!(state && state.me && state.me.fainted);
-    if (action.type === 'switch' && !replacementMode) {
-        var staySim = null;
-        for (var s2 = 0; s2 < sims.length; s2++) {
-            if (/^move /.test(String(sims[s2].actionKey))) { staySim = sims[s2].actionKey; break; }
-        }
-        if (!staySim) {
-            return 'NOT READY — you are about to switch, but every branch you simulated was also a switch, so you never put the STAYING board next to it. ' +
-                'Run simulate_turn with i_do = {"move":"<a move your active has>"} (the same opponent branches), then compare: switching now makes your switch-in eat their move THIS turn, ' +
-                'while staying means your active faints where it stands and your replacement enters UNHARMED in the end-of-turn phase. Simulated so far: ' +
-                sims.map(function (s) { return s.actionKey; }).join(', ') + '.';
-        }
-    }
+    // 0.7.6/0.7.7 曾在这里加过「声明换人前，本回合必须先仿真一条留场分支」——**已撤（0.7.8）**。
+    // 撤掉的理由：它把"我们以为合法的动作集合"写成了硬判据，而那个集合恰好是已知有洞的那块
+    // （我方自己用换场招 U-turn 族 / 逃生按钮触发 / 危险回避触发时，PO 给的是"只有换人"的回合，
+    //  但 me.fainted 仍是 false）→ 判据一错，门禁自己就成了新 bug 源。
+    // 而且 battle106 复测 6/6 全对时它一次都没触发（真正起效的是 simulate_turn 里的 trajectory 那条确定性事实）
+    // → 收益未证实、风险已证实。并排比较的引导改由工具输出的事实承担，不再用拦。
     return null;
 }
 

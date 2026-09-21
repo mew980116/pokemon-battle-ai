@@ -51,7 +51,6 @@ var c4 = ctx();
 chk('没跑仿真 → 拒绝', /not run simulate_turn/.test((save(c4).error || '')));
 
 sim(c4, { switch: 4 }, [{ move: 'Hydro Pump' }, { move: 'Hurricane' }]);
-sim(c4, { move: 'Sludge Bomb' }, [{ move: 'Hydro Pump' }, { move: 'Hurricane' }]);   // 门禁要求：声明换人前也要摆出"留场"那块盘面
 chk('跑了仿真但没写 action → 拒绝', /needs `action`/.test((save(c4).error || '')));
 chk('action 没仿真过 → 拒绝', /was never simulated/.test((save(c4, { action: 'switch 2' }).error || '')));
 chk('branch 缺失 → 拒绝', /needs `branch`/.test((save(c4, { action: 'switch 4' }).error || '')));
@@ -73,25 +72,18 @@ console.log('最终答案闸门（选中的动作必须仿真过）');
 var c5 = ctx();                                    // 全新账本，避免受上面用例影响
 sim(c5, { switch: 3 }, [{ move: 'Hydro Pump' }]);
 chk('选了没仿真过的 switch 4 → 拒绝', /never simulated/.test(tools.actionGateCheck(c5.ledger, { type: 'switch', pokeSlot: 4 }, state) || ''));
-chk('补上留场仿真前：选了已仿真过的 switch 3 → 仍拒绝（要求并排摆出留场盘面）', /STAYING board/.test(tools.actionGateCheck(c5.ledger, { type: 'switch', pokeSlot: 3 }, state) || ''));
+chk('只仿真过换人、选已仿真过的 switch 3 → 放行（0.7.8 撤掉了「换人必须先仿留场」）', tools.actionGateCheck(c5.ledger, { type: 'switch', pokeSlot: 3 }, state) === null);
+chk('save_strategy 侧同样不要求留场线', save(c5, { action: 'switch 3', branch: 'Hydro Pump', outcome: 'not applicable' }).ok === true);
 
 console.log('回合走势：留场必倒时，工具确定性给出「死亡 = 免费替补」（battle106 T13/T14 的坑）');
 var r5stay = sim(c5, { move: 'Sludge Bomb' }, [{ move: 'Hydro Pump' }, { switch: 2 }]);
-chk('补上留场仿真后 → 换人放行', tools.actionGateCheck(c5.ledger, { type: 'switch', pokeSlot: 3 }, state) === null);
 var stayRows = {};
 (r5stay.rows || []).forEach(function (r) { stayRows[r.branchKey] = r; });
 chk('留场且我方会倒的行 → 带 trajectory，写明 FREE replacement / 换人当回合就吃招',
     /FREE replacement/.test(String(stayRows['Hydro Pump'].trajectory)) && /NO hit/.test(String(stayRows['Hydro Pump'].trajectory)) && /THIS turn/.test(String(stayRows['Hydro Pump'].trajectory)),
     String(stayRows['Hydro Pump'] && stayRows['Hydro Pump'].trajectory).slice(0, 200));
 chk('留场但打不到我（对手换人）→ 不给 trajectory（不误导）', stayRows['switch 2'].trajectory === undefined, String(stayRows['switch 2'].trajectory).slice(0, 120));
-chk('换人分支本身不给 trajectory（对比交给门禁那条）', (function () { var rr = sim(ctx(), { switch: 3 }, [{ move: 'Hydro Pump' }]); return rr.rows[0].trajectory === undefined; })());
-
-console.log('强制替补（我方已倒 = REPLACEMENT MODE）不受「必须仿真留场」限制');
-var faintedState = JSON.parse(JSON.stringify(state));
-faintedState.me.fainted = true;
-var c8 = { state: faintedState, notes: notes, turn: 5, ledger: tools.newLedger(), simGateOn: true };
-sim(c8, { switch: 3 }, [{ move: 'Hydro Pump' }]);
-chk('只仿真了换人分支 → 放行（没有"留场"这个选项）', tools.actionGateCheck(c8.ledger, { type: 'switch', pokeSlot: 3 }, faintedState) === null);
+chk('换人分支本身不给 trajectory（不是"你被免费换下去"）', (function () { var rr = sim(ctx(), { switch: 3 }, [{ move: 'Hydro Pump' }]); return rr.rows[0].trajectory === undefined; })());
 
 console.log('速度重叠 → 正反两种情况都仿（不猜）');
 var c6 = ctx();
