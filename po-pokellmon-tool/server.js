@@ -65,7 +65,7 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.8.0';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
+var SERVER_VERSION = '0.8.1';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
 
 // ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
 // 对战主脑用 v4-flash：这个场景（超大计算量 + 幻觉高发）里 pro 的"深想"反而被门禁压制，
@@ -94,9 +94,17 @@ var TURN_DEADLINE = 0;
 var dsRequests = 0;                     // 本回合已发出的 DeepSeek 请求数（含重试），写进日志
 var RETRY_DELAYS = [2000, 5000, 10000]; // 单次请求失败后的重试延迟：第1次2s、第2次5s、第3次10s（第3次降级 no think），再失败 fallback
 
+// 「首回合」判据：优先用 script 送的 firstDecision（script 0.6.28+，与 PO 回合号解耦），
+// 老日志 / fixture 没有这个字段 → 退回 `turn === 0`（保持它们原来的行为，评测基线不被这次改动污染）。
+function isFirstTurn(state) {
+    if (!state) return false;
+    if (state.firstDecision !== undefined) return state.firstDecision === true;
+    return state.turn === 0;
+}
+
 // 本回合的时长上限：首回合（唯一开思考）单独放宽，其余走 MAX_TURN_MS。0 = 不限。
 function turnCapMs(state) {
-    return (state && state.turn === 0) ? MAX_TURN_MS_T0 : MAX_TURN_MS;
+    return isFirstTurn(state) ? MAX_TURN_MS_T0 : MAX_TURN_MS;
 }
 
 // system prompt 结构：战术底色（BATTLE_TIPS）+ 每回合工作流（WORKFLOW）+ 一句 tool 指引。
@@ -772,11 +780,11 @@ function handleChoice(res, state) {
         attempt(0);
     }
 
-    // 首回合（turn 0）单独开思考（high），其余回合沿用全局设置（当前关闭）
-    var turnThinkingOpts = (FIRST_TURN_THINKING && state.turn === 0)
+    // 首回合（见 isFirstTurn）单独开思考，其余回合沿用全局设置（当前关闭）
+    var turnThinkingOpts = (FIRST_TURN_THINKING && isFirstTurn(state))
         ? { thinking: true, effort: FIRST_TURN_EFFORT }
         : null;
-    if (turnThinkingOpts) console.log('[choice] turn 0 -> thinking ' + FIRST_TURN_EFFORT);
+    if (turnThinkingOpts) console.log('[choice] turn ' + state.turn + ' (first decision) -> thinking ' + FIRST_TURN_EFFORT);
 
     // 本轮工作暂存（worklog）：LLM 用 update_worklog 覆盖写入；每次请求把它注入 system，
     // 使它在本次决策的后续所有 tool 轮次里始终可见，且不会随轮数累积膨胀。

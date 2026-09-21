@@ -91,6 +91,11 @@
 - **DeepSeek 请求必须压「硬墙钟」超时（0.6.1，真 bug）**：原来只有 `req.setTimeout(TIMEOUT_MS)`——那是**空闲超时**（socket idle），连接上只要有零星保活/分块流量就**永远不触发**。
   - 实测（2026-09-20 battle98 T11）：`api.deepseek.com`（117.185.125.154）的连接从 23:42:00 建起到 23:51:24 **仍 Established（564s）**，240s 空闲超时没掐，PO 侧 `sys.synchronousWebCall` 一直阻塞，面板停在「实时 503s 思考中…」。
   - 现在另加一个 `setTimeout` 硬墙钟 deadline（同一时长，`done()` 保证 cb 只回调一次、`res.on('error')` 也接住）。PO 侧兜底：**单次失败→`pklmFallbackAttack()`**，连续 3 次且跨度 >15s 才会认输。
+- **回合号对齐 PO（tool 0.8.1 + script 0.6.28）**
+  - 起因（用户 2026-09-21："你的日志也可以对齐回合号了吧"）：复盘时每次都要把我们的日志回合号手动 +1 才能对上 PO 窗口/战报。
+  - 根因：**PO 在回合开始之前就收指令** —— `onBeginTurn(N)` 是在指令收集之后、回合结算开始时才触发，所以决策那一刻 `pklmCurrentTurn` 还是「最后一个已开始的回合」= PO 回合号 − 1（首回合是 0）。这也解释了为什么**日志里的战报文本（`Turn 11:`）本来就对**：那时 `onBeginTurn` 已触发。
+  - 修法：script 侧只改**报告出去**的 `state.turn = pklmCurrentTurn + 1`（= 这个决策为了第几回合），并**新增显式标志 `state.firstDecision`**（`pklmCurrentTurn === 0`，即本局第一个决策）；回合内事件文本用的还是 `pklmCurrentTurn`，不动。tool 侧把「首回合」的两处特例（`turnCapMs` 放宽超时、首回合开思考）改走 `isFirstTurn(state)` = **优先看 `firstDecision`，没有该字段才退回 `turn === 0`** —— 这样老日志/老 fixture（battle96-t1 是 `turn:1`、battle98-T0 是 `turn:0`）行为**完全不变**，评测基线不被污染。
+  - 已知代价：回合中段的强制替补（倒下后选人）被标成 N+1，与紧随其后的「下一回合指令」同号；两者靠 `me.fainted` / history 尾部区分。
 - **simulate_turn：同先制度一律「正反手都算」，不再判谁快（0.8.0）**
   - 起因（用户 2026-09-21：**"只要是同先制度的操作你都算正反手吧…别直接 you move first 了"**）：battle106 T15 实测，sim 输出 `you move first (your spe 309 vs their 194-306)`，实际 Zarude 是**后手**死的 —— 对手 Roserade 全程先手、一点血没掉，一路 KO 掉 Basculin → Zarude → Vikavolt → Mew。唯一自洽解释是它带**专爱围巾**（306×1.5），而我们的速度上限只算到"252 速 + 正性格"（306）。
   - **系统性偏差**：速度对比的错法**只往一个方向错**（围巾 / 顺风 / 速度强化 / 麻痹我们看不见，对手不可能比我们算的更慢）⇒ "我先手白杀它" 这类结论会被单方面放大。既然速度只能给出"可能范围"，就不该用它定顺序。

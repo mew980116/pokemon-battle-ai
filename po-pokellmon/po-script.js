@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8092";
-var PKLM_VERSION = "0.6.27";      // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.6.28";      // 脚本版本（改动时 bump，随日志记录）
 var pklmLastWebFailTime = 0;       // 上次 webCall 失败时间戳（ms），用于断线时节流重发
 var pklmSilent = false;            // 静默模式：清分少女等无人值守 BOT 账号不向 PO 窗口 print 任何脚本输出
 var pklmFailCount = 0;             // 连续 webCall 失败次数（成功即归零）
@@ -1024,7 +1024,19 @@ function pklmCollectState() {
         log: pklmLogEnabled,
         battleId: battle.id,
         scriptVersion: PKLM_VERSION,
-        turn: pklmCurrentTurn,
+        // turn = **这个决策是为了第几回合**（= PO 战报/窗口里的回合号）。
+        // 坑：PO 在回合**开始之前**就收指令（`onBeginTurn(N)` 是在指令收集之后、回合结算开始时才触发），
+        // 所以决策时 `pklmCurrentTurn` 还是「最后一个已开始的回合」= PO 回合号 − 1（首回合时是 0）。
+        // 直接报它会让日志/看板/复盘比 PO 少一回合（每次都要手动 +1），故这里 +1。
+        // 注意：回合内的事件文本（pklmTurnLog / pklmFullHistory 前缀、pklmMessages）用的是 pklmCurrentTurn，
+        // 那时 onBeginTurn 已经触发、值就是 PO 回合号，本来就对，不动。
+        // 已知代价：回合中段的强制替补（已倒后选人）发生在本回合结算中，会被标成 N+1，与紧随其后的「下一回合指令」
+        // 同号；两种记录靠 `me.fainted` 与 history 尾部可区分（暂不为此单独加字段）。
+        turn: pklmCurrentTurn + 1,
+        // firstDecision = 本局第一个决策（此时 onBeginTurn(1) 还没触发 → pklmCurrentTurn 仍是 0）。
+        // 用途：tool 侧「首回合」的特例（放宽超时 / 开思考）不该靠 `turn === 0` 判 —— 对齐 PO 回合号后线上首回合是 1，
+        // 而同样的 1 也可能是 battle96 那种测试 fixture（它本来就该按老行为走），所以给一个显式标志，fixture 不吃这个特例。
+        firstDecision: (pklmCurrentTurn === 0),
         shadow: pklmShadowMode,
         teamPreview: pklmTeamPreview,
         bannedMoves: bannedMoves,
