@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8092";
-var PKLM_VERSION = "0.6.17";      // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.6.18";      // 脚本版本（改动时 bump，随日志记录）
 var pklmLastWebFailTime = 0;       // 上次 webCall 失败时间戳（ms），用于断线时节流重发
 var pklmSilent = false;            // 静默模式：清分少女等无人值守 BOT 账号不向 PO 窗口 print 任何脚本输出
 var pklmFailCount = 0;             // 连续 webCall 失败次数（成功即归零）
@@ -406,7 +406,7 @@ function pklmRenderMsg(kind, fileName, msgNum, part, ctx) {
     // 先替换三字符占位符（%st/%ts/%tf），避免被 %s/%t/%f 误伤
     var order = [['%st', ctx.st], ['%ts', ctx.ts], ['%tf', ctx.tf],
                  ['%s', ctx.s], ['%f', ctx.f], ['%m', ctx.m], ['%i', ctx.i],
-                 ['%t', ctx.t], ['%a', ctx.a], ['%q', ctx.q], ['%p', ctx.p]];
+                 ['%t', ctx.t], ['%a', ctx.a], ['%q', ctx.q], ['%d', ctx.d], ['%p', ctx.p]];
     for (var k = 0; k < order.length; k++) {
         var val = order[k][1];
         if (val === undefined || val === null) val = '';
@@ -521,6 +521,25 @@ var PKLM_ITEM_MSG_CONSUME = {
 };
 // 分 part 判断的：35 = 气球，只有 part0「popped!」才消耗（part1 是「is floating on a balloon」还带着）
 var PKLM_ITEM_MSG_CONSUME_PART = { 35: 0 };
+// 「道具消息号 → 道具编号」硬表，来源 = 主脚本 `analyseCurrentItem`（它按消息号硬映射，**不依赖文本**，
+// 所以「道具名不在文本里」时也准）。实测佐证：12→15(Leftovers)、21→91(Life Orb) 与 battle104 的
+// `poke.item` 快照完全一致。只收「真的携带物」；66 超级石/67 原始回归/68 Z 纯晶/73 究极爆发 跳过。
+// 数组 = 按 part 取值（19 火珠/毒珠、35 气球 popped→0 即已消耗）。
+var PKLM_ITEM_MSG_TO_ITEM = {
+    3: 37,            // White Herb（一次性，会被下面的 consume 分支立刻清掉）
+    4: 9,             // Focus Band
+    12: 15,           // Leftovers
+    16: 50,           // Black Sludge
+    17: 180,          // Quick Claw
+    19: [71, 141],    // Flame Orb / Toxic Orb
+    21: 91,           // Life Orb
+    24: 126,          // Shell Bell
+    29: 183,          // Sticky Barb
+    34: 235,          // Rocky Helmet
+    35: [0, 236],     // Air Balloon：part0 popped（→0，已消耗）/ part1 还带着
+    41: 7,            // Destiny Knot
+    42: 332           // Safety Goggles
+};
 
 var pklmStickyHold = {};   // 'me:<numRef>' / 'opp:<slot>' -> true
 
@@ -551,13 +570,17 @@ function pklmItemLose(side, src) {
 
 function pklmMsgCtx(spot, type, other, q, abilityId) {
     return {
-        s: pklmActiveName(spot),
-        f: pklmActiveName(pklmOtherSpot(spot)),
-        m: pklmLastMove[spot] || '',
-        i: pklmItemLabel(spot),
-        t: pklmTypeName(type) || '',
+        s: pklmActiveName(spot),                            // %s = 这一侧（消息主体）；证据：主脚本逐条 case 的方向（25/28/33/93/104/151/174/175/233…）
+        f: pklmActiveName(pklmOtherSpot(spot)),             // %f = 对侧；证据：主脚本用 `foe === battle.opp` 判「谁被作用」，且从不检查 foe 为同侧
+        m: pklmLastMove[spot] || '',                        // %m = 招式名（方向按消息族不同，特性侧在 onAbilityMessage 里换成对侧）
+        i: pklmItemLabel(spot),                             // %i = 道具名（多数消息里是回调 other / 树果是 berry，见各回调）
+        t: pklmTypeName(type) || '',                        // %t = 属性；证据：主脚本 case 9 / 14 / 19 / 20 / 157 的 `temptype = type`
         a: pklmAbilityName((abilityId !== undefined && abilityId !== null && abilityId !== 0) ? abilityId : pklmPoke(spot).ability),
-        q: (q !== undefined && q !== null && q !== 0) ? String(q) : '',
+        // ↑ %a = 特性名；证据：主脚本 `ability = other` 的正好是 18/30/31/32/33/38/40/50/68/70/80/89，而这 12 条模板全都含 %a
+        q: (q !== undefined && q !== null && q !== 0) ? String(q) : '',   // %q = 数量/回合号（连击数、减 PP 数、许愿回合），原样贴数字
+        // %d = 数字；证据：主脚本 case 95 `other < 2` ↔ 模板 `95 %s's perish count fell to %d!` → `%d` 就是 `other`。
+        // 其余两条（78 Magnitude 威力档 / 125 stockpiled 层数）同机制但**未实测** → 读不出正数时保留字面 `%d`，不做猜测。
+        d: (other > 0) ? String(other) : '%d',
         st: PKLM_STAT_NAMES[other] || '',
         p: pklmActiveName(spot),
         ts: pklmActiveName(spot),
@@ -1259,6 +1282,16 @@ function pklmSpotLabel(spot) {
             if (isBerry && berry) {
                 var bn = pklmItemName(berry);            // 树果名直接可读（不必靠文本清单）
                 if (bn) ictx.i = bn;
+            }
+            // 道具消息：优先用主脚本那张「消息号 → 道具编号」硬表定位道具（不依赖文本）。
+            // 它的用处有两处：① `%i` 兜底（`other` 读不到时）；② 对手道具命名（比文本清单可靠）。
+            if (!isBerry && PKLM_ITEM_MSG_TO_ITEM[item] !== undefined) {
+                var mm = PKLM_ITEM_MSG_TO_ITEM[item];
+                // 数组 = 按 part 取值；数字直接就是道具编号（用 .length 判断，避免依赖 instanceof 在 QScript 的可用性）
+                var mtRaw = (mm && mm.length) ? mm[(part === undefined || part === null || part < 0 || part >= mm.length) ? 0 : part] : mm;
+                var mtName = pklmItemName(mtRaw);
+                if (mtName && spot === battle.opp) pklmOppItem[pklmCurrentOppSlot] = mtName;
+                if (mtName && !ictx.i) ictx.i = mtName;
             }
             // 注意：**非树果的道具消息不要**用 `other` 覆盖 `%i`。带 `%i` 的只有 36/37
             // （`%s's %i raised its %st!` / `%s's %i raised %m's power!`），那里的 `%i` 是**持有者自己的道具**

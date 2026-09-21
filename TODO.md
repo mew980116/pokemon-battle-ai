@@ -109,6 +109,22 @@
   - **特性消息对照**：主脚本 `analyseCurrentAbility` **纯粹是「消息号 → 特性 id」**（+ 极少数 `temptype`/`tempability`），我们的 `pklmAnalyseAbility` 是它的逐条移植 → **识别侧没有 gap**。但主脚本**不从特性消息里挖道具** → 我们 0.6.15 加的 察觉23 / 顺手牵羊78 / 收获88 / 捡拾93 是**超出主脚本的新地面**，其中「`%i` ← 回调 `other`」是**按约定推的、尚未实测**（打一局遇到察觉/收获即可坐实或推翻）。
   - **顺带一个高价值探针（未做）**：`battle-object.md` 在 `field.poke(0).pokemon` 上列了 `ev(int)` / `iv(int)` / `nature` / `hiddenPower` / `level`。当前我们**假设对手的 ev/iv/nature 读不到**（所以要做 EV 反推），但这个假设**只在 `move(i)` 上实测过**（对手恒 num=0/PP=0）。→ 值得试一把 `field.poke(opp).pokemon.ev(1)` / `.nature`：若能读到，对手伤害计算就不用再猜 EV 了。
   - **建议优先级**：① 顺风/神秘守护（和已有双墙同一处，成本最低）→ ② 挑拨/再来一次/定身法（直接影响「它这回合能不能用变化招」这类判断）→ ③ 哈欠/灭歌/寄生种子（影响「还剩几回合」）→ ④ 属性替换 + 扎根/磁力/击坠/燃尽（影响克制与免疫）→ ⑤ `lastMove`/`tempability`/`needSwitch`。
+  - **占位符字典 + 证据等级（0.6.17/0.6.18 收口）**：渲染器是通用的（`pklmRenderMsg` 查表 + 13 个槽位替换），**关键在于这些槽位是「位置槽」、类型由消息决定**（同一个 `%t`：`157 transformed into the %t type!` 是属性，`Perish Body %t's perish count` 是宝可梦）—— 这就是主脚本干脆不渲染文本的原因。逐个列证据：
+    | 占位符 | 取值 | 证据 |
+    |---|---|---|
+    | `%s` | 这一侧（spot） | ✅ 主脚本 case 25/28/33/68/72/93/104/109/133/144/151/174/175/233 逐条方向一致 |
+    | `%f` | 对侧（foe） | ✅ 同上（主脚本全程用 `foe === battle.opp` 判「谁被作用」，从不检查 foe 为同侧） |
+    | `%i` | 招式 16/23/70/105/132/160/162 → `other`；树果 → `berry`（道具编号）；道具 36/37 → 持有者自己的道具 | ✅ 招式侧有 `case 23/105/132/162: info.item = other`；树果侧 battle104 实测 `berry=8015`=Iapapa；36/37 为推断 |
+    | `%m` | 招式/道具/树果 → 自己那招；**特性 → 对侧那招**（0.6.17） | ✅ 19/22/129（特性）与 128/37/berry4-5（自己）模板自证 |
+    | `%a` | `other`（特性编号） | ✅ 主脚本 `ability = other` 的正好是 18/30/31/32/33/38/40/50/68/70/80/89，而这 12 条模板全含 `%a` |
+    | `%t` | `type` | ✅ `case 9 / 14 / 19 / 20 / 157: temptype = type` |
+    | `%st` | `other`（能力编号） | ✅ 与 `%i` 同模板互补（berry 7 `The %i raised %s's %st!`） |
+    | `%d` | `other`（0.6.18 补上，读不出保留字面） | ✅ `case 95: other < 2 → needSwitch` ↔ `%s's perish count fell to %d!`；78 Magnitude / 125 stockpile 同机制未实测 |
+    | `%ts` / `%tf` | 这一侧 / 对侧 | ⚠️ 由 case 133/109/236/102 的用法 + 我们的双墙归属推的，未实测 |
+    | `%q` | 回调 `q`（原样数字） | ⚠️ 连击数/减 PP 数/许愿回合，主脚本完全不取 `q` → 无对照 |
+    | `%p` | 变身/进化后的形态名 —— **取值未验证**（137 Transform / 66 Mega / 特性 81） | ❌ 主脚本不碰；我们暂填 spot 自己的名字（对 Mega 可能恰好对、对 Transform 必错） |
+    | `%e` | 被拖出来的那只（107 part2）—— **无证据** | ❌ 保持字面不替换 |
+  - **待实测/待澄清**：① **主脚本 case 107 疑似笔误** —— `if (foe === battle.opp && part === 1) info.specialStatus.rooted = true;`，而模板 part1 是 `%s is solidly rooted to the ground!`（按全表一致的 `%s`=spot，扎根的应是 spot 这一侧）→ 可能主脚本把 `spot`/`foe` 写反了，打一局遇到扎根即可判；② `%p` 一局实测（Mega 进化那一刻 `numRef` 是否已换成新形态）；③ `%q`/`%d` 的 78/125 两条实测。
 
 - [ ] 🔴 **`simulate_turn` 不建模「入场特性」→ 会把某条线的全部价值漏算掉（2026-09-21 battle99 T19 实测）**：
   - **现场**：Sandaconda 倒下要补位，对手 Barraskewda 100%（408 速物理水系），我方剩 Escavalier 11% / Ninetales 59% / Slurpuff 72%。工具算 `Liquidation → Ninetales = 100-118% guaranteed OHKO`，于是 LLM 判"换 Ninetales 就是白送"、否掉了「换九尾开晴天」这条线，改选 Slurpuff（吃 42-49%）。
