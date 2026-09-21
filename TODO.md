@@ -125,6 +125,12 @@
     | `%p` | 变身/进化后的形态名 —— **取值未验证**（137 Transform / 66 Mega / 特性 81） | ❌ 主脚本不碰；我们暂填 spot 自己的名字（对 Mega 可能恰好对、对 Transform 必错） |
     | `%e` | 被拖出来的那只（107 part2）—— **无证据** | ❌ 保持字面不替换 |
   - **待实测/待澄清**：① **主脚本 case 107 疑似笔误** —— `if (foe === battle.opp && part === 1) info.specialStatus.rooted = true;`，而模板 part1 是 `%s is solidly rooted to the ground!`（按全表一致的 `%s`=spot，扎根的应是 spot 这一侧）→ 可能主脚本把 `spot`/`foe` 写反了，打一局遇到扎根即可判；② `%p` 一局实测（Mega 进化那一刻 `numRef` 是否已换成新形态）；③ `%q`/`%d` 的 78/125 两条实测。
+  - **✅ 已做（script 0.6.19）：渲染探针 —— 让渲染结果与 PO 战报并排**（用户提案：「你渲染了就发出来到 po，然后我直接把 po 战报连着 probe 一起贴回来」）。`onMoveMessage`/`onItemMessage`/`onAbilityMessage` 三处各打一行 `[PKLMP]`：
+    ```
+    [PKLMP] move=70/0 spot=ME foe=OPP type=0 other=15(item:Leftovers) q=0 m=Darkest Lariat | T=%s knocked off %f's %i! | R=Snorlax knocked off the foe's Leftovers!
+    ```
+    `T`=命中的模板原文（`(NO TEMPLATE)` = 表里没这条）、`R`=我们渲染出的文本（`(null)` = 没渲染）、`other=..(..)` 把该数字同时按 道具/招式/特性 解码（帮助判 `other` 语义）。**PO 自己那行战报就在相邻行** → 逐行对照即可判定每个占位符是谁、方向对不对、哪些消息我们根本没渲染。开关 `/llm probe`（默认 ON），走 `pklmPrint` 所以静默账号不出。
+  - **贴回来之后的动作**：按对照结果勾掉上面「待实测」三项 + 占位符表里 ⚠️/❌ 的行（`%ts`/`%tf`/`%q`/`%p`/`%e`），并把「`(NO TEMPLATE)`/`(null)`」暴露出来的消息号补进 message 表或明确标注为「不渲染」（预期：不会有大错，最多是主脚本 case 107 那条笔误）。
 
 - [ ] 🔴 **`simulate_turn` 不建模「入场特性」→ 会把某条线的全部价值漏算掉（2026-09-21 battle99 T19 实测）**：
   - **现场**：Sandaconda 倒下要补位，对手 Barraskewda 100%（408 速物理水系），我方剩 Escavalier 11% / Ninetales 59% / Slurpuff 72%。工具算 `Liquidation → Ninetales = 100-118% guaranteed OHKO`，于是 LLM 判"换 Ninetales 就是白送"、否掉了「换九尾开晴天」这条线，改选 Slurpuff（吃 42-49%）。

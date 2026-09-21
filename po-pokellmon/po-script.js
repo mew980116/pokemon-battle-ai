@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8092";
-var PKLM_VERSION = "0.6.18";      // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.6.19";      // 脚本版本（改动时 bump，随日志记录）
 var pklmLastWebFailTime = 0;       // 上次 webCall 失败时间戳（ms），用于断线时节流重发
 var pklmSilent = false;            // 静默模式：清分少女等无人值守 BOT 账号不向 PO 窗口 print 任何脚本输出
 var pklmFailCount = 0;             // 连续 webCall 失败次数（成功即归零）
@@ -438,6 +438,43 @@ function pklmItemName(n) {
 function pklmAbilityName(n) {
     if (!n) return '';
     try { return sys.ability(n); } catch (e) { return ''; }
+}
+
+function pklmMoveName(n) {
+    if (!n) return '';
+    try { return sys.move(n); } catch (e) { return ''; }
+}
+
+// ==== 渲染探针（`/llm probe` 开关）====
+// 用途：把「原始参数 + 选中的模板 + 我们渲染出的文本」打到 PO 窗口，**与 PO 自己那行战报并排**。
+// 用户打完一局把整段贴回来 → 逐行对照就能确认占位符语义（%s/%f/%i/%m/%a/%t/%d/%q/%p/%e 各自是谁），
+// 也能看出「我们渲染成 null（模板没命中）」「占位符没替换留下字面量」「方向反了」这几类问题。
+// 默认 ON（当前是占位符核对轮次）；`/llm probe` 可随时切。
+var pklmMsgProbe = true;
+
+// 把一个数字按键位去猜它可能是道具/招式/特性哪个（只用于探针展示，帮助判断 other 的语义）
+function pklmDecodeNum(n) {
+    if (!n) return '';
+    var out = [];
+    try { var it = pklmItemName(n); if (it && it !== '(No Item)') out.push('item:' + it); } catch (e1) {}
+    try { var mv = pklmMoveName(n); if (mv && mv !== '?') out.push('move:' + mv); } catch (e2) {}
+    try { var ab = pklmAbilityName(n); if (ab && ab !== '?') out.push('abil:' + ab); } catch (e3) {}
+    return out.join(',');
+}
+
+function pklmMsgProbeLine(kind, fileName, num, part, spot, foe, other, q, type, txt) {
+    if (!pklmMsgProbe) return;
+    try {
+        var tmpl = pklmMsgTemplate(kind, fileName, num, part);
+        var side = function (s) { return (s === battle.me) ? 'ME' : (s === battle.opp ? 'OPP' : String(s)); };
+        var dec = pklmDecodeNum(other);
+        pklmPrint("[PKLMP] " + kind + "=" + num + "/" + part
+            + " spot=" + side(spot) + " foe=" + side(foe)
+            + " type=" + type + " other=" + other + (dec ? '(' + dec + ')' : '')
+            + " q=" + q + " m=" + (pklmLastMove[spot] || '-')
+            + " | T=" + (tmpl === null ? '(NO TEMPLATE)' : tmpl)
+            + " | R=" + (txt === null ? '(null)' : txt));
+    } catch (e) {}
 }
 
 // 构建消息替换上下文（%i/%a 用当前宝可梦持有的道具/特性，未知时为空——尽力而为）
@@ -1132,6 +1169,11 @@ function pklmSpotLabel(spot) {
             pklmPrint("callback log " + (pklmCbLog ? "ON" : "OFF"));
             return;
         }
+        if (message.indexOf("/llm probe") === 0) {
+            pklmMsgProbe = !pklmMsgProbe;
+            pklmPrint("message-render PROBE " + (pklmMsgProbe ? "ON" : "OFF"));
+            return;
+        }
         if (message.indexOf("/eval ") === 0) {
             try {
                 var res = eval(message.substring(6));
@@ -1305,6 +1347,7 @@ function pklmSpotLabel(spot) {
                 if (bnm) txt = pklmActiveName(spot) + " consumed its " + bnm + " (berry msg " + item + ", no template)";
             }
             if (txt) pklmTurnLog += txt + ". ";
+            pklmMsgProbeLine(kind, file, msgNum, part, spot, foe, other, undefined, undefined, txt);
             // 对手道具：道具消息一旦触发，说明该道具已被「公开暴露」→ 记下来供 use_state 用。
             // 注意：**不能**用 pklmPoke(battle.opp).item —— 实测 PO 对对手恒返回 0（sys.item(0)="(No Item)"），
             // 会把 "(No Item)" 当成推断结果喂给 LLM/计算器。改为从消息文本里认道具名（受控清单）。
@@ -1361,6 +1404,7 @@ function pklmSpotLabel(spot) {
                 if (inm) mctx.i = inm;
             }
             var txt = pklmRenderMsg('move', 'move_message.txt', move, part, mctx);
+            pklmMsgProbeLine('move', 'move_message.txt', move, part, spot, foe, other, q, type, txt);
             if (txt) pklmTurnLog += txt + ". ";
             // 道具流向（依据 = 主脚本 analyseCurrentMoveMess 的 case 16/23/70/105/132/160/162）。
             // 顺序要紧：**先登记失去、再登记得到** —— 戏法/偷取是同一事件里「一进一出」，
@@ -1423,6 +1467,7 @@ function pklmSpotLabel(spot) {
                 actx.m = pklmLastMove[pklmOtherSpot(spot)] || '';
             }
             var txt = pklmRenderMsg('ability', 'ability_messages.txt', ab, part, actx);
+            pklmMsgProbeLine('ability', 'ability_messages.txt', ab, part, spot, foe, other, undefined, type, txt);
             if (txt) pklmTurnLog += txt + ". ";
             if (spot === battle.opp) {
                 pklmOppAbilityTriggered = true;  // 本回合触发过特性消息（供反向排除）
