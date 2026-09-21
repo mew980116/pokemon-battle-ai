@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8092";
-var PKLM_VERSION = "0.6.24";      // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.6.25";      // 脚本版本（改动时 bump，随日志记录）
 var pklmLastWebFailTime = 0;       // 上次 webCall 失败时间戳（ms），用于断线时节流重发
 var pklmSilent = false;            // 静默模式：清分少女等无人值守 BOT 账号不向 PO 窗口 print 任何脚本输出
 var pklmFailCount = 0;             // 连续 webCall 失败次数（成功即归零）
@@ -1179,6 +1179,18 @@ function pklmSpotLabel(spot) {
     return spot === battle.me ? "You" : "opposing";
 }
 
+// 第二人称所有格（战报文本是给 LLM 读的，避免 "You's attack missed." 这种语法错）
+function pklmPossessive(spot) {
+    return spot === battle.me ? "Your" : "The foe's";
+}
+
+// 追加一条战报：模板自带 `!` / `?` / `.` 时不再补句号（原来会出现 "was seeded!." 这种双标点）
+function pklmLogLine(txt) {
+    if (!txt) return;
+    var last = txt.charAt(txt.length - 1);
+    pklmTurnLog += (last === '!' || last === '?' || last === '.') ? (txt + " ") : (txt + ". ");
+}
+
 // ==== 自更新（可选：`/llm update` 开关，默认 OFF）====
 // 背景：PO 有**运行期切换脚本**的官方 API `sys.changeBattleScript`（docs/reference/sys-object.md），
 // 脚本自己又能 `sys.synchronousWebCall` 下载 + `sys.writeToFile` 落盘 → 于是部署可以做成
@@ -1392,7 +1404,7 @@ try {
 
     // ===== 战报细节回调：把战斗过程细节补进 pklmTurnLog（进 history/fullHistory）=====
     onMiss: function (spot) {
-        try { pklmTurnLog += pklmSpotLabel(spot) + "'s attack missed. "; } catch (e) {}
+        try { pklmLogLine(pklmPossessive(spot) + " attack missed."); } catch (e) {}
     },
     onAvoid: function (spot) {
         try { pklmTurnLog += pklmSpotLabel(spot) + " avoided the attack. "; } catch (e) {}
@@ -1405,7 +1417,7 @@ try {
         } catch (e) {}
     },
     onSendBack: function (spot) {
-        try { pklmTurnLog += pklmSpotLabel(spot) + " called back its pokemon. "; } catch (e) {}
+        try { pklmLogLine(pklmPossessive(spot) + " pokemon was called back."); } catch (e) {}
     },
     onItemMessage: function (spot, item, part, foe, berry, other) {
         try {
@@ -1446,7 +1458,7 @@ try {
                 var bnm = pklmItemName(berry);
                 if (bnm) txt = pklmActiveName(spot) + " consumed its " + bnm + " (berry msg " + item + ", no template)";
             }
-            if (txt) pklmTurnLog += txt + ". ";
+            pklmLogLine(txt);
             pklmMsgProbeLine(kind, file, msgNum, part, spot, foe, other, undefined, undefined, txt);
             // 对手道具：道具消息一旦触发，说明该道具已被「公开暴露」→ 记下来供 use_state 用。
             // 注意：**不能**用 pklmPoke(battle.opp).item —— 实测 PO 对对手恒返回 0（sys.item(0)="(No Item)"），
@@ -1503,9 +1515,14 @@ try {
                 var inm = pklmItemArgName(other);
                 if (inm) mctx.i = inm;
             }
+            // `%p`（形态名）**按消息族不同**（实测 3 局 4 处）：
+            //   137 变身 `%s transformed into %p!` → PO 写的是「百变怪 transformed into **Aegislash**」
+            //        （= 被复制的那只 = **对侧**）→ 用自己会写成 "Ditto transformed into Ditto!"
+            //   item 66 超进化 `%s has Mega Evolved into %p!` → 是**自己的新形态**，保持默认（自己）
+            if (move === 137) mctx.p = pklmActiveName(pklmOtherSpot(spot));
             var txt = pklmRenderMsg('move', 'move_message.txt', move, part, mctx);
             pklmMsgProbeLine('move', 'move_message.txt', move, part, spot, foe, other, q, type, txt);
-            if (txt) pklmTurnLog += txt + ". ";
+            pklmLogLine(txt);
             // 道具流向（依据 = 主脚本 analyseCurrentMoveMess 的 case 16/23/70/105/132/160/162）。
             // 顺序要紧：**先登记失去、再登记得到** —— 戏法/偷取是同一事件里「一进一出」，
             // 反过来的话 gain 会被紧随其后的 lose 抹掉。
@@ -1576,9 +1593,11 @@ try {
             if (pklmMsgHas('ability', 'ability_messages.txt', ab, part, '%m')) {
                 actx.m = pklmLastMove[pklmOtherSpot(spot)] || '';
             }
+            // ability 81 = 变身者/Imposter 的 `%s transformed into %p!` → `%p` 同 move 137，是**对侧**那只的名字
+            if (ab === 81) actx.p = pklmActiveName(pklmOtherSpot(spot));
             var txt = pklmRenderMsg('ability', 'ability_messages.txt', ab, part, actx);
             pklmMsgProbeLine('ability', 'ability_messages.txt', ab, part, spot, foe, other, undefined, type, txt);
-            if (txt) pklmTurnLog += txt + ". ";
+            pklmLogLine(txt);
             if (spot === battle.opp) {
                 pklmOppAbilityTriggered = true;  // 本回合触发过特性消息（供反向排除）
                 var ability = pklmAnalyseAbility(ab, part, other, type);
