@@ -91,6 +91,11 @@
 - **DeepSeek 请求必须压「硬墙钟」超时（0.6.1，真 bug）**：原来只有 `req.setTimeout(TIMEOUT_MS)`——那是**空闲超时**（socket idle），连接上只要有零星保活/分块流量就**永远不触发**。
   - 实测（2026-09-20 battle98 T11）：`api.deepseek.com`（117.185.125.154）的连接从 23:42:00 建起到 23:51:24 **仍 Established（564s）**，240s 空闲超时没掐，PO 侧 `sys.synchronousWebCall` 一直阻塞，面板停在「实时 503s 思考中…」。
   - 现在另加一个 `setTimeout` 硬墙钟 deadline（同一时长，`done()` 保证 cb 只回调一次、`res.on('error')` 也接住）。PO 侧兜底：**单次失败→`pklmFallbackAttack()`**，连续 3 次且跨度 >15s 才会认输。
+- **`checks` 的语义写死成「未验证假设」+ 我方道具为空时不再沉默（0.7.1）**
+  - **动机**（battle99 T20，见 [错题集.md](错题集.md) E003）：模型在 `checks` 里写了「verify Ninetales moves first vs Barra (**Scarf present**)」，**同一回合的正文却把它当既成事实**用了（"My Scarf gives 448 Spe > Barra 408 → I move first"），而 `state.me.item` 从 T16 起就是空的 —— 直接送掉 Ninetales。
+  - `checks` 字段的 tool 描述改为「UNVERIFIED HYPOTHESES … 用**战报里能不能看到**来表述（check if the log shows …）」，并明确：**同回合不得把 check 当已证实前提**；凡是当前 prompt 已经写了的东西（我方道具/能力等级/HP、对手已亮招式）必须读 prompt，不能读自己的旧笔记。
+  - 重新注入时的表头同样改成「**these are UNVERIFIED HYPOTHESES, not facts**」。
+  - prompt 里我方道具为**空**时不再什么都不写，改成显式警告 `Item:(none / nothing readable — 早前回合的道具结论已 STALE：打落 / Trick / Switcheroo / 消耗都会清掉这个字段)`。
 - **`resolve_choice` tool + 修「门禁按数组下标找招」的真 bug（0.7.0）**
   - **编号 ≠ 槽位**（battle99 T1 实测）：prompt 的 `Available actions` 列表是**先数招式、再数换人**，和队伍槽位号是两套编号。模型 strategy 写 `action=switch 5`（Escavalier）、散文也说 "Escavalier is the clear play"，却输出 `{"choice":5}` —— 列表第 5 项是 **Slurpuff**（它把槽位号当成了序号；正确答案应是 9 = 4 个招 + 第 5 个后备）。结果换上来的不是它推理的那只，而门禁没拦。
   - 新增 `resolve_choice(choice)`：把编号翻成**实际会执行的动作**并与 `save_strategy` 声明的 `action` 比对 → `MATCH` / `MISMATCH`（MISMATCH 时直接把「你声明的那个动作是第几号」告诉它）。已写进 WORKFLOW 第 5 步（答之前先确认）。

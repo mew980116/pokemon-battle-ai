@@ -65,7 +65,7 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.7.0';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
+var SERVER_VERSION = '0.7.1';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
 
 // ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
 // 对战主脑用 v4-flash：这个场景（超大计算量 + 幻觉高发）里 pro 的"深想"反而被门禁压制，
@@ -437,7 +437,7 @@ function buildPrompt(state, notes) {
             noteLines.push('LAST TURN\'S PREDICTION (turn ' + sceneTurn + ') — compare it with the actual battle log BEFORE deciding. If the board matches, your read held: continue with the plan you wrote. If it does NOT match, work out WHY first — did the opponent reveal a new move or item? is it showing a behaviour preference worth recording (save_observation)? or was your own calculation wrong? Then decide. Predicted board: ' + scene);
         }
         if (checks.length) {
-            noteLines.push('PENDING CHECKS you left for yourself — verify each one against the new battle log BEFORE deciding (confirm or refute it, then update your notes): '
+            noteLines.push('PENDING CHECKS you left for yourself — **these are UNVERIFIED HYPOTHESES, not facts**. For each one, check whether the battle log above confirms or refutes it (ask yourself "does this actually happen in the battle log?"), then update your notes. Do NOT reason from one as if it were established before the log settles it, and never quote one as a number you know: '
                 + checks.join(' | '));
         }
         if (noteLines.length) {
@@ -486,7 +486,9 @@ function buildPrompt(state, notes) {
         var meStatus = me.status ? 'Status:' + me.status + ',' : '';
         var meBoosts = (me.boosts && me.boosts.length) ? 'Boosts:[' + me.boosts.join(',') + '],' : '';
         var meAbi = me.ability ? 'Ability:' + me.ability + ',' : '';
-        var meItem = me.item ? 'Item:' + me.item + ',' : '';
+        var meItem = me.item
+            ? 'Item:' + me.item + ','
+            : 'Item:(none / nothing readable — if an earlier turn told you this pokemon held an item (Choice Scarf/Band/Specs, Leftovers …), that is now STALE: Knock Off / Trick / Switcheroo / consumption all clear or change this field. Re-derive any item-dependent speed or damage from the current state, not from your notes),';
         p += 'Your current pokemon:' + me.name + ',Type:' + (me.types || []).join('&') + ',HP:' + (me.hpPct || 0) + '%,' + meAbi + meItem + meStatus + meBoosts + '\n';
         if (me.fainted) {
             p += 'NOTE: Your current pokemon has fainted — REPLACEMENT MODE. Only the switch options are legal (the move entries listed above belong to the fainted pokemon and cannot be used). ' +

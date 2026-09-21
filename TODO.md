@@ -68,6 +68,13 @@
   - **注意**：tag 是 LLM 自己的判断，**必须标注 [estimated]/[proved]** 并允许被后续信息推翻（与 `save_observation` 的 threat level 同一套可信度口径）；另外 tag 会随对局变化（对手某只倒了 → 对应的 check 失效），需要有失效机制，否则会变成另一种"陈旧数据"。
   - **依赖**：可以先复用 `save_observation` 的结构（每只一条、可覆盖），不一定要新开 tool。
 
+- [ ] 🔴 **我方道具只用 `poke.item` 直读 → Switcheroo/Trick 之后失真；按主脚本的做法改成「从消息维护」+「[proved] 不允许被空读覆盖」**（用户 2026-09-21 提出「主脚本当时还有围巾解析，要不移植一下？」/「能否 proved 的信息不允许简单覆盖」）：
+  - **事实（battle99 T16）**：history 文本明确写了 `Ninetales obtained one Choice Scarf!`（**消息层拿到了**），但 `state.me.item` 从这一回合起变成空。T20 因此用陈旧的「我还有围巾」断言先手，实际被 408 速的 Barraskewda 先手秒掉 —— 见 [错题集.md](po-pokellmon-tool/错题集.md) E003。
+  - **po-script 现状**：我方道具只读 `pklmPoke(me).item` → `sys.item(n)`（[po-script.js](po-pokellmon/po-script.js) `pklmCollectMyActive`）；`pklmInferItem(txt)`（从消息文本认道具名，0.6.8 加的）**只用在对手身上**。
+  - **主脚本（[20201227.js](20201227.js)）的做法完全不同 —— 不读 `poke.item`，而是从消息回调的参数维护**：`analyseCurrentItem(itemMess, part)`，其中 `case 23 / 105 / 162: info.item = other`（道具被公开）、`case 132: part 0 → poke(foe).item, part 1 → other`（**Trick/Switcheroo 的交换**）、`case 70 / 160: info.item = 0`（被拿走/消耗）。这就是用户说的「围巾解析」→ **给我方也建一条「从消息 / 回调 `other` 参数维护道具」的路**。
+  - **并加一条原则（用户提议）**：**已 [proved] 的信息不允许被「空读 / 未知读」简单覆盖**。采集时建议两个字段都给：`item`（当前直读）+ `itemProved`（最后一次被消息证实的值）+ 不一致时给 `itemNote`（直读为空而 proved 存在 → **报 proved 并注明来源**，而不是静默变空）；**只有消息证明变化时才更新 proved**。同一原则适用于招式表 / 特性。
+  - **待确认（要先跑一次探针）**：`team(me).poke(0).item` 在 Switcheroo 之后到底是「PO 读不到」还是「真的没道具」。把 `poke(0).item` 的**原始编号**和回调的 `other` 参数一起打进 `pklmCb` 日志即可判定 —— 若是前者，这是**采集 bug**（系统喂错数据）；若是后者，模型读到空是对的，那就只需 proved 保护。
+
 - [ ] 🔴 **`simulate_turn` 不建模「入场特性」→ 会把某条线的全部价值漏算掉（2026-09-21 battle99 T19 实测）**：
   - **现场**：Sandaconda 倒下要补位，对手 Barraskewda 100%（408 速物理水系），我方剩 Escavalier 11% / Ninetales 59% / Slurpuff 72%。工具算 `Liquidation → Ninetales = 100-118% guaranteed OHKO`，于是 LLM 判"换 Ninetales 就是白送"、否掉了「换九尾开晴天」这条线，改选 Slurpuff（吃 42-49%）。
   - **实际数值**（同一 state，只把 weather 改成 Sun 复算）：Ninetales **Drought 是入场特性**，换入即开晴天 → Liquidation 变 **49-59%（仅 6.3% 概率 OHKO，93.7% 活）**；同时 Slurpuff 只吃 **20-24%**（而非 42-49%）。也就是说用户那条线在数值上明显更优，而 LLM 用它自己算出的"必死"数字否掉了它 —— **不是幻觉**，`unknown[]` 里确实写了 `ability triggers on switch-in (Intimidate / weather setters / etc.) are NOT modelled`，但它没手动补 ×0.5。
