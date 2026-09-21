@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8092";
-var PKLM_VERSION = "0.6.11";      // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.6.12";      // 脚本版本（改动时 bump，随日志记录）
 var pklmLastWebFailTime = 0;       // 上次 webCall 失败时间戳（ms），用于断线时节流重发
 var pklmSilent = false;            // 静默模式：清分少女等无人值守 BOT 账号不向 PO 窗口 print 任何脚本输出
 var pklmFailCount = 0;             // 连续 webCall 失败次数（成功即归零）
@@ -97,6 +97,7 @@ var pklmLastAttackSlot = -1;      // 上一回合使用的攻击槽位（-1 表�
 var pklmPrevAttackSlot = -1;      // 本次决策发送前的 pklmLastAttackSlot（被 PO 拒绝时回滚，避免锁招槽漂移）
 var pklmLockedSlot = -1;          // 当前被锁定的招式槽位（Choice 道具锁招）
 var pklmBannedSlots = [];         // 本轮被 PO 拒绝的招式槽位（拒绝后 ban 掉重新决策）
+var pklmItemProbe = [];           // 临时道具探针：每次 onItemMessage 记录原始编号（结案后删）
 var pklmLastSwitchSlot = -1;      // 上一回合尝试的换人槽位（-1 表示未换人）
 var pklmBannedSwitch = [];        // 被 PO 拒绝的换人槽位（踩影等禁换人）
 var pklmMessages = [];            // 对战中发送的 message（评论，进日志）
@@ -552,6 +553,7 @@ function pklmCollectMyActive() {
         o.boosts = pklmCollectBoosts(battle.me);
         o.ability = pklmAbilityName(tp.ability);
         o.item = pklmItemName(tp.item);
+        o.itemRaw = tp.item;   // 临时探针：道具原始编号（结案后删）
     } catch (e) {}
     return o;
 }
@@ -614,7 +616,8 @@ function pklmCollectBench() {
                 status: pklmStatusName(tp.status),
                 moves: pklmCollectMoves(tp, true, false),   // 带 num/pp（剩余 PP，供耗 PP / 残局判断）
                 ability: pklmAbilityName(tp.ability),
-                item: pklmItemName(tp.item)
+                item: pklmItemName(tp.item),
+                itemRaw: tp.item   // 临时探针：道具原始编号（结案后删）
             };
             var f = pklmFpoke(battle.me); // 场上类型用 field 拿，后备用 sys.pokeType1/2
             var bt1 = pklmTypeName(sys.pokeType1(tp.numRef));
@@ -834,7 +837,8 @@ function pklmCollectState() {
         me: pklmCollectMyActive(),
         myTeam: pklmCollectMyTeam(),
         myStats: pklmCollectMyStats(),
-        bench: pklmCollectBench()
+        bench: pklmCollectBench(),
+        itemProbe: pklmItemProbe.slice()   // 临时探针（判 poke.item 在 Trick/Switcheroo 后是否可读）；结案后删
     };
 }
 
@@ -1146,6 +1150,23 @@ function pklmSpotLabel(spot) {
                 var infItem = pklmInferItem(txt);
                 if (infItem) pklmOppItem[pklmCurrentOppSlot] = infItem;
             }
+            // 临时探针（结案后删）：记录道具消息的原始参数 + 我方 6 只当时的 poke.item 原始编号，
+            // 用来判 `team(me).poke(0).item` 在 Trick / Switcheroo / 打落 之后到底能不能读（battle99 T16 的疑点）。
+            try {
+                var snap = [];
+                for (var pi = 0; pi < 6; pi++) {
+                    try {
+                        var ptp = pklmTpoke(pi);
+                        snap.push(pi + ':' + ptp.numRef + '@' + ptp.item + '=' + pklmItemName(ptp.item));
+                    } catch (pe) { snap.push(pi + ':err'); }
+                }
+                pklmItemProbe.push({
+                    seq: pklmItemProbe.length + 1, spot: (spot === battle.me ? 'me' : 'opp'),
+                    msg: item, part: part, foe: foe, berry: berry, other: other,
+                    otherName: pklmItemName(other), txt: txt, mine: snap.join(' ')
+                });
+                if (pklmItemProbe.length > 20) pklmItemProbe.shift();
+            } catch (e2) {}
         } catch (e) {}
     },
     onMoveMessage: function (spot, move, part, type, foe, other, q) {
