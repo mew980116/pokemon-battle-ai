@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8092";
-var PKLM_VERSION = "0.6.30";      // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.6.31";      // 脚本版本（改动时 bump，随日志记录）
 var pklmLastWebFailTime = 0;       // 上次 webCall 失败时间戳（ms），用于断线时节流重发
 var pklmSilent = false;            // 静默模式：清分少女等无人值守 BOT 账号不向 PO 窗口 print 任何脚本输出
 var pklmFailCount = 0;             // 连续 webCall 失败次数（成功即归零）
@@ -1076,37 +1076,11 @@ function pklmFallbackAttack() {
     pklmSendCommand({ slot: battle.me, type: "attack", attackSlot: 0 });
 }
 
-// ==== 探针：开战时尝试"热更"（0.6.29，临时，验证完就删）====
-// 待验证的问题：`sys.changeBattleScript()` 在**对局进行中**能否热更（立刻重新求值）？
-//   · 已知（实测）：在 `onBattleEnd` 里调用**不会**立刻生效 —— 20:13 调用，直到 22:28 下局开战才出现 0.6.27 的装载标记。
-//   · 用户的一手经验来自 **poserver（聊天大厅服务器，没有对局概念）**，所以"对战脚本"这条仍未验证。
-// 做法：开战回调末尾，把**服务端最新脚本文本**写成 `pklm-probe.js` 并 `changeBattleScript` 切过去（同版本也切，就是为了触发一次求值）：
-//   判据① 若 `pklm-load.log` 在开战时刻出现**两条紧邻的 loaded 行** ⇒ 热更成立（新实例被立刻求值）。
-//   判据② 若本局后续仍正常决策 ⇒ 热更后回调绑在新实例上（`onBeginTurn` 里的 `pklmAutoEnable()` 兜住 useLLM）。
-//   判据③ 若服务端版本更高，本局后续决策的 `scriptVersion` 会变成新版本 ⇒ "开战即更新"成立（跨版本第一局不必再赔）。
-var PKLM_STARTUPDATE_PROBE = true;
-var PKLM_PROBE_FILE = "pklm-probe.js";
-
-function pklmStartUpdateProbe() {
-    if (!PKLM_STARTUPDATE_PROBE) return;
-    var dir = sys.scriptsFolder;
-    if (dir && dir.charAt(dir.length - 1) !== '/') dir += '/';
-    var log = function (t) {
-        try { sys.appendToFile(dir + 'pklm-load.log', new Date().toString() + '  probe: ' + t + '  (battle=' + battle.id + ')\n'); } catch (e) {}
-        pklmPrint('probe: ' + t);
-    };
-    try {
-        var v = sys.synchronousWebCall(PKLM_UPDATE_BASE + '/pklm/version');
-        var body = sys.synchronousWebCall(PKLM_UPDATE_BASE + '/pklm/po-script.js');
-        if (!body || String(body).length < 20000 || String(body).indexOf('PKLM_VERSION') < 0) { log('服务端脚本文本不可用/过短，跳过（本实例 ' + PKLM_VERSION + '）'); return; }
-        sys.writeToFile(dir + PKLM_PROBE_FILE, body);
-        log('已写 ' + PKLM_PROBE_FILE + '（服务端 ' + v + ' / 本实例 ' + PKLM_VERSION + '），调用 changeBattleScript');
-        sys.changeBattleScript(PKLM_PROBE_FILE);
-        log('changeBattleScript 已返回（无异常）。若本行之后又出现一条 loaded 行 ⇒ 热更成立');
-    } catch (e) {
-        log('异常：' + e);
-    }
-}
+// ==== （0.6.29 的开战热更探针已在 0.6.31 删除）====
+// 结论（2026-09-22）：`sys.changeBattleScript(arg)` 的 **arg 是脚本源码本身**（用户确认），
+// 所以那版探针里 `changeBattleScript('pklm-probe.js')`（传文件名）等于把 `pklm - probe.js` 当脚本设进去 →
+// 下一次 PO 用到脚本就 `ReferenceError: Can't find variable: pklm`（Fatal Script Error，整局不决策）。
+// 现在改用「正确的参数形式」在 `onBattleEnd` 里热更，见 `pklmAutoUpdate()`。
 
 // ======================================================================
 // 主决策：采集状态 -> 调 /choice -> server.js 返回 slot 模式 -> 直接执行
@@ -1281,9 +1255,14 @@ function pklmAutoUpdate(force) {
         if (!dir) { pklmPrint("autoupdate: 拿不到 scriptsFolder"); return; }
         if (dir.charAt(dir.length - 1) !== '/') dir += '/';
         var f = dir + 'pklm-live.js';
+        // ① 落盘一份备份（**注意：没有任何东西会去读它**；PO 加载的是 Script Window / battlescripts.js 那一份）
         sys.writeToFile(f, body);
-        pklmPrint("autoupdate: " + PKLM_VERSION + " -> " + v + "，已写入 " + f + "，正在切换");
-        sys.changeBattleScript('pklm-live.js');
+        // ② 真正的热更：**参数是脚本源码本身**（用户 2026-09-22 确认）。
+        // 旧写法传的是**文件名** `'pklm-live.js'` → 等于把 `pklm - live.js` 当脚本设进去 → 下一次 PO 用到脚本时
+        // 直接 `ReferenceError: Can't find variable: pklm`（2026-09-22 00:44 那局就是这么死的：Fatal Script Error，
+        // 我方一直不动、装载标记没有再增加）。所以这里必须传 `String(body)`。
+        pklmPrint("autoupdate: " + PKLM_VERSION + " -> " + v + "，已备份到 " + f + "，调用 changeBattleScript(脚本文本) 热更");
+        sys.changeBattleScript(String(body));
     } catch (e) { pklmPrint("autoupdate error: " + e); }
 }
 
@@ -1712,8 +1691,6 @@ try {
         pklmOppAbilityTriggered = false;
         pklmOppSeen = [];
         pklmMyRevealed = [];
-        // 探针（0.6.29，临时）：开战末尾尝试热更，见 pklmStartUpdateProbe 注释
-        pklmStartUpdateProbe();
     },
     onClauseActivated: function (clause) {},
     onEffectiveness: function (spot, effectiveness) {
