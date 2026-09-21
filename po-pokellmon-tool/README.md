@@ -91,6 +91,9 @@
 - **DeepSeek 请求必须压「硬墙钟」超时（0.6.1，真 bug）**：原来只有 `req.setTimeout(TIMEOUT_MS)`——那是**空闲超时**（socket idle），连接上只要有零星保活/分块流量就**永远不触发**。
   - 实测（2026-09-20 battle98 T11）：`api.deepseek.com`（117.185.125.154）的连接从 23:42:00 建起到 23:51:24 **仍 Established（564s）**，240s 空闲超时没掐，PO 侧 `sys.synchronousWebCall` 一直阻塞，面板停在「实时 503s 思考中…」。
   - 现在另加一个 `setTimeout` 硬墙钟 deadline（同一时长，`done()` 保证 cb 只回调一次、`res.on('error')` 也接住）。PO 侧兜底：**单次失败→`pklmFallbackAttack()`**，连续 3 次且跨度 >15s 才会认输。
+- **修复 0.7.6 门禁的潜在误拦：强制替补（REPLACEMENT MODE）跳过「必须仿真留场」（0.7.7）**
+  - 0.7.6 那条"声明换人前必须先仿真一条留场分支"用的是**机械判据**（ledger 里有 `move ...`），但**濒死后的强制替补**也表现为"换人"且**没有留场这个选项** → 会把合法的替补选择拦死。现在按 `state.me.fainted` 跳过（prompt 里对应 REPLACEMENT MODE 那一段）。单测补一条：`me.fainted=true` + 只仿真了换人分支 → 放行。`test-sim-gate.js` 91 → **92 全绿**。
+  - 另记（教训）：**不要用 PowerShell 的 `Get-Content -Raw | -replace | Set-Content` 改这些源码** —— 这次顺手用它 bump 版本号，把 `server.js` 的中文注释写成乱码并弄出语法错误（`Get-Content` 默认按 ANSI 解码）。修法是 `git checkout -- server.js` 回滚后用编辑器改。源码改动一律用编辑器/Edit。
 - **针对「不推演回合走势」的两条改动：sim 出 `trajectory` + 换人必须先仿真留场（0.7.6）**
   - 起因（battle106 T13/T14 复盘 + 用户指出"禁换必死是治标，根子是他不理解回合发展趋势"）：同一局面复测，生产配置（flash+关思考）**2 错 2 对**（抛硬币），而 flash+低推理 / pro+关思考都是 **4/4 对**，且推理里都主动写出了关键判断（"letting it faint gives me a **FREE replacement** … switching would make my switch-in eat a hit"）。⇒ 知识在、**推演不稳定**：模型能把"换 vs 留"各自算清，但**从没并排比过**——自由推理里"留场"被读成"白白损失一只"，而"主动换人"的代价（换入者当回合白吃一发 + 放弃免费替补）没被摆到眼前。
   - **① `simulate_turn` 新增 per-row `trajectory`（确定性给事实）**：当某一行的我方结局是「会倒 / 可能倒」（且我方动作是留场）时，该行多一个 `trajectory` 字段，写明：*我方这只本回合必倒 → 死亡会在结束阶段换来**免费替补**（换入者当回合不吃招）；若主动换人，换入者**当回合就吃这一发**、且放弃那次免费替补；两者都是死，通常留场更好*。只在"留场"行给出（换人行的对比交给门禁那条），对手换人导致我方毫发无伤的行**不给**（不误导）。

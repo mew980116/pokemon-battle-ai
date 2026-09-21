@@ -1527,7 +1527,9 @@ function actionGateCheck(ledger, action, state) {
     // 换人 = 要拿"换完的盘面"和"留场的盘面"比。若本回合仿真过的**全是换人**，那就没有留场那块盘面，
     // 也就看不到"我方这只反正要倒 → 留场能换来一次免费替补（不吃招），主动换人反而让换入者当回合白吃一发"。
     // （battle106 T13/T14 的摇摆就出在这里：两种盘面各自都算过，但从没并排比过。）
-    if (action.type === 'switch') {
+    // ⚠ 强制替补（我方已倒，REPLACEMENT MODE）**没有"留场"这个选项** → 跳过这条，否则会把合法的替补选择拦死。
+    var replacementMode = !!(state && state.me && state.me.fainted);
+    if (action.type === 'switch' && !replacementMode) {
         var staySim = null;
         for (var s2 = 0; s2 < sims.length; s2++) {
             if (/^move /.test(String(sims[s2].actionKey))) { staySim = sims[s2].actionKey; break; }

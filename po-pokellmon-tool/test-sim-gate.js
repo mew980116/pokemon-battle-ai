@@ -86,6 +86,13 @@ chk('留场且我方会倒的行 → 带 trajectory，写明 FREE replacement / 
 chk('留场但打不到我（对手换人）→ 不给 trajectory（不误导）', stayRows['switch 2'].trajectory === undefined, String(stayRows['switch 2'].trajectory).slice(0, 120));
 chk('换人分支本身不给 trajectory（对比交给门禁那条）', (function () { var rr = sim(ctx(), { switch: 3 }, [{ move: 'Hydro Pump' }]); return rr.rows[0].trajectory === undefined; })());
 
+console.log('强制替补（我方已倒 = REPLACEMENT MODE）不受「必须仿真留场」限制');
+var faintedState = JSON.parse(JSON.stringify(state));
+faintedState.me.fainted = true;
+var c8 = { state: faintedState, notes: notes, turn: 5, ledger: tools.newLedger(), simGateOn: true };
+sim(c8, { switch: 3 }, [{ move: 'Hydro Pump' }]);
+chk('只仿真了换人分支 → 放行（没有"留场"这个选项）', tools.actionGateCheck(c8.ledger, { type: 'switch', pokeSlot: 3 }, faintedState) === null);
+
 console.log('速度重叠 → 正反两种情况都仿（不猜）');
 var c6 = ctx();
 var r6 = sim(c6, { move: 'Sludge Bomb' }, [{ move: 'Hydro Pump' }]);
