@@ -1,0 +1,625 @@
+{
+ "state": {
+  "account": "「木偶」析构万理的发条公主",
+  "log": true,
+  "battleId": "EVAL111T2",
+  "scriptVersion": "0.6.32",
+  "turn": 2,
+  "firstDecision": false,
+  "shadow": false,
+  "teamPreview": false,
+  "bannedMoves": [],
+  "bannedSwitches": [],
+  "history": [
+   "opposing sent out Tapu Lele. You sent out Excadrill. [Weather:None, Terrain:Psychic Terrain, You:None, Opp:None] ",
+   "Turn 1: The foe's pokemon was called back. opposing sent out Rotom-Wash. You used Iron Head. It's not very effective. opposing Rotom-Wash lost 11%. Excadrill is hurt by its Life Orb! Rotom-Wash restored a little HP using its Leftovers! "
+  ],
+  "fullHistory": [
+   "opposing sent out Tapu Lele. You sent out Excadrill. [Weather:None, Terrain:Psychic Terrain, You:None, Opp:None] ",
+   "Turn 1: The foe's pokemon was called back. opposing sent out Rotom-Wash. You used Iron Head. It's not very effective. opposing Rotom-Wash lost 11%. Excadrill is hurt by its Life Orb! Rotom-Wash restored a little HP using its Leftovers! "
+  ],
+  "messages": [],
+  "oppRemaining": 6,
+  "weather": null,
+  "terrain": "Psychic Terrain",
+  "myHazards": [],
+  "oppHazards": [],
+  "screens": {
+   "me": [],
+   "opp": []
+  },
+  "opp": {
+   "name": "Rotom-Wash",
+   "types": [
+    "Electric",
+    "Water"
+   ],
+   "hpPct": 94,
+   "status": null,
+   "moves": [],
+   "fainted": false,
+   "abilityInferred": null,
+   "itemInferred": "Leftovers",
+   "possibleAbilities": [
+    "Levitate"
+   ],
+   "boosts": []
+  },
+  "oppTeam": [
+   {
+    "name": "Rotom-Wash",
+    "revealed": true,
+    "ko": false,
+    "hpPct": 94,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [
+     "Levitate"
+    ],
+    "moves": [],
+    "itemInferred": "Leftovers"
+   },
+   {
+    "name": null,
+    "revealed": false,
+    "ko": false,
+    "hpPct": null,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [],
+    "moves": [],
+    "itemInferred": null
+   },
+   {
+    "name": "Tapu Lele",
+    "revealed": true,
+    "ko": false,
+    "hpPct": 100,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [
+     "Curious Medicine"
+    ],
+    "moves": [],
+    "itemInferred": null
+   },
+   {
+    "name": null,
+    "revealed": false,
+    "ko": false,
+    "hpPct": null,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [],
+    "moves": [],
+    "itemInferred": null
+   },
+   {
+    "name": null,
+    "revealed": false,
+    "ko": false,
+    "hpPct": null,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [],
+    "moves": [],
+    "itemInferred": null
+   },
+   {
+    "name": null,
+    "revealed": false,
+    "ko": false,
+    "hpPct": null,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [],
+    "moves": [],
+    "itemInferred": null
+   }
+  ],
+  "oppSeen": [
+   "Tapu Lele",
+   "Rotom-Wash"
+  ],
+  "me": {
+   "name": "Excadrill",
+   "types": [
+    "Ground",
+    "Steel"
+   ],
+   "hpPct": 90,
+   "status": null,
+   "moves": [
+    {
+     "slot": 0,
+     "name": "Earthquake",
+     "type": "Ground",
+     "num": 89,
+     "pp": 16
+    },
+    {
+     "slot": 1,
+     "name": "Iron Head",
+     "type": "Steel",
+     "num": 442,
+     "pp": 23
+    },
+    {
+     "slot": 2,
+     "name": "Swords Dance",
+     "type": "Normal",
+     "num": 14,
+     "pp": 32
+    },
+    {
+     "slot": 3,
+     "name": "Rock Slide",
+     "type": "Rock",
+     "num": 157,
+     "pp": 16
+    }
+   ],
+   "fainted": false,
+   "boosts": [],
+   "ability": "Sand Rush",
+   "item": "Life Orb",
+   "itemRaw": 91,
+   "itemField": 91
+  },
+  "myTeam": [
+   {
+    "slot": 0,
+    "name": "Excadrill",
+    "hpPct": 90,
+    "ko": false,
+    "status": null
+   },
+   {
+    "slot": 1,
+    "name": "Jirachi",
+    "hpPct": 100,
+    "ko": false,
+    "status": null
+   },
+   {
+    "slot": 2,
+    "name": "Tyranitar",
+    "hpPct": 100,
+    "ko": false,
+    "status": null
+   },
+   {
+    "slot": 3,
+    "name": "Zapdos",
+    "hpPct": 100,
+    "ko": false,
+    "status": null
+   },
+   {
+    "slot": 4,
+    "name": "Clefable",
+    "hpPct": 100,
+    "ko": false,
+    "status": null
+   },
+   {
+    "slot": 5,
+    "name": "Magearna-Original",
+    "hpPct": 100,
+    "ko": false,
+    "status": null
+   }
+  ],
+  "myStats": [
+   {
+    "slot": 0,
+    "name": "Excadrill",
+    "numRef": 530,
+    "level": 100,
+    "ev": [
+     0,
+     252,
+     4,
+     0,
+     0,
+     252
+    ],
+    "iv": [
+     31,
+     31,
+     31,
+     31,
+     31,
+     31
+    ],
+    "nature": 13
+   },
+   {
+    "slot": 1,
+    "name": "Jirachi",
+    "numRef": 385,
+    "level": 100,
+    "ev": [
+     0,
+     252,
+     0,
+     0,
+     4,
+     252
+    ],
+    "iv": [
+     31,
+     31,
+     31,
+     31,
+     31,
+     31
+    ],
+    "nature": 13
+   },
+   {
+    "slot": 2,
+    "name": "Tyranitar",
+    "numRef": 248,
+    "level": 100,
+    "ev": [
+     252,
+     0,
+     0,
+     0,
+     216,
+     40
+    ],
+    "iv": [
+     31,
+     31,
+     31,
+     31,
+     31,
+     31
+    ],
+    "nature": 23
+   },
+   {
+    "slot": 3,
+    "name": "Zapdos",
+    "numRef": 145,
+    "level": 100,
+    "ev": [
+     248,
+     0,
+     220,
+     0,
+     0,
+     40
+    ],
+    "iv": [
+     31,
+     31,
+     31,
+     31,
+     31,
+     31
+    ],
+    "nature": 10
+   },
+   {
+    "slot": 4,
+    "name": "Clefable",
+    "numRef": 36,
+    "level": 100,
+    "ev": [
+     252,
+     0,
+     252,
+     0,
+     4,
+     0
+    ],
+    "iv": [
+     31,
+     31,
+     31,
+     31,
+     31,
+     31
+    ],
+    "nature": 5
+   },
+   {
+    "slot": 5,
+    "name": "Magearna-Original",
+    "numRef": 66337,
+    "level": 100,
+    "ev": [
+     0,
+     0,
+     0,
+     252,
+     4,
+     252
+    ],
+    "iv": [
+     31,
+     31,
+     31,
+     31,
+     31,
+     31
+    ],
+    "nature": 10
+   }
+  ],
+  "bench": [
+   {
+    "slot": 1,
+    "name": "Jirachi",
+    "numRef": 385,
+    "unrevealed": true,
+    "types": [
+     "Steel",
+     "Psychic"
+    ],
+    "hpPct": 100,
+    "status": null,
+    "moves": [
+     {
+      "slot": 0,
+      "name": "Iron Head",
+      "type": "Steel",
+      "num": 442,
+      "pp": 24
+     },
+     {
+      "slot": 1,
+      "name": "U-turn",
+      "type": "Bug",
+      "num": 369,
+      "pp": 32
+     },
+     {
+      "slot": 2,
+      "name": "Trick",
+      "type": "Psychic",
+      "num": 271,
+      "pp": 16
+     },
+     {
+      "slot": 3,
+      "name": "Healing Wish",
+      "type": "Psychic",
+      "num": 361,
+      "pp": 16
+     }
+    ],
+    "ability": "Serene Grace",
+    "item": "Choice Scarf",
+    "itemRaw": 5
+   },
+   {
+    "slot": 2,
+    "name": "Tyranitar",
+    "numRef": 248,
+    "unrevealed": true,
+    "types": [
+     "Rock",
+     "Dark"
+    ],
+    "hpPct": 100,
+    "status": null,
+    "moves": [
+     {
+      "slot": 0,
+      "name": "Rock Blast",
+      "type": "Rock",
+      "num": 350,
+      "pp": 16
+     },
+     {
+      "slot": 1,
+      "name": "Stealth Rock",
+      "type": "Rock",
+      "num": 446,
+      "pp": 32
+     },
+     {
+      "slot": 2,
+      "name": "Thunder Wave",
+      "type": "Electric",
+      "num": 86,
+      "pp": 32
+     },
+     {
+      "slot": 3,
+      "name": "Rest",
+      "type": "Psychic",
+      "num": 156,
+      "pp": 16
+     }
+    ],
+    "ability": "Sand Stream",
+    "item": "Heavy-Duty Boots",
+    "itemRaw": 383
+   },
+   {
+    "slot": 3,
+    "name": "Zapdos",
+    "numRef": 145,
+    "unrevealed": true,
+    "types": [
+     "Electric",
+     "Flying"
+    ],
+    "hpPct": 100,
+    "status": null,
+    "moves": [
+     {
+      "slot": 0,
+      "name": "Discharge",
+      "type": "Electric",
+      "num": 435,
+      "pp": 24
+     },
+     {
+      "slot": 1,
+      "name": "Roost",
+      "type": "Flying",
+      "num": 355,
+      "pp": 16
+     },
+     {
+      "slot": 2,
+      "name": "Heat Wave",
+      "type": "Fire",
+      "num": 257,
+      "pp": 16
+     },
+     {
+      "slot": 3,
+      "name": "Defog",
+      "type": "Flying",
+      "num": 432,
+      "pp": 24
+     }
+    ],
+    "ability": "Static",
+    "item": "Heavy-Duty Boots",
+    "itemRaw": 383
+   },
+   {
+    "slot": 4,
+    "name": "Clefable",
+    "numRef": 36,
+    "unrevealed": true,
+    "types": [
+     "Fairy"
+    ],
+    "hpPct": 100,
+    "status": null,
+    "moves": [
+     {
+      "slot": 0,
+      "name": "Moonblast",
+      "type": "Fairy",
+      "num": 572,
+      "pp": 24
+     },
+     {
+      "slot": 1,
+      "name": "Soft-Boiled",
+      "type": "Normal",
+      "num": 135,
+      "pp": 16
+     },
+     {
+      "slot": 2,
+      "name": "Wish",
+      "type": "Normal",
+      "num": 273,
+      "pp": 16
+     },
+     {
+      "slot": 3,
+      "name": "Knock Off",
+      "type": "Dark",
+      "num": 282,
+      "pp": 32
+     }
+    ],
+    "ability": "Magic Guard",
+    "item": "Leftovers",
+    "itemRaw": 15
+   },
+   {
+    "slot": 5,
+    "name": "Magearna-Original",
+    "numRef": 66337,
+    "unrevealed": true,
+    "types": [
+     "Steel",
+     "Fairy"
+    ],
+    "hpPct": 100,
+    "status": null,
+    "moves": [
+     {
+      "slot": 0,
+      "name": "Shift Gear",
+      "type": "Steel",
+      "num": 508,
+      "pp": 16
+     },
+     {
+      "slot": 1,
+      "name": "Calm Mind",
+      "type": "Psychic",
+      "num": 347,
+      "pp": 32
+     },
+     {
+      "slot": 2,
+      "name": "Stored Power",
+      "type": "Psychic",
+      "num": 500,
+      "pp": 16
+     },
+     {
+      "slot": 3,
+      "name": "Aura Sphere",
+      "type": "Fighting",
+      "num": 396,
+      "pp": 32
+     }
+    ],
+    "ability": "Soul-Heart",
+    "item": "Life Orb",
+    "itemRaw": 91
+   }
+  ],
+  "itemProbe": [
+   {
+    "seq": 1,
+    "spot": "me",
+    "msg": 21,
+    "part": 0,
+    "foe": 0,
+    "berry": 0,
+    "other": 0,
+    "otherName": "",
+    "txt": "Excadrill is hurt by its Life Orb!",
+    "mine": "0:530@91=Life Orb 1:385@5=Choice Scarf 2:248@383=Heavy-Duty Boots 3:145@383=Heavy-Duty Boots 4:36@15=Leftovers 5:66337@91=Life Orb",
+    "myself": "team=91(Life Orb) field=91(Life Orb)"
+   },
+   {
+    "seq": 2,
+    "spot": "opp",
+    "msg": 12,
+    "part": 0,
+    "foe": 0,
+    "berry": 0,
+    "other": 0,
+    "otherName": "",
+    "txt": "Rotom-Wash restored a little HP using its Leftovers!",
+    "mine": "0:530@91=Life Orb 1:385@5=Choice Scarf 2:248@383=Heavy-Duty Boots 3:145@383=Heavy-Duty Boots 4:36@15=Leftovers 5:66337@91=Life Orb",
+    "myself": "team=91(Life Orb) field=91(Life Orb)"
+   }
+  ]
+ },
+ "eval": {
+  "name": "battle111-t2",
+  "note": "Excadrill(场上 slot0，90%，Sand Rush，Life Orb) vs Rotom-Wash(94%，Levitate，剩饭，已暴露 Hydro Pump/Volt Switch)；期望=换 Clefable(slot4) 或 Magearna(slot5)；事故=留场出招（岩崩净只 20%，且送掉 90% 的沙暴核心）",
+  "threatMoves": [
+   "Hydro Pump",
+   "Volt Switch",
+   "Thunderbolt",
+   "Will-O-Wisp"
+  ],
+  "opp": "Rotom-Wash",
+  "expectSafeSlots": [
+   4,
+   5
+  ],
+  "expectNot": "stay and attack — Rock Slide chips only ~26% gross / ~20% net (Leftovers), and Excadrill is a 90% Sand Rush win-condition",
+  "correctPlay": "switch to Clefable(slot4)：吃水炮 34-40%，Magic Guard+Soft-Boiled+剩饭 几乎打不动；Magearna(slot5) 也可（36-43%，可借势 Shift Gear/Calm Mind）；Jirachi(slot1) 可做 U-turn 中转但价值低"
+ }
+}
