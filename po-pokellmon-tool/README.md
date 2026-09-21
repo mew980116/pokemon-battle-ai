@@ -91,6 +91,10 @@
 - **DeepSeek 请求必须压「硬墙钟」超时（0.6.1，真 bug）**：原来只有 `req.setTimeout(TIMEOUT_MS)`——那是**空闲超时**（socket idle），连接上只要有零星保活/分块流量就**永远不触发**。
   - 实测（2026-09-20 battle98 T11）：`api.deepseek.com`（117.185.125.154）的连接从 23:42:00 建起到 23:51:24 **仍 Established（564s）**，240s 空闲超时没掐，PO 侧 `sys.synchronousWebCall` 一直阻塞，面板停在「实时 503s 思考中…」。
   - 现在另加一个 `setTimeout` 硬墙钟 deadline（同一时长，`done()` 保证 cb 只回调一次、`res.on('error')` 也接住）。PO 侧兜底：**单次失败→`pklmFallbackAttack()`**，连续 3 次且跨度 >15s 才会认输。
+- **自更新通道 `GET /pklm/version` + `GET /pklm/po-script.js`（0.7.4）**
+  - 背景：PO 有运行期切换脚本的官方 API `sys.changeBattleScript`（`docs/reference/sys-object.md`），而 PO 脚本能 `sys.synchronousWebCall` 下载、`sys.writeToFile` 落盘 → 部署可以做成「PO 自己去拉仓库里的 `po-script.js` 并切过去」，**不用剪贴板、不用重启 PO**（对应 po-pokellmon 0.6.24 的 `pklmAutoUpdate`）。
+  - 两个路由都从**仓库文件**现读现算：`/pklm/version` 返回从 `po-script.js` 里解析出的 `PKLM_VERSION`，`/pklm/po-script.js` 返回全文（附带 `X-PKLM-Version` 响应头）。**读不出/解析不出就返回 500** —— 不把垃圾内容发出去让脚本写进自己。
+  - 服务本身只绑 `127.0.0.1`，所以这条通道天然只对本机可见。实测：`/pklm/version` → `0.6.24`，`/pklm/po-script.js` → 91142 bytes。
 - **我方道具改用「消息证实值」(itemProved) 兜底（0.7.3）**
   - 背景：po-script 0.6.14 起，我方道具的**两条直读路都不可用**（`team(me).poke(0).item` 换进来的读不到；`field.poke(me).pokemon.item` 失去时不回退），只能靠 `onMoveMessage` 的 msg 132 旁证。state 因此新增 `me.itemProved` / `me.itemProvedSrc`。
   - prompt 的 `Item:` 于是分三支：**直读有值** → 正常写；**直读空、有旁证** → `Item:<名字> [PROVED by a swap message: <src> — the direct read returned nothing, this is what it actually obtained]`；**两者都空** → 保留 0.7.1 的 STALE 警告。

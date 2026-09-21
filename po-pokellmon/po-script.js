@@ -19,7 +19,7 @@ var useAI = true;
 var useLLM = false;               // 默认关闭，聊天 /llm on 开启
 var battleEnd = false;
 var PKLM_URL = "http://127.0.0.1:8092";
-var PKLM_VERSION = "0.6.23";      // 脚本版本（改动时 bump，随日志记录）
+var PKLM_VERSION = "0.6.24";      // 脚本版本（改动时 bump，随日志记录）
 var pklmLastWebFailTime = 0;       // 上次 webCall 失败时间戳（ms），用于断线时节流重发
 var pklmSilent = false;            // 静默模式：清分少女等无人值守 BOT 账号不向 PO 窗口 print 任何脚本输出
 var pklmFailCount = 0;             // 连续 webCall 失败次数（成功即归零）
@@ -1179,6 +1179,42 @@ function pklmSpotLabel(spot) {
     return spot === battle.me ? "You" : "opposing";
 }
 
+// ==== 自更新（可选：`/llm update` 开关，默认 OFF）====
+// 背景：PO 有**运行期切换脚本**的官方 API `sys.changeBattleScript`（docs/reference/sys-object.md），
+// 脚本自己又能 `sys.synchronousWebCall` 下载 + `sys.writeToFile` 落盘 → 于是部署可以做成
+// 「PO 自己去 8092 拉仓库里的 po-script.js 并切过去」，**不用剪贴板、不用重启 PO**。
+// 这样每次改完脚本只要新开一局（或手动 `/llm update now`）就会自动生效。
+//
+// 安全/防呆（自我替换属于敏感操作，所以做了几道护栏）：
+//   ① 只认 `127.0.0.1:8092`（我们的本地服务，且服务本身只绑 loopback）；
+//   ② 下载内容必须**含 `PKLM_VERSION` 且长度 > 20KB**，否则不落盘（避免把错误页/半截响应写成脚本）；
+//   ③ 版本号相同就什么都不做（不会来回切）；
+//   ④ 默认 **OFF** —— 要开：`/llm update`；只开一次：`/llm update now`。
+var PKLM_AUTOUPDATE = false;
+var PKLM_UPDATE_BASE = 'http://127.0.0.1:8092';
+
+function pklmAutoUpdate(force) {
+    if (!PKLM_AUTOUPDATE && !force) return;
+    try {
+        var v = sys.synchronousWebCall(PKLM_UPDATE_BASE + '/pklm/version');
+        if (v === undefined || v === null) { pklmPrint("autoupdate: /pklm/version 无响应（8092 在跑吗？）"); return; }
+        v = String(v).replace(/[\s\r\n]/g, '');
+        if (!v) { pklmPrint("autoupdate: 服务端读不到 PKLM_VERSION"); return; }
+        if (v === PKLM_VERSION) { pklmPrint("autoupdate: 已是最新 " + v); return; }
+        var body = sys.synchronousWebCall(PKLM_UPDATE_BASE + '/pklm/po-script.js');
+        if (!body || String(body).length < 20000 || String(body).indexOf('PKLM_VERSION') < 0) {
+            pklmPrint("autoupdate: 拉到的内容可疑（长度/内容不对），放弃"); return;
+        }
+        var dir = sys.scriptsFolder;
+        if (!dir) { pklmPrint("autoupdate: 拿不到 scriptsFolder"); return; }
+        if (dir.charAt(dir.length - 1) !== '/') dir += '/';
+        var f = dir + 'pklm-live.js';
+        sys.writeToFile(f, body);
+        pklmPrint("autoupdate: " + PKLM_VERSION + " -> " + v + "，已写入 " + f + "，正在切换");
+        sys.changeBattleScript('pklm-live.js');
+    } catch (e) { pklmPrint("autoupdate error: " + e); }
+}
+
 // ==== 装载标记（部署验证用）====
 // PO **启动时**会加载本文件（`Scripts/battlescripts.js`，见 po-client-ops skill §1.5）。
 // 这里在顶层往 `Scripts/pklm-load.log` 追加一行 → **不看界面**就能确认「PO 到底加载了哪个版本、何时加载」，
@@ -1226,6 +1262,16 @@ try {
         if (message.indexOf("/llm probe") === 0) {
             pklmMsgProbe = !pklmMsgProbe;
             pklmPrint("message-render PROBE " + (pklmMsgProbe ? "ON" : "OFF"));
+            return;
+        }
+        if (message.indexOf("/llm update now") === 0) {
+            pklmPrint("autoupdate: 强制检查一次");
+            pklmAutoUpdate(true);
+            return;
+        }
+        if (message.indexOf("/llm update") === 0) {
+            PKLM_AUTOUPDATE = !PKLM_AUTOUPDATE;
+            pklmPrint("autoupdate " + (PKLM_AUTOUPDATE ? "ON" : "OFF") + "（开战时检查一次；想立刻检查用 /llm update now）");
             return;
         }
         if (message.indexOf("/eval ") === 0) {
@@ -1566,6 +1612,7 @@ try {
         } catch (e) {}
     },
     onTierNotification: function (tier) {
+        pklmAutoUpdate();      // 自更新：默认 OFF，`/llm update` 打开（开战时检查一次，已是最新则什么都不做）
         pklmAutoEnable();
         pklmCheckMsgFiles();   // 对战启动扫描消息表文件依赖，缺失则提示
         pklmProbeReset();      // 每局清空 probe 落盘文件（写一行带版本/局号的表头）

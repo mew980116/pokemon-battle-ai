@@ -65,7 +65,7 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.7.3';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
+var SERVER_VERSION = '0.7.4';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
 
 // ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
 // 对战主脑用 v4-flash：这个场景（超大计算量 + 幻觉高发）里 pro 的"深想"反而被门禁压制，
@@ -954,6 +954,35 @@ var server = http.createServer({ maxHeaderSize: 65536 }, function (req, res) {
         res.setHeader('Content-Type', 'text/plain; charset=utf-8');
         res.writeHead(200);
         res.end('ok');
+        return;
+    }
+
+    // ==== 自更新通道（只给本机 PO 脚本用；服务本身只绑 127.0.0.1）====
+    // 背景：PO 有运行期切换脚本的官方 API `sys.changeBattleScript`（docs/reference/sys-object.md），
+    // 而 PO 脚本能用 `sys.synchronousWebCall` 下载、`sys.writeToFile` 落盘 → 于是部署可以做成
+    // 「PO 自己拉取仓库里的 po-script.js 并切过去」，不用剪贴板、不用重启（见 po-pokellmon/README 0.6.24）。
+    // GET /pklm/version       -> 仓库里 po-script.js 的 PKLM_VERSION（读不出时返回空串）
+    // GET /pklm/po-script.js  -> 该文件的全文
+    if (req.method === 'GET' && (u.pathname === '/pklm/version' || u.pathname === '/pklm/po-script.js')) {
+        var poScript = path.join(__dirname, '..', 'po-pokellmon', 'po-script.js');
+        var body = null;
+        try { body = fs.readFileSync(poScript, 'utf8'); } catch (e) { body = null; }
+        var vm = body ? body.match(/PKLM_VERSION\s*=\s*"([^"]+)"/) : null;
+        var ver = vm ? vm[1] : '';
+        res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+        if (!body || !ver) {   // 读不出/不像我们的脚本 → 明确报错，别把垃圾内容发出去让脚本写进自己
+            res.writeHead(500);
+            res.end('cannot read po-script.js or PKLM_VERSION not found');
+            return;
+        }
+        if (u.pathname === '/pklm/version') {
+            res.writeHead(200);
+            res.end(ver);
+            return;
+        }
+        res.setHeader('X-PKLM-Version', ver);
+        res.writeHead(200);
+        res.end(body);
         return;
     }
 
