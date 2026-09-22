@@ -149,6 +149,7 @@ var TYPE_COLOR={Normal:"#A8A878",Fire:"#F08030",Water:"#6890F0",Electric:"#F8D03
 var STATUS={burn:{cn:"烧",c:"#fb923c"},sleep:{cn:"睡",c:"#60a5fa"},freeze:{cn:"冰",c:"#67e8f9"},paralysis:{cn:"麻",c:"#fde047"},poison:{cn:"毒",c:"#a855f7"}};
 
 var BATTLE=null, cur=0;
+var SYS_PROMPT='';   // ?light=1 只在第一条里带 systemPrompt（每条都一样），其余用这条兜底
 
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
 function hpColor(p){return p>50?["#4ade80","#16a34a"]:p>25?["#facc15","#ca8a04"]:["#f87171","#dc2626"];}
@@ -270,7 +271,7 @@ function render(d){
   var h=document.getElementById('history');
   var hist=(d.state&&d.state.history)||[];
   h.innerHTML=hist.map(function(x){ return '<span class="hl">'+esc(x)+'</span>'; }).join('<br>');
-  document.getElementById('prompt').textContent='[SYSTEM]\n'+(d.systemPrompt||'(未记录)')+'\n\n[USER]\n'+(d.prompt||'');
+  document.getElementById('prompt').textContent='[SYSTEM]\n'+(d.systemPrompt||SYS_PROMPT||'(未记录)')+'\n\n[USER]\n'+(d.prompt||'');
   document.getElementById('slider').value=cur;
   document.getElementById('stepInfo').textContent='第 '+(cur+1)+' / '+BATTLE.length+' 条 · turn '+(d.turn!=null?d.turn:'?');
 }
@@ -283,9 +284,10 @@ function navTo(i){
 function nav(delta){ navTo(cur+delta); }
 
 function loadBattle(file){
-  fetch('/api/battle?file='+encodeURIComponent(file)).then(function(r){return r.json();}).then(function(arr){
+  fetch('/api/battle?light=1&file='+encodeURIComponent(file)).then(function(r){return r.json();}).then(function(arr){
     BATTLE=arr;
     cur=0;
+    SYS_PROMPT=(arr.length&&arr[0].systemPrompt)||SYS_PROMPT;   // light 模式只在第一条带 systemPrompt
     document.getElementById('slider').max=Math.max(0,arr.length-1);
     var hasTool=arr.some(function(d){return d.toolLog&&d.toolLog.length;});
     document.getElementById('toolTag').style.display=hasTool?'inline':'none';
@@ -294,8 +296,13 @@ function loadBattle(file){
   });
 }
 
-// 初始化：加载 battle 列表（每 4s 自动刷新，新对战自动出现并切换过去）
+// 初始化：加载 battle 列表（每 15s 自动刷新，新的日志文件会出现并被切过去）
+// ⚠ 不要调小这个间隔：日志在网络盘上，列表要 stat 200+ 个文件；原来 4s 轮询而每次请求要几十秒 → 请求堆积、整个服务卡死。
+//    真正"进行中"的回合是走 SSE（/events）实时进列表的，不依赖这个轮询。
+var listBusy=false;
 function loadBattleList(){
+  if(listBusy) return;                       // 上一次还没回来就跳过这一轮，避免堆积
+  listBusy=true;
   fetch('/api/battles').then(function(r){return r.json();}).then(function(list){
     var sel=document.getElementById('selBattle');
     var prev=sel.value;
@@ -310,10 +317,10 @@ function loadBattleList(){
       if(newest!==prev){ sel.value=newest; loadBattle(newest); }
       else { sel.value=prev; }
     }
-  });
+  }).catch(function(){}).then(function(){ listBusy=false; });
 }
 loadBattleList();
-setInterval(loadBattleList, 4000);
+setInterval(loadBattleList, 15000);
 
 // ===== 进行中面板：LLM 思考中（SSE progress 事件，含正计时）=====
 var liveStartTs=0, liveTimerId=null, liveBid=null;

@@ -42,3 +42,20 @@ node po-pokellmon-view/server.js
 
 - 对手后备 HP 在 PO 里是隐藏的，日志只有 `oppSeen`（名字）和 `oppRemaining`（数量），无 HP
 - 对手场上只给 HP 百分比（PO 不暴露具体值）
+
+## 性能（2026-09-22 修：整站卡到不可用）
+
+日志目录在**网络盘**（`\\smartstorage`），实测单次文件操作 ~170ms。原来踩了两个坑：
+
+- `listLogFiles()` 用 `readdirSync` + 每个文件一个 `statSync`（共 **243 个**）**同步**扫目录 → 一次 `/api/battles` 要 30–60s，期间事件循环被占死，连读本地 `index.html` 都被拖到 **77s**；
+- 前端 `index.html` 每 **4 秒**轮询一次 `/api/battles` → 请求堆积，服务再也空不出来（进程累计 CPU 1296s）。
+
+现在：
+
+- 全链路改**异步**（`fs.readdir` / `fs.stat` / `fs.readFile`），stat 走 24 并发池（冷扫 ~1.5s，且不再阻塞事件循环）；目录列表缓存 15s、解析结果按 `(file+mtime+size)` 缓存（最多留 3 份）；
+- 前端轮询 4s → **15s**，且上一次请求未返回时跳过这一轮（不堆积）。**进行中的回合走 SSE `/events`**，不依赖这个轮询；
+- `/api/battle` 支持 **`?light=1`**（前端默认用）：丢掉前端从不读的 `ledger`（占 ~20%）与**每条都完全相同**的 `systemPrompt`（只留第一条，前端用第一条兜底）→ 体积约 **−28%**。
+
+实测（battle112，1.73MB）：`/` 81s → **0.13s**；`/api/battles` 34–61s → **1.5s 冷 / 36ms 缓存**；`/api/battle?light=1` 32s → **0.19s**。
+
+**以后改这里的规矩**：这条路径上**不要用任何 `*Sync` API**，也不要把前端轮询间隔调小。

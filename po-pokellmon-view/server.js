@@ -44,53 +44,108 @@ setInterval(function () {
     });
 }, 15000);
 
-function listLogFiles() {
-    var out = [];
-    LOG_DIRS.forEach(function (dir) {
-        var files = [];
-        try { files = fs.readdirSync(dir); } catch (e) { return; }
-        files.forEach(function (f) {
-            if (f.indexOf('.log') === -1) return;
-            var full = path.join(dir, f);
-            var rel = 'logs/' + f;
-            try {
-                var st = fs.statSync(full);
-                out.push({ file: rel, name: f, bytes: st.size, mtime: st.mtimeMs, source: (dir.indexOf('tool') !== -1 ? 'tool' : 'no-think') });
-            } catch (e) {}
+// ⚠ 日志目录在**网络盘**（\\smartstorage）：实测单次文件操作 ~170ms。所以这条路径上：
+//   ① 一律不用 *Sync API —— 同步 stat 243 个文件会把事件循环占住 30-60s，连 index.html 都发不出去（实测 `/` 被拖到 77s）；
+//   ② 目录列表缓存 15s（前端每 15s 轮询一次），解析结果按 (file+mtime+size) 缓存 —— 避免反复重读网络盘。
+var LIST_TTL_MS = 15000;
+var listCache = { at: 0, data: null };
+var listWaiters = null;        // 同时到达的请求合并成一次扫描
+var STAT_LIMIT = 24;           // 并发池：串行 220 个 stat ≈ 37s，24 并发 ≈ 1.7s
+
+// 异步列目录 + 并发 stat（不阻塞事件循环）
+function scanDir(dir, cb) {
+    fs.readdir(dir, function (err, names) {
+        if (err) return cb([]);
+        var files = names.filter(function (n) { return n.indexOf('.log') !== -1; });
+        if (!files.length) return cb([]);
+        var out = [], started = 0, done = 0;
+        function launch(name) {
+            started++;
+            fs.stat(path.join(dir, name), function (e, st) {
+                if (!e && st.isFile()) {
+                    out.push({
+                        file: 'logs/' + name, name: name, bytes: st.size, mtime: st.mtimeMs,
+                        source: (dir.indexOf('tool') !== -1 ? 'tool' : 'no-think')
+                    });
+                }
+                done++;
+                if (done === files.length) return cb(out);
+                pump();
+            });
+        }
+        function pump() {
+            while (started < files.length && (started - done) < STAT_LIMIT) launch(files[started]);
+        }
+        pump();
+    });
+}
+
+function listLogFiles(cb) {
+    if (listCache.data && (Date.now() - listCache.at) < LIST_TTL_MS) return cb(null, listCache.data);
+    if (listWaiters) { listWaiters.push(cb); return; }
+    listWaiters = [cb];
+    var acc = [], i = 0;
+    (function nextDir() {
+        if (i >= LOG_DIRS.length) {
+            acc.sort(function (a, b) { return b.mtime - a.mtime; });
+            listCache = { at: Date.now(), data: acc };
+            var q = listWaiters; listWaiters = null;
+            q.forEach(function (fn) { fn(null, acc); });
+            return;
+        }
+        scanDir(LOG_DIRS[i++], function (files) { acc = acc.concat(files || []); nextDir(); });
+    })();
+}
+
+// 相对路径安全解析：只允许访问 LOG_DIRS 下的文件（异步，别用 existsSync 打网络盘）
+function resolveLogFile(file, cb) {
+    if (!file || file.indexOf('..') !== -1 || file.indexOf('\\') !== -1) return cb(null, null);
+    var base = path.basename(file), i = 0;
+    (function next() {
+        if (i >= LOG_DIRS.length) return cb(null, null);
+        var p = path.join(LOG_DIRS[i++], base);
+        fs.stat(p, function (e, st) {
+            if (!e && st.isFile()) return cb(p, st);
+            next();
+        });
+    })();
+}
+
+// 解析结果缓存：key = 文件名 + mtime + size（日志每次追加都会换 key，天然失效）
+var battleCache = {}, battleCacheKeys = [];
+var BATTLE_CACHE_MAX = 3;
+
+function readBattle(file, cb) {
+    resolveLogFile(file, function (p, st) {
+        if (!p) return cb(null, null);
+        var key = path.basename(p) + '|' + st.mtimeMs + '|' + st.size;
+        if (battleCache[key]) return cb(null, battleCache[key]);
+        fs.readFile(p, 'utf8', function (e, txt) {
+            if (e) return cb(null, null);
+            var out = [];
+            txt.split(/\r?\n/).forEach(function (l) {
+                if (!l.trim()) return;
+                try { out.push(JSON.parse(l)); } catch (x) {}
+            });
+            battleCache[key] = out;
+            battleCacheKeys.push(key);
+            while (battleCacheKeys.length > BATTLE_CACHE_MAX) delete battleCache[battleCacheKeys.shift()];
+            cb(null, out);
         });
     });
-    out.sort(function (a, b) { return b.mtime - a.mtime; });
-    return out;
 }
 
-// 相对路径安全解析：只允许访问 LOG_DIRS 下的文件
-function resolveLogFile(file) {
-    if (!file || file.indexOf('..') !== -1 || file.indexOf('\\') !== -1) return null;
-    for (var i = 0; i < LOG_DIRS.length; i++) {
-        var p = path.join(LOG_DIRS[i], path.basename(file));
-        if (fs.existsSync(p)) return p;
-    }
-    // 兼容传入完整相对路径 logs/xxx.log
-    if (file.indexOf('logs/') === 0) {
-        for (var j = 0; j < LOG_DIRS.length; j++) {
-            var p2 = path.join(LOG_DIRS[j], path.basename(file));
-            if (fs.existsSync(p2)) return p2;
-        }
-    }
-    return null;
-}
-
-function readBattle(file) {
-    var p = resolveLogFile(file);
-    if (!p) return null;
-    var txt = fs.readFileSync(p, 'utf8');
-    var lines = txt.split(/\r?\n/);
-    var out = [];
-    lines.forEach(function (l) {
-        if (!l.trim()) return;
-        try { out.push(JSON.parse(l)); } catch (e) {}
+// ?light=1：只回前端真正渲染的字段 —— 丢掉 `ledger`（占 ~20%，前端从不读），
+// 且 `systemPrompt` 每条都完全相同（实测 25 条一模一样），只留第一条（前端用第一条兜底）。
+var LIGHT_DROP = ['ledger'];
+function lighten(arr) {
+    return arr.map(function (o, i) {
+        var c = {};
+        Object.keys(o).forEach(function (k) { c[k] = o[k]; });
+        for (var j = 0; j < LIGHT_DROP.length; j++) delete c[LIGHT_DROP[j]];
+        if (i > 0) delete c.systemPrompt;
+        return c;
     });
-    return out;
 }
 
 var server = http.createServer(function (req, res) {
@@ -138,21 +193,25 @@ var server = http.createServer(function (req, res) {
     }
 
     if (req.method === 'GET' && req.url.indexOf('/api/battles') === 0) {
-        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-        res.end(JSON.stringify(listLogFiles()));
+        listLogFiles(function (err, list) {
+            res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+            res.end(JSON.stringify(list || []));
+        });
         return;
     }
 
     if (req.method === 'GET' && req.url.indexOf('/api/battle') === 0) {
         var q = url.parse(req.url, true).query;
-        var battle = readBattle(q.file);
-        if (battle === null) {
-            res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
-            res.end('not found: ' + q.file);
-            return;
-        }
-        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-        res.end(JSON.stringify(battle));
+        readBattle(q.file, function (err, battle) {
+            if (!battle) {
+                res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+                res.end('not found: ' + q.file);
+                return;
+            }
+            if (q.light === '1' || q.light === 'true') battle = lighten(battle);
+            res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+            res.end(JSON.stringify(battle));
+        });
         return;
     }
 
@@ -186,5 +245,7 @@ server.listen(PORT, HOST, function () {
     console.log('po-pokellmon-view server (LLM battle viewer)');
     console.log('  view : http://' + HOST + ':' + PORT + '/');
     console.log('  logs : ' + LOG_DIRS.join(', '));
-    console.log('  files: ' + listLogFiles().length + ' battle logs found');
+    listLogFiles(function (err, list) {
+        console.log('  files: ' + ((list || []).length) + ' battle logs found');
+    });
 });
