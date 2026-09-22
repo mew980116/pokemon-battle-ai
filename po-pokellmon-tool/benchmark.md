@@ -27,7 +27,7 @@
 1. **条目缺统一的「这个场景暴露的是哪一类硬伤」标签** —— 按 benchmark 的定位这应该是第一属性（目前只有部分条目带 `标签` 字段）。可能的分类：*速度/顺序*、*伤害档位（乐观/保守）*、*回合发展趋势（主动换人 vs 留场）*、*状态与信息的陈旧/复活*、*harness 自身的表述*（如 E004 那句被删掉的倾向建议）。
 2. **T7 的"替补选谁"没在 0.8.5 之后复测**（证据停在 0.8.2 时代的 2/3）。
 3. **「同 turn 第二条记录」没有覆盖**：`replay.js` 只跑同 turn 的第一条，像 E005 里"上了又换下"、battle111 T12#1 这类要单独处理。
-4. **还没有一个 benchmark runner**：fixture 已备 7 个（`eval/fixtures/`：battle96-t1、battle111-t2、battle106-t13/t15、battle108-t2/t7/t12），但只有 `eval/run.js` 能做"单 fixture 采样 N 次"，**没有"一次跑完所有 fixture + 按断言判定"的入口**。
+4. **还没有一个 benchmark runner**：fixture 一共 11 个（`eval/fixtures/`）—— 本 benchmark 相关的 7 个：battle96-t1（E001）、battle111-t2（E004）、battle106-t13 / t15（P006）、battle108-t2 / t7 / t12（E005）；另有 4 个更早的评测 fixture：battle98-t0 / t1、CTRL93-T4、CTRL94-T2。但只有 `eval/run.js` 能做"单 fixture 采样 N 次"，**没有"一次跑完 + 按断言判定"的入口**。
 
 ## 来源
 
