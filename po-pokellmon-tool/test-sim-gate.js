@@ -319,5 +319,20 @@ chk('只给事实：不含任何"必须/应当选谁"的措辞',
     !/must pick|you should switch to|pick slot|required/i.test(rf.block.join(' ') + JSON.stringify(rf.perSlot)),
     (rf.block.join(' ') + JSON.stringify(rf.perSlot)).slice(0, 200));
 
+console.log('\nREPLACEMENT MODE 速度对比必须先把对手的强化算进去（tool 0.8.8）');
+// 复刻 battle112 PO T13 的坑：对面 Mew 已 +3 速，我们却给 Weavile 印了 "CLEARLY faster"
+var rfB = JSON.parse(JSON.stringify(rfState));
+rfB.opp.boosts = ['Atk+3', 'Spe+3'];
+rfB.myTeam = [{ slot: 0, name: 'Throh', hpPct: 0, ko: true }, { slot: 3, name: 'Weavile', hpPct: 50, ko: false }];
+rfB.myStats = [{ slot: 3, name: 'Weavile', level: 100, ev: [0, 0, 0, 0, 0, 252], iv: [31, 31, 31, 31, 31, 31], nature: 0 }];
+rfB.bench = [{ slot: 3, name: 'Weavile', hpPct: 50, types: ['Dark', 'Ice'], moves: [{ name: 'Ice Shard', type: 'Ice' }] }];
+var rfb = tools.replacementFacts(rfB);
+chk('对手 Spe+3 → 候补行不再说 CLEARLY faster，并把强化后的区间写出来',
+    !/CLEARLY faster/.test(rfb.perSlot[3] || '') && /Spe\+3/.test(rfb.perSlot[3] || ''), String(rfb.perSlot[3]));
+chk('对手 Spe+3 → block 里单独点出「真实速度不是 level-0 区间」',
+    (rfb.block || []).some(function (x) { return /CURRENTLY at Spe\+3/.test(x) && /NOT the level-0 range above/.test(x); }),
+    JSON.stringify(rfb.block).slice(0, 200));
+chk('对手无速度强化 → 原行为不变（仍可 CLEARLY faster）', /CLEARLY faster/.test(rf.perSlot[3] || ''), String(rf.perSlot[3]));
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

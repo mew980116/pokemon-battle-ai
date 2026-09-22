@@ -91,6 +91,11 @@
 - **DeepSeek 请求必须压「硬墙钟」超时（0.6.1，真 bug）**：原来只有 `req.setTimeout(TIMEOUT_MS)`——那是**空闲超时**（socket idle），连接上只要有零星保活/分块流量就**永远不触发**。
   - 实测（2026-09-20 battle98 T11）：`api.deepseek.com`（117.185.125.154）的连接从 23:42:00 建起到 23:51:24 **仍 Established（564s）**，240s 空闲超时没掐，PO 侧 `sys.synchronousWebCall` 一直阻塞，面板停在「实时 503s 思考中…」。
   - 现在另加一个 `setTimeout` 硬墙钟 deadline（同一时长，`done()` 保证 cb 只回调一次、`res.on('error')` 也接住）。PO 侧兜底：**单次失败→`pklmFallbackAttack()`**，连续 3 次且跨度 >15s 才会认输。
+- **REPLACEMENT MODE 的速度对比要先把对手的强化算进去（tool 0.8.8，A 类实现缺陷：喂错信息）**
+  - 起因（battle112 PO T13 实测，**模型自己抓出来的**）：对面 Mew 已 **+3 速**，候补行却仍旧给 Weavile 印 `spe 383 vs their range 131-229 → CLEARLY faster` —— 那段区间只是「种族值 + 满努力」，**不含强化/围巾/麻痹**（同一段 block 里我们自己还写着这句警告），却在下一行拿它下"你先手"的结论。模型原文：`a trap: the note's "clearly faster" ignores Mew's +3 Spe (~470-656), so Weavile does NOT outspeed`。
+  - 后果：它因此**否决了 Weavile 的复仇线**（本该是"先制 Ice Shard 收残血"）转而选 Durant —— 那局恰好也合理，但这是运气，不是事实支持。
+  - 修：读 `state.opp.boosts` 的 `Spe+N`，按等级倍率（正级 `(2+s)/2`、负级 `2/(2-s)`）把区间折成**强化后的真实区间**并写明；此时不再印 `CLEARLY faster`，改成 `still faster than that` / `SLOWER than that — do NOT assume you move first` / `inside that range`。block 另起一行 `⚠ … is CURRENTLY at Spe+3 … NOT the level-0 range above`。
+  - 回归：`test-sim-gate.js` **105/0**（新增 3 条：Spe+3 时不得出现 `CLEARLY faster` 且必须写出强化区间；block 必须点明"不是 level-0 区间"；无强化时行为不变）；`test-species-alias.js` 18/0、`test-calc-compare.js`、`test-tools.js` 不变。
 - **`replay.js` 汇总表按「同回合组内序号」配对（tool 0.8.7，无行为改动）**
   - 起因：battle108 **T7**（E005）复测时逐条输出是「替补决策 → `switch slot3`（正解）」，而汇总表两行都印成 `新动作 attack slot1`——**表自己跟自己的逐条结果矛盾**。
   - 根因：`oldE = chosen.find(x => x.turn === r.turn)` + `newE = newEntries.filter(x => x.turn === r.turn).pop()` 都是按 turn 取**单条**；同一回合有两条记录（「强制替补」+「换人后的正常回合」）时，两行都取到同一条。

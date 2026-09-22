@@ -1104,6 +1104,20 @@ function replacementFacts(state) {
     if (osr) {
         res.block.push('- ' + oppName + "'s Speed is a RANGE " + osr.min + '-' + osr.max + ' (base stats + max investment): a Choice Scarf / boost / Tailwind / paralysis is NOT inside it, so do not read the range as a claim about who is faster — only a candidate whose own exact Speed falls OUTSIDE that range can be called first, and when the ranges overlap, both orders happen.');
     }
+    // ⚠ 0.8.8：上面的区间是「种族值 + 满努力」，**不含强化**。对手此刻若已 Spe+N，就必须先把强化算进去再比速度 ——
+    // 否则会印出「CLEARLY faster」这种与事实相反的结论（battle112 PO T13 实测：对面 Mew 已 +3 速，
+    // 我们仍给 Weavile 印 "CLEARLY faster"，模型自己发现并写下 "a trap: the note's 'clearly faster' ignores Mew's +3 Spe"）。
+    var oppSpeBoost = 0;
+    for (var bi = 0; bi < (opp.boosts || []).length; bi++) {
+        var bm = /^Spe([+-]\d+)$/.exec(String(opp.boosts[bi]));
+        if (bm) oppSpeBoost = Number(bm[1]);
+    }
+    var speMult = oppSpeBoost > 0 ? (2 + oppSpeBoost) / 2 : (oppSpeBoost < 0 ? 2 / (2 - oppSpeBoost) : 1);
+    var osrBoosted = osr ? { min: Math.floor(osr.min * speMult), max: Math.floor(osr.max * speMult) } : null;
+    if (oppSpeBoost && osrBoosted) {
+        res.block.push('- ⚠ ' + oppName + ' is CURRENTLY at Spe' + (oppSpeBoost > 0 ? '+' : '') + oppSpeBoost +
+            ' (read straight from your state): its real Speed is about ' + osrBoosted.min + '-' + osrBoosted.max + ', NOT the level-0 range above.');
+    }
     var prioList = [];
     for (var pi = 0; pi < oppMoves.length; pi++) {
         var pr = movePriorityByName(oppMoves[pi].name);
@@ -1142,8 +1156,16 @@ function replacementFacts(state) {
         }
         var mySpe = mySpeedOf(state, slot, null);
         if (mySpe && osr) {
-            parts.push('spe ' + mySpe + ' vs their range ' + osr.min + '-' + osr.max + ' → ' +
-                (mySpe > osr.max ? 'CLEARLY faster' : (mySpe < osr.min ? 'clearly slower' : 'inside their range (order NOT decidable)')));
+            if (oppSpeBoost && osrBoosted) {
+                parts.push('spe ' + mySpe + ' vs their level-0 range ' + osr.min + '-' + osr.max + ' → BUT they are CURRENTLY Spe' +
+                    (oppSpeBoost > 0 ? '+' : '') + oppSpeBoost + ' (real Speed ≈ ' + osrBoosted.min + '-' + osrBoosted.max + '): ' +
+                    (mySpe > osrBoosted.max ? 'still faster than that'
+                        : (mySpe < osrBoosted.min ? 'SLOWER than that — do NOT assume you move first'
+                            : 'inside that range (order NOT decidable)')));
+            } else {
+                parts.push('spe ' + mySpe + ' vs their range ' + osr.min + '-' + osr.max + ' → ' +
+                    (mySpe > osr.max ? 'CLEARLY faster' : (mySpe < osr.min ? 'clearly slower' : 'inside their range (order NOT decidable)')));
+            }
         }
         if (parts.length) res.perSlot[slot] = ',' + parts.join(',');
     }
