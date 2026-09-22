@@ -375,5 +375,43 @@ node replay.js logs/deepseek_tool_20260922_battle111.log 2 --url=http://127.0.0.
 - **复测（原样重放 T2，3 遍）**：修前 **1/3**（RT2b 对；RT2c 复现旧错；RT2a 撞 120s 上限走 fallback）→ **修后 3/3 全对**（都是 `switch slot4` = Clefable；36 / 55 / 83s，无 fallback）。
 - **回归（battle106 T13/T15 —— 那句建议原本就是为这局写的，2 轮）**：**全过** —— T13 仍留场（`attack slot3` / `attack slot1`，正是期望的"留场炮灰"），T15 的强制替补仍选 `slot4` ✓。删掉倾向建议**没有破坏**"该留场时就留场"。
 
+---
+
+## E005 — 强制替补「选谁」与「主动换人的代价」：三处同源错误（battle108）
+
+**标签**：`把强制替补当主动换入算代价` `替补选人保守` `自相矛盾（上了又换下）` `伤害怕数乐观`
+**日期**：2026-09-22
+**来源**：battle108（script 0.6.27 / tool 0.8.0；生产配置 = `deepseek-flash` + 关思考）。⚠ 旧编号 ⇒ **日志回合号 = PO − 1**。
+**fixture**：[battle108-t2.json](eval/fixtures/battle108-t2.json)（log T2 = PO T3）· [battle108-t7.json](eval/fixtures/battle108-t7.json)（log T7 = PO T8）· [battle108-t12.json](eval/fixtures/battle108-t12.json)（log T12 = PO T13）
+
+### 三处（用户复盘时点出的原话：「T3 换人连带 T4 大地之力不破替身」「T7 倒后不上师父鼬」「T12 倒后上基拉祈」）
+
+| 位置 | 局面 | 期望 | 实战 | 根因 |
+|---|---|---|---|---|
+| **T2 / PO T3** | Throh 100% vs Bouffalant 81%；**它自己的仿真已算出 `Storm Throw 92-108%`**（必暴击招） | **留场出招**（至少高概率直接收） | `switch slot4` → Bouffalant **免费做出替身**，T4 Palossand 的地震**破不掉**（战报 `substitute took the damage!`） | **主动换人 = 白送一个动作**；且 strategy 把仿真的 92-108% 改写成 `~70-91%, coin flip` |
+| **T7 / PO T8** | Throh 已倒（**强制替补**），Bouffalant 86% | 上**师父鼬**：Close Combat **156-184% = guaranteed OHKO**，且 105 速 vs 55 速 ⇒ **先手** | `switch slot2`（Sandaconda）→ 白挨三回合后死掉，**最后还是靠师父鼬**收掉 | **把"主动换入"的代价套到强制替补上**（原文 `Mienshao OHKO'd by Body Slam — no`）—— 强制替补**本回合不吃招** |
+| **T12 / PO T13** | Mienshao 已倒（强制替补），Raikou 100% | 选一只**能长期站住/起势**的（如 Palossand）并一直用 | `switch slot1`（Jirachi「侦察」）→ **同一 turn 的第二条决策又写 `Jirachi cannot win the damage race` 把它换下去** → Raikou 免费做出替身 | **自相矛盾**：上了又换下 = 白送对手一个动作 |
+
+### 已做的处理与复测
+
+- **tool 0.8.2**：给 REPLACEMENT MODE 注入确定性事实（替补在**回合结束阶段**上场 → **本回合不吃招**；唯一成本是陷阱；对手速度只是**区间**不能用来定顺序；每个候补行带 `takes / deals / spe` 与 KO 判定）。
+- **复测（0.8.2 时代）**：T2 从错变对（2/3 → 稳定 3/3）；T12 的"上了又换下"消失（3/3 都留场出招）；**T7 的"选谁"仍 2/3 保守**（只有 1/3 选到师父鼬）。
+- **强配置对照**：`flash+低推理` 与 `pro+关思考` 在 T7 都能自己写出 `the faint happens in the end-of-turn phase, so Bouffalant gets NO free hit now` + `it never eats a hit and nets a KO` ⇒ 这是**事实缺席 + 生产配置时做不做**，不是"不会"。
+- **仍未结的**：T7 的"选谁"在 0.8.5 之后没再复测（当前证据停在 0.8.2 时代的 2/3）。
+
+### 期望拦它的机制
+
+- 保持**只给事实**：替补不吃招 + 候补的 `takes/deals/spe`（0.8.2 已做）；
+- 「**上场一样又换下**」这类**回合发展趋势**问题，靠 `simulate_turn` 的 `trajectory`-式事实（0.8.5 已去掉其中的倾向性）与 `save_strategy` 的一致性提醒 —— **不再加门禁**。
+
+### 复现方式
+
+```
+node replay.js logs/deepseek_tool_20260921_battle108.log 2 7 12 --url=http://127.0.0.1:8092
+```
+
+**断言**：T2 **不得**是 `switch`；T7 期望 `switch slot3`（师父鼬 = 免费击杀）；T12 的替补选人不得在下一手被自己换下。
+⚠ `replay.js` 只跑**同 turn 的第一条**记录 —— T12「又换下」那条是同 turn 的第二条，需按顺序单独重放（或用 `eval/run.js` 走 fixture）。
+
 
 

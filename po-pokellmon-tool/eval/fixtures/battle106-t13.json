@@ -1,0 +1,719 @@
+{
+ "state": {
+  "account": "「木偶」析构万理的发条公主",
+  "log": true,
+  "battleId": "EVALbattle106t13json",
+  "scriptVersion": "0.6.26",
+  "turn": 13,
+  "shadow": false,
+  "teamPreview": false,
+  "bannedMoves": [],
+  "bannedSwitches": [],
+  "history": [
+   "Turn 8: You used Lash Out. It's super effective. Polteageist hung on using its Focus Sash! opposing Polteageist lost 99%. Polteageist lost part of its armor! opposing used Shell Smash. [Weather:None, Terrain:None, You:None, Opp:Atk+2+Def-2+SpA+2+SpD-1+Spe+4] ",
+   "Turn 9: opposing used Hyper Beam. You Zarude-Aba lost 309 HP. You used Lash Out. It's super effective. opposing Polteageist lost 0%. opposing's pokemon fainted. Zarude-Aba restored a little HP using its Leftovers! opposing sent out Umbreon. [Weather:None, Terrain:None, You:None, Opp:None] ",
+   "Turn 10: Your pokemon was called back. You sent out Vikavolt. opposing used Revenge. It's not very effective. You Vikavolt lost 20 HP. [Weather:None, Terrain:None, You:None, Opp:None] ",
+   "Turn 11: opposing used Curse. You used Bug Buzz. It's super effective. opposing Umbreon lost 100%. opposing's pokemon fainted. Vikavolt is hurt by its Life Orb! opposing sent out Roserade. [Weather:None, Terrain:None, You:None, Opp:None] ",
+   "Turn 12: opposing used Sludge Bomb. You Vikavolt lost 168 HP. You is now poison. You used Bug Buzz. opposing Roserade lost 70%. Vikavolt is hurt by its Life Orb! You suffered poison damage. [Weather:None, Terrain:None, You:None, Opp:SpD-1] ",
+   "Turn 13: Your pokemon was called back. You sent out Tsareena. opposing used Sludge Bomb. It's super effective. You Tsareena lost 168 HP. You is now poison. You suffered poison damage. "
+  ],
+  "fullHistory": [
+   "You sent out Flygon. opposing sent out Garbodor. [Weather:None, Terrain:None, You:None, Opp:None] ",
+   "Turn 1: You used Scorching Sands. It's super effective. opposing Garbodor lost 82%. opposing used Toxic. You is now poison. Garbodor restored a little HP using its Black Sludge! You suffered poison damage. [Weather:None, Terrain:None, You:None, Opp:None] ",
+   "Turn 2: You used Scorching Sands. It's super effective. opposing Garbodor lost 23%. opposing's pokemon fainted. You suffered poison damage. opposing sent out Roserade. [Weather:None, Terrain:None, You:None, Opp:None] ",
+   "Turn 3: Your pokemon was called back. You sent out Mew. opposing used Leaf Storm. You Mew lost 198 HP. [Weather:None, Terrain:None, You:None, Opp:SpA-2] ",
+   "Turn 4: The foe's pokemon was called back. opposing sent out Bisharp. You used Psychic Fangs. It had no effect. [Weather:None, Terrain:None, You:None, Opp:None] ",
+   "Turn 5: Your pokemon was called back. You sent out Flygon. opposing used Knock Off. You Flygon lost 169 HP. Bisharp knocked off Flygon's Choice Specs! You suffered poison damage. [Weather:None, Terrain:None, You:None, Opp:None] ",
+   "Turn 6: You used Fire Blast. It's super effective. opposing Bisharp lost 80%. opposing used Iron Head. You Flygon lost 67 HP. You's pokemon fainted. You sent out Tsareena. [Weather:None, Terrain:None, You:None, Opp:None] ",
+   "Turn 7: You used U-turn. opposing Bisharp lost 19%. opposing's pokemon fainted. Your pokemon was called back. You sent out Zarude-Aba. opposing sent out Polteageist. [Weather:None, Terrain:None, You:None, Opp:None] ",
+   "Turn 8: You used Lash Out. It's super effective. Polteageist hung on using its Focus Sash! opposing Polteageist lost 99%. Polteageist lost part of its armor! opposing used Shell Smash. [Weather:None, Terrain:None, You:None, Opp:Atk+2+Def-2+SpA+2+SpD-1+Spe+4] ",
+   "Turn 9: opposing used Hyper Beam. You Zarude-Aba lost 309 HP. You used Lash Out. It's super effective. opposing Polteageist lost 0%. opposing's pokemon fainted. Zarude-Aba restored a little HP using its Leftovers! opposing sent out Umbreon. [Weather:None, Terrain:None, You:None, Opp:None] ",
+   "Turn 10: Your pokemon was called back. You sent out Vikavolt. opposing used Revenge. It's not very effective. You Vikavolt lost 20 HP. [Weather:None, Terrain:None, You:None, Opp:None] ",
+   "Turn 11: opposing used Curse. You used Bug Buzz. It's super effective. opposing Umbreon lost 100%. opposing's pokemon fainted. Vikavolt is hurt by its Life Orb! opposing sent out Roserade. [Weather:None, Terrain:None, You:None, Opp:None] ",
+   "Turn 12: opposing used Sludge Bomb. You Vikavolt lost 168 HP. You is now poison. You used Bug Buzz. opposing Roserade lost 70%. Vikavolt is hurt by its Life Orb! You suffered poison damage. [Weather:None, Terrain:None, You:None, Opp:SpD-1] ",
+   "Turn 13: Your pokemon was called back. You sent out Tsareena. opposing used Sludge Bomb. It's super effective. You Tsareena lost 168 HP. You is now poison. You suffered poison damage. "
+  ],
+  "messages": [],
+  "oppRemaining": 2,
+  "weather": null,
+  "terrain": null,
+  "myHazards": [],
+  "oppHazards": [],
+  "screens": {
+   "me": [],
+   "opp": []
+  },
+  "opp": {
+   "name": "Roserade",
+   "types": [
+    "Grass",
+    "Poison"
+   ],
+   "hpPct": 28,
+   "status": null,
+   "moves": [
+    {
+     "name": "Leaf Storm",
+     "type": "Grass",
+     "num": 437,
+     "used": 1
+    },
+    {
+     "name": "Sludge Bomb",
+     "type": "Poison",
+     "num": 188,
+     "used": 2
+    }
+   ],
+   "fainted": false,
+   "abilityInferred": null,
+   "itemInferred": null,
+   "possibleAbilities": [
+    "Natural Cure",
+    "Poison Point",
+    "Technician"
+   ],
+   "boosts": [
+    "SpD-1"
+   ]
+  },
+  "oppTeam": [
+   {
+    "name": "Roserade",
+    "revealed": true,
+    "ko": false,
+    "hpPct": 28,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [
+     "Natural Cure",
+     "Poison Point",
+     "Technician"
+    ],
+    "moves": [
+     {
+      "name": "Leaf Storm",
+      "type": "Grass",
+      "num": 437,
+      "used": 1
+     },
+     {
+      "name": "Sludge Bomb",
+      "type": "Poison",
+      "num": 188,
+      "used": 2
+     }
+    ],
+    "itemInferred": null
+   },
+   {
+    "name": "Umbreon",
+    "revealed": true,
+    "ko": true,
+    "hpPct": null,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [
+     "Synchronize",
+     "Inner Focus"
+    ],
+    "moves": [
+     {
+      "name": "Revenge",
+      "type": "Fighting",
+      "num": 279,
+      "used": 1
+     },
+     {
+      "name": "Curse",
+      "type": "Ghost",
+      "num": 174,
+      "used": 1
+     }
+    ],
+    "itemInferred": null
+   },
+   {
+    "name": "Bisharp",
+    "revealed": true,
+    "ko": true,
+    "hpPct": null,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [
+     "Defiant",
+     "Inner Focus"
+    ],
+    "moves": [
+     {
+      "name": "Knock Off",
+      "type": "Dark",
+      "num": 282,
+      "used": 1
+     },
+     {
+      "name": "Iron Head",
+      "type": "Steel",
+      "num": 442,
+      "used": 1
+     }
+    ],
+    "itemInferred": null
+   },
+   {
+    "name": "Garbodor",
+    "revealed": true,
+    "ko": true,
+    "hpPct": null,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [
+     "Stench",
+     "Weak Armor",
+     "Aftermath"
+    ],
+    "moves": [
+     {
+      "name": "Toxic",
+      "type": "Poison",
+      "num": 92,
+      "used": 1
+     }
+    ],
+    "itemInferred": "Black Sludge"
+   },
+   {
+    "name": null,
+    "revealed": false,
+    "ko": false,
+    "hpPct": null,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [],
+    "moves": [],
+    "itemInferred": null
+   },
+   {
+    "name": "Polteageist",
+    "revealed": true,
+    "ko": true,
+    "hpPct": null,
+    "status": null,
+    "abilityInferred": "Weak Armor",
+    "possibleAbilities": [
+     "Weak Armor",
+     "Cursed Body"
+    ],
+    "moves": [
+     {
+      "name": "Shell Smash",
+      "type": "Normal",
+      "num": 504,
+      "used": 1
+     },
+     {
+      "name": "Hyper Beam",
+      "type": "Normal",
+      "num": 63,
+      "used": 1
+     }
+    ],
+    "itemInferred": null
+   }
+  ],
+  "oppSeen": [
+   "Garbodor",
+   "Roserade",
+   "Bisharp",
+   "Polteageist",
+   "Umbreon"
+  ],
+  "me": {
+   "name": "Tsareena",
+   "types": [
+    "Grass"
+   ],
+   "hpPct": 27,
+   "status": "poison",
+   "moves": [
+    {
+     "slot": 0,
+     "name": "Trop Kick",
+     "type": "Grass",
+     "num": 639,
+     "pp": 24
+    },
+    {
+     "slot": 1,
+     "name": "Knock Off",
+     "type": "Dark",
+     "num": 282,
+     "pp": 32
+    },
+    {
+     "slot": 2,
+     "name": "Rapid Spin",
+     "type": "Normal",
+     "num": 229,
+     "pp": 64
+    },
+    {
+     "slot": 3,
+     "name": "U-turn",
+     "type": "Bug",
+     "num": 369,
+     "pp": 31
+    }
+   ],
+   "fainted": false,
+   "boosts": [],
+   "ability": "Queenly Majesty",
+   "item": "Assault Vest",
+   "itemRaw": 331,
+   "itemField": 331
+  },
+  "myTeam": [
+   {
+    "slot": 0,
+    "name": "Tsareena",
+    "hpPct": 27,
+    "ko": false,
+    "status": "poison"
+   },
+   {
+    "slot": 1,
+    "name": "Mew",
+    "hpPct": 41,
+    "ko": false,
+    "status": null
+   },
+   {
+    "slot": 2,
+    "name": "Flygon",
+    "hpPct": 0,
+    "ko": true,
+    "status": null
+   },
+   {
+    "slot": 3,
+    "name": "Vikavolt",
+    "hpPct": 3,
+    "ko": false,
+    "status": "poison"
+   },
+   {
+    "slot": 4,
+    "name": "Zarude-Aba",
+    "hpPct": 20,
+    "ko": false,
+    "status": null
+   },
+   {
+    "slot": 5,
+    "name": "Basculin",
+    "hpPct": 100,
+    "ko": false,
+    "status": null
+   }
+  ],
+  "myStats": [
+   {
+    "slot": 0,
+    "name": "Tsareena",
+    "numRef": 763,
+    "level": 100,
+    "ev": [
+     48,
+     48,
+     48,
+     48,
+     48,
+     252
+    ],
+    "iv": [
+     15,
+     31,
+     15,
+     31,
+     15,
+     31
+    ],
+    "nature": 0
+   },
+   {
+    "slot": 1,
+    "name": "Mew",
+    "numRef": 151,
+    "level": 100,
+    "ev": [
+     48,
+     48,
+     48,
+     48,
+     48,
+     252
+    ],
+    "iv": [
+     15,
+     31,
+     15,
+     31,
+     15,
+     31
+    ],
+    "nature": 0
+   },
+   {
+    "slot": 2,
+    "name": "Flygon",
+    "numRef": 330,
+    "level": 100,
+    "ev": [
+     48,
+     48,
+     48,
+     48,
+     48,
+     252
+    ],
+    "iv": [
+     31,
+     31,
+     31,
+     31,
+     31,
+     31
+    ],
+    "nature": 0
+   },
+   {
+    "slot": 3,
+    "name": "Vikavolt",
+    "numRef": 738,
+    "level": 100,
+    "ev": [
+     48,
+     48,
+     48,
+     48,
+     48,
+     252
+    ],
+    "iv": [
+     15,
+     31,
+     15,
+     31,
+     15,
+     31
+    ],
+    "nature": 0
+   },
+   {
+    "slot": 4,
+    "name": "Zarude-Aba",
+    "numRef": 66429,
+    "level": 100,
+    "ev": [
+     48,
+     48,
+     48,
+     48,
+     48,
+     252
+    ],
+    "iv": [
+     31,
+     31,
+     31,
+     31,
+     31,
+     31
+    ],
+    "nature": 0
+   },
+   {
+    "slot": 5,
+    "name": "Basculin",
+    "numRef": 550,
+    "level": 100,
+    "ev": [
+     48,
+     48,
+     48,
+     48,
+     48,
+     252
+    ],
+    "iv": [
+     15,
+     31,
+     15,
+     31,
+     15,
+     31
+    ],
+    "nature": 0
+   }
+  ],
+  "bench": [
+   {
+    "slot": 1,
+    "name": "Mew",
+    "numRef": 151,
+    "unrevealed": false,
+    "types": [
+     "Psychic"
+    ],
+    "hpPct": 41,
+    "status": null,
+    "moves": [
+     {
+      "slot": 0,
+      "name": "Dragon Dance",
+      "type": "Dragon",
+      "num": 349,
+      "pp": 32
+     },
+     {
+      "slot": 1,
+      "name": "Psychic Fangs",
+      "type": "Psychic",
+      "num": 665,
+      "pp": 15
+     },
+     {
+      "slot": 2,
+      "name": "Close Combat",
+      "type": "Fighting",
+      "num": 370,
+      "pp": 8
+     },
+     {
+      "slot": 3,
+      "name": "Earthquake",
+      "type": "Ground",
+      "num": 89,
+      "pp": 16
+     }
+    ],
+    "ability": "Synchronize",
+    "item": "Life Orb",
+    "itemRaw": 91
+   },
+   {
+    "slot": 3,
+    "name": "Vikavolt",
+    "numRef": 738,
+    "unrevealed": false,
+    "types": [
+     "Bug",
+     "Electric"
+    ],
+    "hpPct": 3,
+    "status": "poison",
+    "moves": [
+     {
+      "slot": 0,
+      "name": "Agility",
+      "type": "Psychic",
+      "num": 97,
+      "pp": 48
+     },
+     {
+      "slot": 1,
+      "name": "Thunderbolt",
+      "type": "Electric",
+      "num": 85,
+      "pp": 24
+     },
+     {
+      "slot": 2,
+      "name": "Bug Buzz",
+      "type": "Bug",
+      "num": 405,
+      "pp": 14
+     },
+     {
+      "slot": 3,
+      "name": "Energy Ball",
+      "type": "Grass",
+      "num": 412,
+      "pp": 16
+     }
+    ],
+    "ability": "Levitate",
+    "item": "Life Orb",
+    "itemRaw": 91
+   },
+   {
+    "slot": 4,
+    "name": "Zarude-Aba",
+    "numRef": 66429,
+    "unrevealed": false,
+    "types": [
+     "Dark",
+     "Grass"
+    ],
+    "hpPct": 20,
+    "status": null,
+    "moves": [
+     {
+      "slot": 0,
+      "name": "Jungle Healing",
+      "type": "Grass",
+      "num": 842,
+      "pp": 16
+     },
+     {
+      "slot": 1,
+      "name": "Power Whip",
+      "type": "Grass",
+      "num": 438,
+      "pp": 16
+     },
+     {
+      "slot": 2,
+      "name": "Bulk Up",
+      "type": "Fighting",
+      "num": 339,
+      "pp": 32
+     },
+     {
+      "slot": 3,
+      "name": "Lash Out",
+      "type": "Dark",
+      "num": 834,
+      "pp": 6
+     }
+    ],
+    "ability": "Leaf Guard",
+    "item": "Leftovers",
+    "itemRaw": 15
+   },
+   {
+    "slot": 5,
+    "name": "Basculin",
+    "numRef": 550,
+    "unrevealed": true,
+    "types": [
+     "Water"
+    ],
+    "hpPct": 100,
+    "status": null,
+    "moves": [
+     {
+      "slot": 0,
+      "name": "Liquidation",
+      "type": "Water",
+      "num": 668,
+      "pp": 16
+     },
+     {
+      "slot": 1,
+      "name": "Aqua Jet",
+      "type": "Water",
+      "num": 453,
+      "pp": 32
+     },
+     {
+      "slot": 2,
+      "name": "Head Smash",
+      "type": "Rock",
+      "num": 457,
+      "pp": 8
+     },
+     {
+      "slot": 3,
+      "name": "Psychic Fangs",
+      "type": "Psychic",
+      "num": 665,
+      "pp": 16
+     }
+    ],
+    "ability": "Reckless",
+    "item": "Choice Band",
+    "itemRaw": 4
+   }
+  ],
+  "itemProbe": [
+   {
+    "seq": 1,
+    "spot": "opp",
+    "msg": 16,
+    "part": 0,
+    "foe": 0,
+    "berry": 0,
+    "other": 0,
+    "otherName": "",
+    "txt": "Garbodor restored a little HP using its Black Sludge!",
+    "mine": "0:330@6=Choice Specs 1:151@91=Life Orb 2:763@331=Assault Vest 3:66429@15=Leftovers 4:738@91=Life Orb 5:550@4=Choice Band",
+    "myself": "team=6(Choice Specs) field=6(Choice Specs)"
+   },
+   {
+    "seq": 2,
+    "spot": "opp",
+    "msg": 5,
+    "part": 0,
+    "foe": 0,
+    "berry": 0,
+    "other": 0,
+    "otherName": "",
+    "txt": "Polteageist hung on using its Focus Sash!",
+    "mine": "0:66429@15=Leftovers 1:151@91=Life Orb 2:330@0= 3:763@331=Assault Vest 4:738@91=Life Orb 5:550@4=Choice Band",
+    "myself": "team=15(Leftovers) field=15(Leftovers)"
+   },
+   {
+    "seq": 3,
+    "spot": "me",
+    "msg": 12,
+    "part": 0,
+    "foe": 0,
+    "berry": 0,
+    "other": 0,
+    "otherName": "",
+    "txt": "Zarude-Aba restored a little HP using its Leftovers!",
+    "mine": "0:66429@15=Leftovers 1:151@91=Life Orb 2:330@0= 3:763@331=Assault Vest 4:738@91=Life Orb 5:550@4=Choice Band",
+    "myself": "team=15(Leftovers) field=15(Leftovers)"
+   },
+   {
+    "seq": 4,
+    "spot": "me",
+    "msg": 21,
+    "part": 0,
+    "foe": 0,
+    "berry": 0,
+    "other": 0,
+    "otherName": "",
+    "txt": "Vikavolt is hurt by its Life Orb!",
+    "mine": "0:738@91=Life Orb 1:151@91=Life Orb 2:330@0= 3:763@331=Assault Vest 4:66429@15=Leftovers 5:550@4=Choice Band",
+    "myself": "team=91(Life Orb) field=91(Life Orb)"
+   },
+   {
+    "seq": 5,
+    "spot": "me",
+    "msg": 21,
+    "part": 0,
+    "foe": 0,
+    "berry": 0,
+    "other": 0,
+    "otherName": "",
+    "txt": "Vikavolt is hurt by its Life Orb!",
+    "mine": "0:738@91=Life Orb 1:151@91=Life Orb 2:330@0= 3:763@331=Assault Vest 4:66429@15=Leftovers 5:550@4=Choice Band",
+    "myself": "team=91(Life Orb) field=91(Life Orb)"
+   }
+  ]
+ },
+ "eval": {
+  "name": "battle106-t13",
+  "note": "battle106 log T13（PO T14）：留场炮灰换免费替靶 —— 实战 switch slot5（错），0.7.8/0.8.5 复测应为留场 attack",
+  "opp": "Roserade",
+  "expect": "留场（attack）为主信号，不得是 switch",
+  "liveAction": {
+   "type": "switch",
+   "pokeSlot": 5
+  },
+  "liveNote": "实战当时的动作（正常）",
+  "recordsWithThisTurn": 1
+ }
+}

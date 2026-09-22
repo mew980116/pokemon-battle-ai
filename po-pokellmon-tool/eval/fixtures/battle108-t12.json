@@ -1,0 +1,768 @@
+{
+ "state": {
+  "account": "「木偶」析构万理的发条公主",
+  "log": true,
+  "battleId": "EVALbattle108t12json",
+  "scriptVersion": "0.6.27",
+  "turn": 12,
+  "shadow": false,
+  "teamPreview": false,
+  "bannedMoves": [],
+  "bannedSwitches": [],
+  "history": [
+   "Turn 7: opposing used Body Slam. You Throh lost 149 HP. You's pokemon fainted. Bouffalant restored a little HP using its Leftovers! You sent out Sandaconda. [Weather:None, Terrain:None, You:None, Opp:Atk+2] ",
+   "Turn 8: You used Earthquake. opposing Bouffalant lost 30%. opposing used Body Slam. You Sandaconda lost 154 HP. Bouffalant is hurt by Sandaconda's Rocky Helmet! You is now paralysis. Bouffalant restored a little HP using its Leftovers! [Weather:None, Terrain:None, You:None, Opp:Atk+2] ",
+   "Turn 9: opposing used Body Slam. You Sandaconda lost 138 HP. Bouffalant is hurt by Sandaconda's Rocky Helmet! Bouffalant restored a little HP using its Leftovers! [Weather:None, Terrain:None, You:None, Opp:Atk+2] ",
+   "Turn 10: opposing used Body Slam. You Sandaconda lost 56 HP. Bouffalant is hurt by Sandaconda's Rocky Helmet! You's pokemon fainted. Bouffalant restored a little HP using its Leftovers! You sent out Mienshao. [Weather:None, Terrain:None, You:None, Opp:Atk+2] ",
+   "Turn 11: You used Close Combat. It's super effective. opposing Bouffalant lost 25%. opposing's pokemon fainted. Mienshao is hurt by its Life Orb! opposing sent out Raikou. Raikou is exerting its Pressure! [Weather:None, Terrain:None, You:Def-1+SpD-1, Opp:None] ",
+   "Turn 12: opposing used Thunderbolt. You Mienshao lost 244 HP. You's pokemon fainted. "
+  ],
+  "fullHistory": [
+   "You sent out Throh. opposing sent out Bouffalant. Throh has Mold Breaker! [Weather:None, Terrain:None, You:None, Opp:None] ",
+   "Turn 1: opposing used Swords Dance. You used Bulk Up. [Weather:None, Terrain:None, You:Atk+1+Def+1, Opp:Atk+2] ",
+   "Turn 2: opposing used Substitute. Bouffalant made a substitute! You used Storm Throw. It's super effective. A critical hit! Bouffalant's substitute faded! Bouffalant restored a little HP using its Leftovers! [Weather:None, Terrain:None, You:Atk+1+Def+1, Opp:Atk+2] ",
+   "Turn 3: Your pokemon was called back. You sent out Palossand. opposing used Substitute. Bouffalant made a substitute! Bouffalant restored a little HP using its Leftovers! [Weather:None, Terrain:None, You:None, Opp:Atk+2] ",
+   "Turn 4: opposing used Throat Chop. It's super effective. Palossand's Colbur Berry weakened Storm Throw's power! You Palossand lost 110 HP. The effects of Throat Chop prevent Palossand from using Sound-based moves! You used Earth Power. Bouffalant's substitute took the damage! Bouffalant restored a little HP using its Leftovers! [Weather:None, Terrain:None, You:None, Opp:Atk+2] ",
+   "Turn 5: Your pokemon was called back. You sent out Throh. Throh has Mold Breaker! opposing used Throat Chop. It's not very effective. You Throh lost 88 HP. The effects of Throat Chop prevent Throh from using Sound-based moves! Bouffalant restored a little HP using its Leftovers! Throh restored a little HP using its Leftovers! [Weather:None, Terrain:None, You:None, Opp:Atk+2] ",
+   "Turn 6: opposing used Body Slam. You Throh lost 261 HP. You used Storm Throw. It's super effective. A critical hit! Bouffalant's substitute faded! Bouffalant restored a little HP using its Leftovers! Throh restored a little HP using its Leftovers! [Weather:None, Terrain:None, You:None, Opp:Atk+2] ",
+   "Turn 7: opposing used Body Slam. You Throh lost 149 HP. You's pokemon fainted. Bouffalant restored a little HP using its Leftovers! You sent out Sandaconda. [Weather:None, Terrain:None, You:None, Opp:Atk+2] ",
+   "Turn 8: You used Earthquake. opposing Bouffalant lost 30%. opposing used Body Slam. You Sandaconda lost 154 HP. Bouffalant is hurt by Sandaconda's Rocky Helmet! You is now paralysis. Bouffalant restored a little HP using its Leftovers! [Weather:None, Terrain:None, You:None, Opp:Atk+2] ",
+   "Turn 9: opposing used Body Slam. You Sandaconda lost 138 HP. Bouffalant is hurt by Sandaconda's Rocky Helmet! Bouffalant restored a little HP using its Leftovers! [Weather:None, Terrain:None, You:None, Opp:Atk+2] ",
+   "Turn 10: opposing used Body Slam. You Sandaconda lost 56 HP. Bouffalant is hurt by Sandaconda's Rocky Helmet! You's pokemon fainted. Bouffalant restored a little HP using its Leftovers! You sent out Mienshao. [Weather:None, Terrain:None, You:None, Opp:Atk+2] ",
+   "Turn 11: You used Close Combat. It's super effective. opposing Bouffalant lost 25%. opposing's pokemon fainted. Mienshao is hurt by its Life Orb! opposing sent out Raikou. Raikou is exerting its Pressure! [Weather:None, Terrain:None, You:Def-1+SpD-1, Opp:None] ",
+   "Turn 12: opposing used Thunderbolt. You Mienshao lost 244 HP. You's pokemon fainted. "
+  ],
+  "messages": [],
+  "oppRemaining": 5,
+  "weather": null,
+  "terrain": null,
+  "myHazards": [],
+  "oppHazards": [],
+  "screens": {
+   "me": [],
+   "opp": []
+  },
+  "opp": {
+   "name": "Raikou",
+   "types": [
+    "Electric"
+   ],
+   "hpPct": 100,
+   "status": null,
+   "moves": [
+    {
+     "name": "Thunderbolt",
+     "type": "Electric",
+     "num": 85,
+     "used": 1
+    }
+   ],
+   "fainted": false,
+   "abilityInferred": "Pressure",
+   "itemInferred": null,
+   "possibleAbilities": [
+    "Pressure",
+    "Inner Focus"
+   ],
+   "boosts": []
+  },
+  "oppTeam": [
+   {
+    "name": "Raikou",
+    "revealed": true,
+    "ko": false,
+    "hpPct": 100,
+    "status": null,
+    "abilityInferred": "Pressure",
+    "possibleAbilities": [
+     "Pressure",
+     "Inner Focus"
+    ],
+    "moves": [
+     {
+      "name": "Thunderbolt",
+      "type": "Electric",
+      "num": 85,
+      "used": 1
+     }
+    ],
+    "itemInferred": null
+   },
+   {
+    "name": null,
+    "revealed": false,
+    "ko": false,
+    "hpPct": null,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [],
+    "moves": [],
+    "itemInferred": null
+   },
+   {
+    "name": null,
+    "revealed": false,
+    "ko": false,
+    "hpPct": null,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [],
+    "moves": [],
+    "itemInferred": null
+   },
+   {
+    "name": null,
+    "revealed": false,
+    "ko": false,
+    "hpPct": null,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [],
+    "moves": [],
+    "itemInferred": null
+   },
+   {
+    "name": null,
+    "revealed": false,
+    "ko": false,
+    "hpPct": null,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [],
+    "moves": [],
+    "itemInferred": null
+   },
+   {
+    "name": "Bouffalant",
+    "revealed": true,
+    "ko": true,
+    "hpPct": null,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [
+     "Reckless",
+     "Sap Sipper",
+     "Soundproof"
+    ],
+    "moves": [
+     {
+      "name": "Swords Dance",
+      "type": "Normal",
+      "num": 14,
+      "used": 1
+     },
+     {
+      "name": "Substitute",
+      "type": "Normal",
+      "num": 164,
+      "used": 2
+     },
+     {
+      "name": "Throat Chop",
+      "type": "Dark",
+      "num": 634,
+      "used": 2
+     },
+     {
+      "name": "Body Slam",
+      "type": "Normal",
+      "num": 34,
+      "used": 5
+     }
+    ],
+    "itemInferred": "Leftovers"
+   }
+  ],
+  "oppSeen": [
+   "Bouffalant",
+   "Raikou"
+  ],
+  "me": {
+   "name": "Mienshao",
+   "types": [
+    "Fighting"
+   ],
+   "hpPct": 0,
+   "status": null,
+   "moves": [
+    {
+     "slot": 0,
+     "name": "Close Combat",
+     "type": "Fighting",
+     "num": 370,
+     "pp": 7
+    },
+    {
+     "slot": 1,
+     "name": "Knock Off",
+     "type": "Dark",
+     "num": 282,
+     "pp": 32
+    },
+    {
+     "slot": 2,
+     "name": "U-turn",
+     "type": "Bug",
+     "num": 369,
+     "pp": 32
+    },
+    {
+     "slot": 3,
+     "name": "Stone Edge",
+     "type": "Rock",
+     "num": 444,
+     "pp": 8
+    }
+   ],
+   "fainted": true,
+   "boosts": [
+    "Def-1",
+    "SpD-1"
+   ],
+   "ability": "Regenerator",
+   "item": "Life Orb",
+   "itemRaw": 91,
+   "itemField": 91
+  },
+  "myTeam": [
+   {
+    "slot": 0,
+    "name": "Mienshao",
+    "hpPct": 0,
+    "ko": true,
+    "status": null
+   },
+   {
+    "slot": 1,
+    "name": "Jirachi",
+    "hpPct": 100,
+    "ko": false,
+    "status": null
+   },
+   {
+    "slot": 2,
+    "name": "Throh",
+    "hpPct": 0,
+    "ko": true,
+    "status": null
+   },
+   {
+    "slot": 3,
+    "name": "Sandaconda",
+    "hpPct": 0,
+    "ko": true,
+    "status": null
+   },
+   {
+    "slot": 4,
+    "name": "Palossand",
+    "hpPct": 70,
+    "ko": false,
+    "status": null
+   },
+   {
+    "slot": 5,
+    "name": "Tornadus",
+    "hpPct": 100,
+    "ko": false,
+    "status": null
+   }
+  ],
+  "myStats": [
+   {
+    "slot": 0,
+    "name": "Mienshao",
+    "numRef": 620,
+    "level": 100,
+    "ev": [
+     0,
+     252,
+     0,
+     0,
+     4,
+     252
+    ],
+    "iv": [
+     31,
+     31,
+     31,
+     31,
+     31,
+     31
+    ],
+    "nature": 13
+   },
+   {
+    "slot": 1,
+    "name": "Jirachi",
+    "numRef": 385,
+    "level": 100,
+    "ev": [
+     252,
+     0,
+     0,
+     0,
+     120,
+     136
+    ],
+    "iv": [
+     31,
+     31,
+     31,
+     31,
+     31,
+     31
+    ],
+    "nature": 13
+   },
+   {
+    "slot": 2,
+    "name": "Throh",
+    "numRef": 538,
+    "level": 100,
+    "ev": [
+     252,
+     0,
+     0,
+     0,
+     176,
+     80
+    ],
+    "iv": [
+     31,
+     31,
+     31,
+     31,
+     31,
+     31
+    ],
+    "nature": 23
+   },
+   {
+    "slot": 3,
+    "name": "Sandaconda",
+    "numRef": 844,
+    "level": 100,
+    "ev": [
+     252,
+     0,
+     244,
+     0,
+     0,
+     12
+    ],
+    "iv": [
+     31,
+     31,
+     31,
+     31,
+     31,
+     31
+    ],
+    "nature": 8
+   },
+   {
+    "slot": 4,
+    "name": "Palossand",
+    "numRef": 770,
+    "level": 100,
+    "ev": [
+     252,
+     0,
+     208,
+     0,
+     48,
+     0
+    ],
+    "iv": [
+     31,
+     31,
+     31,
+     31,
+     31,
+     31
+    ],
+    "nature": 5
+   },
+   {
+    "slot": 5,
+    "name": "Tornadus",
+    "numRef": 641,
+    "level": 100,
+    "ev": [
+     0,
+     0,
+     0,
+     252,
+     4,
+     252
+    ],
+    "iv": [
+     31,
+     31,
+     31,
+     31,
+     31,
+     31
+    ],
+    "nature": 10
+   }
+  ],
+  "bench": [
+   {
+    "slot": 1,
+    "name": "Jirachi",
+    "numRef": 385,
+    "unrevealed": true,
+    "types": [
+     "Steel",
+     "Psychic"
+    ],
+    "hpPct": 100,
+    "status": null,
+    "moves": [
+     {
+      "slot": 0,
+      "name": "Iron Head",
+      "type": "Steel",
+      "num": 442,
+      "pp": 24
+     },
+     {
+      "slot": 1,
+      "name": "Body Slam",
+      "type": "Normal",
+      "num": 34,
+      "pp": 24
+     },
+     {
+      "slot": 2,
+      "name": "Wish",
+      "type": "Normal",
+      "num": 273,
+      "pp": 16
+     },
+     {
+      "slot": 3,
+      "name": "Protect",
+      "type": "Normal",
+      "num": 182,
+      "pp": 16
+     }
+    ],
+    "ability": "Serene Grace",
+    "item": "Leftovers",
+    "itemRaw": 15
+   },
+   {
+    "slot": 4,
+    "name": "Palossand",
+    "numRef": 770,
+    "unrevealed": false,
+    "types": [
+     "Ghost",
+     "Ground"
+    ],
+    "hpPct": 70,
+    "status": null,
+    "moves": [
+     {
+      "slot": 0,
+      "name": "Stealth Rock",
+      "type": "Rock",
+      "num": 446,
+      "pp": 32
+     },
+     {
+      "slot": 1,
+      "name": "Earth Power",
+      "type": "Ground",
+      "num": 414,
+      "pp": 15
+     },
+     {
+      "slot": 2,
+      "name": "Shadow Ball",
+      "type": "Ghost",
+      "num": 247,
+      "pp": 24
+     },
+     {
+      "slot": 3,
+      "name": "Shore Up",
+      "type": "Ground",
+      "num": 645,
+      "pp": 16
+     }
+    ],
+    "ability": "Water Compaction",
+    "item": "",
+    "itemRaw": 0
+   },
+   {
+    "slot": 5,
+    "name": "Tornadus",
+    "numRef": 641,
+    "unrevealed": true,
+    "types": [
+     "Flying"
+    ],
+    "hpPct": 100,
+    "status": null,
+    "moves": [
+     {
+      "slot": 0,
+      "name": "Nasty Plot",
+      "type": "Dark",
+      "num": 417,
+      "pp": 32
+     },
+     {
+      "slot": 1,
+      "name": "Hurricane",
+      "type": "Flying",
+      "num": 542,
+      "pp": 16
+     },
+     {
+      "slot": 2,
+      "name": "Heat Wave",
+      "type": "Fire",
+      "num": 257,
+      "pp": 16
+     },
+     {
+      "slot": 3,
+      "name": "Grass Knot",
+      "type": "Grass",
+      "num": 447,
+      "pp": 32
+     }
+    ],
+    "ability": "Defiant",
+    "item": "Heavy-Duty Boots",
+    "itemRaw": 383
+   }
+  ],
+  "itemProbe": [
+   {
+    "seq": 1,
+    "spot": "opp",
+    "msg": 12,
+    "part": 0,
+    "foe": 0,
+    "berry": 0,
+    "other": 0,
+    "otherName": "",
+    "txt": "Bouffalant restored a little HP using its Leftovers!",
+    "mine": "0:538@15=Leftovers 1:385@15=Leftovers 2:844@235=Rocky Helmet 3:620@91=Life Orb 4:770@8050=Colbur Berry 5:641@383=Heavy-Duty Boots",
+    "myself": "team=15(Leftovers) field=15(Leftovers)"
+   },
+   {
+    "seq": 2,
+    "spot": "opp",
+    "msg": 12,
+    "part": 0,
+    "foe": 0,
+    "berry": 0,
+    "other": 0,
+    "otherName": "",
+    "txt": "Bouffalant restored a little HP using its Leftovers!",
+    "mine": "0:770@8050=Colbur Berry 1:385@15=Leftovers 2:844@235=Rocky Helmet 3:620@91=Life Orb 4:538@15=Leftovers 5:641@383=Heavy-Duty Boots",
+    "myself": "team=8050(Colbur Berry) field=8050(Colbur Berry)"
+   },
+   {
+    "seq": 3,
+    "spot": "me",
+    "msg": 8004,
+    "part": 0,
+    "foe": 1,
+    "berry": 8050,
+    "other": 634,
+    "txt": "Palossand's Colbur Berry weakened Storm Throw's power!",
+    "mine": "0:770@8050=Colbur Berry 1:385@15=Leftovers 2:844@235=Rocky Helmet 3:620@91=Life Orb 4:538@15=Leftovers 5:641@383=Heavy-Duty Boots",
+    "myself": "team=8050(Colbur Berry) field=8050(Colbur Berry)"
+   },
+   {
+    "seq": 4,
+    "spot": "opp",
+    "msg": 12,
+    "part": 0,
+    "foe": 0,
+    "berry": 0,
+    "other": 0,
+    "otherName": "",
+    "txt": "Bouffalant restored a little HP using its Leftovers!",
+    "mine": "0:770@0= 1:385@15=Leftovers 2:844@235=Rocky Helmet 3:620@91=Life Orb 4:538@15=Leftovers 5:641@383=Heavy-Duty Boots",
+    "myself": "team=0() field=8050(Colbur Berry)"
+   },
+   {
+    "seq": 5,
+    "spot": "opp",
+    "msg": 12,
+    "part": 0,
+    "foe": 0,
+    "berry": 0,
+    "other": 0,
+    "otherName": "",
+    "txt": "Bouffalant restored a little HP using its Leftovers!",
+    "mine": "0:538@15=Leftovers 1:385@15=Leftovers 2:844@235=Rocky Helmet 3:620@91=Life Orb 4:770@0= 5:641@383=Heavy-Duty Boots",
+    "myself": "team=15(Leftovers) field=15(Leftovers)"
+   },
+   {
+    "seq": 6,
+    "spot": "me",
+    "msg": 12,
+    "part": 0,
+    "foe": 0,
+    "berry": 0,
+    "other": 0,
+    "otherName": "",
+    "txt": "Throh restored a little HP using its Leftovers!",
+    "mine": "0:538@15=Leftovers 1:385@15=Leftovers 2:844@235=Rocky Helmet 3:620@91=Life Orb 4:770@0= 5:641@383=Heavy-Duty Boots",
+    "myself": "team=15(Leftovers) field=15(Leftovers)"
+   },
+   {
+    "seq": 7,
+    "spot": "opp",
+    "msg": 12,
+    "part": 0,
+    "foe": 0,
+    "berry": 0,
+    "other": 0,
+    "otherName": "",
+    "txt": "Bouffalant restored a little HP using its Leftovers!",
+    "mine": "0:538@15=Leftovers 1:385@15=Leftovers 2:844@235=Rocky Helmet 3:620@91=Life Orb 4:770@0= 5:641@383=Heavy-Duty Boots",
+    "myself": "team=15(Leftovers) field=15(Leftovers)"
+   },
+   {
+    "seq": 8,
+    "spot": "me",
+    "msg": 12,
+    "part": 0,
+    "foe": 0,
+    "berry": 0,
+    "other": 0,
+    "otherName": "",
+    "txt": "Throh restored a little HP using its Leftovers!",
+    "mine": "0:538@15=Leftovers 1:385@15=Leftovers 2:844@235=Rocky Helmet 3:620@91=Life Orb 4:770@0= 5:641@383=Heavy-Duty Boots",
+    "myself": "team=15(Leftovers) field=15(Leftovers)"
+   },
+   {
+    "seq": 9,
+    "spot": "opp",
+    "msg": 12,
+    "part": 0,
+    "foe": 0,
+    "berry": 0,
+    "other": 0,
+    "otherName": "",
+    "txt": "Bouffalant restored a little HP using its Leftovers!",
+    "mine": "0:538@15=Leftovers 1:385@15=Leftovers 2:844@235=Rocky Helmet 3:620@91=Life Orb 4:770@0= 5:641@383=Heavy-Duty Boots",
+    "myself": "team=15(Leftovers) field=15(Leftovers)"
+   },
+   {
+    "seq": 10,
+    "spot": "me",
+    "msg": 34,
+    "part": 0,
+    "foe": 1,
+    "berry": 0,
+    "other": 0,
+    "otherName": "",
+    "txt": "Bouffalant is hurt by Sandaconda's Rocky Helmet!",
+    "mine": "0:844@235=Rocky Helmet 1:385@15=Leftovers 2:538@15=Leftovers 3:620@91=Life Orb 4:770@0= 5:641@383=Heavy-Duty Boots",
+    "myself": "team=235(Rocky Helmet) field=235(Rocky Helmet)"
+   },
+   {
+    "seq": 11,
+    "spot": "opp",
+    "msg": 12,
+    "part": 0,
+    "foe": 0,
+    "berry": 0,
+    "other": 0,
+    "otherName": "",
+    "txt": "Bouffalant restored a little HP using its Leftovers!",
+    "mine": "0:844@235=Rocky Helmet 1:385@15=Leftovers 2:538@15=Leftovers 3:620@91=Life Orb 4:770@0= 5:641@383=Heavy-Duty Boots",
+    "myself": "team=235(Rocky Helmet) field=235(Rocky Helmet)"
+   },
+   {
+    "seq": 12,
+    "spot": "me",
+    "msg": 34,
+    "part": 0,
+    "foe": 1,
+    "berry": 0,
+    "other": 0,
+    "otherName": "",
+    "txt": "Bouffalant is hurt by Sandaconda's Rocky Helmet!",
+    "mine": "0:844@235=Rocky Helmet 1:385@15=Leftovers 2:538@15=Leftovers 3:620@91=Life Orb 4:770@0= 5:641@383=Heavy-Duty Boots",
+    "myself": "team=235(Rocky Helmet) field=235(Rocky Helmet)"
+   },
+   {
+    "seq": 13,
+    "spot": "opp",
+    "msg": 12,
+    "part": 0,
+    "foe": 0,
+    "berry": 0,
+    "other": 0,
+    "otherName": "",
+    "txt": "Bouffalant restored a little HP using its Leftovers!",
+    "mine": "0:844@235=Rocky Helmet 1:385@15=Leftovers 2:538@15=Leftovers 3:620@91=Life Orb 4:770@0= 5:641@383=Heavy-Duty Boots",
+    "myself": "team=235(Rocky Helmet) field=235(Rocky Helmet)"
+   },
+   {
+    "seq": 14,
+    "spot": "me",
+    "msg": 34,
+    "part": 0,
+    "foe": 1,
+    "berry": 0,
+    "other": 0,
+    "otherName": "",
+    "txt": "Bouffalant is hurt by Sandaconda's Rocky Helmet!",
+    "mine": "0:844@235=Rocky Helmet 1:385@15=Leftovers 2:538@15=Leftovers 3:620@91=Life Orb 4:770@0= 5:641@383=Heavy-Duty Boots",
+    "myself": "team=235(Rocky Helmet) field=235(Rocky Helmet)"
+   },
+   {
+    "seq": 15,
+    "spot": "opp",
+    "msg": 12,
+    "part": 0,
+    "foe": 0,
+    "berry": 0,
+    "other": 0,
+    "otherName": "",
+    "txt": "Bouffalant restored a little HP using its Leftovers!",
+    "mine": "0:844@235=Rocky Helmet 1:385@15=Leftovers 2:538@15=Leftovers 3:620@91=Life Orb 4:770@0= 5:641@383=Heavy-Duty Boots",
+    "myself": "team=235(Rocky Helmet) field=235(Rocky Helmet)"
+   },
+   {
+    "seq": 16,
+    "spot": "me",
+    "msg": 21,
+    "part": 0,
+    "foe": 0,
+    "berry": 0,
+    "other": 0,
+    "otherName": "",
+    "txt": "Mienshao is hurt by its Life Orb!",
+    "mine": "0:620@91=Life Orb 1:385@15=Leftovers 2:538@15=Leftovers 3:844@235=Rocky Helmet 4:770@0= 5:641@383=Heavy-Duty Boots",
+    "myself": "team=91(Life Orb) field=91(Life Orb)"
+   }
+  ]
+ },
+ "eval": {
+  "name": "battle108-t12",
+  "note": "log T12 = PO T13：强制替补上基拉祈 + 紧接着又把它换下去（白送一个替身）",
+  "opp": "Raikou",
+  "expect": "替补选人不得与下一手自相矛盾",
+  "liveAction": {
+   "type": "switch",
+   "pokeSlot": 1
+  },
+  "recordsWithThisTurn": 2
+ }
+}

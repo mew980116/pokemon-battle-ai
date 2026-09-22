@@ -1,0 +1,635 @@
+{
+ "state": {
+  "account": "「木偶」析构万理的发条公主",
+  "log": true,
+  "battleId": "EVALbattle108t2json",
+  "scriptVersion": "0.6.27",
+  "turn": 2,
+  "shadow": false,
+  "teamPreview": false,
+  "bannedMoves": [],
+  "bannedSwitches": [],
+  "history": [
+   "You sent out Throh. opposing sent out Bouffalant. Throh has Mold Breaker! [Weather:None, Terrain:None, You:None, Opp:None] ",
+   "Turn 1: opposing used Swords Dance. You used Bulk Up. [Weather:None, Terrain:None, You:Atk+1+Def+1, Opp:Atk+2] ",
+   "Turn 2: opposing used Substitute. Bouffalant made a substitute! You used Storm Throw. It's super effective. A critical hit! Bouffalant's substitute faded! Bouffalant restored a little HP using its Leftovers! "
+  ],
+  "fullHistory": [
+   "You sent out Throh. opposing sent out Bouffalant. Throh has Mold Breaker! [Weather:None, Terrain:None, You:None, Opp:None] ",
+   "Turn 1: opposing used Swords Dance. You used Bulk Up. [Weather:None, Terrain:None, You:Atk+1+Def+1, Opp:Atk+2] ",
+   "Turn 2: opposing used Substitute. Bouffalant made a substitute! You used Storm Throw. It's super effective. A critical hit! Bouffalant's substitute faded! Bouffalant restored a little HP using its Leftovers! "
+  ],
+  "messages": [],
+  "oppRemaining": 6,
+  "weather": null,
+  "terrain": null,
+  "myHazards": [],
+  "oppHazards": [],
+  "screens": {
+   "me": [],
+   "opp": []
+  },
+  "opp": {
+   "name": "Bouffalant",
+   "types": [
+    "Normal"
+   ],
+   "hpPct": 81,
+   "status": null,
+   "moves": [
+    {
+     "name": "Swords Dance",
+     "type": "Normal",
+     "num": 14,
+     "used": 1
+    },
+    {
+     "name": "Substitute",
+     "type": "Normal",
+     "num": 164,
+     "used": 1
+    }
+   ],
+   "fainted": false,
+   "abilityInferred": null,
+   "itemInferred": "Leftovers",
+   "possibleAbilities": [
+    "Reckless",
+    "Sap Sipper",
+    "Soundproof"
+   ],
+   "boosts": [
+    "Atk+2"
+   ]
+  },
+  "oppTeam": [
+   {
+    "name": "Bouffalant",
+    "revealed": true,
+    "ko": false,
+    "hpPct": 81,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [
+     "Reckless",
+     "Sap Sipper",
+     "Soundproof"
+    ],
+    "moves": [
+     {
+      "name": "Swords Dance",
+      "type": "Normal",
+      "num": 14,
+      "used": 1
+     },
+     {
+      "name": "Substitute",
+      "type": "Normal",
+      "num": 164,
+      "used": 1
+     }
+    ],
+    "itemInferred": "Leftovers"
+   },
+   {
+    "name": null,
+    "revealed": false,
+    "ko": false,
+    "hpPct": null,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [],
+    "moves": [],
+    "itemInferred": null
+   },
+   {
+    "name": null,
+    "revealed": false,
+    "ko": false,
+    "hpPct": null,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [],
+    "moves": [],
+    "itemInferred": null
+   },
+   {
+    "name": null,
+    "revealed": false,
+    "ko": false,
+    "hpPct": null,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [],
+    "moves": [],
+    "itemInferred": null
+   },
+   {
+    "name": null,
+    "revealed": false,
+    "ko": false,
+    "hpPct": null,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [],
+    "moves": [],
+    "itemInferred": null
+   },
+   {
+    "name": null,
+    "revealed": false,
+    "ko": false,
+    "hpPct": null,
+    "status": null,
+    "abilityInferred": null,
+    "possibleAbilities": [],
+    "moves": [],
+    "itemInferred": null
+   }
+  ],
+  "oppSeen": [
+   "Bouffalant"
+  ],
+  "me": {
+   "name": "Throh",
+   "types": [
+    "Fighting"
+   ],
+   "hpPct": 100,
+   "status": null,
+   "moves": [
+    {
+     "slot": 0,
+     "name": "Substitute",
+     "type": "Normal",
+     "num": 164,
+     "pp": 16
+    },
+    {
+     "slot": 1,
+     "name": "Bulk Up",
+     "type": "Fighting",
+     "num": 339,
+     "pp": 31
+    },
+    {
+     "slot": 2,
+     "name": "Storm Throw",
+     "type": "Fighting",
+     "num": 480,
+     "pp": 15
+    },
+    {
+     "slot": 3,
+     "name": "Knock Off",
+     "type": "Dark",
+     "num": 282,
+     "pp": 32
+    }
+   ],
+   "fainted": false,
+   "boosts": [
+    "Atk+1",
+    "Def+1"
+   ],
+   "ability": "Mold Breaker",
+   "item": "Leftovers",
+   "itemRaw": 15,
+   "itemField": 15
+  },
+  "myTeam": [
+   {
+    "slot": 0,
+    "name": "Throh",
+    "hpPct": 100,
+    "ko": false,
+    "status": null
+   },
+   {
+    "slot": 1,
+    "name": "Jirachi",
+    "hpPct": 100,
+    "ko": false,
+    "status": null
+   },
+   {
+    "slot": 2,
+    "name": "Sandaconda",
+    "hpPct": 100,
+    "ko": false,
+    "status": null
+   },
+   {
+    "slot": 3,
+    "name": "Mienshao",
+    "hpPct": 100,
+    "ko": false,
+    "status": null
+   },
+   {
+    "slot": 4,
+    "name": "Palossand",
+    "hpPct": 100,
+    "ko": false,
+    "status": null
+   },
+   {
+    "slot": 5,
+    "name": "Tornadus",
+    "hpPct": 100,
+    "ko": false,
+    "status": null
+   }
+  ],
+  "myStats": [
+   {
+    "slot": 0,
+    "name": "Throh",
+    "numRef": 538,
+    "level": 100,
+    "ev": [
+     252,
+     0,
+     0,
+     0,
+     176,
+     80
+    ],
+    "iv": [
+     31,
+     31,
+     31,
+     31,
+     31,
+     31
+    ],
+    "nature": 23
+   },
+   {
+    "slot": 1,
+    "name": "Jirachi",
+    "numRef": 385,
+    "level": 100,
+    "ev": [
+     252,
+     0,
+     0,
+     0,
+     120,
+     136
+    ],
+    "iv": [
+     31,
+     31,
+     31,
+     31,
+     31,
+     31
+    ],
+    "nature": 13
+   },
+   {
+    "slot": 2,
+    "name": "Sandaconda",
+    "numRef": 844,
+    "level": 100,
+    "ev": [
+     252,
+     0,
+     244,
+     0,
+     0,
+     12
+    ],
+    "iv": [
+     31,
+     31,
+     31,
+     31,
+     31,
+     31
+    ],
+    "nature": 8
+   },
+   {
+    "slot": 3,
+    "name": "Mienshao",
+    "numRef": 620,
+    "level": 100,
+    "ev": [
+     0,
+     252,
+     0,
+     0,
+     4,
+     252
+    ],
+    "iv": [
+     31,
+     31,
+     31,
+     31,
+     31,
+     31
+    ],
+    "nature": 13
+   },
+   {
+    "slot": 4,
+    "name": "Palossand",
+    "numRef": 770,
+    "level": 100,
+    "ev": [
+     252,
+     0,
+     208,
+     0,
+     48,
+     0
+    ],
+    "iv": [
+     31,
+     31,
+     31,
+     31,
+     31,
+     31
+    ],
+    "nature": 5
+   },
+   {
+    "slot": 5,
+    "name": "Tornadus",
+    "numRef": 641,
+    "level": 100,
+    "ev": [
+     0,
+     0,
+     0,
+     252,
+     4,
+     252
+    ],
+    "iv": [
+     31,
+     31,
+     31,
+     31,
+     31,
+     31
+    ],
+    "nature": 10
+   }
+  ],
+  "bench": [
+   {
+    "slot": 1,
+    "name": "Jirachi",
+    "numRef": 385,
+    "unrevealed": true,
+    "types": [
+     "Steel",
+     "Psychic"
+    ],
+    "hpPct": 100,
+    "status": null,
+    "moves": [
+     {
+      "slot": 0,
+      "name": "Iron Head",
+      "type": "Steel",
+      "num": 442,
+      "pp": 24
+     },
+     {
+      "slot": 1,
+      "name": "Body Slam",
+      "type": "Normal",
+      "num": 34,
+      "pp": 24
+     },
+     {
+      "slot": 2,
+      "name": "Wish",
+      "type": "Normal",
+      "num": 273,
+      "pp": 16
+     },
+     {
+      "slot": 3,
+      "name": "Protect",
+      "type": "Normal",
+      "num": 182,
+      "pp": 16
+     }
+    ],
+    "ability": "Serene Grace",
+    "item": "Leftovers",
+    "itemRaw": 15
+   },
+   {
+    "slot": 2,
+    "name": "Sandaconda",
+    "numRef": 844,
+    "unrevealed": true,
+    "types": [
+     "Ground"
+    ],
+    "hpPct": 100,
+    "status": null,
+    "moves": [
+     {
+      "slot": 0,
+      "name": "Stealth Rock",
+      "type": "Rock",
+      "num": 446,
+      "pp": 32
+     },
+     {
+      "slot": 1,
+      "name": "Earthquake",
+      "type": "Ground",
+      "num": 89,
+      "pp": 16
+     },
+     {
+      "slot": 2,
+      "name": "Glare",
+      "type": "Normal",
+      "num": 137,
+      "pp": 48
+     },
+     {
+      "slot": 3,
+      "name": "Rest",
+      "type": "Psychic",
+      "num": 156,
+      "pp": 16
+     }
+    ],
+    "ability": "Shed Skin",
+    "item": "Rocky Helmet",
+    "itemRaw": 235
+   },
+   {
+    "slot": 3,
+    "name": "Mienshao",
+    "numRef": 620,
+    "unrevealed": true,
+    "types": [
+     "Fighting"
+    ],
+    "hpPct": 100,
+    "status": null,
+    "moves": [
+     {
+      "slot": 0,
+      "name": "Close Combat",
+      "type": "Fighting",
+      "num": 370,
+      "pp": 8
+     },
+     {
+      "slot": 1,
+      "name": "Knock Off",
+      "type": "Dark",
+      "num": 282,
+      "pp": 32
+     },
+     {
+      "slot": 2,
+      "name": "U-turn",
+      "type": "Bug",
+      "num": 369,
+      "pp": 32
+     },
+     {
+      "slot": 3,
+      "name": "Stone Edge",
+      "type": "Rock",
+      "num": 444,
+      "pp": 8
+     }
+    ],
+    "ability": "Regenerator",
+    "item": "Life Orb",
+    "itemRaw": 91
+   },
+   {
+    "slot": 4,
+    "name": "Palossand",
+    "numRef": 770,
+    "unrevealed": true,
+    "types": [
+     "Ghost",
+     "Ground"
+    ],
+    "hpPct": 100,
+    "status": null,
+    "moves": [
+     {
+      "slot": 0,
+      "name": "Stealth Rock",
+      "type": "Rock",
+      "num": 446,
+      "pp": 32
+     },
+     {
+      "slot": 1,
+      "name": "Earth Power",
+      "type": "Ground",
+      "num": 414,
+      "pp": 16
+     },
+     {
+      "slot": 2,
+      "name": "Shadow Ball",
+      "type": "Ghost",
+      "num": 247,
+      "pp": 24
+     },
+     {
+      "slot": 3,
+      "name": "Shore Up",
+      "type": "Ground",
+      "num": 645,
+      "pp": 16
+     }
+    ],
+    "ability": "Water Compaction",
+    "item": "Colbur Berry",
+    "itemRaw": 8050
+   },
+   {
+    "slot": 5,
+    "name": "Tornadus",
+    "numRef": 641,
+    "unrevealed": true,
+    "types": [
+     "Flying"
+    ],
+    "hpPct": 100,
+    "status": null,
+    "moves": [
+     {
+      "slot": 0,
+      "name": "Nasty Plot",
+      "type": "Dark",
+      "num": 417,
+      "pp": 32
+     },
+     {
+      "slot": 1,
+      "name": "Hurricane",
+      "type": "Flying",
+      "num": 542,
+      "pp": 16
+     },
+     {
+      "slot": 2,
+      "name": "Heat Wave",
+      "type": "Fire",
+      "num": 257,
+      "pp": 16
+     },
+     {
+      "slot": 3,
+      "name": "Grass Knot",
+      "type": "Grass",
+      "num": 447,
+      "pp": 32
+     }
+    ],
+    "ability": "Defiant",
+    "item": "Heavy-Duty Boots",
+    "itemRaw": 383
+   }
+  ],
+  "itemProbe": [
+   {
+    "seq": 1,
+    "spot": "opp",
+    "msg": 12,
+    "part": 0,
+    "foe": 0,
+    "berry": 0,
+    "other": 0,
+    "otherName": "",
+    "txt": "Bouffalant restored a little HP using its Leftovers!",
+    "mine": "0:538@15=Leftovers 1:385@15=Leftovers 2:844@235=Rocky Helmet 3:620@91=Life Orb 4:770@8050=Colbur Berry 5:641@383=Heavy-Duty Boots",
+    "myself": "team=15(Leftovers) field=15(Leftovers)"
+   }
+  ]
+ },
+ "eval": {
+  "name": "battle108-t2",
+  "note": "log T2 = PO T3：主动换人白送 free sub —— 仿真自己算出 Storm Throw 92-108% 直接杀，实战却换成 Palossand",
+  "opp": "Bouffalant",
+  "expect": "应为留场出招（attack），不得是 switch",
+  "liveAction": {
+   "type": "switch",
+   "pokeSlot": 4
+  },
+  "recordsWithThisTurn": 1
+ }
+}
