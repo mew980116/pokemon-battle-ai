@@ -1350,10 +1350,15 @@ function simulateTurn(args, ctx) {
         // ⚠ 这个字段只在 `!iSwitch` 时可能出现，所以 `i_do` 是换人的时候拿不到它；要看到就必须自己仿真一条留场线。
         if (!iSwitch && row.mine && row.mine.faints) {
             var certain = (row.mine.faints === true);
+            // ⚠ 2026-09-22 删掉原句「When your active is doomed either way, STAYING is normally better than switching it out」：
+            // 它的触发条件只有「留场会倒」，**没有检查换人能不能救活它**。battle111 T2 正是"换人能救"（Clefable 只吃 34-40%），
+            // 那句话在这个局面**说反了**，还把 FREE replacement 包装成倾向性建议 —— 三次复测的 sim 里都带着它，
+            // 其中一次（RT2c）顺着它把 90% 的 Sand Rush Excadrill 送掉（错题集 E004）。
+            // 现在只留事实 + 一个自查动作，不给任何倾向。
             row.trajectory = 'YOUR ACTIVE (' + myName + ')' + (certain ? ' FAINTS THIS TURN ANYWAY' : ' MAY FAINT THIS TURN') + ' → if it faints, that hands you a FREE replacement in the end-of-turn phase: ' +
                 'the pokemon you send in next enters and takes NO hit this turn. If you switch out instead, your switch-in eats their move THIS turn ' +
-                '(and you forfeit that free replacement). When your active is doomed either way, STAYING is normally better than switching it out — ' +
-                'simulate both boards before you pick.';
+                '(and you forfeit that free replacement). Whether that trade is worth it depends on whether a switch-in would SURVIVE the same hit: ' +
+                'if one does, switching KEEPS this pokemon alive and still puts a fresh body on the field — check your switch rows before you decide.';
         }
 
         // ---- 命中率（含天气修正）：低命中招必须写清"它有机会落空" ----

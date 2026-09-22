@@ -91,6 +91,11 @@
 - **DeepSeek 请求必须压「硬墙钟」超时（0.6.1，真 bug）**：原来只有 `req.setTimeout(TIMEOUT_MS)`——那是**空闲超时**（socket idle），连接上只要有零星保活/分块流量就**永远不触发**。
   - 实测（2026-09-20 battle98 T11）：`api.deepseek.com`（117.185.125.154）的连接从 23:42:00 建起到 23:51:24 **仍 Established（564s）**，240s 空闲超时没掐，PO 侧 `sys.synchronousWebCall` 一直阻塞，面板停在「实时 503s 思考中…」。
   - 现在另加一个 `setTimeout` 硬墙钟 deadline（同一时长，`done()` 保证 cb 只回调一次、`res.on('error')` 也接住）。PO 侧兜底：**单次失败→`pklmFallbackAttack()`**，连续 3 次且跨度 >15s 才会认输。
+- **删掉 `trajectory` 里那句倾向性建议（tool 0.8.5）**
+  - 原句是 0.7.6 为 battle106 T13/T15 那种「怎么都死」的局面写的：`When your active is doomed either way, STAYING is normally better than switching it out — simulate both boards before you pick.` 但它的触发条件**只检查「留场那一支会倒」，没检查换人能不能救活它**。
+  - 后果（错题集 **E004** / battle111 T2）：那个局面恰恰是"换人能救"（Clefable 只吃 34-40%，换进去照样活着），这句话**说反了**，还把 `FREE replacement` 包装成倾向。三次复测的 sim 行里都带着它：**RT2b 自己推翻了它**（"clearly worse than the safe switch"）选了 Clefable ✓；**RT2c 顺着它**把 90% 的 Sand Rush Excadrill 送掉 ✗；RT2a 撞 120s 上限走 fallback。
+  - 现在只留**事实 + 一个自查动作**：`… Whether that trade is worth it depends on whether a switch-in would SURVIVE the same hit: if one does, switching KEEPS this pokemon alive and still puts a fresh body on the field — check your switch rows before you decide.`
+  - 回归：`test-sim-gate.js` 加两条断言（会倒的留场行**不得**出现 `normally better`；**必须**含 `check your switch rows`）。
 - **回复手段识别补漏：`Pain Split` 归入 `healing` 分类（tool 0.8.4）**
   - 起因（用户问 battle111 里「他的配置里有哪些有回复招式的」）：`get_pokemon_info` 的 `notable_status_moves.healing` 靠 `moves.json` 的 `desc` 正则（`recovers|restores|heals` + `user`）分类，而 **Pain Split 的 desc 是「把双方 HP 加总后平分」→ 抓不到** ⇒ 洗衣机的回复手段只列出 `Rest`（对所有物种都成立，等于没有信号），漏掉了真正相关的 `Pain Split`。
   - 为什么这条要紧：battle111 T2 我们「垫伤害到半血 → 吃死水炮 → 拿免费替补收残血」的计划**正建立在「它不能回血」上**；而洗衣机当时是**剩饭已暴露 + 会 Pain Split**（模型自己在候选招里写了 Pain Split，是**我们这边**的工具漏了）。

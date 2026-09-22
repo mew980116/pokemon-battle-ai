@@ -83,6 +83,10 @@ chk('留场且我方会倒的行 → 带 trajectory，写明 FREE replacement / 
     /FREE replacement/.test(String(stayRows['Hydro Pump'].trajectory)) && /NO hit/.test(String(stayRows['Hydro Pump'].trajectory)) && /THIS turn/.test(String(stayRows['Hydro Pump'].trajectory)),
     String(stayRows['Hydro Pump'] && stayRows['Hydro Pump'].trajectory).slice(0, 200));
 chk('留场但打不到我（对手换人）→ 不给 trajectory（不误导）', stayRows['switch 2'].trajectory === undefined, String(stayRows['switch 2'].trajectory).slice(0, 120));
+// 0.8.5：删掉「STAYING is normally better」这类**倾向性建议**（它的触发条件只看"留场会倒"，没检查换人能不能救 =>
+// battle111 T2 说反了）；改成要求先去看换入行的存活情况。
+chk('会倒的留场行不再出现 "normally better" 这类建议', !/normally better/i.test(String(stayRows['Hydro Pump'].trajectory)), String(stayRows['Hydro Pump'].trajectory).slice(-160));
+chk('改为要求先看换入行是否活得下来', /check your switch rows/.test(String(stayRows['Hydro Pump'].trajectory)), String(stayRows['Hydro Pump'].trajectory).slice(-160));
 chk('换人分支本身不给 trajectory（不是"你被免费换下去"）', (function () { var rr = sim(ctx(), { switch: 3 }, [{ move: 'Hydro Pump' }]); return rr.rows[0].trajectory === undefined; })());
 
 console.log('同先制度 → 一律正反手都算（不判谁快；0.8.0 起）');
