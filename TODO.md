@@ -69,7 +69,7 @@
   - **依赖**：可以先复用 `save_observation` 的结构（每只一条、可覆盖），不一定要新开 tool。
 
 - [x] ✅ **我方道具只用 `poke.item` 直读 → Switcheroo/Trick 之后失真；按主脚本的做法改成「从消息维护」+「[proved] 不允许被空读覆盖」**（用户 2026-09-21 提出「主脚本当时还有围巾解析，要不移植一下？」/「能否 proved 的信息不允许简单覆盖」）—— **已完成（script 0.6.14 + 0.6.15）**：
-  - **事实（battle99 T16）**：history 文本明确写了 `Ninetales obtained one Choice Scarf!`（**消息层拿到了**），但 `state.me.item` 从这一回合起变成空。T20 因此用陈旧的「我还有围巾」断言先手，实际被 408 速的 Barraskewda 先手秒掉 —— 见 [错题集.md](po-pokellmon-tool/错题集.md) E003。
+  - **事实（battle99 T16）**：history 文本明确写了 `Ninetales obtained one Choice Scarf!`（**消息层拿到了**），但 `state.me.item` 从这一回合起变成空。T20 因此用陈旧的「我还有围巾」断言先手，实际被 408 速的 Barraskewda 先手秒掉 —— 见 [benchmark-errors.md](po-pokellmon-tool/benchmark-errors.md) E003。
   - **po-script 现状**：我方道具只读 `pklmPoke(me).item` → `sys.item(n)`（[po-script.js](po-pokellmon/po-script.js) `pklmCollectMyActive`）；`pklmInferItem(txt)`（从消息文本认道具名，0.6.8 加的）**只用在对手身上**。
   - **主脚本（[20201227.js](20201227.js)）的做法完全不同 —— 不读 `poke.item`，而是从消息回调的参数维护**：`analyseCurrentItem(itemMess, part)`，其中 `case 23 / 105 / 162: info.item = other`（道具被公开）、`case 132: part 0 → poke(foe).item, part 1 → other`（**Trick/Switcheroo 的交换**）、`case 70 / 160: info.item = 0`（被拿走/消耗）。这就是用户说的「围巾解析」→ **给我方也建一条「从消息 / 回调 `other` 参数维护道具」的路**。
   - **并加一条原则（用户提议）**：**已 [proved] 的信息不允许被「空读 / 未知读」简单覆盖**。采集时建议两个字段都给：`item`（当前直读）+ `itemProved`（最后一次被消息证实的值）+ 不一致时给 `itemNote`（直读为空而 proved 存在 → **报 proved 并注明来源**，而不是静默变空）；**只有消息证明变化时才更新 proved**。同一原则适用于招式表 / 特性。
@@ -168,7 +168,7 @@
   - **待办**：① 重新定义 worklog 只写「结论 + 假设」三行式（`DECISION` / `ASSUMED` / `TODO`，≤300 字）；② server 侧对 `text` 做清洗（剥 thinking / DSML 标记）+ 长度上限；③ 评估是否改为 **server 自动回灌**（不再让模型花一轮重写，直接省掉那 28% 往返）。
   - **对比参照**：`save_strategy` 的 `scene` / `checks` 是**已结构化回灌**的（预测与实况不符会强制复盘、`checks` 回灌最近两条），worklog 若保留应向这套看齐，而不是纯文本拼回 system 首条。
 
-- [ ] 🔴 **决策门禁：predict → 验算 → 不一致则重选动作**（用户 2026-09-20 提出；这是 E001 的正解，见 [错题集.md](po-pokellmon-tool/错题集.md)）：
+- [ ] 🔴 **决策门禁：predict → 验算 → 不一致则重选动作**（用户 2026-09-20 提出；这是 E001 的正解，见 [benchmark-errors.md](po-pokellmon-tool/benchmark-errors.md)）：
   - **要解决的问题**：LLM 会对「换入者扛不扛得住」**不验算就下结论**，且**只在支持自己想做的动作时把倍率说反**（E001 实测 6 次重放：inbound 验算 0/6；要换洛托姆时说「水是中性」3/3 错，决定不换时说「弱水 2x」2/2 对）。
   - **设计**：新增 `predict(claims)`（**只登记预测、不给答案**，强制先承诺后揭示）；claim 分四类 `type`（`get_type_matchup` 裁决）/ `survive`（`calc_damage` inbound）/ `damage`（outbound）/ `order`（`calc_stats`）；`calc_*` 接受 `claim_id` 并在返回里带 `MATCH|MISMATCH`；`save_strategy` 变**硬闸**（承载结论的 claim 未裁决或 MISMATCH → 返回 error，必须改写重交）；最终 `{"choice":N}` 前若闸门未过 → 注入一条 user 消息让它收敛（超过 2 次放行并标 `gate_unmet`，防死锁）。
   - **关键措辞**：MISMATCH 必须**重选动作**，不是只改预测（否则会交出「预测改对了、方案照旧」的策略）。
@@ -176,7 +176,7 @@
   - **验收①（已完成，2026-09-20）**：门禁前基线 A/B 两臂各 10 次（唯一变量 = worklog 开关，state 完全相同）——**A** = 0.4.12（worklog 开，8096，`%TEMP%\pba-armA`）：**7/10 = 70% 选了必死的洛托姆**，inbound 均值 1.30/样本；**B** = 0.4.13（worklog 关，8092）：**5/10 = 50%**，inbound 2.40/样本；早前 B 批次 2/6 → 合计 12/20 = 60%。⚠️ n=10 时 A/B **统计上分不开**（p≈0.65），只能说点估计偏高。完整表 + 证据见 [错题集.md E001](po-pokellmon-tool/错题集.md)。
   - **验收①的关键发现（改变了设计）**：① **「算了」≠「会改判」**——B R10 对选中的洛托姆算了 6 次承伤、strategy 明写「Hydro Pump/Scald in rain = OHKO」，**仍然换了**（赌对手点 Hurricane）；② **它只给「自己想选的那条」做体检**（A 臂 7 个致命样本的 inbound 验算全算在 Toxtricity/留场上，没有一次算在选中目标 `me:4`）；③ **幻觉在制造决策依据**——R10 写「Hurricane **2x vs Fairy**」（实际 1x），把留场算成挨 82-96%（实际 ~37-42%），从而让「换人赌一把」显得合理。
   - **设计修正（因上面 ①）**：光做「claim vs calc 一致性」**不够**——R10 的 strategy 并不自相矛盾，一致性检查不会触发。必须追加 **结果约束闸门**：用已裁决的最坏 inbound，若**所选动作**在对手任一合理招下 `guaranteed OHKO` 且存在更安全的可选动作 → **直接拒绝**（要求改选）。并且 `type` claim（`get_type_matchup`）放在最前，一次调用就能杀掉「2x vs Fairy」这类幻觉。
-  - **验收②（已完成 2026-09-20）**：C1 20% → C2 40%（换漏法）→ **C3（simulate_turn）0%**；见 [错题集.md](po-pokellmon-tool/错题集.md) 的 C1/C2/C3 表 + 对照 fixture 表。**但要诚实**：C3 的 0% 更可能来自「仿真表让它看见负血量」的信息效应，而非门禁的拒绝力（门禁只校验"声明的那个分支"，它可以选择声明无害分支）。
+  - **验收②（已完成 2026-09-20）**：C1 20% → C2 40%（换漏法）→ **C3（simulate_turn）0%**；见 [benchmark-errors.md](po-pokellmon-tool/benchmark-errors.md) 的 C1/C2/C3 表 + 对照 fixture 表。**但要诚实**：C3 的 0% 更可能来自「仿真表让它看见负血量」的信息效应，而非门禁的拒绝力（门禁只校验"声明的那个分支"，它可以选择声明无害分支）。
   - [ ] ⏸ **待定（用户 2026-09-20：先打打实战再说）补「换人后的下一回合收益」**：`simulate_turn` 是**单回合生存表**，看不到"赌赢的收益"（例：赌一次换入 → 下回合围巾先手 4x 秒掉对手洒水器）。结构上会让模型**系统性偏向不赌**（battle96-T1 fixture 实测 0/5 选洛托姆，而该路线并未被门禁禁止）。候选修法：对**换人动作**多输出一行「若这回合没死，下回合的先手情况 + 对它的 4x 击杀机会」——只补一层、不做树搜索。**先看实战是否真的过度保守再决定。**
   - **设施（已完成）**：fixture [eval/fixtures/battle96-t1.json](po-pokellmon-tool/eval/fixtures/battle96-t1.json)（含上帝视角评分规格 `threatMoves`）；采样+评分脚本 [eval/run.js](po-pokellmon-tool/eval/run.js)（`--url` / `--logdir` / `--arm` / `--n`，产 `eval/results/*.json` 含 strategy 原文）。评分口径已验证：留场 Weezing 87-103%（25% 被杀）= RISKY，Toxtricity 81-96% = SAFE，Rotom-Heat 137-162% = **LETHAL**。
   - **⚠ 方向修正（2026-09-21，用户："最好别搞门禁，我感觉门禁会搞出 bug"）**：0.7.6 加的「声明换人前必须先仿真一条留场分支」**已撤（tool 0.7.8）**。理由：那条判据把"我们以为合法的动作集合"写成硬拦，而该集合恰好是已知有洞的那块 —— 「只有换人可选」的回合不止"我方已倒"（`me.fainted`），还有**我方自己用换场招（U-turn 族）/ 逃生按钮触发 / 危险回避触发**，那时 `me.fainted=false`、招式列表也照样列出来 → 判据一错，门禁自己就是新 bug 源。且 battle106 复测 6/6 全对时它**一次都没触发**（起效的是 `trajectory` 那句确定性事实）⇒ 收益未证实、风险已证实。**今后引导倾向"给确定性事实"，不倾向"加拦"**；`trajectory` 保留。
@@ -213,7 +213,7 @@
 
 - [ ] 🟡 **`from_state` 越界槽位静默降级**（2026-09-20 发现）：合法槽位是 `state.myStats` 的 slot（0=场上，1-5=板凳），但传 `me:7` 这类越界值时 `tools.js` **不报错**，只把 ev/iv/性格换成默认值，照样返回一个"看起来正常"的伤害（battle96 T1 的 Thunderbolt 就是这么算的）。建议：显式指定了 slot 却解析不到 → 返回 error（或至少把 warning 提到返回体的顶层），不要让模型拿到一个来路不明的数字。
 
-- [ ] ⏸ **（用户 2026-09-20 决定暂缓，先不动）跨回合的战术洞察没有留存机制**（来源 E002，见 [错题集.md](po-pokellmon-tool/错题集.md)）：`save_strategy.text` 从不回灌（只有 `scene` 最近 1 条、`checks` 最近 2 条），所以「锁招陷阱」这类正确洞察写过就丢——battle96 里它 T4 写过「锁 Draco 会吃 -2 SpA，U-turn 更好」，T16 面对同一个抉择点时已完全不记得。worklog 也救不了（每回合清空）。方向（先不做）：把这类洞察引导到 `save_observation`，或做成可从教训里召回的知识条目。
+- [ ] ⏸ **（用户 2026-09-20 决定暂缓，先不动）跨回合的战术洞察没有留存机制**（来源 E002，见 [benchmark-errors.md](po-pokellmon-tool/benchmark-errors.md)）：`save_strategy.text` 从不回灌（只有 `scene` 最近 1 条、`checks` 最近 2 条），所以「锁招陷阱」这类正确洞察写过就丢——battle96 里它 T4 写过「锁 Draco 会吃 -2 SpA，U-turn 更好」，T16 面对同一个抉择点时已完全不记得。worklog 也救不了（每回合清空）。方向（先不做）：把这类洞察引导到 `save_observation`，或做成可从教训里召回的知识条目。
 
 - [x] 🔴 **【高优先级】对战主脑切 `deepseek-v4-pro`（已切 0.3.46，待实测对比）**：实测（2026-09-16）确认 `deepseek-v4-pro` 端点可用、**未被路由到 flash**（响应 `model:deepseek-v4-pro`）；开 thinking + tool 多轮时**不回传 reasoning_content 不报错**（两场景均 200），故切换**无需**改 [server.js](po-pokellmon-tool/server.js) 的 reasoning_content 回传逻辑。附带发现：回传 reasoning_content 提升 prompt cache 命中（cached_tokens 384 vs 256、miss 41 vs 169），属可选优化。**已落地（0.3.46）**：`MODEL` 默认改 `deepseek-v4-pro`，提成 env `POKELLMON_MODEL`（一键回 flash：`POKELLMON_MODEL=deepseek-v4-flash`），thinking 仍 `low`。**待做**：实测对比 Flash/Pro 的决策质量 + 延迟；Pro-max 在多轮 tool（MAX_TOOL_ROUNDS=15）下可能逼近 240s 超时，若 low 稳定再考虑按「关键回合（换人/残局/强化手判断）升 high/max」分级。
   - 背景：Flash 强「工具/agent 执行」（DeepSWE 74.2 > Pro 62.7）弱「闭卷深想」（HLE 36.8 < Pro 42.7）；对战主脑瓶颈是「决策浅/缺全局意识」而非工具执行，故倾向 Pro。R1 无资源 + 工具调用弱，不作主脑。

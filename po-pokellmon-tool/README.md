@@ -91,9 +91,14 @@
 - **DeepSeek 请求必须压「硬墙钟」超时（0.6.1，真 bug）**：原来只有 `req.setTimeout(TIMEOUT_MS)`——那是**空闲超时**（socket idle），连接上只要有零星保活/分块流量就**永远不触发**。
   - 实测（2026-09-20 battle98 T11）：`api.deepseek.com`（117.185.125.154）的连接从 23:42:00 建起到 23:51:24 **仍 Established（564s）**，240s 空闲超时没掐，PO 侧 `sys.synchronousWebCall` 一直阻塞，面板停在「实时 503s 思考中…」。
   - 现在另加一个 `setTimeout` 硬墙钟 deadline（同一时长，`done()` 保证 cb 只回调一次、`res.on('error')` 也接住）。PO 侧兜底：**单次失败→`pklmFallbackAttack()`**，连续 3 次且跨度 >15s 才会认输。
+- **文档改名：案例库 / 错题集 → benchmark（0.8.6，无行为改动）**
+  - `案例库.md` → **[benchmark.md](benchmark.md)**（总清单 + 正例对照）、`错题集.md` → **[benchmark-errors.md](benchmark-errors.md)**（已确诊错例）。
+  - **定位修正（用户 2026-09-22）**：这些场景的用途**不是让模型对齐"标准答案"**，而是「在这些局面下，模型的决策最容易暴露它自己的硬伤，或者 harness 本身的问题」；正例只作**对照**（确认改动没把对的行为改坏）。
+  - `benchmark.md` 顶部新增**清单表**（正例 5 / 错例 4 / 反面参照 3）+ **已知缺口**（battle106 T13/T15、battle108 T3/T7/T12 还没独立条目与 fixture；条目缺统一的"暴露哪类硬伤"标签；只有 E001/E004 有冻结 fixture）。
+  - 引用同步更新：`TODO.md`、`po-pokellmon/README.md`、本 README、`tools.js`、`eval/run.js`。
 - **删掉 `trajectory` 里那句倾向性建议（tool 0.8.5）**
   - 原句是 0.7.6 为 battle106 T13/T15 那种「怎么都死」的局面写的：`When your active is doomed either way, STAYING is normally better than switching it out — simulate both boards before you pick.` 但它的触发条件**只检查「留场那一支会倒」，没检查换人能不能救活它**。
-  - 后果（错题集 **E004** / battle111 T2）：那个局面恰恰是"换人能救"（Clefable 只吃 34-40%，换进去照样活着），这句话**说反了**，还把 `FREE replacement` 包装成倾向。三次复测的 sim 行里都带着它：**RT2b 自己推翻了它**（"clearly worse than the safe switch"）选了 Clefable ✓；**RT2c 顺着它**把 90% 的 Sand Rush Excadrill 送掉 ✗；RT2a 撞 120s 上限走 fallback。
+  - 后果（benchmark-errors **E004** / battle111 T2）：那个局面恰恰是"换人能救"（Clefable 只吃 34-40%，换进去照样活着），这句话**说反了**，还把 `FREE replacement` 包装成倾向。三次复测的 sim 行里都带着它：**RT2b 自己推翻了它**（"clearly worse than the safe switch"）选了 Clefable ✓；**RT2c 顺着它**把 90% 的 Sand Rush Excadrill 送掉 ✗；RT2a 撞 120s 上限走 fallback。
   - 现在只留**事实 + 一个自查动作**：`… Whether that trade is worth it depends on whether a switch-in would SURVIVE the same hit: if one does, switching KEEPS this pokemon alive and still puts a fresh body on the field — check your switch rows before you decide.`
   - 回归：`test-sim-gate.js` 加两条断言（会倒的留场行**不得**出现 `normally better`；**必须**含 `check your switch rows`）。
 - **回复手段识别补漏：`Pain Split` 归入 `healing` 分类（tool 0.8.4）**
@@ -171,7 +176,7 @@
   - **修两层**：① `toCalcPokemon` 构造前先查 `GEN8DEX.species.get(toID(name))`，拿不到 `baseStats` 就返回明确的 `error`（附带物种名）；构造本身也包 try/catch。② server 的 tool 分发**整段包 try/catch** —— tool 抛异常只回一条 `{error: 'the tool crashed: …'}` 给模型，不再让它带走进程（同时写 `crash.log` 的 `toolThrew` 行便于定位）。
   - **教训**：`process.exit(1)` 的 uncaughtException 兜底对"服务型 BOT"太狠 —— 任何一处未捕获异常都会变成一次判负。以后新 tool 一律要在分发层有兜底。
 - **`checks` 的语义写死成「未验证假设」+ 我方道具为空时不再沉默（0.7.1）**
-  - **动机**（battle99 T20，见 [错题集.md](错题集.md) E003）：模型在 `checks` 里写了「verify Ninetales moves first vs Barra (**Scarf present**)」，**同一回合的正文却把它当既成事实**用了（"My Scarf gives 448 Spe > Barra 408 → I move first"），而 `state.me.item` 从 T16 起就是空的 —— 直接送掉 Ninetales。
+  - **动机**（battle99 T20，见 [benchmark-errors.md](benchmark-errors.md) E003）：模型在 `checks` 里写了「verify Ninetales moves first vs Barra (**Scarf present**)」，**同一回合的正文却把它当既成事实**用了（"My Scarf gives 448 Spe > Barra 408 → I move first"），而 `state.me.item` 从 T16 起就是空的 —— 直接送掉 Ninetales。
   - `checks` 字段的 tool 描述改为「UNVERIFIED HYPOTHESES … 用**战报里能不能看到**来表述（check if the log shows …）」，并明确：**同回合不得把 check 当已证实前提**；凡是当前 prompt 已经写了的东西（我方道具/能力等级/HP、对手已亮招式）必须读 prompt，不能读自己的旧笔记。
   - 重新注入时的表头同样改成「**these are UNVERIFIED HYPOTHESES, not facts**」。
   - prompt 里我方道具为**空**时不再什么都不写，改成显式警告 `Item:(none / nothing readable — 早前回合的道具结论已 STALE：打落 / Trick / Switcheroo / 消耗都会清掉这个字段)`。

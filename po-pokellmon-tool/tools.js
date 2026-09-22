@@ -1353,7 +1353,7 @@ function simulateTurn(args, ctx) {
             // ⚠ 2026-09-22 删掉原句「When your active is doomed either way, STAYING is normally better than switching it out」：
             // 它的触发条件只有「留场会倒」，**没有检查换人能不能救活它**。battle111 T2 正是"换人能救"（Clefable 只吃 34-40%），
             // 那句话在这个局面**说反了**，还把 FREE replacement 包装成倾向性建议 —— 三次复测的 sim 里都带着它，
-            // 其中一次（RT2c）顺着它把 90% 的 Sand Rush Excadrill 送掉（错题集 E004）。
+            // 其中一次（RT2c）顺着它把 90% 的 Sand Rush Excadrill 送掉（benchmark-errors.md E004）。
             // 现在只留事实 + 一个自查动作，不给任何倾向。
             row.trajectory = 'YOUR ACTIVE (' + myName + ')' + (certain ? ' FAINTS THIS TURN ANYWAY' : ' MAY FAINT THIS TURN') + ' → if it faints, that hands you a FREE replacement in the end-of-turn phase: ' +
                 'the pokemon you send in next enters and takes NO hit this turn. If you switch out instead, your switch-in eats their move THIS turn ' +
