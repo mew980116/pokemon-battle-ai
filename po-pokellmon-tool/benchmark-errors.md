@@ -397,7 +397,7 @@ node replay.js logs/deepseek_tool_20260922_battle111.log 2 --url=http://127.0.0.
 - **tool 0.8.2**：给 REPLACEMENT MODE 注入确定性事实（替补在**回合结束阶段**上场 → **本回合不吃招**；唯一成本是陷阱；对手速度只是**区间**不能用来定顺序；每个候补行带 `takes / deals / spe` 与 KO 判定）。
 - **复测（0.8.2 时代）**：T2 从错变对（2/3 → 稳定 3/3）；T12 的"上了又换下"消失（3/3 都留场出招）；**T7 的"选谁"仍 2/3 保守**（只有 1/3 选到师父鼬）。
 - **复测（tool 0.8.5，2026-09-22）**：T7 原样重放 3 遍 → **3/3 都选 `switch slot3`（师父鼬）**（29 / 18 / 28s，无 fallback、无门禁打回）。三遍的 strategy 都自己写出「Spe 339 CLEARLY faster + Close Combat 156-184% = GUARANTEED OHKO ⇒ it never has to eat a hit」；其中一遍还额外核了对手**没有任何先制招**（Sucker Punch / Quick Attack / Mach Punch 学习面全无），另一遍把五个候补逐个算完（Jirachi 3HKO 输赛跑 / Sandaconda 速度掷硬币 / Palossand 慢且 3HKO / Tornadus 88-104% 有被 KO 风险）。⇒ **T7 的"选谁"在当前基线上通过（3/3）**。
-  - **不叫"结案"**：条目与 fixture 都留着 —— 它的价值是**探针**，以后**改 harness 的注意力机制**（注入哪些事实、怎么引导）就要把它拉出来重跑，看会不会被打回 2/3 甚至更差。
+  - **结案口径（用户 2026-09-22 定）**：**harness 侧那半可以结**（「REPLACEMENT MODE 从没说过替补不吃招」= 我们自己的信息缺失，0.8.2 补上就结了）；**模型侧那半不结** —— 「会不会自己补上那一步」（替补偏"挡"不偏"击杀" / 上了又换下）是**能评测模型的 benchmark**，条目与 fixture 都留着，以后**改 harness 的注意力机制**（注入哪些事实、怎么引导）就要把它拉出来重跑，看会不会被打回 2/3 甚至更差。
   - 顺带说明 0.8.5 删掉 `trajectory` 那句倾向性建议**没有把 T7 带偏**：它仍按事实在强制替补上选进攻手，而不是保守选盾。
 - **强配置对照**：`flash+低推理` 与 `pro+关思考` 在 T7 都能自己写出 `the faint happens in the end-of-turn phase, so Bouffalant gets NO free hit now` + `it never eats a hit and nets a KO` ⇒ 这是**事实缺席 + 生产配置时做不做**，不是"不会"。
 - **当前基线**：T2 3/3、T7 3/3、T12 3/3 —— **三处全部保留为回归靶**（harness 注意力机制一改就重跑这一组）。
