@@ -91,6 +91,10 @@
 - **DeepSeek 请求必须压「硬墙钟」超时（0.6.1，真 bug）**：原来只有 `req.setTimeout(TIMEOUT_MS)`——那是**空闲超时**（socket idle），连接上只要有零星保活/分块流量就**永远不触发**。
   - 实测（2026-09-20 battle98 T11）：`api.deepseek.com`（117.185.125.154）的连接从 23:42:00 建起到 23:51:24 **仍 Established（564s）**，240s 空闲超时没掐，PO 侧 `sys.synchronousWebCall` 一直阻塞，面板停在「实时 503s 思考中…」。
   - 现在另加一个 `setTimeout` 硬墙钟 deadline（同一时长，`done()` 保证 cb 只回调一次、`res.on('error')` 也接住）。PO 侧兜底：**单次失败→`pklmFallbackAttack()`**，连续 3 次且跨度 >15s 才会认输。
+- **`replay.js` 汇总表按「同回合组内序号」配对（tool 0.8.7，无行为改动）**
+  - 起因：battle108 **T7**（E005）复测时逐条输出是「替补决策 → `switch slot3`（正解）」，而汇总表两行都印成 `新动作 attack slot1`——**表自己跟自己的逐条结果矛盾**。
+  - 根因：`oldE = chosen.find(x => x.turn === r.turn)` + `newE = newEntries.filter(x => x.turn === r.turn).pop()` 都是按 turn 取**单条**；同一回合有两条记录（「强制替补」+「换人后的正常回合」）时，两行都取到同一条。
+  - 修：先按 turn 分组，再用**组内序号**配对；改后汇总表与逐条输出、`_r.js` 的输出一致。
 - **文档改名：案例库 / 错题集 → benchmark（0.8.6，无行为改动）**
   - `案例库.md` → **[benchmark.md](benchmark.md)**（总清单 + 正例对照）、`错题集.md` → **[benchmark-errors.md](benchmark-errors.md)**（已确诊错例）。
   - **定位修正（用户 2026-09-22）**：这些场景的用途**不是让模型对齐"标准答案"**，而是「在这些局面下，模型的决策最容易暴露它自己的硬伤，或者 harness 本身的问题」；正例只作**对照**（确认改动没把对的行为改坏）。

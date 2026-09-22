@@ -108,9 +108,16 @@ async function run() {
     console.log('\n===== 对比汇总 =====');
     console.log('turn | 旧动作 (rounds) | 新动作 (rounds) | 一致 | 旧耗时 | 新耗时');
     let changed = 0;
+    // 同一个 turn 可能有多条记录（如"强制替补"+"换人后的正常回合"）：必须按组内序号配对，
+    // 否则 find/filter(...).pop() 会把同一回合的旧/新记录都取到同一条上（汇总表与上面的逐条结果矛盾）。
+    const oldByTurn = {}, newByTurn = {};
+    chosen.forEach(x => { (oldByTurn[x.turn] = oldByTurn[x.turn] || []).push(x); });
+    newEntries.forEach(x => { (newByTurn[x.turn] = newByTurn[x.turn] || []).push(x); });
+    const seen = {};
     for (const r of results) {
-        const oldE = chosen.find(x => x.turn === r.turn);
-        const newE = newEntries.filter(x => x.turn === r.turn).pop();
+        const ord = seen[r.turn] = (seen[r.turn] || 0); seen[r.turn] = ord + 1;
+        const oldE = (oldByTurn[r.turn] || [])[ord] || {};
+        const newE = (newByTurn[r.turn] || [])[ord] || null;
         if (!r.same) changed++;
         const nAct = newE && newE.action ? newE.action : r.newAction;
         console.log('T' + r.turn + ' | ' + actStr(r.oldAction) + ' (' + oldE.rounds + ') | ' + actStr(nAct) + ' (' + (newE ? newE.rounds : '?') + ') | ' +
