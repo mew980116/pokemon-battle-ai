@@ -522,4 +522,14 @@ const immTop = xLeg({ attacker: { poke: 'Garchomp', ev: [0, 252, 0, 0, 0, 252] }
 const immTopOk = immTop.min === 0 && Array.isArray(immTop.notes) && Array.isArray(shedWg.notes) && Array.isArray(shedImm.notes);
 if (!immTopOk) wdiff++;
 console.log('[' + (immTopOk ? 'OK  ' : 'DIFF') + '] 0 伤害分支的 notes 在顶层（免疫 / Wonder Guard / 算不出 三种）');
-console.log('脱壳忍者 HP/Wonder Guard：' + (5 - wdiff) + '/5 通过');
+// 「特性造成的免疫」不能只特判 Wonder Guard：Levitate / Flash Fire / Water Absorb / Volt Absorb / Sap Sipper …
+// 计算器都会把伤害归零并记进 applied.defenderAbility，旧代码却一律说成「算不出的固定伤害」。
+const levitate = xLeg({ attacker: { poke: 'Excadrill', ability: 'Sand Rush', ev: [0, 252, 0, 0, 0, 252] }, defender: { poke: 'Rotom-Wash' }, move: { name: 'Earthquake' } });
+const levOk = levitate.min === 0 && levitate.desc.indexOf('Levitate') >= 0 && levitate.desc.indexOf('CANNOT be computed') < 0;
+if (!levOk) wdiff++;
+console.log('[' + (levOk ? 'OK  ' : 'DIFF') + '] 浮游挡住地震 → 必须点名特性（不能说「算不出」）-> ' + levitate.desc.slice(0, 100));
+const flashFire = xLeg({ attacker: { poke: 'Charizard', ev: [0, 0, 0, 252, 0, 252] }, defender: { poke: 'Heatran' }, move: { name: 'Flamethrower' } });
+const ffOk = flashFire.min === 0 && flashFire.desc.indexOf('Flash Fire') >= 0 && flashFire.notes.join(' ').indexOf('Bypass it with Mold Breaker') >= 0;
+if (!ffOk) wdiff++;
+console.log('[' + (ffOk ? 'OK  ' : 'DIFF') + '] 引火挡住火焰 → 点名特性 + 写明「破格类/无视特性招可穿透」-> ' + flashFire.desc.slice(0, 100));
+console.log('脱壳忍者 HP/Wonder Guard + 特性免疫：' + (7 - wdiff) + '/7 通过');

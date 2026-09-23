@@ -2845,16 +2845,18 @@ function calcOneLeg(leg, idx, ctx) {
 
     // ---- 免疫 / 无效果 ----
     if (max === 0) {
+        var tmult = typeMultOf(mv.type, def.types);
         // ① 脱壳忍者的 Wonder Guard：**非效果拔群的招一律 0 伤害**（vendor/smogon-calc/mechanics/gen3.js 实现）。
         // 这必须排在下面的 tmult 分支之前，否则会给 LLM 一个**错误的原因**：
         // 实测（Ice Shard 对 Shedinja，1x）note 原本写 "NOT type-immune … its damage is fixed or depends on the current HP
         // (Super Fang/Endeavor…)"，而真相是 Wonder Guard 免疫 —— 同一段 detail.applied 里就写着 "Wonder Guard"。
         var defAbility = String((leg.defender && leg.defender.ability) || calcDef.pokemon.ability || '');
         if (/wonder guard/i.test(defAbility) || /wonder guard/i.test(String(applied.defenderAbility || ''))) {
-            var wgT = typeMultOf(mv.type, def.types);
             notes.push('WONDER GUARD: ' + defName + ' takes damage ONLY from super-effective moves — ' + (mv.name || 'this move') +
-                ' is ' + (wgT === null ? 'not super effective' : (wgT + 'x')) + ' against it, so it deals 0 and can NEVER damage it. ' +
-                'To break through, you need a super-effective move (this is not "the calculator failed", it is a hard immunity).');
+                ' is ' + (tmult === null ? 'not super effective' : (tmult + 'x')) + ' against it, so it deals 0 and can NEVER damage it. ' +
+                'To break through, you need a super-effective move — or an ability-ignoring effect (Mold Breaker / Teravolt / Turboblaze, ' +
+                'Moongeist Beam / Sunsteel Strike / Photon Geyser / Light That Burns the Sky / Menacing Moonraze Maelstrom / Searing Sunraze Smash); ' +
+                'an Ability Shield on the target prevents that bypass. (This is a hard immunity, not "the calculator failed".)');
             return {
                 index: idx, min: 0, max: 0, percent_min: 0, percent_max: 0,
                 desc: (mv.name || 'move') + ' vs. ' + defName + ': no effect — Wonder Guard (only super-effective moves damage it)',
@@ -2864,15 +2866,38 @@ function calcOneLeg(leg, idx, ctx) {
                 detail: {
                     attack_stat: aStat, defense_stat: dStat,
                     attack_stat_name: aStatLabel, defense_stat_name: dStatLabel,
-                    defender_max_hp: defHp, type_mult: wgT, power: bpShown,
+                    defender_max_hp: defHp, type_mult: tmult, power: bpShown,
                     is_crit: calcCrit, applied: applied, notes: notes,
                     inputs_used: leg._fromState || undefined
                 }
             };
         }
-        // ② 0 有两种含义：真的属性免疫，或**计算器算不出**这类招的伤害（固定伤害/依赖当前 HP）。
+        // ② 其余「特性造成的免疫」（Levitate / Flash Fire / Water Absorb / Volt Absorb / Sap Sipper / Motor Drive /
+        //    Storm Drain / Dry Skin / Lightning Rod / Earth Eater / Wind Rider / Bulletproof …）：计算器把伤害归零，
+        //    并在 applied.defenderAbility 里记下是哪个特性。旧代码只看属性倍率 → 当成「算不出的固定伤害」，
+        //    等于给 LLM 编了个错原因（实测 Levitate / Flash Fire / Water Absorb / Volt Absorb / Sap Sipper 全部中招）。
+        if (tmult !== null && tmult > 0 && applied.defenderAbility) {
+            notes.push(applied.defenderAbility + ' BLOCKS this move: ' + defName + ' takes 0 from ' + (mv.name || 'this move') +
+                ' because of that ability (type matchup alone would be ' + tmult + 'x). Bypass it with Mold Breaker / Teravolt / Turboblaze, ' +
+                'or with an ability-ignoring move (Moongeist Beam / Sunsteel Strike / Photon Geyser / Light That Burns the Sky / ' +
+                'Menacing Moonraze Maelstrom / Searing Sunraze Smash); an Ability Shield on the target prevents that bypass.');
+            return {
+                index: idx, min: 0, max: 0, percent_min: 0, percent_max: 0,
+                desc: (mv.name || 'move') + ' vs. ' + defName + ': no effect — ' + applied.defenderAbility + ' (this ability blocks that move)',
+                ko: null,
+                notes: notes,
+                species_note: speciesNotes.length ? speciesNotes.join('  |  ') : null,
+                detail: {
+                    attack_stat: aStat, defense_stat: dStat,
+                    attack_stat_name: aStatLabel, defense_stat_name: dStatLabel,
+                    defender_max_hp: defHp, type_mult: tmult, power: bpShown,
+                    is_crit: calcCrit, applied: applied, notes: notes,
+                    inputs_used: leg._fromState || undefined
+                }
+            };
+        }
+        // ③ 0 有两种含义：真的属性免疫，或**计算器算不出**这类招的伤害（固定伤害/依赖当前 HP）。
         // 用我们自己的克制表区分（防御方类型查不到时按老口径显示「免疫」）。
-        var tmult = typeMultOf(mv.type, def.types);
         if (tmult !== null && tmult > 0) {
             notes.push('the calculator returned 0, but ' + (mv.name || 'this move') + ' is NOT type-immune against ' + defName + ' — its damage is fixed or depends on the current HP / on damage taken (Super Fang / Counter / Mirror Coat / Endeavor / Final Gambit / Psywave…), which the calculator cannot derive. Reason it manually from the current HP.');
             return {

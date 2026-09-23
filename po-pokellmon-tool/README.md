@@ -91,6 +91,11 @@
 - **DeepSeek 请求必须压「硬墙钟」超时（0.6.1，真 bug）**：原来只有 `req.setTimeout(TIMEOUT_MS)`——那是**空闲超时**（socket idle），连接上只要有零星保活/分块流量就**永远不触发**。
   - 实测（2026-09-20 battle98 T11）：`api.deepseek.com`（117.185.125.154）的连接从 23:42:00 建起到 23:51:24 **仍 Established（564s）**，240s 空闲超时没掐，PO 侧 `sys.synchronousWebCall` 一直阻塞，面板停在「实时 503s 思考中…」。
   - 现在另加一个 `setTimeout` 硬墙钟 deadline（同一时长，`done()` 保证 cb 只回调一次、`res.on('error')` 也接住）。PO 侧兜底：**单次失败→`pklmFallbackAttack()`**，连续 3 次且跨度 >15s 才会认输。
+- **「特性造成的免疫」不能只特判 Wonder Guard（tool 0.8.10，把 0.8.9 的修法泛化）**
+  - 起因（用户问「这些特性是否被破格类特性/招式无视有没有表述」）：查这条时实测发现，**同一族的免疫全都被我们写错**——旧代码只看属性倍率，于是把「特性把伤害归零」当成「算不出的固定伤害」：`地震 vs 洗衣机（Levitate）`、`喷射火焰 vs 火钢兽（Flash Fire）`、`冲浪 vs 水精灵（Water Absorb）`、`十万伏特 vs 雷精灵（Volt Absorb）`、`木槌 vs 玛力露丽（Sap Sipper）` —— **全部**印成 `CANNOT be computed (fixed / current-HP-dependent damage) — reason it manually`。0.8.9 只特判了 Wonder Guard。
+  - 修：`max === 0` 且属性倍率 > 0 时，只要 `applied.defenderAbility` 有值，就是这个特性造成的免疫 → desc 写 `no effect — <Ability> (this ability blocks that move)`；note 里点名，并写明**穿透方式**（Mold Breaker / Teravolt / Turboblaze，或 Moongeist Beam / Sunsteel Strike / Photon Geyser / Light That Burns the Sky / Menacing Moonraze Maelstrom / Searing Sunraze Smash；对面持 **Ability Shield** 时不可穿透）。
+  - **顺带核实计算器侧本来就是完整的**（无需改动）：`mechanics/gen789.js` 有 `attackerIgnoresAbility`（Mold Breaker / Teravolt / Turboblaze）、`moveIgnoresAbility`（七招）与「可被无视的特性」白名单（含 Wonder Guard / Levitate / Multiscale / Filter / Bulletproof / Soundproof…），并处理 **Ability Shield**。实测：破格 Excadrill 地震 vs 浮游洗衣机 = **318-374**（不带破格 = 0）；破格地震 vs 脱壳忍者（0.5x）= **157-186**（不带破格 = 0）；流星闪冲 vs 脱壳忍者（1x）= **315-372**；破格 + 对面持特性护罩 = **0**。
+  - 回归：`test-calc-compare.js` 该段扩到 **7/7**（新增 Levitate / Flash Fire 两条）；`Super Fang`（真·算不出）仍走原分支（断言未变）；`test-sim-gate.js` 105/0。
 - **种族 HP=1（脱壳忍者）与 Wonder Guard：两处口径修正（tool 0.8.9，A 类喂错信息）**
   - 先说探针结论（这两件事**本来就是对的**）：① HP 已经钉成 1 —— 计算器 `vendor/smogon-calc/stats.js` 里 `if (stat === 'hp') return base === 1 ? base : ...`，是**泛化实现**（按 `base === 1` 判，不写物种名），实测 `maxHP() = 1`；② Wonder Guard 也实现了 —— `vendor/smogon-calc/mechanics/gen3.js`：`defender.hasAbility('Wonder Guard') && typeEffectiveness <= 1` → 0，gen8 复用（实测 Ice Shard 1x → 0、Knock Off 2x → 374-444）。
   - **修的是我们这一层怎么报**：
