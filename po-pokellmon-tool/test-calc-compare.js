@@ -488,3 +488,38 @@ const m3Ok = M3.notes.join(' ').indexOf('not recognised') >= 0;   // 真的拼�
 if (!m3Ok) sdiff++;
 console.log('[' + (m3Ok ? 'OK  ' : 'DIFF') + '] 真拼错的特性仍报 not recognised');
 console.log('名字反查 + A/B 容错：' + (3 - sdiff) + '/3 通过');
+
+// ===== 种族 HP=1（脱壳忍者）+ Wonder Guard =====
+// 回归背景（2026-09-22 探针）：
+//  ① 计算器已把 base HP=1 钉成 HP=1（vendor/smogon-calc/stats.js），于是「伤害 ÷ maxHP」算出 37400% 这种垃圾百分比；
+//  ② desc() 在脱壳忍者上会抛异常（getKOChance 断言失败）→ 旧兜底把 0 伤害说成
+//     "NOT type-immune … damage is fixed or depends on the current HP (Super Fang/Endeavor…)"，
+//     而真相是 Wonder Guard 免疫（同一段 detail.applied 就写着 "Wonder Guard"）。
+console.log('\n--- 种族 HP=1（脱壳忍者）+ Wonder Guard ---');
+let wdiff = 0;
+const ATK_W = { poke: 'Weavile', ev: [0, 252, 0, 0, 0, 252] };
+const shedKo = xLeg({ attacker: ATK_W, defender: { poke: 'Shedinja' }, move: { name: 'Knock Off' } });
+const shedKoOk = shedKo.percent_min === 100 && shedKo.percent_max === 100 && shedKo.ko === 'guaranteed OHKO' &&
+    shedKo.desc.indexOf('1 HP') >= 0 && shedKo.notes.join(' ').indexOf('has only 1 HP') >= 0;
+if (!shedKoOk) wdiff++;
+console.log('[' + (shedKoOk ? 'OK  ' : 'DIFF') + '] 恶招打脱壳忍者 → 不应出现 37400%（=100/100，KO）-> ' + shedKo.percent_min + '-' + shedKo.percent_max + '% | ' + shedKo.desc.slice(0, 90));
+const shedWg = xLeg({ attacker: ATK_W, defender: { poke: 'Shedinja' }, move: { name: 'Ice Shard' } });
+const shedWgOk = shedWg.min === 0 && shedWg.max === 0 && shedWg.desc.indexOf('Wonder Guard') >= 0 &&
+    shedWg.notes.join(' ').indexOf('NOT type-immune') < 0 && shedWg.notes.join(' ').indexOf('WONDER GUARD:') >= 0;
+if (!shedWgOk) wdiff++;
+console.log('[' + (shedWgOk ? 'OK  ' : 'DIFF') + '] 冰招（1x）打脱壳忍者 → 应说 Wonder Guard，不能说是「算不出的固定伤害」-> ' + shedWg.desc.slice(0, 90));
+const shedImm = xLeg({ attacker: { poke: 'Weavile', ev: [0, 252, 0, 0, 0, 252] }, defender: { poke: 'Shedinja' }, move: { name: 'Low Kick' } });
+const shedImmOk = shedImm.min === 0 && shedImm.desc.indexOf('Wonder Guard') >= 0;
+if (!shedImmOk) wdiff++;
+console.log('[' + (shedImmOk ? 'OK  ' : 'DIFF') + '] 格斗招（幽灵免疫 0x）打脱壳忍者 -> ' + shedImm.desc.slice(0, 90));
+// 非 1 HP 的宝可梦不能被这条特例影响
+const normalHp = xLeg({ attacker: ATK_W, defender: { poke: 'Blissey', ev: [252, 0, 252, 0, 0, 0], nature: 'Bold' }, move: { name: 'Knock Off' } });
+const normalHpOk = normalHp.percent_max < 100 && normalHp.desc.indexOf('1 HP') < 0;
+if (!normalHpOk) wdiff++;
+console.log('[' + (normalHpOk ? 'OK  ' : 'DIFF') + '] 普通宝可梦仍是百分比 -> ' + normalHp.percent_min + '-' + normalHp.percent_max + '%');
+// 所有 0 伤害分支都必须把 notes 放在**顶层**（旧代码只塞在 detail 里，与成功路径的返回形状不一致）
+const immTop = xLeg({ attacker: { poke: 'Garchomp', ev: [0, 252, 0, 0, 0, 252] }, defender: { poke: 'Tornadus' }, move: { name: 'Earthquake' } });
+const immTopOk = immTop.min === 0 && Array.isArray(immTop.notes) && Array.isArray(shedWg.notes) && Array.isArray(shedImm.notes);
+if (!immTopOk) wdiff++;
+console.log('[' + (immTopOk ? 'OK  ' : 'DIFF') + '] 0 伤害分支的 notes 在顶层（免疫 / Wonder Guard / 算不出 三种）');
+console.log('脱壳忍者 HP/Wonder Guard：' + (5 - wdiff) + '/5 通过');

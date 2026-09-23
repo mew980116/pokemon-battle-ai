@@ -91,6 +91,13 @@
 - **DeepSeek 请求必须压「硬墙钟」超时（0.6.1，真 bug）**：原来只有 `req.setTimeout(TIMEOUT_MS)`——那是**空闲超时**（socket idle），连接上只要有零星保活/分块流量就**永远不触发**。
   - 实测（2026-09-20 battle98 T11）：`api.deepseek.com`（117.185.125.154）的连接从 23:42:00 建起到 23:51:24 **仍 Established（564s）**，240s 空闲超时没掐，PO 侧 `sys.synchronousWebCall` 一直阻塞，面板停在「实时 503s 思考中…」。
   - 现在另加一个 `setTimeout` 硬墙钟 deadline（同一时长，`done()` 保证 cb 只回调一次、`res.on('error')` 也接住）。PO 侧兜底：**单次失败→`pklmFallbackAttack()`**，连续 3 次且跨度 >15s 才会认输。
+- **种族 HP=1（脱壳忍者）与 Wonder Guard：两处口径修正（tool 0.8.9，A 类喂错信息）**
+  - 先说探针结论（这两件事**本来就是对的**）：① HP 已经钉成 1 —— 计算器 `vendor/smogon-calc/stats.js` 里 `if (stat === 'hp') return base === 1 ? base : ...`，是**泛化实现**（按 `base === 1` 判，不写物种名），实测 `maxHP() = 1`；② Wonder Guard 也实现了 —— `vendor/smogon-calc/mechanics/gen3.js`：`defender.hasAbility('Wonder Guard') && typeEffectiveness <= 1` → 0，gen8 复用（实测 Ice Shard 1x → 0、Knock Off 2x → 374-444）。
+  - **修的是我们这一层怎么报**：
+  - ① **百分比爆炸**：`伤害 ÷ maxHP(=1)` 会印出 `37400%` 这种垃圾数。修：`defHp === 1` 时不报百分比 —— desc 写成 `374-444 (1 HP — any hit KOs)`，`percent_min/max` 归一到 100（于是 `simulate_turn` 的行是 `takes 100-100%` 而不是 37400%），另加一条 note 说明"这不是 HP 百分比，看 KO 结论"。
+  - ② **给 0 伤害编错原因**：`desc()` 在脱壳忍者上会**抛异常**（`getKOChance` 里的 `damage[damage.length-1] === 0` 断言失败），旧兜底于是把 Wonder Guard 免疫说成 `NOT type-immune … its damage is fixed or depends on the current HP (Super Fang/Endeavor…)` —— 而同一段 `detail.applied` 里就写着 `"Wonder Guard"`。修：`max === 0` 时**先判 Wonder Guard**（读 `applied.defenderAbility` 与防守方特性），命中即返回 `no effect — Wonder Guard (only super-effective moves damage it)` + 明确 note。
+  - ③ 顺带统一返回形状：三个 0 伤害分支的 `notes` / `species_note` 原来只塞在 `detail` 里（与正常路径不一致），现在也在顶层。
+  - 回归：`test-calc-compare.js` 新增「种族 HP=1 + Wonder Guard」段 **5/5**（恶招 → 100/100 + KO；冰招 1x → 必须说 Wonder Guard 且**不得**出现 `NOT type-immune`；格斗 0x 同理；普通宝可梦仍是百分比；三种 0 伤害分支的 `notes` 在顶层）；其余分段不变（44/44 伤害一致、护栏 8/8、场地/天气 12/12、fixed_damage 5/5、特性 8/8、from_state 8/8+4/4、名字反查 3/3）。`test-sim-gate.js` 105/0、`test-species-alias.js` 18/0。
 - **REPLACEMENT MODE 的速度对比要先把对手的强化算进去（tool 0.8.8，A 类实现缺陷：喂错信息）**
   - 起因（battle112 PO T13 实测，**模型自己抓出来的**）：对面 Mew 已 **+3 速**，候补行却仍旧给 Weavile 印 `spe 383 vs their range 131-229 → CLEARLY faster` —— 那段区间只是「种族值 + 满努力」，**不含强化/围巾/麻痹**（同一段 block 里我们自己还写着这句警告），却在下一行拿它下"你先手"的结论。模型原文：`a trap: the note's "clearly faster" ignores Mew's +3 Spe (~470-656), so Weavile does NOT outspeed`。
   - 后果：它因此**否决了 Weavile 的复仇线**（本该是"先制 Ice Shard 收残血"）转而选 Durant —— 那局恰好也合理，但这是运气，不是事实支持。

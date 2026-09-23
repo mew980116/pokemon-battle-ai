@@ -2793,8 +2793,11 @@ function calcOneLeg(leg, idx, ctx) {
 
     var defHp = calcDef.pokemon.rawStats.hp;
     var hpForKo = calcDef.pokemon.originalCurHP || defHp;
-    var pctMin = defHp > 0 ? Math.floor(min * 100 / defHp) : 0;
-    var pctMax = defHp > 0 ? Math.floor(max * 100 / defHp) : 0;
+    // ⚠ 种族 HP=1 的宝可梦（脱壳忍者）HP 恒为 1（计算器已按 base===1 钉死，见 vendor/smogon-calc/stats.js）。
+    // 此时「伤害 ÷ maxHP」会算出 37400% 这种垃圾数，而且百分比在这里根本没有意义：只要没被挡住就必杀。
+    var oneHp = (defHp === 1);
+    var pctMin = oneHp ? (min > 0 ? 100 : 0) : (defHp > 0 ? Math.floor(min * 100 / defHp) : 0);
+    var pctMax = oneHp ? (max > 0 ? 100 : 0) : (defHp > 0 ? Math.floor(max * 100 / defHp) : 0);
     // 实际威力（计算器算出的 BP，如鳃咬翻倍 170 / Low Kick 按体重）
     var bpShown = (res.rawDesc && res.rawDesc.moveBP) ? res.rawDesc.moveBP : calcMove.move.bp;
     var extra = (leg.extra !== undefined && leg.extra !== null) ? leg.extra : 1.0;
@@ -2842,7 +2845,32 @@ function calcOneLeg(leg, idx, ctx) {
 
     // ---- 免疫 / 无效果 ----
     if (max === 0) {
-        // 0 有两种含义：真的属性免疫，或**计算器算不出**这类招的伤害（固定伤害/依赖当前 HP）。
+        // ① 脱壳忍者的 Wonder Guard：**非效果拔群的招一律 0 伤害**（vendor/smogon-calc/mechanics/gen3.js 实现）。
+        // 这必须排在下面的 tmult 分支之前，否则会给 LLM 一个**错误的原因**：
+        // 实测（Ice Shard 对 Shedinja，1x）note 原本写 "NOT type-immune … its damage is fixed or depends on the current HP
+        // (Super Fang/Endeavor…)"，而真相是 Wonder Guard 免疫 —— 同一段 detail.applied 里就写着 "Wonder Guard"。
+        var defAbility = String((leg.defender && leg.defender.ability) || calcDef.pokemon.ability || '');
+        if (/wonder guard/i.test(defAbility) || /wonder guard/i.test(String(applied.defenderAbility || ''))) {
+            var wgT = typeMultOf(mv.type, def.types);
+            notes.push('WONDER GUARD: ' + defName + ' takes damage ONLY from super-effective moves — ' + (mv.name || 'this move') +
+                ' is ' + (wgT === null ? 'not super effective' : (wgT + 'x')) + ' against it, so it deals 0 and can NEVER damage it. ' +
+                'To break through, you need a super-effective move (this is not "the calculator failed", it is a hard immunity).');
+            return {
+                index: idx, min: 0, max: 0, percent_min: 0, percent_max: 0,
+                desc: (mv.name || 'move') + ' vs. ' + defName + ': no effect — Wonder Guard (only super-effective moves damage it)',
+                ko: null,
+                notes: notes,
+                species_note: speciesNotes.length ? speciesNotes.join('  |  ') : null,
+                detail: {
+                    attack_stat: aStat, defense_stat: dStat,
+                    attack_stat_name: aStatLabel, defense_stat_name: dStatLabel,
+                    defender_max_hp: defHp, type_mult: wgT, power: bpShown,
+                    is_crit: calcCrit, applied: applied, notes: notes,
+                    inputs_used: leg._fromState || undefined
+                }
+            };
+        }
+        // ② 0 有两种含义：真的属性免疫，或**计算器算不出**这类招的伤害（固定伤害/依赖当前 HP）。
         // 用我们自己的克制表区分（防御方类型查不到时按老口径显示「免疫」）。
         var tmult = typeMultOf(mv.type, def.types);
         if (tmult !== null && tmult > 0) {
@@ -2851,6 +2879,8 @@ function calcOneLeg(leg, idx, ctx) {
                 index: idx, min: 0, max: 0, percent_min: 0, percent_max: 0,
                 desc: (mv.name || 'move') + ' vs. ' + defName + ': CANNOT be computed (fixed / current-HP-dependent damage) — reason it manually',
                 ko: null,
+                notes: notes,
+                species_note: speciesNotes.length ? speciesNotes.join('  |  ') : null,
                 detail: {
                     attack_stat: aStat, defense_stat: dStat,
                     attack_stat_name: aStatLabel, defense_stat_name: dStatLabel,
@@ -2865,6 +2895,8 @@ function calcOneLeg(leg, idx, ctx) {
             index: idx, min: 0, max: 0, percent_min: 0, percent_max: 0,
             desc: (mv.name || 'move') + ' vs. ' + defName + ': no effect (immune, 0x)',
             ko: null,
+            notes: notes,
+            species_note: speciesNotes.length ? speciesNotes.join('  |  ') : null,
             detail: {
                 attack_stat: aStat, defense_stat: dStat,
                 attack_stat_name: aStatLabel, defense_stat_name: dStatLabel,
@@ -2899,11 +2931,15 @@ function calcOneLeg(leg, idx, ctx) {
 
     // ---- PS 风格描述串（伤害值 + 场景 + KO 结论）----
     var fmt = function (v) { return defHp > 0 ? (Math.floor(v * 1000 / defHp) / 10) : 0; };
+    if (oneHp) notes.push(defName + ' has only 1 HP (base HP = 1 → its HP stat is always exactly 1, e.g. Shedinja), so the raw damage number above is NOT a percentage of its HP — any move that is not blocked KOs it. Read the KO verdict, not a percentage.');
     var powerLabel = fixedDamage ? ('fixed ' + min + ' dmg') : ((bpShown !== undefined && bpShown !== null && bpShown !== 0) ? (bpShown + ' BP') : '? BP');
+    var dmgTxt = oneHp
+        ? (min + '-' + max + ' (1 HP — any hit KOs)')
+        : (min + '-' + max + ' (' + fmt(min) + ' - ' + fmt(max) + '%)');
     var desc = evNatDesc(aEvSpec, aEvNature, aIdxUsed) + ' ' + aStatLabel + ' ' + atkName + ' ' + (mv.name || 'move') +
         ' (' + powerLabel + ') vs. ' + evNatDesc(leg.defender, dNature, 0) + ' HP / ' +
         evNatDesc(leg.defender, dNature, dIdxUsed) + ' ' + dStatLabel + ' ' + defName +
-        ': ' + min + '-' + max + ' (' + fmt(min) + ' - ' + fmt(max) + '%)' + (ko ? ' -- ' + ko : '');
+        ': ' + dmgTxt + (ko ? ' -- ' + ko : '');
 
     return {
         index: idx,
