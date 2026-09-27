@@ -11,18 +11,30 @@ function hpPercent(pokemon) {
     return pct === null ? null : Math.round(pct * 10) / 10;
 }
 
-// 属性：PS 的协议不给属性，只能查内嵌图鉴（PS 名，取最新世代；与决策服务的 tools.speciesTypes 同源）
-var SPECIES_DEX = null;
+// 属性/招式类型：PS 的协议都不给，只能查内嵌图鉴（对方给的是 PS 名，取最新世代；
+// 与决策服务的 tools.speciesTypes 同源）
+var CALC_DEX = null;
+function calcDex() {
+    if (!CALC_DEX) {
+        var calc = require('../../vendor/smogon-calc/index.js');
+        CALC_DEX = calc.Generations.get(9) || calc.Generations.get(8);
+    }
+    return CALC_DEX;
+}
 function typesOf(name) {
     if (!name) return null;
     try {
-        if (!SPECIES_DEX) {
-            var calc = require('../../vendor/smogon-calc/index.js');
-            var gen = calc.Generations.get(9) || calc.Generations.get(8);
-            SPECIES_DEX = gen.species;
-        }
-        var sp = SPECIES_DEX.get(String(name).toLowerCase().replace(/[^a-z0-9]+/g, ''));
+        var sp = calcDex().species.get(String(name).toLowerCase().replace(/[^a-z0-9]+/g, ''));
         if (sp && sp.exists !== false && sp.types && sp.types.length) return sp.types;
+    } catch (e) { /* 查不到就不给 */ }
+    return null;
+}
+// 招式属性（看板的招式色点、prompt 都要用）；PS 只给 id（"earthquake"）或名字
+function moveTypeOf(idOrName) {
+    if (!idOrName) return null;
+    try {
+        var mv = calcDex().moves.get(String(idOrName));
+        if (mv && mv.exists !== false && mv.type) return mv.type;
     } catch (e) { /* 查不到就不给 */ }
     return null;
 }
@@ -57,7 +69,10 @@ function pokemonState(pokemon, reveal) {
         if (types) result.types = types;
     }
     if (reveal && pokemon.moves) {
-        for (var m = 0; m < pokemon.moves.length; m++) result.moves.push({ name: pokemon.moves[m], type: '?', slot: m + 1 });
+        for (var m = 0; m < pokemon.moves.length; m++) {
+            var mt = moveTypeOf(pokemon.moves[m]);
+            result.moves.push({ name: pokemon.moves[m], type: mt || '?', slot: m + 1 });
+        }
     }
     return result;
 }
@@ -193,7 +208,7 @@ DecisionBridge.prototype.buildState = function (session, request, actions) {
         var usable = [];
         for (var k = 0; k < reqActive.moves.length; k++) {
             if (reqActive.moves[k].disabled) continue;
-            usable.push({ name: reqActive.moves[k].move || reqActive.moves[k].id, type: '?', slot: k + 1, id: reqActive.moves[k].id || null });
+            usable.push({ name: reqActive.moves[k].move || reqActive.moves[k].id, type: moveTypeOf(reqActive.moves[k].id || reqActive.moves[k].move) || '?', slot: k + 1, id: reqActive.moves[k].id || null });
         }
         if (usable.length) state.me.moves = usable;
         // 极巨化 / 钛晶化能力（gen8 给 canDynamax，gen9 给 canTerastallize=<属性>）

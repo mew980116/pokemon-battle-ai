@@ -142,6 +142,11 @@ BattleSession.prototype.upsertPokemon = function (info, details, hp) {
     return pokemon;
 };
 
+BattleSession.prototype.pokemonBySlot = function (side, slot) {
+    for (var i = 0; i < side.team.length; i++) if (Number(side.team[i].slot) === Number(slot)) return side.team[i];
+    return null;
+};
+
 BattleSession.prototype.applyRequest = function (request) {
     this.request = request || null;
     this.pending = null;
@@ -174,7 +179,14 @@ BattleSession.prototype.applyRequest = function (request) {
             p.fainted = p.hp.fainted;
         }
     }
-    if (request.active && request.active[0]) side.active = side.team[0] || null;
+    // 出战位：以 request 的 active 标记为准
+    // （原来直接写 side.team[0] —— 只要首发不是 1 号槽，me.active 就指错，prompt/看板的"我方当前"会显示错的那只）
+    for (var ai = 0; ai < (request.side.pokemon || []).length; ai++) {
+        if (!request.side.pokemon[ai].active) continue;
+        var act = this.pokemonBySlot(side, ai + 1);
+        if (act) side.active = act;
+        break;
+    }
     if (request.forceSwitch) this.pending = { type: 'forceSwitch', slots: request.forceSwitch };
     else if (request.teamPreview) this.pending = { type: 'teamPreview' };
     return this;

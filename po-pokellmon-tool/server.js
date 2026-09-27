@@ -96,7 +96,7 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.9.6';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
+var SERVER_VERSION = '0.9.7';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
 
 // ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
 // 对战主脑用 v4-flash：这个场景（超大计算量 + 幻觉高发）里 pro 的"深想"反而被门禁压制，
@@ -342,10 +342,15 @@ function buildDefenderAdvantage(oppName, oppTypes, myMoveTypes) {
 function moveInfo(m) {
     var num = m.num;
     var base = (MOVES[String(num)] || MOVES[num]) || {};
+    // PS 侧只给招式 id/名字（"earthquake"/"Earthquake"），不给 num → 查表补上属性/威力/命中
+    if (!base.name && (m.id || m.name)) {
+        var byId = tools.moveById(m.id || m.name);
+        if (byId) base = byId;
+    }
     var power = (m.power !== undefined && m.power !== null) ? m.power : (base.power || 0);
     var acc = base.accuracy || 0;
     var effect = base.effect || '';
-    return { name: m.name || base.name || '?', type: m.type || '?', power: power, pp: m.pp, acc: acc, effect: effect };
+    return { name: m.name || base.name || '?', type: m.type && m.type !== '?' ? m.type : (base.type || '?'), power: power, pp: m.pp, acc: acc, effect: effect };
 }
 
 // 对手 bench 槽位详情（[Name,HP%,status] / [Name,fainted] / [???]）
