@@ -96,7 +96,8 @@ DecisionBridge.prototype.buildState = function (session, request, actions) {
         oppTeam: [],
         bench: [],
         request: request || null,
-        actions: actions || []
+        actions: actions || [],
+        log: true   // 让决策服务把本回合（prompt / usage / toolLog）写进 logs/deepseek_tool_*.log，便于看 token 开销
     };
     var fieldKeys = Object.keys(session.field || {});
     for (var f = 0; f < fieldKeys.length; f++) if (fieldKeys[f].toLowerCase().indexOf('terrain') !== -1) state.terrain = fieldKeys[f];
@@ -163,6 +164,20 @@ DecisionBridge.prototype.recordResult = function (state, session, suggestion, ac
     return record;
 };
 
+// 服务给的动作必须落在本次请求的可选项里（例如 team preview 只能选 team 动作）。
+// 不匹配就当作不可用 → 交给本地兜底；否则会被服务器拒（[Invalid choice]）并把对局卡住。
+DecisionBridge.prototype.pickServiceAction = function (suggestion, actions) {
+    var action = this.toPSAction(suggestion);
+    if (!action) return null;
+    if (!actions || !actions.length) return action;
+    for (var i = 0; i < actions.length; i++) {
+        if (actions[i].type !== action.type) continue;
+        if (action.type === 'team') return action;
+        if (Number(actions[i].slot) === Number(action.slot)) return action;
+    }
+    return null;
+};
+
 DecisionBridge.prototype.handleRequest = function (request, actions, session) {
     var self = this;
     var state = this.buildState(session, request, actions);
@@ -171,8 +186,8 @@ DecisionBridge.prototype.handleRequest = function (request, actions, session) {
         return Promise.resolve(this.recordResult(state, session, localAction, this.toPSAction(localAction), true));
     }
     return this.fetchChoice(state).then(function (suggestion) {
-        var action = self.toPSAction(suggestion);
-        // 服务有响应但翻不成动作（如返回 {"error":...}）：退回本地，否则不发动作会卡住
+        var action = self.pickServiceAction(suggestion, actions);
+        // 服务有响应但翻不成动作、或动作不在可选项里（如 team preview 却给了招式）：退回本地，避免卡住
         if (action) return self.recordResult(state, session, suggestion, action);
         var fallbackAction = self.pickLocalAction(actions);
         return self.recordResult(state, session, suggestion, self.toPSAction(fallbackAction), true);

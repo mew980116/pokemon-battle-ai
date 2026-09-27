@@ -30,7 +30,7 @@ var sent = [];
 var client = { onRequest: function () {}, chooseAction: function (action, room) { sent.push({ action: action, room: room }); return { sent: true }; } };
 var bridge = new bridgeModule.DecisionBridge({ url: 'http://127.0.0.1:8092/choice', request: fakeRequest, shadow: true });
 bridge.attachClient(client);
-return bridge.handleRequest(request, [{ type: 'move', slot: 1 }], session).then(function (record) {
+return bridge.handleRequest(request, actions, session).then(function (record) {
     assert.strictEqual(fakeRequest.options.path.indexOf('/choice?state='), 0);
     var state = record.state;
     assert.strictEqual(state.turn, 3);
@@ -78,6 +78,22 @@ return bridge.handleRequest(request, [{ type: 'move', slot: 1 }], session).then(
     return errorBridge.handleRequest(request, actions, session).then(function (fallbackRecord) {
         assert.strictEqual(fallbackRecord.fallback, true);
         assert.strictEqual(errorSent.length, 1);
+    });
+}).then(function () {
+    // 服务给了不在本次可选项里的动作（例如 team preview 却回了招式）：同样退回本地，否则会被服务器拒掉卡住
+    var offListSent = [];
+    var offListBridge = new bridgeModule.DecisionBridge({
+        agent: 'llm',
+        shadow: false,
+        request: function (options, callback) {
+            callback(fakeResponse({ type: 'attack', attackSlot: 9 }));
+            return { on: function () {}, end: function () {} };
+        }
+    });
+    offListBridge.attachClient({ onRequest: function () {}, chooseAction: function (action, room) { offListSent.push(action); return { sent: true }; } });
+    return offListBridge.handleRequest(request, actions, session).then(function (offListRecord) {
+        assert.strictEqual(offListRecord.fallback, true);
+        assert.ok(offListSent[0].slot === 1 || offListSent[0].slot === 2, '兜底动作必须落在可选项里');
         console.log('PS decision bridge tests passed');
     });
 });
