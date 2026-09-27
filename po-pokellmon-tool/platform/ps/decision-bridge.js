@@ -97,22 +97,26 @@ DecisionBridge.prototype.buildState = function (session, request, actions) {
         bench: [],
         request: request || null,
         actions: actions || [],
+        teamPreview: !!(request && request.teamPreview),   // PO 的同名字段：决策服务据此走「开局选人」分支
         log: true   // 让决策服务把本回合（prompt / usage / toolLog）写进 logs/deepseek_tool_*.log，便于看 token 开销
     };
     var fieldKeys = Object.keys(session.field || {});
     for (var f = 0; f < fieldKeys.length; f++) if (fieldKeys[f].toLowerCase().indexOf('terrain') !== -1) state.terrain = fieldKeys[f];
-    // 出战槽位以 request 为准（adapter 的 side.active 在换人后可能指向旧的）
+    // 出战槽位以 request 为准（adapter 的 side.active 在换人后可能指向旧的）；
+    // team preview 的 request 没有 active 标记（activeSlots 为空）→ 退回对象身份判断
     var activeSlots = {};
     var requestTeam = request && request.side && request.side.pokemon;
     if (requestTeam) {
         for (var a = 0; a < requestTeam.length; a++) if (requestTeam[a].active) activeSlots[a + 1] = true;
     }
+    var useSlots = false;
+    for (var sk in activeSlots) { useSlots = true; break; }
     for (var i = 0; i < (me.team || []).length; i++) {
         var mine = pokemonState(me.team[i], true);
         var slot = me.team[i].slot || (i + 1);
         state.myTeam.push(mine);
         // 替补席：排除出战中的和已濒死的（之前用对象身份判断，导致出战那只自己也出现在替补里）
-        if (requestTeam ? !!activeSlots[slot] : me.team[i] === activeMe) continue;
+        if (useSlots ? !!activeSlots[slot] : me.team[i] === activeMe) continue;
         if (me.team[i].fainted) continue;
         state.bench.push(mine);
     }
@@ -163,7 +167,7 @@ DecisionBridge.prototype.toPSAction = function (action) {
         return move;
     }
     if (action.type === 'switch' || action.type === 'switchSlot') return { type: 'switch', slot: Number(action.pokeSlot || action.slot) };
-    if (action.type === 'team') return { type: 'team', order: action.order };
+    if (action.type === 'team') return { type: 'team', lead: Number(action.lead || 0), order: action.order };
     return null;
 };
 
@@ -197,8 +201,12 @@ DecisionBridge.prototype.pickServiceAction = function (suggestion, actions) {
     for (var i = 0; i < actions.length; i++) {
         var cand = actions[i];
         if (cand.type !== action.type) continue;
-        // team preview：本地只有「默认出战顺序」这一个合法选项
-        if (action.type === 'team') return { type: 'team', order: cand.order };
+        // 开局选人：按「谁首发」匹配本地候选（本地候选带着整队顺序，直接用它的）
+        if (action.type === 'team') {
+            if (!action.lead) return actions[0];
+            if (Number(cand.lead) === Number(action.lead)) return cand;
+            continue;
+        }
         if (Number(cand.slot) !== Number(action.slot)) continue;
         // 招式 / 极巨化 / 钛晶化是三个不同选项，不能互相顶替
         if (!!cand.dynamax !== !!action.dynamax) continue;

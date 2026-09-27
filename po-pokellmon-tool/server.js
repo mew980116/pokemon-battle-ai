@@ -96,7 +96,7 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.9.2';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
+var SERVER_VERSION = '0.9.3';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
 
 // ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
 // 对战主脑用 v4-flash：这个场景（超大计算量 + 幻觉高发）里 pro 的"深想"反而被门禁压制，
@@ -580,8 +580,38 @@ function buildPrompt(state, notes) {
         }
     }
 
+    if (state.teamPreview) {
+        // 开局选人（PS team preview / 工厂）：先把双方队伍摆出来，再让模型决定谁首发
+        p += '\nTEAM PREVIEW — both teams are revealed at the start; decide who you send out first.\n';
+        var pvMine = state.myTeam || [];
+        var pvNames = [];
+        for (var pvm = 0; pvm < pvMine.length; pvm++) pvNames.push((pvMine[pvm].slot || (pvm + 1)) + ':' + pvMine[pvm].name);
+        p += 'Your team (team slot:name): ' + pvNames.join(' | ') + '\n';
+        var pvOpp = state.oppTeam || [];
+        var pvOppNames = [];
+        for (var pvo = 0; pvo < pvOpp.length; pvo++) pvOppNames.push(pvOpp[pvo].name);
+        p += 'Opponent team: ' + (pvOppNames.length ? pvOppNames.join(', ') : '(not revealed at team preview — random battle)') + '\n';
+    }
+
     p += '\nAvailable actions (choose one number):\n';
     var idx = 0;
+    if (state.teamPreview) {
+        // 只决定「谁首发」（单打 66 里真正有意义的决定），其余按队伍槽位顺序
+        var previewTeam = state.myTeam || [];
+        for (var pv = 0; pv < previewTeam.length; pv++) {
+            var pm = previewTeam[pv];
+            idx++;
+            p += idx + '. lead with ' + pm.name + ':Type:' + ((pm.types || []).join('&')) + ',HP:' + (pm.hpPct || 0) + '%';
+            if (pm.moves && pm.moves.length) {
+                var pms = [];
+                for (var pmi = 0; pmi < pm.moves.length; pmi++) pms.push(pm.moves[pmi].name);
+                p += ',Moves:[' + pms.join('|') + ']';
+            }
+            p += '\n';
+        }
+        p += 'Pick who leads; the rest follow in team-slot order.\n';
+        return p;
+    }
     // 专爱锁招：找出唯一可选的招式名，用于把其余招式标注成「不可选」（否则 LLM 会点非法招、被 PO 拒一次）
     var lockedName = null;
     if (me.moves) {
@@ -684,6 +714,7 @@ function parseAction(content, state) {
     // resolve_choice tool 与这里必须完全同源，否则模型自检的结果会和实际执行的不一致。
     var a = tools.choiceToAction(num, state);
     if (!a) return null;
+    if (a.type === 'team') return { type: 'team', lead: a.lead };   // PS：/choose team <首发在前>
     if (a.type === 'attack') {
         var act = { type: 'attack', attackSlot: a.attackSlot };
         if (a.dynamax) act.dynamax = true;          // PS：/choose move N dynamax

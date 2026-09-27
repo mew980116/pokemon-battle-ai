@@ -118,4 +118,35 @@ assert.deepStrictEqual(adapter.requestActions(gen9), [
 ]);
 assert.strictEqual(adapter.actionToCommand({ type: 'move', slot: 1, tera: true }), '/choose move 1 terastallize');
 
+// 开局选人：每个候选 = 谁首发 + 对应的整队顺序
+var preview = {
+    teamPreview: true,
+    side: { id: 'p1', pokemon: [
+        { ident: 'p1: A', details: 'A', condition: '100/100', active: true },
+        { ident: 'p1: B', details: 'B', condition: '100/100', active: true },
+        { ident: 'p1: C', details: 'C', condition: '100/100', active: true }
+    ] }
+};
+assert.deepStrictEqual(adapter.requestActions(preview), [
+    { type: 'team', lead: 1, order: '123' },
+    { type: 'team', lead: 2, order: '213' },
+    { type: 'team', lead: 3, order: '312' }
+]);
+assert.strictEqual(adapter.actionToCommand({ type: 'team', lead: 2, order: '213' }), '/choose team 213');
+
+// |poke| 事件：开局亮出的对手成员要记进队伍（工厂/team preview 才发）
+var pokeSession = new adapter.BattleSession('battle-poke');
+pokeSession.apply('|player|p2|Bob|\n|poke|p2|Gourgeist-*, M|\n|poke|p2|Jolteon, F|');
+assert.strictEqual(pokeSession.sides.p2.team.length, 2);
+assert.strictEqual(pokeSession.sides.p2.team[0].name, 'Gourgeist-*');
+
+// 同一次 team preview：先 |poke| 亮出自己队伍，再来 request —— 不能重复记账
+var pvSession = new adapter.BattleSession('battle-pv');
+pvSession.apply('|player|p1|Alice|\n|poke|p1|Wishiwashi|\n|poke|p1|Shiftry|');
+pvSession.applyRequest({ teamPreview: true, side: { id: 'p1', pokemon: [
+    { ident: 'p1: Wishiwashi', details: 'Wishiwashi', condition: '241/241', active: true },
+    { ident: 'p1: Shiftry', details: 'Shiftry', condition: '100/100', active: true }
+] } });
+assert.strictEqual(pvSession.sides.p1.team.length, 2);
+
 console.log('PS adapter tests passed');

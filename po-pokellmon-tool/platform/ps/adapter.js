@@ -146,7 +146,8 @@ BattleSession.prototype.applyRequest = function (request) {
             var item = request.side.pokemon[i];
             // name 统一取物种名（details 是 "Cresselia, L80, F"）：这样喂给 get_pokemon_info 之类的 tool 才查得到
             var species = String(item.details || '').split(',')[0].trim();
-            var p = this.findPokemon(side, item.ident || item.details, item.ident);
+            // 按物种名去重（不能拿 ident 当名字传：那会让先前的 |poke| 条目匹配不上）
+            var p = this.findPokemon(side, species, item.ident);
             if (!p) {
                 p = { slot: i + 1, ident: item.ident || null, name: species || null, details: item.details || null, hp: null, status: item.condition || null, boosts: {}, moves: [], fainted: false };
                 side.team.push(p);
@@ -171,6 +172,16 @@ BattleSession.prototype.applyEvent = function (event) {
     var side, pokemon, info;
     if (event.type === 'turn') this.turn = event.turn;
     if (event.type === 'player') { side = this.sideFor(event.side); if (side) { side.id = event.side; side.name = event.args[1] || null; } }
+    // |poke|p2|Species, M| —— 开局（team preview / 工厂）先亮出的队伍成员，还没有血量信息
+    if (event.type === 'poke') {
+        side = this.sideFor(event.args[0]);
+        if (side) {
+            var pokeName = String(event.args[1] || '').split(',')[0].trim();
+            if (pokeName && !this.findPokemon(side, pokeName, null)) {
+                side.team.push({ slot: side.team.length + 1, ident: null, name: pokeName, details: event.args[1], hp: null, status: null, boosts: {}, moves: [], fainted: false, unrevealed: true });
+            }
+        }
+    }
     if (event.type === 'teamsize') { side = this.sideFor(event.side); if (side) side.teamSize = event.size; }
     if (event.type === 'switch' || event.type === 'drag') {
         info = event.actor; pokemon = this.upsertPokemon(info, event.details, event.hp);
@@ -224,8 +235,16 @@ function requestActions(request) {
     // wait:true 是「等对手出招」的通知，没有可选项；此时乱发 /choose 会被拒（[Invalid choice] There's nothing to choose）
     if (request.wait) return actions;
     if (request.teamPreview) {
-        var teamSize = request.side && request.side.pokemon ? request.side.pokemon.length : 6;
-        return [{ type: 'team', order: '123456'.slice(0, teamSize) }];
+        // 开局选人：每个候选 = 「谁首发」+ 对应的整队顺序（其余按队伍槽位依次）
+        var preview = (request.side && request.side.pokemon) || [];
+        if (!preview.length) return [{ type: 'team', order: '123456' }];
+        var leads = [];
+        for (var t = 0; t < preview.length; t++) {
+            var order = String(t + 1);
+            for (var rest = 1; rest <= preview.length; rest++) if (rest !== t + 1) order += String(rest);
+            leads.push({ type: 'team', lead: t + 1, order: order });
+        }
+        return leads;
     }
     // forceSwitch[i]=true 表示第 i 个出战位必须换人：可选的是替补席的队伍槽位，不是 i+1
     if (request.forceSwitch) {

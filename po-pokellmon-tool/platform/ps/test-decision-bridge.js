@@ -96,6 +96,37 @@ return bridge.handleRequest(request, actions, session).then(function (record) {
     return offListBridge.handleRequest(request, actions, session).then(function (offListRecord) {
         assert.strictEqual(offListRecord.fallback, true);
         assert.ok(offListSent[0].slot === 1 || offListSent[0].slot === 2, '兜底动作必须落在可选项里');
+    });
+}).then(function () {
+    // 开局选人：服务给 lead → 用本地候选（带整队顺序）发 /choose team
+    var previewRequest = {
+        teamPreview: true,
+        side: { id: 'p1', pokemon: [
+            { ident: 'p1: A', details: 'A', condition: '100/100', active: true },
+            { ident: 'p1: B', details: 'B', condition: '100/100', active: true },
+            { ident: 'p1: C', details: 'C', condition: '100/100', active: true }
+        ] }
+    };
+    var pvSession = new adapter.BattleSession('battle-preview');
+    pvSession.apply('|player|p1|Alice|1|');
+    pvSession.applyRequest(previewRequest);
+    var pvActions = adapter.requestActions(previewRequest);
+    var pvSent = [];
+    var pvBridge = new bridgeModule.DecisionBridge({
+        agent: 'llm',
+        shadow: false,
+        request: function (options, callback) {
+            callback(fakeResponse({ type: 'team', lead: 3 }));
+            return { on: function () {}, end: function () {} };
+        }
+    });
+    pvBridge.attachClient({ onRequest: function () {}, chooseAction: function (action, room) { pvSent.push(action); return { sent: true }; } });
+    return pvBridge.handleRequest(previewRequest, pvActions, pvSession).then(function (pvRecord) {
+        assert.strictEqual(pvRecord.state.teamPreview, true);
+        assert.strictEqual(pvRecord.state.myTeam.length, 3);
+        assert.strictEqual(pvRecord.state.bench.length, 0, 'team preview 全员都是 active，替补应为空');
+        assert.strictEqual(pvRecord.fallback, undefined, '服务给的是合法首发，不该走兜底');
+        assert.deepStrictEqual(pvSent[0], { type: 'team', lead: 3, order: '312' });
         console.log('PS decision bridge tests passed');
     });
 });

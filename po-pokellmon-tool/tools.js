@@ -1589,6 +1589,16 @@ function choiceToAction(num, state) {
     var me = (state && state.me) || {};
     var moves = me.moves || [];
     var bench = (state && state.bench) || [];
+    // 开局选人（PS team preview）：编号 = 我方队伍槽位顺序，选的是「谁首发」
+    if (state && state.teamPreview) {
+        var previewTeam = state.myTeam || [];
+        if (n < 1 || n > previewTeam.length) return null;
+        var lead = previewTeam[n - 1];
+        return {
+            type: 'team', lead: lead.slot || n, name: lead.name,
+            desc: 'lead with ' + lead.name + ' (team slot ' + (lead.slot || n) + ')'
+        };
+    }
     // 列表顺序必须与 buildPrompt 完全一致：招式 → 极巨化招式 → 钛晶化招式 → 换人
     var options = [];
     var i;
