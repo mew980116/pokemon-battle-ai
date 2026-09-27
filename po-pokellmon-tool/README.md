@@ -287,6 +287,7 @@ node po-pokellmon-tool/platform/ps/run-shadow.js
 | `PS_RIVAL` | `III.Columbina` | 定向挑战的对手（`PS_SEARCH_FORMAT` 未设时生效） |
 | `PS_CHALLENGE_FORMAT` | `gen8randombattle` | 定向挑战的分级 |
 | `PS_SHADOW` | 关 | `1` / `true` 时只输出建议、不发送动作（影子模式） |
+| `PS_DECISION` | `llm` | `random` = 纯本地随机合法动作（不请求决策服务，用于先把 PS 链路跑通）；`llm` 模式下决策服务报错/返回不可用响应时也会自动退回本地随机，避免不发动作卡住 |
 | `PS_SERVER` / `PS_WS_URL` | `play.pokemonshowdown.com` / `sim3.psim.us` | 登录服 / 对战服 |
 | `POKELLMON_TOOL_URL` | `http://127.0.0.1:8092/choice` | 决策服务地址 |
 
@@ -294,6 +295,13 @@ node po-pokellmon-tool/platform/ps/run-shadow.js
 
 ```powershell
 $env:PS_SEARCH_FORMAT="gen8randombattle"
+node po-pokellmon-tool/platform/ps/run-shadow.js
+```
+
+例（不接 LLM，只验证 PS 链路能通：进队列 → 配对 → 出招）：
+
+```powershell
+$env:PS_SEARCH_FORMAT="gen8randombattle"; $env:PS_DECISION="random"
 node po-pokellmon-tool/platform/ps/run-shadow.js
 ```
 

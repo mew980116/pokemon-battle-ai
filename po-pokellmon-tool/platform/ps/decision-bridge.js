@@ -50,6 +50,8 @@ function DecisionBridge(options) {
     this.url = options.url || process.env.POKELLMON_TOOL_URL || 'http://127.0.0.1:8092/choice';
     this.shadow = options.shadow !== undefined ? !!options.shadow : process.env.PS_SHADOW !== '0' && process.env.PS_SHADOW !== 'false';
     this.request = options.request || null;
+    // 决策来源：'llm'（默认，调决策服务）| 'random'（纯本地随机合法动作，不请求服务）
+    this.agent = options.agent || 'llm';
     this.client = null;
     this.onRequest = options.onRequest || function () {};
     this.onSuggestion = options.onSuggestion || function () {};
@@ -140,17 +142,44 @@ DecisionBridge.prototype.toPSAction = function (action) {
     return null;
 };
 
+// 本地兜底策略：从合法动作里随机取一个（team preview / 换人 / 招式都在列）。
+// 用途：① 先把 PS 链路跑通、不依赖决策服务；② 决策服务异常时不让整场卡住。
+DecisionBridge.prototype.pickLocalAction = function (actions) {
+    if (!actions || !actions.length) return null;
+    return actions[Math.floor(Math.random() * actions.length)];
+};
+
+DecisionBridge.prototype.recordResult = function (state, session, suggestion, action, fallback) {
+    var record = {
+        battleId: session.roomId, turn: session.turn, state: state,
+        suggestion: suggestion, action: action, shadow: this.shadow
+    };
+    if (fallback) record.fallback = true;
+    this.suggestions.push(record);
+    this.onSuggestion(record);
+    this.onRequest(record);
+    if (!this.shadow && action && this.client) record.sent = this.client.chooseAction(action, session.roomId);
+    return record;
+};
+
 DecisionBridge.prototype.handleRequest = function (request, actions, session) {
     var self = this;
     var state = this.buildState(session, request, actions);
+    if (this.agent === 'random') {
+        var localAction = this.pickLocalAction(actions);
+        return Promise.resolve(this.recordResult(state, session, localAction, this.toPSAction(localAction), true));
+    }
     return this.fetchChoice(state).then(function (suggestion) {
         var action = self.toPSAction(suggestion);
-        var record = { battleId: session.roomId, turn: session.turn, state: state, suggestion: suggestion, action: action, shadow: self.shadow };
-        self.suggestions.push(record);
-        self.onSuggestion(record);
-        self.onRequest(record);
-        if (!self.shadow && action && self.client) record.sent = self.client.chooseAction(action, session.roomId);
-        return record;
+        // 服务有响应但翻不成动作（如返回 {"error":...}）：退回本地，否则不发动作会卡住
+        if (action) return self.recordResult(state, session, suggestion, action);
+        var fallbackAction = self.pickLocalAction(actions);
+        return self.recordResult(state, session, suggestion, self.toPSAction(fallbackAction), true);
+    }).catch(function (error) {
+        self.onSuggestion({ error: error.message, room: session && session.roomId });
+        var fallbackAction = self.pickLocalAction(actions);
+        if (!fallbackAction) return null;
+        return self.recordResult(state, session, fallbackAction, self.toPSAction(fallbackAction), true);
     });
 };
 

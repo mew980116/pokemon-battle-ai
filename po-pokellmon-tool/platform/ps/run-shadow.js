@@ -27,6 +27,7 @@ function reportDebug(hypothesisId, message, data) {
 // #endregion
 
 var shadowMode = ['1', 'true', 'yes', 'on'].indexOf(String(process.env.PS_SHADOW || '').trim().toLowerCase()) !== -1;
+var decisionMode = String(process.env.PS_DECISION || 'llm').trim().toLowerCase();
 var searchFormat = process.env.PS_SEARCH_FORMAT || '';
 var rival = process.env.PS_RIVAL || 'III.Columbina';
 var challengeFormat = process.env.PS_CHALLENGE_FORMAT || 'gen8randombattle';
@@ -52,19 +53,28 @@ var client = new clientModule.PSClient({
         if (raw.indexOf('/error') !== -1) console.log('[ps error] ' + raw.slice(0, 300));
     }
 });
-console.log('[ps mode] ' + (searchFormat ? 'ladder search: ' + searchFormat : 'challenge: ' + rival + ' (' + challengeFormat + ')'));
+console.log('[ps mode] ' + (searchFormat ? 'ladder search: ' + searchFormat : 'challenge: ' + rival + ' (' + challengeFormat + ')')
+    + ' | decision: ' + (decisionMode === 'random' ? 'random (local, no LLM)' : 'llm ' + (process.env.POKELLMON_TOOL_URL || 'http://127.0.0.1:8092/choice'))
+    + (shadowMode ? ' | shadow' : ''));
 var chatTarget = process.env.PS_CHAT_TARGET || 'III.Columbina';
 var chatMessage = process.env.PS_CHAT_MESSAGE || '';
 var bridge = new bridgeModule.DecisionBridge({
     url: process.env.POKELLMON_TOOL_URL,
     shadow: client.shadowMode,
+    agent: decisionMode,
     onSuggestion: function (entry) {
-        console.log('[ps decision' + (entry.shadow ? ' shadow' : '') + '] ' + JSON.stringify(entry.suggestion));
+        if (entry.error) {
+            console.log('[ps decision error] ' + entry.error + (entry.room ? ' (' + entry.room + ')' : ''));
+            writeLog('decision_error', { room: entry.room || null, error: entry.error });
+            return;
+        }
+        console.log('[ps decision' + (entry.shadow ? ' shadow' : '') + (entry.fallback ? ' fallback' : '') + '] ' + JSON.stringify(entry.suggestion));
         writeLog('decision', {
             battleId: entry.battleId,
             turn: entry.turn,
             suggestion: entry.suggestion,
             action: entry.action,
+            fallback: !!entry.fallback,
             sent: entry.sent || { sent: false, shadow: entry.shadow }
         });
     },
