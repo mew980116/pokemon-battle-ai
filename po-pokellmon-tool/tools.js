@@ -1589,22 +1589,38 @@ function choiceToAction(num, state) {
     var me = (state && state.me) || {};
     var moves = me.moves || [];
     var bench = (state && state.bench) || [];
-    if (n >= 1 && n <= moves.length) {
-        var m = moves[n - 1];
-        return {
-            type: 'attack', attackSlot: m.slot, moveName: m.name,
-            desc: 'attack with ' + m.name + ' (move slot ' + m.slot + ')'
-        };
+    // 列表顺序必须与 buildPrompt 完全一致：招式 → 极巨化招式 → 钛晶化招式 → 换人
+    var options = [];
+    var i;
+    for (i = 0; i < moves.length; i++) {
+        options.push({
+            type: 'attack', attackSlot: moves[i].slot, moveName: moves[i].name,
+            desc: 'attack with ' + moves[i].name + ' (move slot ' + moves[i].slot + ')'
+        });
     }
-    var switchIdx = n - moves.length - 1;
-    if (switchIdx >= 0 && switchIdx < bench.length) {
-        var b = bench[switchIdx];
-        return {
-            type: 'switch', pokeSlot: b.slot, switchName: b.name,
-            desc: 'switch to ' + b.name + ' (team slot ' + b.slot + ', ' + (b.hpPct || 0) + '% HP)'
-        };
+    if (me.canDynamax) {
+        for (i = 0; i < moves.length; i++) {
+            options.push({
+                type: 'attack', attackSlot: moves[i].slot, dynamax: true, moveName: moves[i].name,
+                desc: 'Dynamax + ' + moves[i].name + ' (move slot ' + moves[i].slot + ')'
+            });
+        }
     }
-    return null;
+    if (me.canTerastallize) {
+        for (i = 0; i < moves.length; i++) {
+            options.push({
+                type: 'attack', attackSlot: moves[i].slot, tera: true, teraType: me.canTerastallize, moveName: moves[i].name,
+                desc: 'Terastallize (' + me.canTerastallize + ') + ' + moves[i].name + ' (move slot ' + moves[i].slot + ')'
+            });
+        }
+    }
+    for (i = 0; i < bench.length; i++) {
+        options.push({
+            type: 'switch', pokeSlot: bench[i].slot, switchName: bench[i].name,
+            desc: 'switch to ' + bench[i].name + ' (team slot ' + bench[i].slot + ', ' + (bench[i].hpPct || 0) + '% HP)'
+        });
+    }
+    return options[n - 1] || null;
 }
 
 function actionGateCheck(ledger, action, state) {

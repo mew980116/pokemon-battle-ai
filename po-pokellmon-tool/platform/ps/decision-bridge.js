@@ -101,15 +101,34 @@ DecisionBridge.prototype.buildState = function (session, request, actions) {
     };
     var fieldKeys = Object.keys(session.field || {});
     for (var f = 0; f < fieldKeys.length; f++) if (fieldKeys[f].toLowerCase().indexOf('terrain') !== -1) state.terrain = fieldKeys[f];
+    // 出战槽位以 request 为准（adapter 的 side.active 在换人后可能指向旧的）
+    var activeSlots = {};
+    var requestTeam = request && request.side && request.side.pokemon;
+    if (requestTeam) {
+        for (var a = 0; a < requestTeam.length; a++) if (requestTeam[a].active) activeSlots[a + 1] = true;
+    }
     for (var i = 0; i < (me.team || []).length; i++) {
         var mine = pokemonState(me.team[i], true);
+        var slot = me.team[i].slot || (i + 1);
         state.myTeam.push(mine);
-        if (me.team[i] !== activeMe && !me.team[i].fainted) state.bench.push(mine);
+        // 替补席：排除出战中的和已濒死的（之前用对象身份判断，导致出战那只自己也出现在替补里）
+        if (requestTeam ? !!activeSlots[slot] : me.team[i] === activeMe) continue;
+        if (me.team[i].fainted) continue;
+        state.bench.push(mine);
     }
     for (var j = 0; j < (opp.team || []).length; j++) state.oppTeam.push(pokemonState(opp.team[j], true));
-    if (state.me.moves.length === 0 && request && request.active && request.active[0]) {
-        var moves = request.active[0].moves || [];
-        for (var k = 0; k < moves.length; k++) if (!moves[k].disabled) state.me.moves.push({ name: moves[k].move || moves[k].id, type: '?', slot: k + 1, id: moves[k].id || null });
+    // 当前可出招的招式：以 request 为准（战报事件里只有「用过的招式」，会漏掉没出过手的那几个）
+    var reqActive = request && request.active && request.active[0];
+    if (reqActive && reqActive.moves) {
+        var usable = [];
+        for (var k = 0; k < reqActive.moves.length; k++) {
+            if (reqActive.moves[k].disabled) continue;
+            usable.push({ name: reqActive.moves[k].move || reqActive.moves[k].id, type: '?', slot: k + 1, id: reqActive.moves[k].id || null });
+        }
+        if (usable.length) state.me.moves = usable;
+        // 极巨化 / 钛晶化能力（gen8 给 canDynamax，gen9 给 canTerastallize=<属性>）
+        if (reqActive.canDynamax) state.me.canDynamax = true;
+        if (reqActive.canTerastallize) state.me.canTerastallize = reqActive.canTerastallize;
     }
     return state;
 };
@@ -137,7 +156,12 @@ DecisionBridge.prototype.fetchChoice = function (state) {
 
 DecisionBridge.prototype.toPSAction = function (action) {
     if (!action || !action.type) return null;
-    if (action.type === 'attack' || action.type === 'attackSlot' || action.type === 'move') return { type: 'move', slot: Number(action.attackSlot || action.slot) };
+    if (action.type === 'attack' || action.type === 'attackSlot' || action.type === 'move') {
+        var move = { type: 'move', slot: Number(action.attackSlot || action.slot) };
+        if (action.dynamax) move.dynamax = true;
+        else if (action.tera || action.terastallize) move.tera = true;
+        return move;
+    }
     if (action.type === 'switch' || action.type === 'switchSlot') return { type: 'switch', slot: Number(action.pokeSlot || action.slot) };
     if (action.type === 'team') return { type: 'team', order: action.order };
     return null;
@@ -171,9 +195,15 @@ DecisionBridge.prototype.pickServiceAction = function (suggestion, actions) {
     if (!action) return null;
     if (!actions || !actions.length) return action;
     for (var i = 0; i < actions.length; i++) {
-        if (actions[i].type !== action.type) continue;
-        if (action.type === 'team') return action;
-        if (Number(actions[i].slot) === Number(action.slot)) return action;
+        var cand = actions[i];
+        if (cand.type !== action.type) continue;
+        // team preview：本地只有「默认出战顺序」这一个合法选项
+        if (action.type === 'team') return { type: 'team', order: cand.order };
+        if (Number(cand.slot) !== Number(action.slot)) continue;
+        // 招式 / 极巨化 / 钛晶化是三个不同选项，不能互相顶替
+        if (!!cand.dynamax !== !!action.dynamax) continue;
+        if (!!cand.tera !== !!action.tera) continue;
+        return action;
     }
     return null;
 };

@@ -37,6 +37,8 @@ return bridge.handleRequest(request, actions, session).then(function (record) {
     assert.strictEqual(state.battleId, 'battle-bridge');
     assert.strictEqual(state.weather, 'RainDance');
     assert.strictEqual(state.me.moves[1].name, 'Protect');
+    assert.strictEqual(state.me.moves.length, 2);   // 招式以 request 为准，不是「用过的」
+    assert.strictEqual(state.bench.length, 0);      // 出战中的那只不能出现在替补席
     assert.strictEqual(record.action.type, 'move');
     assert.strictEqual(record.action.slot, 2);
     assert.strictEqual(sent.length, 0);

@@ -96,7 +96,7 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.9.1';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
+var SERVER_VERSION = '0.9.2';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
 
 // ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
 // 对战主脑用 v4-flash：这个场景（超大计算量 + 幻觉高发）里 pro 的"深想"反而被门禁压制，
@@ -607,6 +607,23 @@ function buildPrompt(state, notes) {
             p += '\n';
         }
     }
+    // 极巨化 / 钛晶化：PS 侧才有（PO 的 state 不带这两个标志）。作为独立编号列在招式之后、换人之前
+    if (me.canDynamax && me.moves && me.moves.length) {
+        for (var dm = 0; dm < me.moves.length; dm++) {
+            var dmi = moveInfo(me.moves[dm]);
+            idx++;
+            p += idx + '. Dynamax + ' + dmi.name + ':Type:' + dmi.type + ',Power:' + dmi.power + ',Acc:' + dmi.acc + '%' +
+                ' [one per battle; doubles HP, boosts damage, lasts 3 turns]\n';
+        }
+    }
+    if (me.canTerastallize && me.moves && me.moves.length) {
+        for (var tm = 0; tm < me.moves.length; tm++) {
+            var tmi = moveInfo(me.moves[tm]);
+            idx++;
+            p += idx + '. Terastallize (' + me.canTerastallize + ') + ' + tmi.name + ':Type:' + tmi.type + ',Power:' + tmi.power + ',Acc:' + tmi.acc + '%' +
+                ' [one per battle; changes my type to ' + me.canTerastallize + ' and boosts same-type moves]\n';
+        }
+    }
     if (bench.length) {
         for (var s = 0; s < bench.length; s++) {
             idx++;
@@ -667,7 +684,12 @@ function parseAction(content, state) {
     // resolve_choice tool 与这里必须完全同源，否则模型自检的结果会和实际执行的不一致。
     var a = tools.choiceToAction(num, state);
     if (!a) return null;
-    if (a.type === 'attack') return { type: 'attack', attackSlot: a.attackSlot };
+    if (a.type === 'attack') {
+        var act = { type: 'attack', attackSlot: a.attackSlot };
+        if (a.dynamax) act.dynamax = true;          // PS：/choose move N dynamax
+        if (a.tera) act.tera = true;                // PS：/choose move N terastallize
+        return act;
+    }
     return { type: 'switch', pokeSlot: a.pokeSlot };
 }
 

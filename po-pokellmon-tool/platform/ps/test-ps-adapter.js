@@ -94,4 +94,28 @@ assert.deepStrictEqual(adapter.requestActions({
     { type: 'switch', slot: 2 }
 ]);
 
+// 极巨化 / 钛晶化：作为独立选项出现，命令是 /choose move N dynamax | terastallize
+var gen8 = {
+    side: { id: 'p1', pokemon: [{ ident: 'p1: Cresselia', condition: '100/100', active: true }] },
+    active: [{ canDynamax: true, moves: [
+        { move: 'Psychic', id: 'psychic', disabled: false },
+        { move: 'Moonblast', id: 'moonblast', disabled: true }
+    ] }]
+};
+assert.deepStrictEqual(adapter.requestActions(gen8), [
+    { type: 'move', slot: 1, id: 'psychic', name: 'Psychic' },
+    { type: 'move', slot: 1, id: 'psychic', name: 'Psychic', dynamax: true }
+]);
+assert.strictEqual(adapter.actionToCommand({ type: 'move', slot: 1, dynamax: true }), '/choose move 1 dynamax');
+
+var gen9 = {
+    side: { id: 'p1', pokemon: [{ ident: 'p1: Meowscarada', condition: '100/100', active: true }] },
+    active: [{ canTerastallize: 'Grass', moves: [{ move: 'Flower Trick', id: 'flowertrick', disabled: false }] }]
+};
+assert.deepStrictEqual(adapter.requestActions(gen9), [
+    { type: 'move', slot: 1, id: 'flowertrick', name: 'Flower Trick' },
+    { type: 'move', slot: 1, id: 'flowertrick', name: 'Flower Trick', tera: true, teraType: 'Grass' }
+]);
+assert.strictEqual(adapter.actionToCommand({ type: 'move', slot: 1, tera: true }), '/choose move 1 terastallize');
+
 console.log('PS adapter tests passed');

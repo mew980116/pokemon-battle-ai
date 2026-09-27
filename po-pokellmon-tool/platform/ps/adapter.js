@@ -107,10 +107,15 @@ BattleSession.prototype.sideFor = function (side) {
     return side && this.sides[side] ? this.sides[side] : null;
 };
 
+// 归一化 ident：出战位带 a/b 后缀（p1a: Foo），request 的 side.pokemon 只有 p1: Foo，
+// 不归一化会被当成两只 → 队伍里出现重复条目、替补席算错
+function normIdent(ident) { return String(ident || '').replace(/^(p[12])[a-z]:/, '$1:'); }
+
 BattleSession.prototype.findPokemon = function (side, name, ident) {
+    var want = normIdent(ident);
     var list = side.team;
     for (var i = 0; i < list.length; i++) {
-        if ((ident && list[i].ident === ident) || (name && list[i].name === name)) return list[i];
+        if ((want && normIdent(list[i].ident) === want) || (name && list[i].name === name)) return list[i];
     }
     return null;
 };
@@ -139,13 +144,15 @@ BattleSession.prototype.applyRequest = function (request) {
     if (request.side.pokemon) {
         for (var i = 0; i < request.side.pokemon.length; i++) {
             var item = request.side.pokemon[i];
+            // name 统一取物种名（details 是 "Cresselia, L80, F"）：这样喂给 get_pokemon_info 之类的 tool 才查得到
+            var species = String(item.details || '').split(',')[0].trim();
             var p = this.findPokemon(side, item.ident || item.details, item.ident);
             if (!p) {
-                p = { slot: i + 1, ident: item.ident || null, name: item.details || null, details: item.details || null, hp: null, status: item.condition || null, boosts: {}, moves: [], fainted: false };
+                p = { slot: i + 1, ident: item.ident || null, name: species || null, details: item.details || null, hp: null, status: item.condition || null, boosts: {}, moves: [], fainted: false };
                 side.team.push(p);
             }
             p.slot = i + 1;
-            p.name = item.details || p.name;
+            p.name = species || p.name;
             p.details = item.details || p.details;
             p.hp = parseHp(item.condition);
             p.status = item.condition && item.condition.indexOf(' ') !== -1 ? item.condition.split(' ')[1] : null;
@@ -231,6 +238,24 @@ function requestActions(request) {
         for (var m = 0; m < active.moves.length; m++) {
             if (!active.moves[m].disabled) actions.push({ type: 'move', slot: m + 1, id: active.moves[m].id || null, name: active.moves[m].move || null });
         }
+        // 极巨化 / 钛晶化：PS 侧命令是 /choose move N dynamax | terastallize
+        // （gen8 的 request 给 canDynamax + maxMoves，gen9 给 canTerastallize=<属性>）
+        var variants = [];
+        if (active.canDynamax) variants.push('dynamax');
+        if (active.canTerastallize) variants.push('tera');
+        for (var v = 0; v < variants.length; v++) {
+            for (var mv = 0; mv < active.moves.length; mv++) {
+                if (active.moves[mv].disabled) continue;
+                var boosted = { type: 'move', slot: mv + 1, id: active.moves[mv].id || null, name: active.moves[mv].move || null };
+                if (variants[v] === 'dynamax') {
+                    boosted.dynamax = true;
+                } else {
+                    boosted.tera = true;
+                    if (typeof active.canTerastallize === 'string') boosted.teraType = active.canTerastallize;
+                }
+                actions.push(boosted);
+            }
+        }
     }
     var bench = benchSwitches(request);
     for (var b = 0; b < bench.length; b++) actions.push(bench[b]);
@@ -239,7 +264,12 @@ function requestActions(request) {
 
 function actionToCommand(action) {
     if (!action || !action.type) return null;
-    if (action.type === 'move') return '/choose move ' + action.slot;
+    if (action.type === 'move') {
+        var command = '/choose move ' + action.slot;
+        if (action.dynamax) command += ' dynamax';
+        else if (action.tera) command += ' terastallize';
+        return command;
+    }
     if (action.type === 'switch') return '/choose switch ' + action.slot;
     if (action.type === 'team') return '/choose team ' + action.order;
     return null;
