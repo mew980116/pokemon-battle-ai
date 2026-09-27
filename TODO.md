@@ -429,6 +429,13 @@
   - 濒死信号过强：`HP 1%` 触发过度保守换人。
   - 方向：换人选项追加「换人代价 / 强化损失」提示 + 注入速度对比 + 预设评估「强化后应进攻利用，换人白费强化」。
 
+**PS 平台（platform/ps）待办（2026-09-27 本地自建服实测记录）**：
+
+- [ ] 🟡 **看板左栏不渲染「等级/道具/特性」**：PS 侧 state 里已经有 `level`/`item`/`ability`（tool 0.9.6），prompt 里也在用（`Ability:innerfocus,Item:heavydutyboots`），但 `po-pokellmon-view/index.html` 的左栏渲染没画这几项（原来只服务 PO 的 state）。**只改 viewer，不动 PS 侧**。
+- [ ] 🟡 **决策服务的知识库停在 gen8（物种 + 招式）**：`get_pokemon_info("Iron Valiant")` → `unknown pokemon`；`Ivy Cudgel` / `Psychic Noise` 这类 gen9 招式在 prompt 里只能显示原始 id。PS 侧 `speciesTypes` / `moveById` 已优先走内嵌 PS 图鉴（gen9）所以**观战与首发候选行不受影响**，缺口在 tool 侧。两条路：① tool 在 PO 图鉴查不到时回退到 `vendor/smogon-calc`（小改动）② 重建 `knowledge/pokemon.json` + `moves.json` 到 gen9（彻底，需重跑 build-knowledge.js）。
+- [ ] 🟡 **`simulate_turn` 的 move 参数易写错**：battle68 T22 实测它连发 30 次 tool 调用仍没定稿（`{"move":"TeraBlast"}`、`"太晶爆发"`、`{"move":"Tera Blast","terastallize":"Flying"}`、`{"move":851}`），最后被回合预算掐掉走兜底。方向：给 move 参数加更硬的校验与示例（只接受动作表里的原始名字或编号），或在报错时直接回「请用动作表里的名字」。
+- [ ] ⚪ **小瑕疵**：`Calm Mind:Acc:101%` —— PO 招式数据里「必中」用 101 编码，prompt 里显示成 101% 有点怪，可考虑渲染成「必中」。
+
 ---
 
 ## 历史条目（早期路线 / 暂缓追踪）
