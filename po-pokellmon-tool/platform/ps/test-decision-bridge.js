@@ -102,9 +102,9 @@ return bridge.handleRequest(request, actions, session).then(function (record) {
     var previewRequest = {
         teamPreview: true,
         side: { id: 'p1', pokemon: [
-            { ident: 'p1: A', details: 'A', condition: '100/100', active: true },
-            { ident: 'p1: B', details: 'B', condition: '100/100', active: true },
-            { ident: 'p1: C', details: 'C', condition: '100/100', active: true }
+            { ident: 'p1: A', details: 'A, L50, F', condition: '100/100', active: true, moves: ['tackle', 'protect'] },
+            { ident: 'p1: B', details: 'B, L50, M', condition: '100/100', active: true, moves: ['ember'] },
+            { ident: 'p1: C', details: 'C, L50', condition: '100/100', active: true, moves: [] }
         ] }
     };
     var pvSession = new adapter.BattleSession('battle-preview');
@@ -125,6 +125,8 @@ return bridge.handleRequest(request, actions, session).then(function (record) {
         assert.strictEqual(pvRecord.state.teamPreview, true);
         assert.strictEqual(pvRecord.state.myTeam.length, 3);
         assert.strictEqual(pvRecord.state.bench.length, 0, 'team preview 全员都是 active，替补应为空');
+        assert.strictEqual(pvRecord.state.myTeam[0].details, 'A, L50, F', '候选要带 details（服务据此取等级）');
+        assert.deepStrictEqual(pvRecord.state.myTeam[0].moveIds, ['tackle', 'protect'], '候选要带招式 id');
         assert.strictEqual(pvRecord.fallback, undefined, '服务给的是合法首发，不该走兜底');
         assert.deepStrictEqual(pvSent[0], { type: 'team', lead: 3, order: '312' });
         console.log('PS decision bridge tests passed');

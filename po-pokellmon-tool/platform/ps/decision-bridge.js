@@ -134,6 +134,17 @@ DecisionBridge.prototype.buildState = function (session, request, actions) {
         if (reqActive.canDynamax) state.me.canDynamax = true;
         if (reqActive.canTerastallize) state.me.canTerastallize = reqActive.canTerastallize;
     }
+    // 开局选人：把候选的等级 + 招式 id 带上（PS 的 request.side.pokemon[].details / .moves），
+    // 决策服务据此拼出「Lv / 属性 / 招式」候选行（属性由它查图鉴）
+    if (request && request.teamPreview && requestTeam) {
+        for (var ti = 0; ti < state.myTeam.length; ti++) {
+            var cand = state.myTeam[ti];
+            var rp = requestTeam[(cand.slot || (ti + 1)) - 1];
+            if (!rp) continue;
+            cand.details = rp.details || '';
+            cand.moveIds = rp.moves || [];
+        }
+    }
     return state;
 };
 

@@ -3725,6 +3725,54 @@ function runTool(name, args, ctx) {
     return { error: 'unknown tool: ' + name };
 }
 
+// PS 招式 id（小写、去非字母数字，如 "earthquake"）→ 招式条目。
+// PS 的 request.side.pokemon[].moves 只给 id，靠这个还原名字/属性/威力。
+var MOVE_ID_INDEX = null;
+function moveById(id) {
+    var key = String(id || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+    if (!key) return null;
+    if (!MOVE_ID_INDEX) {
+        MOVE_ID_INDEX = {};
+        for (var k in MOVES) {
+            var m = MOVES[k];
+            if (!m || !m.name) continue;
+            var mid = String(m.name).toLowerCase().replace(/[^a-z0-9]+/g, '');
+            if (mid && !MOVE_ID_INDEX[mid]) MOVE_ID_INDEX[mid] = m;
+        }
+    }
+    return MOVE_ID_INDEX[key] || null;
+}
+
+// 物种名 → 属性数组（PS 的 team preview request 不给属性，只能查图鉴）。
+// 名字来自 PS，所以优先查内嵌的 PS 图鉴；**取最新世代**（属性几乎不随世代变，
+// 且 gen8 dex 缺 Hisui/帕底亚形态 —— 如 Goodra-Hisui 在 gen8 里是 MISS，退到基础形态属性就错了）。
+// PO 图鉴只作兜底，最后再逐级砍 "-后缀"。
+var TYPE_DEX = null;
+function speciesTypes(name) {
+    var raw = String(name || '');
+    if (!raw) return [];
+    try {
+        if (!TYPE_DEX) {
+            var newest = SMOGON.Generations.get(9) || SMOGON.Generations.get(8) || SMOGON.Generations.get(PKLM_GEN);
+            TYPE_DEX = newest.species;
+        }
+        var sp = TYPE_DEX.get(SMOGON.toID(raw));
+        if (sp && sp.exists !== false && sp.types && sp.types.length) return sp.types;
+    } catch (e) { /* 图鉴查不到就走兜底 */ }
+    var n = raw.toLowerCase();
+    while (n) {
+        var num = POKEMON.byName[n];
+        if (num !== undefined) {
+            var entry = POKEMON.byNum[num];
+            return (entry && entry.types) ? entry.types : [];
+        }
+        var cut = n.lastIndexOf('-');
+        if (cut === -1) break;
+        n = n.slice(0, cut);
+    }
+    return [];
+}
+
 module.exports = {
     TYPE_NAMES: TYPE_NAMES,
     CHART: CHART,
@@ -3737,5 +3785,7 @@ module.exports = {
     replacementFacts: replacementFacts,
     moveAccuracy: moveAccuracy,
     moveCritStage: moveCritStage,
-    resolveSpeciesName: resolveSpeciesName
+    resolveSpeciesName: resolveSpeciesName,
+    moveById: moveById,
+    speciesTypes: speciesTypes
 };

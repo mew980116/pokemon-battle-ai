@@ -96,7 +96,7 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.9.3';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
+var SERVER_VERSION = '0.9.4';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
 
 // ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
 // 对战主脑用 v4-flash：这个场景（超大计算量 + 幻觉高发）里 pro 的"深想"反而被门禁压制，
@@ -601,13 +601,17 @@ function buildPrompt(state, notes) {
         for (var pv = 0; pv < previewTeam.length; pv++) {
             var pm = previewTeam[pv];
             idx++;
-            p += idx + '. lead with ' + pm.name + ':Type:' + ((pm.types || []).join('&')) + ',HP:' + (pm.hpPct || 0) + '%';
-            if (pm.moves && pm.moves.length) {
-                var pms = [];
-                for (var pmi = 0; pmi < pm.moves.length; pmi++) pms.push(pm.moves[pmi].name);
-                p += ',Moves:[' + pms.join('|') + ']';
+            var lvMatch = String(pm.details || '').match(/L(\d+)/);
+            var pmTypes = tools.speciesTypes(pm.name);
+            var moveIds = pm.moveIds || [];
+            var moveNames = [];
+            for (var pmi = 0; pmi < moveIds.length; pmi++) {
+                var mvInfo = tools.moveById(moveIds[pmi]);
+                moveNames.push(mvInfo ? mvInfo.name : String(moveIds[pmi]));
             }
-            p += '\n';
+            p += idx + '. lead with ' + pm.name + (lvMatch ? ',Lv' + lvMatch[1] : '') +
+                ',Type:' + (pmTypes.length ? pmTypes.join('&') : '?') +
+                (moveNames.length ? ',Moves:[' + moveNames.join('|') + ']' : '') + '\n';
         }
         p += 'Pick who leads; the rest follow in team-slot order.\n';
         return p;
