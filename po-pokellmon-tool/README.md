@@ -284,11 +284,13 @@ node po-pokellmon-tool/platform/ps/run-shadow.js
 | 变量 | 默认 | 说明 |
 |---|---|---|
 | `PS_SEARCH_FORMAT` | 空 | 设了就登录后走**天梯匹配**（`/search <format>`，rated 排位）；设了它就不再定向挑战 |
-| `PS_RIVAL` | `III.Columbina` | 定向挑战的对手（`PS_SEARCH_FORMAT` 未设时生效） |
+| `PS_RIVAL` | `III.Columbina` | 定向挑战的对手；`none` / `off` = 不主动挑战（只等别人来挑战，配合 `PS_AUTO_ACCEPT`） |
 | `PS_CHALLENGE_FORMAT` | `gen8randombattle` | 定向挑战的分级 |
 | `PS_SHADOW` | 关 | `1` / `true` 时只输出建议、不发送动作（影子模式） |
 | `PS_DECISION` | `llm` | `random` = 纯本地随机合法动作（不请求决策服务，用于先把 PS 链路跑通）；`llm` 模式下决策服务报错/返回不可用响应时也会自动退回本地随机，避免不发动作卡住 |
-| `PS_SERVER` / `PS_WS_URL` | `play.pokemonshowdown.com` / `sim3.psim.us` | 登录服 / 对战服 |
+| `PS_SKIP_LOGIN` | 关 | `1` = 跳过官方登录服务器，收到 challstr 后直接 `/trn <用户名>,0,`（只对开了 `noguestsecurity` 的自建服有效） |
+| `PS_AUTO_ACCEPT` | 关 | `1` = 自动接受他人挑战（自己发出的那份不会触发） |
+| `PS_SERVER` / `PS_WS_URL` | `play.pokemonshowdown.com` / `sim3.psim.us` | 登录服 / 对战服（自建服填 `ws://127.0.0.1:8000/showdown/websocket`） |
 | `POKELLMON_TOOL_URL` | `http://127.0.0.1:8092/choice` | 决策服务地址 |
 
 例（打 gen8 Random Battle 天梯，可用来自己双号对排）：
@@ -306,6 +308,20 @@ node po-pokellmon-tool/platform/ps/run-shadow.js
 ```
 
 **PS 账号门槛（实测踩过）**：PS 的 `autoconfirmed` 判定 = **注册满 7 天** 且 **赢过 1 场排位**（登录服务器 `ntbb-session.lib.php`；定向挑战是非排位、不计数）。不满足时若 IP 被判为垃圾/代理来源（报错 `spam from your internet provider`），账号会被半锁（身份显示为 `!`），**不能主动挑战、也不能聊天**；天梯匹配与定向挑战是两条路径，受限情况可能不同。协议与决策日志见 `platform/logs/ps-*.jsonl`。
+
+### 本地自建服务器（自己打自己 / 批量评测）
+
+官方服上「自己打自己」走不通：天梯**同 IP 不能互配**（`server/ladders.ts` 的 `matchmakingOK` 硬判 `latestIp` 不能相同），定向挑战又被 IP 级反垃圾半锁。本地自建服关掉这些限制后，可以随便自己打自己、也不受 7 天门槛影响：
+
+```powershell
+pwsh -File platform\ps\local-server\setup-server.ps1    # 一次性：clone + npm install + build + 写开发用 config
+cd "$env:USERPROFILE\ps-sim"; node pokemon-showdown start --skip-build   # 启动服务器（这个终端一直开着）
+pwsh -File platform\ps\local-server\selfplay.ps1        # 另开终端：起两个客户端自打自（默认两侧随机出招）
+pwsh -File platform\ps\local-server\selfplay.ps1 -AIDecision llm        # AI 侧接 8092 决策服务，陪练侧随机
+```
+
+- `setup-server.ps1` 会在本地服的 `config/config.js` 末尾追加：`noipchecks`（关同 IP 检查）、`nothrottle`（关限流）、`noguestsecurity`（允许 `/trn 名字` 无登录服务器起名）、`backdoor = false`。
+- 已知点：PS master 的 network worker 会把监听地址覆盖成 `0.0.0.0`（`sockets.ts` 里 `PM.env` 用 `Config.bindaddress || '0.0.0.0'`），所以 `Config.bindaddress = '127.0.0.1'` 不生效；本机开发够用，但别在不信任的网络里开着这个服。
 
 ## 版本管理
 

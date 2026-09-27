@@ -27,9 +27,12 @@ function reportDebug(hypothesisId, message, data) {
 // #endregion
 
 var shadowMode = ['1', 'true', 'yes', 'on'].indexOf(String(process.env.PS_SHADOW || '').trim().toLowerCase()) !== -1;
+var skipLogin = ['1', 'true', 'yes', 'on'].indexOf(String(process.env.PS_SKIP_LOGIN || '').trim().toLowerCase()) !== -1;
+var autoAccept = ['1', 'true', 'yes', 'on'].indexOf(String(process.env.PS_AUTO_ACCEPT || '').trim().toLowerCase()) !== -1;
 var decisionMode = String(process.env.PS_DECISION || 'llm').trim().toLowerCase();
 var searchFormat = process.env.PS_SEARCH_FORMAT || '';
 var rival = process.env.PS_RIVAL || 'III.Columbina';
+if (rival === 'none' || rival === 'off') rival = '';   // 显式关闭自动挑战：只等别人来挑战（配合 PS_AUTO_ACCEPT 用）
 var challengeFormat = process.env.PS_CHALLENGE_FORMAT || 'gen8randombattle';
 var client = new clientModule.PSClient({
     server: process.env.PS_SERVER,
@@ -45,6 +48,11 @@ var client = new clientModule.PSClient({
     },
     onBattleStart: function (session, room) { writeLog('battle_start', { room: room }); },
     onBattleEnd: function (session, event, room) { writeLog('battle_end', { room: room, event: event }); },
+    onChallenge: function (from) {
+        console.log('[ps challenge] from ' + from + (autoAccept ? ' -> accept' : ' (ignored)'));
+        writeLog('challenge', { from: from, autoAccept: autoAccept });
+        if (autoAccept) client.acceptChallenge(from);
+    },
     onProtocol: function (event, room) {
         writeLog('protocol', { room: room, event: event });
         if (room || !event || !event.raw) return;
@@ -55,6 +63,8 @@ var client = new clientModule.PSClient({
 });
 console.log('[ps mode] ' + (searchFormat ? 'ladder search: ' + searchFormat : 'challenge: ' + rival + ' (' + challengeFormat + ')')
     + ' | decision: ' + (decisionMode === 'random' ? 'random (local, no LLM)' : 'llm ' + (process.env.POKELLMON_TOOL_URL || 'http://127.0.0.1:8092/choice'))
+    + ' | login: ' + (skipLogin ? 'skip (local server)' : 'official ' + (process.env.PS_WS_URL || 'wss://sim3.psim.us/showdown/websocket'))
+    + (autoAccept ? ' | auto-accept' : '')
     + (shadowMode ? ' | shadow' : ''));
 var chatTarget = process.env.PS_CHAT_TARGET || 'III.Columbina';
 var chatMessage = process.env.PS_CHAT_MESSAGE || '';

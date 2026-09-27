@@ -61,9 +61,37 @@ assert.strictEqual(adapter.actionToCommand(actions[0]), '/choose move 1');
 assert.strictEqual(adapter.actionToCommand(actions[1]), '/choose switch 2');
 assert.strictEqual(adapter.actionToCommand({ type: 'team', order: '321' }), '/choose team 321');
 
-var force = { side: { id: 'p1', pokemon: [] }, forceSwitch: [true] };
+// 强制换人：只能选替补席的队伍槽位（不是出战位 i+1）
+var force = {
+    side: { id: 'p1', pokemon: [
+        { ident: 'p1: Pikachu', condition: '0 fnt', active: true },
+        { ident: 'p1: Charizard', condition: '100/100', active: false },
+        { ident: 'p1: Snorlax', condition: '0 fnt', active: false },
+        { ident: 'p1: Lapras', condition: '80/100', active: false }
+    ] },
+    forceSwitch: [true]
+};
 session.apply(force);
 assert.strictEqual(session.pending.type, 'forceSwitch');
-assert.deepStrictEqual(adapter.requestActions(force), [{ type: 'switch', slot: 1, forced: true }]);
+assert.deepStrictEqual(adapter.requestActions(force), [{ type: 'switch', slot: 2 }, { type: 'switch', slot: 4 }]);
+
+// wait:true（等对手出招）没有可选项
+assert.deepStrictEqual(adapter.requestActions({
+    wait: true,
+    side: { id: 'p1', pokemon: [{ ident: 'p1: Pikachu', condition: '100/100', active: true }] }
+}), []);
+
+// forceSwitch:[false] 是正常回合：招式 + 替补换人
+assert.deepStrictEqual(adapter.requestActions({
+    side: { id: 'p1', pokemon: [
+        { ident: 'p1: Pikachu', condition: '100/100', active: true },
+        { ident: 'p1: Charizard', condition: '100/100', active: false }
+    ] },
+    forceSwitch: [false],
+    active: [{ moves: [{ move: 'Tackle', id: 'tackle', disabled: false }] }]
+}), [
+    { type: 'move', slot: 1, id: 'tackle', name: 'Tackle' },
+    { type: 'switch', slot: 2 }
+]);
 
 console.log('PS adapter tests passed');

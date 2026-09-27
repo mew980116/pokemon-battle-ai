@@ -50,7 +50,7 @@ return Promise.resolve().then(function () {
     client.cancelSearch();
     assert.deepStrictEqual(socket.sent.slice(1), ['|/challenge Rival', '|/accept Rival', '|/pm Rival, hello', 'battle-test|public hello', '|/join battle-test', '|/search gen8randombattle', '|/cancelsearch']);
 
-    socket.emit('message', 'battle-test\n|player|p1|TestUser|1|\n|request|{"rqid":1,"side":{"id":"p1","pokemon":[{"ident":"p1: Pikachu","details":"Pikachu, L50","condition":"100/100","active":true}]},"active":[{"moves":[{"id":"thunderbolt","move":"Thunderbolt","disabled":false}]}]}');
+    socket.emit('message', '>battle-test\n|player|p1|TestUser|1|\n|request|{"rqid":1,"side":{"id":"p1","pokemon":[{"ident":"p1: Pikachu","details":"Pikachu, L50","condition":"100/100","active":true}]},"active":[{"moves":[{"id":"thunderbolt","move":"Thunderbolt","disabled":false}]}]}');
     assert.ok(client.sessions['battle-test']);
     assert.strictEqual(starts[0], 'battle-test');
     assert.strictEqual(starts[1].actions[0].type, 'move');
@@ -60,7 +60,7 @@ return Promise.resolve().then(function () {
     client.setShadowMode(false);
     client.chooseAction({ type: 'move', slot: 1 }, 'battle-test');
     assert.strictEqual(socket.sent[socket.sent.length - 1], 'battle-test|/choose move 1');
-    socket.emit('message', 'battle-test\n|win|TestUser');
+    socket.emit('message', '>battle-test\n|win|TestUser');
     assert.strictEqual(client.sessions['battle-test'], undefined);
     assert.deepStrictEqual(ends, ['battle-test']);
     assert.ok(protocols.indexOf('request') !== -1);

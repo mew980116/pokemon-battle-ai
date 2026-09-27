@@ -5,6 +5,8 @@ var path = require('path');
 var https = require('https');
 var adapter = require('./adapter.js');
 
+function toId(text) { return String(text || '').toLowerCase().replace(/[^a-z0-9]+/g, ''); }
+
 function readCredentialsFile() {
     try {
         var file = path.join(__dirname, 'ps-credentials.json');
@@ -73,6 +75,9 @@ function PSClient(options) {
     this.wsUrl = options.wsUrl || process.env.PS_WS_URL || 'wss://sim3.psim.us/showdown/websocket';
     this.WebSocket = options.WebSocket || null;
     this.loginRequest = options.loginRequest || defaultLoginRequest;
+    // 本地/开发服务器：跳过官方登录，收到 challstr 后直接以未注册用户名登录（要求服务器 noguestsecurity=true）
+    this.skipLogin = options.skipLogin !== undefined ? !!options.skipLogin
+        : ['1', 'true', 'yes', 'on'].indexOf(String(process.env.PS_SKIP_LOGIN || '').trim().toLowerCase()) !== -1;
     this.socket = null;
     this.connected = false;
     this.loggedIn = false;
@@ -87,6 +92,8 @@ function PSClient(options) {
     this.onBattleEnd = options.onBattleEnd || function () {};
     this.onProtocol = options.onProtocol || function () {};
     this.onConnection = options.onConnection || function () {};
+    // 收到他人的挑战时回调 (fromName)，用于自动接受（自己发的挑战不会触发）
+    this.onChallenge = options.onChallenge || null;
 }
 
 PSClient.prototype.connect = function (socket) {
@@ -144,7 +151,8 @@ PSClient.prototype.setShadowMode = function (enabled) { this.shadowMode = !!enab
 PSClient.prototype.handleMessage = function (raw) {
     var lines = String(raw || '').split(/\r?\n/);
     var room = '';
-    if (lines.length && lines[0].charAt(0) !== '|') room = lines.shift();
+    // 房间消息的格式是 ">roomid\n|...|..."（server/users.ts: sendTo）；剥掉前缀的 ">"
+    if (lines.length && lines[0].charAt(0) !== '|') room = lines.shift().replace(/^>/, '');
     var payload = lines.join('\n');
     if (!payload) return;
     if (room) this.currentRoom = room;
@@ -165,9 +173,15 @@ PSClient.prototype.handleMessage = function (raw) {
     if (challenge) {
         this.challstr = challenge[1] + '|' + challenge[2];
         if (this.onConnection) this.onConnection('challstr', { hasChallstr: true });
-        this.login();
+        if (this.skipLogin) this.guestLogin(); else this.login();
     }
     // #endregion
+    // 他人发来的挑战（|pm|挑战方|被挑战方|/challenge ...）；自己发出的那份也带自己名字，按名字跳过
+    var challengePm = payload.match(/\|pm\|([^|\n]+)\|([^|\n]+)\|\/challenge\b/);
+    if (challengePm && this.onChallenge) {
+        var from = String(challengePm[1]).replace(/^[^A-Za-z0-9]+/, '');
+        if (toId(from) !== toId(this.username)) this.onChallenge(from);
+    }
     if (room && room.indexOf('battle-') === 0) this.handleBattlePayload(room, payload);
 };
 
@@ -183,6 +197,15 @@ PSClient.prototype.login = function () {
         if (self.onConnection) self.onConnection('loginAccepted', { username: userid });
         return assertion;
     });
+};
+
+// 本地/开发服务器登录：不发登录请求，直接以未注册用户名登录（要求服务器 noguestsecurity=true）
+PSClient.prototype.guestLogin = function () {
+    if (!this.username) throw new Error('PS_USERNAME (or username in ps-credentials.json) is required for skip-login mode');
+    this.send('|/trn ' + this.username + ',0,');
+    this.loggedIn = false;
+    if (this.onConnection) this.onConnection('trnSent', { username: this.username });
+    return this.username;
 };
 
 PSClient.prototype.handleBattlePayload = function (room, payload) {

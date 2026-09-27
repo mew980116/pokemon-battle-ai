@@ -198,17 +198,42 @@ BattleSession.prototype.apply = function (input) {
     return this;
 };
 
+// 替补席（可以换上来的）队伍槽位：排除出战中的和已濒死的
+function benchSwitches(request) {
+    var list = [];
+    var team = request.side && request.side.pokemon;
+    if (!team) return list;
+    for (var p = 0; p < team.length; p++) {
+        if (team[p].active === true) continue;
+        if (team[p].condition && team[p].condition.indexOf('fnt') !== -1) continue;
+        list.push({ type: 'switch', slot: p + 1 });
+    }
+    return list;
+}
+
 function requestActions(request) {
     var actions = [];
     if (!request) return actions;
-    if (request.forceSwitch) {
-        for (var i = 0; i < request.forceSwitch.length; i++) if (request.forceSwitch[i]) actions.push({ type: 'switch', slot: i + 1, forced: true });
-        return actions;
+    // wait:true 是「等对手出招」的通知，没有可选项；此时乱发 /choose 会被拒（[Invalid choice] There's nothing to choose）
+    if (request.wait) return actions;
+    if (request.teamPreview) {
+        var teamSize = request.side && request.side.pokemon ? request.side.pokemon.length : 6;
+        return [{ type: 'team', order: '123456'.slice(0, teamSize) }];
     }
-    if (request.teamPreview) return [{ type: 'team', order: '123456'.slice(0, request.side && request.side.pokemon ? request.side.pokemon.length : 6) }];
+    // forceSwitch[i]=true 表示第 i 个出战位必须换人：可选的是替补席的队伍槽位，不是 i+1
+    if (request.forceSwitch) {
+        var mustSwitch = false;
+        for (var i = 0; i < request.forceSwitch.length; i++) if (request.forceSwitch[i]) mustSwitch = true;
+        if (mustSwitch) return benchSwitches(request);
+    }
     var active = request.active && request.active[0];
-    if (active && active.moves) for (var m = 0; m < active.moves.length; m++) if (!active.moves[m].disabled) actions.push({ type: 'move', slot: m + 1, id: active.moves[m].id || null, name: active.moves[m].move || null });
-    if (request.side && request.side.pokemon) for (var p = 0; p < request.side.pokemon.length; p++) if (request.side.pokemon[p].condition && request.side.pokemon[p].condition.indexOf('fnt') === -1 && request.side.pokemon[p].active !== true) actions.push({ type: 'switch', slot: p + 1 });
+    if (active && active.moves) {
+        for (var m = 0; m < active.moves.length; m++) {
+            if (!active.moves[m].disabled) actions.push({ type: 'move', slot: m + 1, id: active.moves[m].id || null, name: active.moves[m].move || null });
+        }
+    }
+    var bench = benchSwitches(request);
+    for (var b = 0; b < bench.length; b++) actions.push(bench[b]);
     return actions;
 }
 

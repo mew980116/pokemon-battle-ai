@@ -155,10 +155,11 @@ DecisionBridge.prototype.recordResult = function (state, session, suggestion, ac
         suggestion: suggestion, action: action, shadow: this.shadow
     };
     if (fallback) record.fallback = true;
+    // 先发送再回调：否则日志里的 sent 永远是"没发"（回调读取时还没赋值）
+    if (!this.shadow && action && this.client) record.sent = this.client.chooseAction(action, session.roomId);
     this.suggestions.push(record);
     this.onSuggestion(record);
     this.onRequest(record);
-    if (!this.shadow && action && this.client) record.sent = this.client.chooseAction(action, session.roomId);
     return record;
 };
 
