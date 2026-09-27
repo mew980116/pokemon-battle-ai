@@ -67,6 +67,8 @@ function PSClient(options) {
     this.password = options.password || process.env.PS_PASSWORD || credentials.password || '';
     this.rival = options.rival || process.env.PS_RIVAL || '';
     this.challengeFormat = options.challengeFormat || process.env.PS_CHALLENGE_FORMAT || 'gen8randombattle';
+    // 设了就登录后走天梯匹配（/search），优先于定向挑战（/challenge）
+    this.searchFormat = options.searchFormat || process.env.PS_SEARCH_FORMAT || '';
     this.server = options.server || process.env.PS_SERVER || 'play.pokemonshowdown.com';
     this.wsUrl = options.wsUrl || process.env.PS_WS_URL || 'wss://sim3.psim.us/showdown/websocket';
     this.WebSocket = options.WebSocket || null;
@@ -130,6 +132,13 @@ PSClient.prototype.sendPrivateMessage = function (username, message) {
 PSClient.prototype.joinRoom = function (room) { this.sendGlobal('join ' + room); this.currentRoom = room; };
 PSClient.prototype.challenge = function (username) { this.sendGlobal('challenge ' + username); };
 PSClient.prototype.acceptChallenge = function (username) { this.sendGlobal('accept ' + username); };
+// 天梯匹配：登录同一分级队列，由服务器配到对手（rated，计入排位胜场）
+PSClient.prototype.search = function (format) {
+    if (!format) throw new Error('format is required');
+    this.sendGlobal('search ' + format);
+    return format;
+};
+PSClient.prototype.cancelSearch = function () { this.sendGlobal('cancelsearch'); };
 PSClient.prototype.setShadowMode = function (enabled) { this.shadowMode = !!enabled; };
 
 PSClient.prototype.handleMessage = function (raw) {
@@ -145,7 +154,9 @@ PSClient.prototype.handleMessage = function (raw) {
         this.loggedIn = true;
         this.userId = updateUser[1];
         if (this.onConnection) this.onConnection('loggedIn', { username: updateUser[1] });
-        if (this.rival) {
+        if (this.searchFormat) {
+            this.search(this.searchFormat);
+        } else if (this.rival) {
             this.sendGlobal('challenge ' + this.rival + ', ' + this.challengeFormat);
         }
     }

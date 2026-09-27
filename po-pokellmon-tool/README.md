@@ -267,7 +267,39 @@ node po-pokellmon-tool/server.js
 
 3. 对战内 `/llm on` 开启（或账号 mew's 自动开）。建议用 `/llm shadow` 影子模式先观察 DS 的 tool 调用与决策质量。
 
+## PS 平台（platform/ps）
+
+把同一套决策服务接到 Pokémon Showdown 上（PO 之外的第二个平台）。
+
+1. 先起决策服务：`node po-pokellmon-tool/server.js`（默认 `http://127.0.0.1:8092`）。
+2. 填账号：`platform/ps/ps-credentials.json`（`{"username":"","password":""}`，模板见同目录 `ps-credentials.example.json`）。
+3. 起客户端：
+
+```powershell
+node po-pokellmon-tool/platform/ps/run-shadow.js
+```
+
+环境变量：
+
+| 变量 | 默认 | 说明 |
+|---|---|---|
+| `PS_SEARCH_FORMAT` | 空 | 设了就登录后走**天梯匹配**（`/search <format>`，rated 排位）；设了它就不再定向挑战 |
+| `PS_RIVAL` | `III.Columbina` | 定向挑战的对手（`PS_SEARCH_FORMAT` 未设时生效） |
+| `PS_CHALLENGE_FORMAT` | `gen8randombattle` | 定向挑战的分级 |
+| `PS_SHADOW` | 关 | `1` / `true` 时只输出建议、不发送动作（影子模式） |
+| `PS_SERVER` / `PS_WS_URL` | `play.pokemonshowdown.com` / `sim3.psim.us` | 登录服 / 对战服 |
+| `POKELLMON_TOOL_URL` | `http://127.0.0.1:8092/choice` | 决策服务地址 |
+
+例（打 gen8 Random Battle 天梯，可用来自己双号对排）：
+
+```powershell
+$env:PS_SEARCH_FORMAT="gen8randombattle"
+node po-pokellmon-tool/platform/ps/run-shadow.js
+```
+
+**PS 账号门槛（实测踩过）**：PS 的 `autoconfirmed` 判定 = **注册满 7 天** 且 **赢过 1 场排位**（登录服务器 `ntbb-session.lib.php`；定向挑战是非排位、不计数）。不满足时若 IP 被判为垃圾/代理来源（报错 `spam from your internet provider`），账号会被半锁（身份显示为 `!`），**不能主动挑战、也不能聊天**；天梯匹配与定向挑战是两条路径，受限情况可能不同。协议与决策日志见 `platform/logs/ps-*.jsonl`。
+
 ## 版本管理
 
-- [server.js](server.js) `SERVER_VERSION`、[tools.js](tools.js) 无独立版本号（随 server 记录）
+- [server.js](server.js) `SERVER_VERSION`、[tools.js](tools.js) 与 `platform/ps/*` 无独立版本号（随 server 记录）
 - 改代码后 bump `SERVER_VERSION` + 更新本 README，并 git commit（见仓库根 [CLAUDE.md](../CLAUDE.md) 规范）

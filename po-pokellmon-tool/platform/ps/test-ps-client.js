@@ -46,7 +46,9 @@ return Promise.resolve().then(function () {
     client.sendPrivateMessage('Rival', 'hello');
     client.sendChat('battle-test', 'public hello');
     client.joinRoom('battle-test');
-    assert.deepStrictEqual(socket.sent.slice(1), ['|/challenge Rival', '|/accept Rival', '|/pm Rival, hello', 'battle-test|public hello', '|/join battle-test']);
+    client.search('gen8randombattle');
+    client.cancelSearch();
+    assert.deepStrictEqual(socket.sent.slice(1), ['|/challenge Rival', '|/accept Rival', '|/pm Rival, hello', 'battle-test|public hello', '|/join battle-test', '|/search gen8randombattle', '|/cancelsearch']);
 
     socket.emit('message', 'battle-test\n|player|p1|TestUser|1|\n|request|{"rqid":1,"side":{"id":"p1","pokemon":[{"ident":"p1: Pikachu","details":"Pikachu, L50","condition":"100/100","active":true}]},"active":[{"moves":[{"id":"thunderbolt","move":"Thunderbolt","disabled":false}]}]}');
     assert.ok(client.sessions['battle-test']);
@@ -62,5 +64,23 @@ return Promise.resolve().then(function () {
     assert.strictEqual(client.sessions['battle-test'], undefined);
     assert.deepStrictEqual(ends, ['battle-test']);
     assert.ok(protocols.indexOf('request') !== -1);
-    console.log('PS client tests passed');
+
+    // searchFormat 优先于 rival：登录后应走 /search，而不是 /challenge
+    var searchSocket = new FakeSocket();
+    var searchClient = new clientModule.PSClient({
+        username: 'SearchUser',
+        password: 'not-stored',
+        rival: 'Rival',
+        searchFormat: 'gen8randombattle',
+        shadowMode: true,
+        loginRequest: function () { return Promise.resolve('assertion-search'); }
+    });
+    searchClient.connect(searchSocket);
+    searchSocket.emit('open');
+    searchSocket.emit('message', '|challstr|abc|123');
+    return Promise.resolve().then(function () {
+        searchSocket.emit('message', '|updateuser|SearchUser|1');
+        assert.deepStrictEqual(searchSocket.sent, ['|/trn SearchUser,0,assertion-search', '|/search gen8randombattle']);
+        console.log('PS client tests passed');
+    });
 });
