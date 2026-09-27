@@ -55,3 +55,7 @@ server_scripts/
 
 # PO 数据图片（道具/树果图标，客户端资源，不进 git）
 po-data/**/*.png
+
+# 临时调试脚本（本地草稿，不进 git）
+po-pokellmon-tool/_*.js
+po-pokellmon-tool/test-timeout-server.js
