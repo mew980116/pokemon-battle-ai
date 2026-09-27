@@ -21,8 +21,11 @@ function fakeRequest(options, callback) {
 }
 
 var session = new adapter.BattleSession('battle-bridge');
-session.apply('|player|p1|Alice|1|\n|turn|3\n|switch|p1a: Pikachu|Pikachu, L50|80/100\n|switch|p2a: Garchomp|Garchomp, L50|100/100\n|weather|RainDance');
-var request = { side: { id: 'p1', pokemon: [{ ident: 'p1: Pikachu', details: 'Pikachu, L50', condition: '80/100', active: true }] }, active: [{ moves: [{ id: 'tackle', move: 'Tackle', disabled: false }, { id: 'protect', move: 'Protect', disabled: false }] }] };
+session.apply('|player|p1|Alice|1|\n|player|p2|Bob|2|\n|teamsize|p1|3\n|teamsize|p2|6\n|turn|3\n|switch|p1a: Pikachu|Pikachu, L50|80/100\n|switch|p2a: Garchomp|Garchomp, L50|100/100\n|weather|RainDance');
+var request = { side: { id: 'p1', pokemon: [
+    { ident: 'p1: Pikachu', details: 'Pikachu, L50', condition: '80/100', active: true, item: 'Light Ball', ability: 'Static', stats: { atk: 55, def: 40, spa: 50, spd: 50, spe: 90 } },
+    { ident: 'p1: Charizard', details: 'Charizard, L50', condition: '100/100', active: false, stats: { atk: 84, def: 78, spa: 109, spd: 85, spe: 100 } }
+] }, active: [{ moves: [{ id: 'tackle', move: 'Tackle', disabled: false }, { id: 'protect', move: 'Protect', disabled: false }] }] };
 session.applyRequest(request);
 var actions = adapter.requestActions(request);
 
@@ -38,7 +41,16 @@ return bridge.handleRequest(request, actions, session).then(function (record) {
     assert.strictEqual(state.weather, 'RainDance');
     assert.strictEqual(state.me.moves[1].name, 'Protect');
     assert.strictEqual(state.me.moves.length, 2);   // 招式以 request 为准，不是「用过的」
-    assert.strictEqual(state.bench.length, 0);      // 出战中的那只不能出现在替补席
+    assert.strictEqual(state.bench.length, 1);      // 出战中的那只不能出现在替补席（替补只剩 Charizard）
+    assert.strictEqual(state.bench[0].name, 'Charizard');
+    // 补充字段：等级/属性/道具 + 我方六维(myStats) + 对手剩余只数
+    assert.strictEqual(state.me.level, 50);
+    assert.deepStrictEqual(state.me.types, ['Electric']);
+    assert.strictEqual(state.me.item, 'Light Ball');
+    assert.strictEqual(state.me.hpPct, 80);
+    assert.strictEqual(state.myStats[0].stats.spe, 90);
+    assert.strictEqual(state.myStats[1].name, 'Charizard');
+    assert.strictEqual(state.oppRemaining, 6);      // |teamsize|p2|6，一只都没倒
     assert.strictEqual(record.action.type, 'move');
     assert.strictEqual(record.action.slot, 2);
     assert.strictEqual(sent.length, 0);

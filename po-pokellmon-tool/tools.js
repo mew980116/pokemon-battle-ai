@@ -3194,6 +3194,18 @@ function getMyStats(args, ctx) {
     for (var i = 0; i < myStats.length; i++) {
         var m = myStats[i];
         if (wanted && m.name !== wanted && String(m.slot) !== wanted) continue;
+        // PS 侧：state.myStats 直接带算好的六维（PS 不暴露 randbats 的 EV/性格，按 base+EV 现算会错）→ 原样返回
+        if (m.stats && m.stats.atk !== undefined) {
+            var direct = { slot: m.slot, name: m.name, level: m.level, nature: m.nature, stats: m.stats };
+            var dtm = teamBySlot[String(m.slot)];
+            if (dtm) {
+                direct.hpPct = dtm.hpPct;
+                direct.ko = !!dtm.ko;
+                if (dtm.status) direct.status = dtm.status;
+            }
+            out.push(direct);
+            continue;
+        }
         var p = POKEMON.byNum[String(m.numRef)];
         if (!p && m.name) {
             var nk = POKEMON.byName[String(m.name).toLowerCase()];   // byName 的值是 byNum 的 key（字符串）

@@ -111,6 +111,12 @@ BattleSession.prototype.sideFor = function (side) {
 // 不归一化会被当成两只 → 队伍里出现重复条目、替补席算错
 function normIdent(ident) { return String(ident || '').replace(/^(p[12])[a-z]:/, '$1:'); }
 
+// 从 PS 的 details（"Cresselia, L80, F"）里取等级；没写就是 100（PS 对满级不写 L100）
+function levelFromDetails(details) {
+    var m = String(details || '').match(/L(\d+)/);
+    return m ? Number(m[1]) : 100;
+}
+
 BattleSession.prototype.findPokemon = function (side, name, ident) {
     var want = normIdent(ident);
     var list = side.team;
@@ -125,10 +131,13 @@ BattleSession.prototype.upsertPokemon = function (info, details, hp) {
     if (!side) return null;
     var pokemon = this.findPokemon(side, info.name, info.ident);
     if (!pokemon) {
-        pokemon = { slot: null, ident: info.ident, name: info.name, details: details || info.name, hp: null, status: null, boosts: {}, moves: [], fainted: false };
+        pokemon = { slot: null, ident: info.ident, name: info.name, details: details || info.name, level: levelFromDetails(details), hp: null, status: null, boosts: {}, moves: [], fainted: false };
         side.team.push(pokemon);
     }
-    if (details) pokemon.details = details;
+    if (details) {
+        pokemon.details = details;
+        pokemon.level = levelFromDetails(details);
+    }
     if (hp && hp.raw) pokemon.hp = hp;
     return pokemon;
 };
@@ -149,12 +158,17 @@ BattleSession.prototype.applyRequest = function (request) {
             // 按物种名去重（不能拿 ident 当名字传：那会让先前的 |poke| 条目匹配不上）
             var p = this.findPokemon(side, species, item.ident);
             if (!p) {
-                p = { slot: i + 1, ident: item.ident || null, name: species || null, details: item.details || null, hp: null, status: item.condition || null, boosts: {}, moves: [], fainted: false };
+                p = { slot: i + 1, ident: item.ident || null, name: species || null, details: item.details || null, level: levelFromDetails(item.details), hp: null, status: item.condition || null, boosts: {}, moves: [], fainted: false };
                 side.team.push(p);
             }
             p.slot = i + 1;
             p.name = species || p.name;
             p.details = item.details || p.details;
+            p.level = levelFromDetails(item.details);
+            // request 里带着我方每只的道具/特性/六维（对手的要等战报暴露）
+            if (item.item) p.item = item.item;
+            if (item.ability) p.ability = item.ability;
+            if (item.stats) p.stats = item.stats;
             p.hp = parseHp(item.condition);
             p.status = item.condition && item.condition.indexOf(' ') !== -1 ? item.condition.split(' ')[1] : null;
             p.fainted = p.hp.fainted;
@@ -197,6 +211,19 @@ BattleSession.prototype.applyEvent = function (event) {
         if (pokemon) { pokemon.hp = event.hp; pokemon.fainted = event.hp.fainted; }
     }
     if (event.type === 'status') { pokemon = this.upsertPokemon(event.target, null, null); if (pokemon) pokemon.status = event.status; }
+    // 道具 / 特性暴露：|ability|p1a: X|Moxie|boost、|item|p2a: X|Leftovers、|-enditem|p2a: X|Leftovers|...
+    if (event.type === 'ability' && event.args.length > 1) {
+        pokemon = this.upsertPokemon(parseIdent(event.args[0]), null, null);
+        if (pokemon && event.args[1]) pokemon.ability = event.args[1];
+    }
+    if (event.type === 'item' && event.args.length > 1) {
+        pokemon = this.upsertPokemon(parseIdent(event.args[0]), null, null);
+        if (pokemon && event.args[1]) pokemon.item = event.args[1];
+    }
+    if (event.type === 'enditem') {
+        pokemon = this.upsertPokemon(parseIdent(event.args[0]), null, null);
+        if (pokemon) pokemon.item = null;
+    }
     if (event.type === 'curestatus') { pokemon = this.upsertPokemon(event.target, null, null); if (pokemon) pokemon.status = null; }
     if (event.type === 'boost' || event.type === 'unboost') { pokemon = this.upsertPokemon(event.target, null, null); if (pokemon) pokemon.boosts[event.stat] = (pokemon.boosts[event.stat] || 0) + (event.type === 'boost' ? event.amount : -event.amount); }
     if (event.type === 'weather') this.weather = event.weather;

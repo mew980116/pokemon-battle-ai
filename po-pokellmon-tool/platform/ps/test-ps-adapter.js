@@ -149,4 +149,13 @@ pvSession.applyRequest({ teamPreview: true, side: { id: 'p1', pokemon: [
 ] } });
 assert.strictEqual(pvSession.sides.p1.team.length, 2);
 
+// 等级/道具/特性：等级从 details 取，道具/特性从 |item| / |ability| / |-enditem| 事件记
+var infoSession = new adapter.BattleSession('battle-info');
+infoSession.apply('|player|p2|Bob|\n|switch|p2a: Gyarados|Gyarados, L80, M|100/100\n|ability|p2a: Gyarados|Intimidate|\n|item|p2a: Gyarados|Leftovers');
+assert.strictEqual(infoSession.sides.p2.team[0].level, 80);
+assert.strictEqual(infoSession.sides.p2.team[0].ability, 'Intimidate');
+assert.strictEqual(infoSession.sides.p2.team[0].item, 'Leftovers');
+infoSession.apply('|-enditem|p2a: Gyarados|Leftovers|[from] move: Knock Off');
+assert.strictEqual(infoSession.sides.p2.team[0].item, null);
+
 console.log('PS adapter tests passed');

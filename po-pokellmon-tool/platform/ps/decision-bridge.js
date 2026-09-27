@@ -6,7 +6,30 @@ var url = require('url');
 
 function hpPercent(pokemon) {
     if (!pokemon || !pokemon.hp) return null;
-    return pokemon.hp.percent !== null && pokemon.hp.percent !== undefined ? pokemon.hp.percent : null;
+    var pct = (pokemon.hp.percent !== null && pokemon.hp.percent !== undefined) ? pokemon.hp.percent : null;
+    // 一位小数：别把 90.11406844106465 这种原始浮点丢给 LLM / 看板
+    return pct === null ? null : Math.round(pct * 10) / 10;
+}
+
+// 属性：PS 的协议不给属性，只能查内嵌图鉴（PS 名，取最新世代；与决策服务的 tools.speciesTypes 同源）
+var SPECIES_DEX = null;
+function typesOf(name) {
+    if (!name) return null;
+    try {
+        if (!SPECIES_DEX) {
+            var calc = require('../../vendor/smogon-calc/index.js');
+            var gen = calc.Generations.get(9) || calc.Generations.get(8);
+            SPECIES_DEX = gen.species;
+        }
+        var sp = SPECIES_DEX.get(String(name).toLowerCase().replace(/[^a-z0-9]+/g, ''));
+        if (sp && sp.exists !== false && sp.types && sp.types.length) return sp.types;
+    } catch (e) { /* 查不到就不给 */ }
+    return null;
+}
+
+function levelOf(details) {
+    var m = String(details || '').match(/L(\d+)/);
+    return m ? Number(m[1]) : 100;
 }
 
 function pokemonState(pokemon, reveal) {
@@ -25,6 +48,14 @@ function pokemonState(pokemon, reveal) {
     var boosts = pokemon.boosts || {};
     var keys = Object.keys(boosts);
     for (var i = 0; i < keys.length; i++) if (boosts[keys[i]]) result.boosts.push(keys[i] + (boosts[keys[i]] > 0 ? '+' : '') + boosts[keys[i]]);
+    // 等级/道具/特性/属性：看板要显示，决策服务的 prompt 也用（原来全缺 → prompt 里 Type:?、克制提示空算）
+    if (pokemon.level) result.level = pokemon.level;
+    if (pokemon.item) result.item = pokemon.item;
+    if (pokemon.ability) result.ability = pokemon.ability;
+    if (reveal && pokemon.name) {
+        var types = typesOf(pokemon.name);
+        if (types) result.types = types;
+    }
     if (reveal && pokemon.moves) {
         for (var m = 0; m < pokemon.moves.length; m++) result.moves.push({ name: pokemon.moves[m], type: '?', slot: m + 1 });
     }
@@ -121,6 +152,41 @@ DecisionBridge.prototype.buildState = function (session, request, actions) {
         state.bench.push(mine);
     }
     for (var j = 0; j < (opp.team || []).length; j++) state.oppTeam.push(pokemonState(opp.team[j], true));
+    // 对手道具/特性是「战报已证实」的推断值：决策服务的 from_state 读的是 *Inferred 字段
+    for (var inf = 0; inf < state.oppTeam.length; inf++) {
+        if (state.oppTeam[inf].item) state.oppTeam[inf].itemInferred = state.oppTeam[inf].item;
+        if (state.oppTeam[inf].ability) state.oppTeam[inf].abilityInferred = state.oppTeam[inf].ability;
+    }
+    if (state.opp && state.opp.item) state.opp.itemInferred = state.opp.item;
+    if (state.opp && state.opp.ability) state.opp.abilityInferred = state.opp.ability;
+    // 对手还剩几只（看板要显示）：|teamsize| 给了总数，倒下的必然都已露过面
+    if (opp.teamSize) {
+        var oppFainted = 0;
+        for (var of2 = 0; of2 < (opp.team || []).length; of2++) if (opp.team[of2].fainted) oppFainted++;
+        state.oppRemaining = Math.max(0, opp.teamSize - oppFainted);
+    }
+    // 我方六维：request.side.pokemon[].stats 就是算好的实际能力值（PS 不暴露 randbats 的 EV/性格），
+    // 直接放进 myStats[].stats —— get_my_stats 会原样返回（PO 那边给的是 ev/iv/nature 现算）
+    if (requestTeam) {
+        var statRows = [];
+        for (var sr = 0; sr < requestTeam.length; sr++) {
+            var rpStats = requestTeam[sr];
+            if (!rpStats.stats) continue;
+            var hpMax = String(rpStats.condition || '').match(/^(\d+)\/(\d+)/);
+            statRows.push({
+                slot: sr + 1,
+                name: String(rpStats.details || '').split(',')[0].trim(),
+                level: levelOf(rpStats.details),
+                item: rpStats.item || null,
+                stats: {
+                    hp: hpMax ? Number(hpMax[2]) : undefined,
+                    atk: rpStats.stats.atk, def: rpStats.stats.def,
+                    spa: rpStats.stats.spa, spd: rpStats.stats.spd, spe: rpStats.stats.spe
+                }
+            });
+        }
+        if (statRows.length) state.myStats = statRows;
+    }
     // 当前可出招的招式：以 request 为准（战报事件里只有「用过的招式」，会漏掉没出过手的那几个）
     var reqActive = request && request.active && request.active[0];
     if (reqActive && reqActive.moves) {
@@ -205,9 +271,9 @@ DecisionBridge.prototype.pickLocalAction = function (actions) {
 };
 
 // 「没得选」的请求（PS 的 wait:true）只记一笔，不进决策、不发动作
-function recordSkip(bridge, state, session) {
+function recordSkip(bridge, session) {
     var record = {
-        battleId: session.roomId, turn: session.turn, state: state,
+        battleId: session.roomId, turn: session.turn,
         suggestion: null, action: null, shadow: bridge.shadow, skipped: true
     };
     bridge.suggestions.push(record);
@@ -254,13 +320,13 @@ DecisionBridge.prototype.pickServiceAction = function (suggestion, actions) {
 
 DecisionBridge.prototype.handleRequest = function (request, actions, session) {
     var self = this;
-    var state = this.buildState(session, request, actions);
     // 本次请求没有可选项（PS 的 wait:true「等对手出招」通知等）：不调决策服务 —— 否则白烧一整轮 LLM，
-    // 而且服务给的答案必然不在可选项里（会被退回兜底），纯浪费
+    // 而且服务给的答案必然不在可选项里（会被退回兜底），纯浪费。连 state 都不用算。
     if (!actions || !actions.length) {
-        recordSkip(this, state, session);
+        recordSkip(this, session);
         return Promise.resolve(null);
     }
+    var state = this.buildState(session, request, actions);
     if (this.agent === 'random') {
         var localAction = this.pickLocalAction(actions);
         return Promise.resolve(this.recordResult(state, session, localAction, this.toPSAction(localAction), true));
