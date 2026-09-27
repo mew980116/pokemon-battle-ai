@@ -17,6 +17,37 @@ var url = require('url');
 var fs = require('fs');
 var path = require('path');
 var tools = require('./tools.js');
+
+function readJsonFile(file) {
+    try {
+        var data = JSON.parse(fs.readFileSync(file, 'utf8'));
+        return data && typeof data === 'object' ? data : {};
+    } catch (error) {
+        return {};
+    }
+}
+
+function readLlmConfig() {
+    var config = readJsonFile(path.join(__dirname, 'llm-config.json'));
+    if (config.active && config.profiles && config.profiles[config.active]) {
+        var profile = config.profiles[config.active];
+        var merged = {};
+        var key;
+        for (key in profile) merged[key] = profile[key];
+        if (!merged.api_key && merged.credential && config.credentials) {
+            var credentials = config.credentials;
+            merged.api_key = credentials[merged.credential] || '';
+        }
+        merged.profile = config.active;
+        return merged;
+    }
+    // 兼容旧版单一 Mify 配置文件。
+    var legacy = readJsonFile(path.join(__dirname, 'mify-credentials.json'));
+    if (legacy.provider || legacy.api_key || legacy.model) return legacy;
+    return {};
+}
+
+var LLM = readLlmConfig();
 var ABILITIES = require('./knowledge/abilities.json');
 var ABILITY_SIGNALS = require('./knowledge/ability_signals.json');
 var MOVES = require('./knowledge/moves.json');
@@ -70,14 +101,19 @@ var SERVER_VERSION = '0.8.10';   // tool 分支版本（改动时 bump，随日�
 // ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
 // 对战主脑用 v4-flash：这个场景（超大计算量 + 幻觉高发）里 pro 的"深想"反而被门禁压制，
 // 先读收益被抵消；改回 pro 只需 POKELLMON_MODEL=deepseek-v4-pro
-var MODEL = process.env.POKELLMON_MODEL || 'deepseek-v4-flash';
+var PROVIDER = String(process.env.POKELLMON_PROVIDER || LLM.provider || 'deepseek').toLowerCase();
+var MODEL = process.env.POKELLMON_MODEL || LLM.model || 'deepseek-v4-flash';
+var API_HOST = process.env.POKELLMON_API_HOST || LLM.api_host || (PROVIDER === 'mify' ? 'api.llm.mioffice.cn' : 'api.deepseek.com');
+var API_PATH = process.env.POKELLMON_API_PATH || LLM.api_path || (PROVIDER === 'mify' ? '/v1/chat/completions' : '/chat/completions');
+var REQUEST_OPTIONS = LLM.request_options || {};
 // 思考/模型都可用环境变量覆盖 —— 目的是能同时起多个不同配置的 server 做 A/B 复测
 // （例：`POKELLMON_MODEL=deepseek-v4-flash POKELLMON_THINKING=1 POKELLMON_EFFORT=low POKELLMON_TOOL_PORT=8094 node server.js`）
 // ⚠ 无环境变量时行为与以前完全一致（思考默认关闭）。
-var THINKING_ENABLED = (process.env.POKELLMON_THINKING === '1' || process.env.POKELLMON_THINKING === 'true');
-var REASONING_EFFORT = process.env.POKELLMON_EFFORT || 'low';
+var THINKING_ENABLED = process.env.POKELLMON_THINKING !== undefined ?
+    (process.env.POKELLMON_THINKING === '1' || process.env.POKELLMON_THINKING === 'true') : Boolean(LLM.thinking);
+var REASONING_EFFORT = process.env.POKELLMON_EFFORT || LLM.effort || 'low';
 var FIRST_TURN_THINKING = process.env.POKELLMON_FIRST_THINKING ? (process.env.POKELLMON_FIRST_THINKING === '1') : true;
-var FIRST_TURN_EFFORT = process.env.POKELLMON_FIRST_EFFORT || 'low';
+var FIRST_TURN_EFFORT = process.env.POKELLMON_FIRST_EFFORT || LLM.first_effort || 'low';
 var MAX_TOKENS = null;                  // 不限制输出 token（思考链 + 最终答案）
 var TIMEOUT_MS = 240000;                // 单次请求的硬墙钟上限（不设 max_tokens，8192 是服务端默认）
 var MAX_TOOL_ROUNDS = 35;               // 最多 function calling 轮数，超过则 no-think 收敛（门禁要 predict+验算+可能打回，25 实测会被打满）
@@ -159,7 +195,10 @@ var CHART = TYPECHART.chart;
 var LOG_DIR = path.join(__dirname, 'logs');
 
 function getApiKey() {
-    if (process.env.DEEPSEEK_API_KEY) return process.env.DEEPSEEK_API_KEY;
+    if (PROVIDER === 'mify' && process.env.MIFY_API_KEY) return process.env.MIFY_API_KEY;
+    if (PROVIDER !== 'mify' && process.env.DEEPSEEK_API_KEY) return process.env.DEEPSEEK_API_KEY;
+    if (LLM.api_key) return LLM.api_key;
+    if (PROVIDER === 'mify') return null;
     // 优先本目录 apikey.txt，其次复用 po-pokellmon/apikey.txt
     var candidates = [path.join(__dirname, 'apikey.txt'), path.join(__dirname, '..', 'po-pokellmon', 'apikey.txt')];
     for (var i = 0; i < candidates.length; i++) {
@@ -174,7 +213,7 @@ function getApiKey() {
 function callDeepSeek(messages, noThink, cb, opts) {
     var apiKey = getApiKey();
     if (!apiKey) {
-        cb(new Error('missing DEEPSEEK_API_KEY (set env var or create apikey.txt)'));
+        cb(new Error('missing API key (set ' + (PROVIDER === 'mify' ? 'MIFY_API_KEY' : 'DEEPSEEK_API_KEY') + ' or configure the local credentials file)'));
         return;
     }
     var payloadObj = {
@@ -183,8 +222,16 @@ function callDeepSeek(messages, noThink, cb, opts) {
         stream: false,
         tools: EXPOSED_TOOL_DEFS
     };
-    var mt = MAX_TOKENS;
+    var mt = MAX_TOKENS || REQUEST_OPTIONS.max_tokens;
     if (mt) payloadObj.max_tokens = mt;
+    if (REQUEST_OPTIONS.temperature !== undefined) payloadObj.temperature = REQUEST_OPTIONS.temperature;
+    if (REQUEST_OPTIONS.top_p !== undefined) payloadObj.top_p = REQUEST_OPTIONS.top_p;
+    if (REQUEST_OPTIONS.frequency_penalty !== undefined) payloadObj.frequency_penalty = REQUEST_OPTIONS.frequency_penalty;
+    if (REQUEST_OPTIONS.presence_penalty !== undefined) payloadObj.presence_penalty = REQUEST_OPTIONS.presence_penalty;
+    if (REQUEST_OPTIONS.extra_body && typeof REQUEST_OPTIONS.extra_body === 'object') {
+        var extraKey;
+        for (extraKey in REQUEST_OPTIONS.extra_body) payloadObj[extraKey] = REQUEST_OPTIONS.extra_body[extraKey];
+    }
     // 思考开关：opts 显式指定时优先（首回合 high），否则用全局设置；noThink（重试降级）永远优先
     var thinkOn = (opts && opts.thinking !== undefined) ? opts.thinking : THINKING_ENABLED;
     var effort = (opts && opts.effort !== undefined) ? opts.effort : REASONING_EFFORT;
@@ -196,8 +243,8 @@ function callDeepSeek(messages, noThink, cb, opts) {
     }
     var payload = JSON.stringify(payloadObj);
     var req = https.request({
-        hostname: 'api.deepseek.com',
-        path: '/chat/completions',
+        hostname: API_HOST,
+        path: API_PATH,
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -1022,6 +1069,7 @@ server.listen(PORT, HOST, function () {
     console.log('po-pokellmon-tool server (route 3: thinking + tool)');
     console.log('  health : http://' + HOST + ':' + PORT + '/health');
     console.log('  choice : http://' + HOST + ':' + PORT + '/choice?state=...');
+    console.log('  provider: ' + PROVIDER + (LLM.profile ? ' / profile ' + LLM.profile : ''));
     console.log('  model  : ' + MODEL);
     console.log('  thinking: ' + (THINKING_ENABLED ? 'enabled / ' + REASONING_EFFORT : 'disabled'));
     console.log('  timeout: ' + TIMEOUT_MS + 'ms, max_tool_rounds: ' + MAX_TOOL_ROUNDS);

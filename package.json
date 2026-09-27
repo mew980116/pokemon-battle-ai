@@ -17,7 +17,8 @@
   "license": "MIT",
   "dependencies": {
     "fs": "^0.0.1-security",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "ws": "^8.22.0"
   },
   "devDependencies": {
     "eslint": "^8.57.0",

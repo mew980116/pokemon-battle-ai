@@ -10,6 +10,13 @@ npm-debug.log*
 .env
 .env.local
 
+# PS 本地账号配置（本地凭据，不提交）
+po-pokellmon-tool/platform/ps/ps-credentials.json
+
+# LLM 本地配置（含 API Key，不提交）
+po-pokellmon-tool/llm-config.json
+po-pokellmon-tool/mify-credentials.json
+
 # DeepSeek API key（本地凭据，不提交）
 **/apikey.txt
 

@@ -1,0 +1,61 @@
+{
+  "active": "mify-deepseek-flash",
+  "credentials": {
+    "deepseek": "",
+    "mify": ""
+  },
+  "profiles": {
+    "deepseek-default": {
+      "provider": "deepseek",
+      "api_host": "api.deepseek.com",
+      "api_path": "/chat/completions",
+      "credential": "deepseek",
+      "model": "deepseek-v4-flash",
+      "thinking": false,
+      "effort": "low",
+      "request_options": {
+        "max_tokens": 8192,
+        "temperature": 0.2
+      }
+    },
+    "mify-deepseek-flash": {
+      "provider": "mify",
+      "api_host": "api.llm.mioffice.cn",
+      "api_path": "/v1/chat/completions",
+      "credential": "mify",
+      "model": "deepseek/deepseek-flash",
+      "thinking": false,
+      "effort": "low",
+      "request_options": {
+        "max_tokens": 8192,
+        "temperature": 0.2
+      }
+    },
+    "mify-mimo-v2.6-pro": {
+      "provider": "mify",
+      "api_host": "api.llm.mioffice.cn",
+      "api_path": "/v1/chat/completions",
+      "credential": "mify",
+      "model": "xiaomi/mimo-v2.6-pro",
+      "thinking": false,
+      "effort": "low",
+      "request_options": {
+        "max_tokens": 8192,
+        "temperature": 0.2
+      }
+    },
+    "mify-gpt-6-astra": {
+      "provider": "mify",
+      "api_host": "api.llm.mioffice.cn",
+      "api_path": "/v1/chat/completions",
+      "credential": "mify",
+      "model": "ppio/pa/gpt-6-astra",
+      "thinking": false,
+      "effort": "low",
+      "request_options": {
+        "max_tokens": 8192,
+        "temperature": 0.2
+      }
+    }
+  }
+}
