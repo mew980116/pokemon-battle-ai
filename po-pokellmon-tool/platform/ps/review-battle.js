@@ -40,6 +40,7 @@ var clientFiles = fs.existsSync(clientLogDir)
     : [];
 var transcript = [];
 var seenTurnCount = 0;
+var lastSeen = {};
 clientFiles.forEach(function (f) {
     readJsonl(path.join(clientLogDir, f)).forEach(function (row) {
         if (row.type !== 'protocol' || !row.data || row.data.room !== room) return;
@@ -47,8 +48,11 @@ clientFiles.forEach(function (f) {
         if (!e.type || e.type === 't:' || e.type === 't') return;
         var args = e.args || [];
         var line = '|' + e.type + (args.length ? '|' + args.join('|') : '');
-        // 两个客户端各写一份 → 去掉连续重复
-        if (transcript.length && transcript[transcript.length - 1] === line) return;
+        // 两个客户端各写一份：带参数的事件在 500ms 内重复出现就丢掉（纯标记行如 |request/|upkeep 保留，
+        // 因为同一回合本来就可能有两条 request —— 一条真请求、一条 wait）
+        var ts = Date.parse(row.time) || 0;
+        if (args.length && lastSeen[line] !== undefined && ts - lastSeen[line] < 500) return;
+        lastSeen[line] = ts;
         if (e.type === 'turn') seenTurnCount = Math.max(seenTurnCount, Number(e.turn) || 0);
         transcript.push(line);
     });
