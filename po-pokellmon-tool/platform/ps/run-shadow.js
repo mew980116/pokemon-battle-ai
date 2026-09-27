@@ -89,6 +89,8 @@ var bridge = new bridgeModule.DecisionBridge({
         });
     },
     onRequest: function (entry) {
+        // skip = 没有可选项（等对手出招），没有决策可记
+        if (entry.skipped) { writeLog('decision_skip', { battleId: entry.battleId, turn: entry.turn }); return; }
         writeLog('decision_request', { battleId: entry.battleId, turn: entry.turn, actions: entry.state.actions });
     }
 });

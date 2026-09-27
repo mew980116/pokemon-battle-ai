@@ -44,13 +44,26 @@ return bridge.handleRequest(request, actions, session).then(function (record) {
     assert.strictEqual(sent.length, 0);
 
     bridge.shadow = false;
-    return bridge.handleRequest(request, [], session);
+    return bridge.handleRequest(request, actions, session);
 }).then(function (record) {
     assert.strictEqual(record.shadow, false);
     assert.strictEqual(sent.length, 1);
     assert.deepStrictEqual(sent[0].action, { type: 'move', slot: 2 });
     assert.strictEqual(sent[0].room, 'battle-bridge');
     assert.deepStrictEqual(bridge.toPSAction({ type: 'switch', pokeSlot: 4 }), { type: 'switch', slot: 4 });
+
+    // 没有可选项的请求（PS 的 wait:true）：不调决策服务，否则白烧一整轮 LLM
+    var skipCalls = 0;
+    var skipBridge = new bridgeModule.DecisionBridge({
+        agent: 'llm',
+        shadow: false,
+        request: function () { skipCalls++; throw new Error('没有可选项时不该调决策服务'); }
+    });
+    skipBridge.attachClient({ onRequest: function () {}, chooseAction: function () { return { sent: true }; } });
+    return skipBridge.handleRequest({ wait: true }, [], session).then(function (skipRecord) {
+        assert.strictEqual(skipRecord, null);
+        assert.strictEqual(skipCalls, 0);
+    });
 
     // agent='random'：不请求决策服务，直接发本地随机合法动作
     var localSent = [];

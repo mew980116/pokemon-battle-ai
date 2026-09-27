@@ -148,11 +148,17 @@ DecisionBridge.prototype.buildState = function (session, request, actions) {
     return state;
 };
 
-DecisionBridge.prototype.fetchChoice = function (state) {
+DecisionBridge.prototype.fetchChoiceOnce = function (state) {
     var target = url.parse(this.url);
     var transport = target.protocol === 'https:' ? https : http;
     var query = (target.search ? target.search + '&' : '?') + 'state=' + encodeURIComponent(JSON.stringify(state));
-    var options = { hostname: target.hostname, port: target.port || (target.protocol === 'https:' ? 443 : 80), path: target.pathname + query, method: 'GET' };
+    var options = {
+        hostname: target.hostname,
+        port: target.port || (target.protocol === 'https:' ? 443 : 80),
+        path: target.pathname + query,
+        method: 'GET',
+        agent: false   // 不复用 keep-alive 连接：服务端空闲关连接后再复用会 ECONNRESET
+    };
     var requester = this.request || transport.request;
     return new Promise(function (resolve, reject) {
         var req = requester.call(transport, options, function (res) {
@@ -166,6 +172,15 @@ DecisionBridge.prototype.fetchChoice = function (state) {
         });
         req.on('error', reject);
         req.end();
+    });
+};
+
+DecisionBridge.prototype.fetchChoice = function (state) {
+    var self = this;
+    return this.fetchChoiceOnce(state).catch(function (error) {
+        // 瞬时断连（连接被重置/管道断开）重试一次：不能把一整轮决策直接降级成随机兜底
+        if (!/ECONNRESET|EPIPE/.test(String((error && error.message) || ''))) throw error;
+        return self.fetchChoiceOnce(state);
     });
 };
 
@@ -188,6 +203,16 @@ DecisionBridge.prototype.pickLocalAction = function (actions) {
     if (!actions || !actions.length) return null;
     return actions[Math.floor(Math.random() * actions.length)];
 };
+
+// 「没得选」的请求（PS 的 wait:true）只记一笔，不进决策、不发动作
+function recordSkip(bridge, state, session) {
+    var record = {
+        battleId: session.roomId, turn: session.turn, state: state,
+        suggestion: null, action: null, shadow: bridge.shadow, skipped: true
+    };
+    bridge.suggestions.push(record);
+    bridge.onRequest(record);
+}
 
 DecisionBridge.prototype.recordResult = function (state, session, suggestion, action, fallback) {
     var record = {
@@ -230,6 +255,12 @@ DecisionBridge.prototype.pickServiceAction = function (suggestion, actions) {
 DecisionBridge.prototype.handleRequest = function (request, actions, session) {
     var self = this;
     var state = this.buildState(session, request, actions);
+    // 本次请求没有可选项（PS 的 wait:true「等对手出招」通知等）：不调决策服务 —— 否则白烧一整轮 LLM，
+    // 而且服务给的答案必然不在可选项里（会被退回兜底），纯浪费
+    if (!actions || !actions.length) {
+        recordSkip(this, state, session);
+        return Promise.resolve(null);
+    }
     if (this.agent === 'random') {
         var localAction = this.pickLocalAction(actions);
         return Promise.resolve(this.recordResult(state, session, localAction, this.toPSAction(localAction), true));
