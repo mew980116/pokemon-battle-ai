@@ -87,6 +87,7 @@ function PSClient(options) {
     this.currentRoom = null;
     this.lastActions = {};
     this.requestCommits = {};
+    this.latestRqid = {};
     this.callbacks = options.callbacks || {};
     this.onRequest = options.onRequest || function () {};
     this.onBattleStart = options.onBattleStart || function () {};
@@ -222,6 +223,10 @@ PSClient.prototype.handleBattlePayload = function (room, payload) {
         var event = events[i];
         this.onProtocol(event, room, session);
         if (event.type === 'request') {
+            var incomingRqid = event.request && event.request.rqid;
+            var previousRqid = this.latestRqid[room];
+            if (incomingRqid !== undefined && incomingRqid !== null && previousRqid !== undefined && previousRqid !== null && Number(incomingRqid) < Number(previousRqid)) continue;
+            if (incomingRqid !== undefined && incomingRqid !== null) this.latestRqid[room] = incomingRqid;
             session.applyRequest(event.request);
             var actions = adapter.requestActions(event.request);
             this.lastActions[room] = actions;
@@ -261,6 +266,7 @@ PSClient.prototype.endBattle = function (room, session, event) {
     for (var i = 0; i < keys.length; i++) if (keys[i].indexOf(prefix) === 0) delete this.requestCommits[keys[i]];
     delete this.sessions[room];
     delete this.lastActions[room];
+    delete this.latestRqid[room];
     this.onBattleEnd(session, event, room);
 };
 
