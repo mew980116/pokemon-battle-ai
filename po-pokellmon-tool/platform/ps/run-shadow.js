@@ -34,6 +34,7 @@ var searchFormat = process.env.PS_SEARCH_FORMAT || '';
 var rival = process.env.PS_RIVAL || 'III.Columbina';
 if (rival === 'none' || rival === 'off') rival = '';   // 显式关闭自动挑战：只等别人来挑战（配合 PS_AUTO_ACCEPT 用）
 var challengeFormat = process.env.PS_CHALLENGE_FORMAT || 'gen8randombattle';
+var exitAfterBattle = ['1', 'true', 'yes', 'on'].indexOf(String(process.env.PS_EXIT_AFTER_BATTLE || '').trim().toLowerCase()) !== -1;
 var client = new clientModule.PSClient({
     server: process.env.PS_SERVER,
     wsUrl: process.env.PS_WS_URL,
@@ -47,7 +48,12 @@ var client = new clientModule.PSClient({
         reportDebug(type === 'error' ? 'A' : (type === 'challstr' ? 'C' : 'B'), 'PS connection event: ' + type, data || {});
     },
     onBattleStart: function (session, room) { writeLog('battle_start', { room: room }); },
-    onBattleEnd: function (session, event, room) { writeLog('battle_end', { room: room, event: event }); },
+    onBattleEnd: function (session, event, room) {
+        writeLog('battle_end', { room: room, event: event });
+        if (exitAfterBattle) {
+            setTimeout(function () { client.leaveRoom(room); client.close(); }, 250);
+        }
+    },
     onChallenge: function (from) {
         console.log('[ps challenge] from ' + from + (autoAccept ? ' -> accept' : ' (ignored)'));
         writeLog('challenge', { from: from, autoAccept: autoAccept });

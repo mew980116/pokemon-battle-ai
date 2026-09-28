@@ -1,9 +1,5 @@
 {
   "active": "mify-deepseek-flash",
-  "credentials": {
-    "deepseek": "",
-    "mify": ""
-  },
   "profiles": {
     "deepseek-default": {
       "provider": "deepseek",
@@ -11,7 +7,7 @@
       "api_path": "/chat/completions",
       "credential": "deepseek",
       "model": "deepseek-v4-flash",
-      "thinking": false,
+      "thinking": true,
       "effort": "low",
       "request_options": {
         "max_tokens": 8192,
@@ -24,7 +20,7 @@
       "api_path": "/v1/chat/completions",
       "credential": "mify",
       "model": "deepseek/deepseek-flash",
-      "thinking": false,
+      "thinking": true,
       "effort": "low",
       "request_options": {
         "max_tokens": 8192,

@@ -8,8 +8,8 @@
 param(
     [string]$Format = 'gen8randombattle',
     [ValidateSet('llm', 'random')][string]$AIDecision = 'random',
-    [string]$AIPlayer = 'LocalAlpha',
-    [string]$RivalPlayer = 'LocalBeta',
+    [string]$AIPlayer = 'VII.Sandrone',
+    [string]$RivalPlayer = 'III.Columbina',
     [string]$PSUrl = 'ws://127.0.0.1:8000/showdown/websocket',
     [int]$ServerPort = 8000,
     [switch]$Shadow
@@ -23,15 +23,28 @@ if (-not (Get-NetTCPConnection -LocalPort $ServerPort -State Listen -ErrorAction
 
 function Start-LocalPlayer {
     param([string]$Name, [string]$Rival, [string]$Decision, [switch]$AutoAccept, [switch]$ShadowMode)
-    $env:PS_USERNAME = $Name
-    $env:PS_SKIP_LOGIN = '1'
-    $env:PS_WS_URL = $PSUrl
-    $env:PS_CHALLENGE_FORMAT = $Format
-    $env:PS_DECISION = $Decision
-    $env:PS_RIVAL = if ($Rival) { $Rival } else { 'none' }
-    if ($AutoAccept) { $env:PS_AUTO_ACCEPT = '1' } else { Remove-Item Env:PS_AUTO_ACCEPT -ErrorAction SilentlyContinue }
-    if ($ShadowMode) { $env:PS_SHADOW = '1' } else { Remove-Item Env:PS_SHADOW -ErrorAction SilentlyContinue }
-    Start-Process -FilePath 'node' -ArgumentList 'platform/ps/run-shadow.js' -WorkingDirectory $clientRoot
+    $childEnv = @{}
+    foreach ($key in [System.Environment]::GetEnvironmentVariables().Keys) {
+        $childEnv[[string]$key] = [string][System.Environment]::GetEnvironmentVariable([string]$key)
+    }
+    $childEnv['PS_USERNAME'] = $Name
+    $childEnv['PS_SKIP_LOGIN'] = '1'
+    $childEnv['PS_WS_URL'] = $PSUrl
+    $childEnv['PS_CHALLENGE_FORMAT'] = $Format
+    $childEnv['PS_DECISION'] = $Decision
+    $childEnv['PS_RIVAL'] = if ($Rival) { $Rival } else { 'none' }
+    $childEnv['PS_EXIT_AFTER_BATTLE'] = '1'
+    if ($AutoAccept) { $childEnv['PS_AUTO_ACCEPT'] = '1' } else { $childEnv.Remove('PS_AUTO_ACCEPT') }
+    if ($ShadowMode) { $childEnv['PS_SHADOW'] = '1' } else { $childEnv['PS_SHADOW'] = '0' }
+    $startInfo = New-Object System.Diagnostics.ProcessStartInfo
+    $startInfo.FileName = 'node'
+    $startInfo.Arguments = 'platform/ps/run-shadow.js'
+    $startInfo.WorkingDirectory = $clientRoot
+    $startInfo.UseShellExecute = $false
+    foreach ($key in $childEnv.Keys) {
+        if ($null -ne $childEnv[$key]) { $startInfo.Environment[$key] = $childEnv[$key] }
+    }
+    [System.Diagnostics.Process]::Start($startInfo) | Out-Null
 }
 
 Write-Host "陪练 $RivalPlayer 先起（自动接受挑战、随机出招）..."

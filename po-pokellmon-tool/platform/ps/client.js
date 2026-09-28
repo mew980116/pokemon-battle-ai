@@ -86,6 +86,7 @@ function PSClient(options) {
     this.sessions = {};
     this.currentRoom = null;
     this.lastActions = {};
+    this.requestCommits = {};
     this.callbacks = options.callbacks || {};
     this.onRequest = options.onRequest || function () {};
     this.onBattleStart = options.onBattleStart || function () {};
@@ -137,6 +138,8 @@ PSClient.prototype.sendPrivateMessage = function (username, message) {
     this.sendGlobal('pm ' + username + ', ' + String(message).replace(/[\r\n]+/g, ' '));
 };
 PSClient.prototype.joinRoom = function (room) { this.sendGlobal('join ' + room); this.currentRoom = room; };
+PSClient.prototype.leaveRoom = function (room) { room = room || this.currentRoom; if (room) this.sendGlobal('leave ' + room); if (room === this.currentRoom) this.currentRoom = null; };
+PSClient.prototype.close = function () { if (this.socket && typeof this.socket.close === 'function') this.socket.close(); };
 PSClient.prototype.challenge = function (username) { this.sendGlobal('challenge ' + username); };
 PSClient.prototype.acceptChallenge = function (username) { this.sendGlobal('accept ' + username); };
 // 天梯匹配：登录同一分级队列，由服务器配到对手（rated，计入排位胜场）
@@ -222,27 +225,40 @@ PSClient.prototype.handleBattlePayload = function (room, payload) {
             session.applyRequest(event.request);
             var actions = adapter.requestActions(event.request);
             this.lastActions[room] = actions;
-            this.onRequest(event.request, actions, session);
+            this.onRequest(event.request, actions, session, room);
         } else session.applyEvent(event);
         if (event.type === 'win' || event.type === 'tie' || event.type === 'deinit') this.endBattle(room, session, event);
     }
 };
 
-PSClient.prototype.chooseAction = function (action, room) {
+PSClient.prototype.chooseAction = function (action, room, rqid, metadata) {
     room = room || this.currentRoom;
+    if (rqid && typeof rqid === 'object') {
+        metadata = rqid;
+        rqid = metadata.rqid;
+    }
+    metadata = metadata || {};
     var session = room ? this.sessions[room] : null;
     var command = typeof action === 'string' ? action : adapter.actionToCommand(action);
     if (!command) throw new Error('Unsupported PS action');
-    if (this.shadowMode) {
-        if (session) session.lastChosenAction = action;
-        return { sent: false, command: command, action: action, room: room };
+    var requestKey = metadata.requestKey || (rqid !== undefined && rqid !== null ? room + ':' + rqid : null);
+    if (requestKey && this.requestCommits[requestKey]) return this.requestCommits[requestKey];
+    var result = { sent: false, command: command, action: action, room: room };
+    if (rqid !== undefined && rqid !== null) result.rqid = rqid;
+    if (Object.keys(metadata).length) result.metadata = metadata;
+    if (!this.shadowMode) {
+        this.sendRoom(room, command.slice(1));
+        result.sent = true;
     }
-    this.sendRoom(room, command.slice(1));
     if (session) session.lastChosenAction = action;
-    return { sent: true, command: command, action: action, room: room };
+    if (requestKey) this.requestCommits[requestKey] = result;
+    return result;
 };
 
 PSClient.prototype.endBattle = function (room, session, event) {
+    var prefix = room + ':';
+    var keys = Object.keys(this.requestCommits);
+    for (var i = 0; i < keys.length; i++) if (keys[i].indexOf(prefix) === 0) delete this.requestCommits[keys[i]];
     delete this.sessions[room];
     delete this.lastActions[room];
     this.onBattleEnd(session, event, room);

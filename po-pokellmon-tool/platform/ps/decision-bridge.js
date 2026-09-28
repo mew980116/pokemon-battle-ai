@@ -44,6 +44,18 @@ function levelOf(details) {
     return m ? Number(m[1]) : 100;
 }
 
+function detectFormat(request, session) {
+    var format = request && (request.format || request.formatid || request.ruleset);
+    if (!format && session) format = session.format || session.formatid;
+    return format ? String(format) : null;
+}
+function detectGen(request, session, format) {
+    var value = request && (request.gen || request.generation);
+    if (value === undefined && session) value = session.gen || session.generation;
+    var m = String(value || format || '').toLowerCase().match(/(?:gen|generation)[-_ ]?(\d+)/);
+    return m ? Number(m[1]) : null;
+}
+
 function pokemonState(pokemon, reveal) {
     if (!pokemon) return null;
     var result = {
@@ -102,6 +114,9 @@ function DecisionBridge(options) {
     this.onRequest = options.onRequest || function () {};
     this.onSuggestion = options.onSuggestion || function () {};
     this.suggestions = [];
+    this.jobs = {};
+    this.activeByBattle = {};
+    this.endedBattles = {};
 }
 
 DecisionBridge.prototype.attachClient = function (client) {
@@ -114,6 +129,11 @@ DecisionBridge.prototype.attachClient = function (client) {
             self.onSuggestion({ error: error.message, room: session && session.roomId });
         });
     };
+    var previousEnd = client.onBattleEnd;
+    client.onBattleEnd = function (session, event, room) {
+        self.endBattle(session && session.roomId || room);
+        if (previousEnd) previousEnd(session, event, room);
+    };
     return this;
 };
 
@@ -124,11 +144,15 @@ DecisionBridge.prototype.buildState = function (session, request, actions) {
     var opp = session.sides[oppSide] || { team: [] };
     var activeMe = me.active || (me.team && me.team[0]);
     var activeOpp = opp.active || (opp.team && opp.team[0]);
+    var format = detectFormat(request, session);
+    var detectedGen = detectGen(request, session, format);
     var state = {
+        platform: 'ps',
         turn: session.turn,
         battleId: session.roomId,
-        gen: 8,
-        format: 'gen8 singles',
+        gen: detectedGen || undefined,
+        format: format || undefined,
+        rqid: request && request.rqid !== undefined ? request.rqid : undefined,
         history: session.history.map(eventText),
         fullHistory: session.history.map(eventText),
         weather: session.weather || null,
@@ -190,6 +214,7 @@ DecisionBridge.prototype.buildState = function (session, request, actions) {
             var hpMax = String(rpStats.condition || '').match(/^(\d+)\/(\d+)/);
             statRows.push({
                 slot: sr + 1,
+                legacySlot: sr,
                 name: String(rpStats.details || '').split(',')[0].trim(),
                 level: levelOf(rpStats.details),
                 item: rpStats.item || null,
@@ -197,7 +222,10 @@ DecisionBridge.prototype.buildState = function (session, request, actions) {
                     hp: hpMax ? Number(hpMax[2]) : undefined,
                     atk: rpStats.stats.atk, def: rpStats.stats.def,
                     spa: rpStats.stats.spa, spd: rpStats.stats.spd, spe: rpStats.stats.spe
-                }
+                },
+                hp: hpMax ? Number(hpMax[2]) : undefined,
+                atk: rpStats.stats.atk, def: rpStats.stats.def,
+                spa: rpStats.stats.spa, spd: rpStats.stats.spd, spe: rpStats.stats.spe
             });
         }
         if (statRows.length) state.myStats = statRows;
@@ -229,7 +257,7 @@ DecisionBridge.prototype.buildState = function (session, request, actions) {
     return state;
 };
 
-DecisionBridge.prototype.fetchChoiceOnce = function (state) {
+DecisionBridge.prototype.fetchChoiceOnce = function (state, job) {
     var target = url.parse(this.url);
     var transport = target.protocol === 'https:' ? https : http;
     var query = (target.search ? target.search + '&' : '?') + 'state=' + encodeURIComponent(JSON.stringify(state));
@@ -251,17 +279,22 @@ DecisionBridge.prototype.fetchChoiceOnce = function (state) {
                 try { resolve(JSON.parse(body)); } catch (error) { reject(new Error('decision service returned invalid JSON')); }
             });
         });
-        req.on('error', reject);
+        if (job) job.req = req;
+        req.on('error', function (error) {
+            if (job && job.cancelled) return reject(error);
+            reject(error);
+        });
         req.end();
     });
 };
 
-DecisionBridge.prototype.fetchChoice = function (state) {
+DecisionBridge.prototype.fetchChoice = function (state, job) {
     var self = this;
-    return this.fetchChoiceOnce(state).catch(function (error) {
+    return this.fetchChoiceOnce(state, job).catch(function (error) {
+        if (job && job.cancelled) throw error;
         // 瞬时断连（连接被重置/管道断开）重试一次：不能把一整轮决策直接降级成随机兜底
         if (!/ECONNRESET|EPIPE/.test(String((error && error.message) || ''))) throw error;
-        return self.fetchChoiceOnce(state);
+        return self.fetchChoiceOnce(state, job);
     });
 };
 
@@ -295,14 +328,41 @@ function recordSkip(bridge, session) {
     bridge.onRequest(record);
 }
 
-DecisionBridge.prototype.recordResult = function (state, session, suggestion, action, fallback) {
+DecisionBridge.prototype.requestKey = function (request, session) {
+    if (!request || request.rqid === undefined || request.rqid === null) return null;
+    return String(session && session.roomId || '') + ':' + String(request.rqid);
+};
+
+DecisionBridge.prototype.endBattle = function (battleId) {
+    if (!battleId) return;
+    this.endedBattles[battleId] = true;
+    var active = this.activeByBattle[battleId];
+    if (active && active.req && typeof active.req.destroy === 'function') {
+        active.cancelled = true;
+        try { active.req.destroy(); } catch (error) {}
+    }
+    delete this.activeByBattle[battleId];
+};
+
+DecisionBridge.prototype.commitResult = function (request, session, state, suggestion, action, fallback) {
+    var key = this.requestKey(request, session);
+    if (key && this.jobs[key] && this.jobs[key].committed) return this.jobs[key].record;
+    var record = this.recordResult(state, session, suggestion, action, fallback, request);
+    if (key && this.jobs[key]) {
+        this.jobs[key].committed = true;
+        this.jobs[key].record = record;
+    }
+    return record;
+};
+
+DecisionBridge.prototype.recordResult = function (state, session, suggestion, action, fallback, request) {
     var record = {
         battleId: session.roomId, turn: session.turn, state: state,
         suggestion: suggestion, action: action, shadow: this.shadow
     };
     if (fallback) record.fallback = true;
     // 先发送再回调：否则日志里的 sent 永远是"没发"（回调读取时还没赋值）
-    if (!this.shadow && action && this.client) record.sent = this.client.chooseAction(action, session.roomId);
+    if (!this.shadow && action && this.client) record.sent = this.client.chooseAction(action, session.roomId, request && request.rqid, { requestKey: this.requestKey(request, session) });
     this.suggestions.push(record);
     this.onSuggestion(record);
     this.onRequest(record);
@@ -335,28 +395,46 @@ DecisionBridge.prototype.pickServiceAction = function (suggestion, actions) {
 
 DecisionBridge.prototype.handleRequest = function (request, actions, session) {
     var self = this;
+    var key = this.requestKey(request, session);
+    var previous = this.activeByBattle[session.roomId];
+    if (this.endedBattles[session.roomId]) return Promise.resolve(null);
+    if (key && this.jobs[key]) return this.jobs[key].promise;
+    if (previous && key && previous.key !== key && previous.req && typeof previous.req.destroy === 'function') {
+        previous.cancelled = true;
+        try { previous.req.destroy(); } catch (error) {}
+    }
+    var job = this.jobs[key] = { key: key, committed: false, req: null };
+    this.activeByBattle[session.roomId] = job;
+    job.promise = this._handleRequest(request, actions, session, job);
+    return job.promise;
+};
+
+DecisionBridge.prototype._handleRequest = function (request, actions, session, job) {
+    var self = this;
     // 本次请求没有可选项（PS 的 wait:true「等对手出招」通知等）：不调决策服务 —— 否则白烧一整轮 LLM，
     // 而且服务给的答案必然不在可选项里（会被退回兜底），纯浪费。连 state 都不用算。
     if (!actions || !actions.length) {
         recordSkip(this, session);
+        job.committed = true;
         return Promise.resolve(null);
     }
     var state = this.buildState(session, request, actions);
     if (this.agent === 'random') {
         var localAction = this.pickLocalAction(actions);
-        return Promise.resolve(this.recordResult(state, session, localAction, this.toPSAction(localAction), true));
+        return Promise.resolve(this.commitResult(request, session, state, localAction, this.toPSAction(localAction), true));
     }
-    return this.fetchChoice(state).then(function (suggestion) {
+    return this.fetchChoice(state, job).then(function (suggestion) {
+        if (job.cancelled || self.endedBattles[session.roomId] || self.activeByBattle[session.roomId] !== job) return null;
         var action = self.pickServiceAction(suggestion, actions);
-        // 服务有响应但翻不成动作、或动作不在可选项里（如 team preview 却给了招式）：退回本地，避免卡住
-        if (action) return self.recordResult(state, session, suggestion, action);
+        if (action) return self.commitResult(request, session, state, suggestion, action);
         var fallbackAction = self.pickLocalAction(actions);
-        return self.recordResult(state, session, suggestion, self.toPSAction(fallbackAction), true);
+        return self.commitResult(request, session, state, suggestion, self.toPSAction(fallbackAction), true);
     }).catch(function (error) {
+        if (job.cancelled || self.endedBattles[session.roomId] || self.activeByBattle[session.roomId] !== job) return null;
         self.onSuggestion({ error: error.message, room: session && session.roomId });
         var fallbackAction = self.pickLocalAction(actions);
         if (!fallbackAction) return null;
-        return self.recordResult(state, session, fallbackAction, self.toPSAction(fallbackAction), true);
+        return self.commitResult(request, session, state, fallbackAction, self.toPSAction(fallbackAction), true);
     });
 };
 

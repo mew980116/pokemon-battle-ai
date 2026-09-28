@@ -19,7 +19,8 @@ var HOST = '127.0.0.1';
 var VIEW_DIR = __dirname;
 var LOG_DIRS = [
     path.join(__dirname, '..', 'po-pokellmon', 'logs'),
-    path.join(__dirname, '..', 'po-pokellmon-tool', 'logs')
+    path.join(__dirname, '..', 'po-pokellmon-tool', 'logs'),
+    path.join(__dirname, '..', 'po-pokellmon-tool', 'platform', 'logs')
 ];
 
 // 实时推送：po-pokellmon server 写日志时 POST /push，这里 SSE 广播给浏览器
@@ -56,7 +57,9 @@ var STAT_LIMIT = 24;           // 并发池：串行 220 个 stat ≈ 37s，24 �
 function scanDir(dir, cb) {
     fs.readdir(dir, function (err, names) {
         if (err) return cb([]);
-        var files = names.filter(function (n) { return n.indexOf('.log') !== -1; });
+        var files = names.filter(function (n) {
+            return path.extname(n).toLowerCase() === '.log' || path.extname(n).toLowerCase() === '.jsonl';
+        });
         if (!files.length) return cb([]);
         var out = [], started = 0, done = 0;
         function launch(name) {
@@ -115,6 +118,53 @@ function resolveLogFile(file, cb) {
 var battleCache = {}, battleCacheKeys = [];
 var BATTLE_CACHE_MAX = 3;
 
+function protocolHistory(entry) {
+    var data = entry && entry.data || {};
+    var event = data.event || {};
+    var raw = typeof event.raw === 'string' ? event.raw : '';
+    var first = raw.split(/\r?\n/).filter(function (line) { return line; })[0];
+    var text = first || event.type || data.room || 'protocol';
+    if (text.length > 240) text = text.substring(0, 240) + '…';
+    return (data.room ? data.room + ': ' : '') + text;
+}
+
+function psBattle(entries) {
+    var history = [], requests = {}, out = [];
+    entries.forEach(function (entry) {
+        if (entry.type === 'protocol') {
+            history.push(protocolHistory(entry));
+            if (history.length > 200) history.shift();
+        }
+        if (entry.type === 'decision_request' && entry.data) {
+            requests[entry.data.battleId] = entry.data.actions || [];
+        }
+        if (entry.type !== 'decision' || !entry.data) return;
+        var d = entry.data;
+        var actions = requests[d.battleId] || [];
+        out.push({
+            time: entry.time,
+            turn: d.turn,
+            state: {
+                battleId: d.battleId,
+                history: history.slice(),
+                me: {},
+                opp: {},
+                myTeam: [],
+                oppTeam: [],
+                bench: [],
+                actions: actions,
+                oppRemaining: null
+            },
+            action: d.action || null,
+            suggestion: d.suggestion || null,
+            fallback: !!d.fallback,
+            reply: d.sent && (d.sent.command || d.sent.reply) || d.reply || '',
+            sent: d.sent || null
+        });
+    });
+    return out;
+}
+
 function readBattle(file, cb) {
     resolveLogFile(file, function (p, st) {
         if (!p) return cb(null, null);
@@ -127,6 +177,9 @@ function readBattle(file, cb) {
                 if (!l.trim()) return;
                 try { out.push(JSON.parse(l)); } catch (x) {}
             });
+            if (path.extname(p).toLowerCase() === '.jsonl' && path.basename(p).indexOf('ps-') === 0) {
+                out = psBattle(out);
+            }
             battleCache[key] = out;
             battleCacheKeys.push(key);
             while (battleCacheKeys.length > BATTLE_CACHE_MAX) delete battleCache[battleCacheKeys.shift()];

@@ -22,7 +22,7 @@ function fakeRequest(options, callback) {
 
 var session = new adapter.BattleSession('battle-bridge');
 session.apply('|player|p1|Alice|1|\n|player|p2|Bob|2|\n|teamsize|p1|3\n|teamsize|p2|6\n|turn|3\n|switch|p1a: Pikachu|Pikachu, L50|80/100\n|switch|p2a: Garchomp|Garchomp, L50|100/100\n|weather|RainDance');
-var request = { side: { id: 'p1', pokemon: [
+var request = { rqid: 17, formatid: 'gen8randombattle', side: { id: 'p1', pokemon: [
     { ident: 'p1: Pikachu', details: 'Pikachu, L50', condition: '80/100', active: true, item: 'Light Ball', ability: 'Static', stats: { atk: 55, def: 40, spa: 50, spd: 50, spe: 90 } },
     { ident: 'p1: Charizard', details: 'Charizard, L50', condition: '100/100', active: false, stats: { atk: 84, def: 78, spa: 109, spd: 85, spe: 100 } }
 ] }, active: [{ moves: [{ id: 'tackle', move: 'Tackle', disabled: false }, { id: 'protect', move: 'Protect', disabled: false }] }] };
@@ -38,6 +38,10 @@ return bridge.handleRequest(request, actions, session).then(function (record) {
     var state = record.state;
     assert.strictEqual(state.turn, 3);
     assert.strictEqual(state.battleId, 'battle-bridge');
+    assert.strictEqual(state.platform, 'ps');
+    assert.strictEqual(state.rqid, 17);
+    assert.strictEqual(state.gen, 8);
+    assert.strictEqual(state.format, 'gen8randombattle');
     assert.strictEqual(state.weather, 'RainDance');
     assert.strictEqual(state.me.moves[1].name, 'Protect');
     assert.strictEqual(state.me.moves.length, 2);   // 招式以 request 为准，不是「用过的」
@@ -56,7 +60,8 @@ return bridge.handleRequest(request, actions, session).then(function (record) {
     assert.strictEqual(sent.length, 0);
 
     bridge.shadow = false;
-    return bridge.handleRequest(request, actions, session);
+    var nextRequest = Object.assign({}, request, { rqid: 18 });
+    return bridge.handleRequest(nextRequest, actions, session);
 }).then(function (record) {
     assert.strictEqual(record.shadow, false);
     assert.strictEqual(sent.length, 1);

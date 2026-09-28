@@ -34,8 +34,8 @@ function readLlmConfig() {
         var merged = {};
         var key;
         for (key in profile) merged[key] = profile[key];
-        if (!merged.api_key && merged.credential && config.credentials) {
-            var credentials = config.credentials;
+        if (!merged.api_key && merged.credential) {
+            var credentials = readJsonFile(path.join(__dirname, 'llm-credentials.json'));
             merged.api_key = credentials[merged.credential] || '';
         }
         merged.profile = config.active;
@@ -121,13 +121,11 @@ var MAX_TOOL_ROUNDS = 35;               // 最多 function calling 轮数，超�
 // 2026-09-20 统计（当前架构 battle93-98，n=137）：中位 36s、平均 54s，>120s 只有 5%（7 个，且都是最难/轮数最多的回合）。
 // 之前是 0（禁用），结果 battle98 T11 跑了 663s 才结束 —— 单请求超时管不到整回合，必须有这道闸。
 var MAX_TURN_MS = 120000;
-// 首回合（唯一开思考的回合，FIRST_TURN_THINKING）单独放宽：实测 battle91-98 的 T0 最坏已到 118s（battle98），
-// 贴着 120s 上限，不放宽的话开局决策会经常被兜底砍掉。
-var MAX_TURN_MS_T0 = 180000;
+// 首回合（唯一开思考的回合，FIRST_TURN_THINKING）与普通回合使用相同的 120s 上限。
+var MAX_TURN_MS_T0 = 120000;
 // 本回合的绝对截止时刻（0=不限）。callDeepSeek 用它把单请求硬超时压成 min(TIMEOUT_MS, 剩余预算)，
 // 这样"超时后重试 3 次"也不会把整回合撑爆（否则最坏 3×240s）。
-var TURN_DEADLINE = 0;
-var dsRequests = 0;                     // 本回合已发出的 DeepSeek 请求数（含重试），写进日志
+// 每个 handleChoice 请求拥有独立的 deadline/请求计数，禁止并发回合互相覆盖。
 var RETRY_DELAYS = [2000, 5000, 10000]; // 单次请求失败后的重试延迟：第1次2s、第2次5s、第3次10s（第3次降级 no think），再失败 fallback
 
 // 「首回合」判据：优先用 script 送的 firstDecision（script 0.6.28+，与 PO 回合号解耦），
@@ -220,7 +218,7 @@ function callDeepSeek(messages, noThink, cb, opts) {
         model: MODEL,
         messages: messages,
         stream: false,
-        tools: EXPOSED_TOOL_DEFS
+        tools: (opts && opts.allowTools === false) ? [] : EXPOSED_TOOL_DEFS
     };
     var mt = MAX_TOKENS || REQUEST_OPTIONS.max_tokens;
     if (mt) payloadObj.max_tokens = mt;
@@ -262,7 +260,8 @@ function callDeepSeek(messages, noThink, cb, opts) {
     // 面板停在「实时 503s 思考中」）。所以必须再压一个**硬墙钟 deadline**，并保证回调只发生一次。
     // 而且这个硬超时取 min(TIMEOUT_MS, 本回合剩余预算) —— 否则"超时后重试 3 次"最坏会把整回合撑到 3×240s。
     var timeoutMs = TIMEOUT_MS;
-    if (TURN_DEADLINE > 0) timeoutMs = Math.max(1000, Math.min(TIMEOUT_MS, TURN_DEADLINE - Date.now()));
+    var deadline = opts && opts.deadline ? opts.deadline : 0;
+    if (deadline > 0) timeoutMs = Math.max(1000, Math.min(TIMEOUT_MS, deadline - Date.now()));
     var settled = false;
     function done(err, code, d) {
         if (settled) return;
@@ -271,7 +270,7 @@ function callDeepSeek(messages, noThink, cb, opts) {
         cb(err, code, d);
     }
     var hardTimer = setTimeout(function () {
-        req.destroy(new Error('deepseek hard timeout (' + timeoutMs + 'ms' + (TURN_DEADLINE > 0 ? ', turn deadline clamped' : '') + ')'));
+        req.destroy(new Error('deepseek hard timeout (' + timeoutMs + 'ms' + (deadline > 0 ? ', deadline clamped' : '') + ')'));
     }, timeoutMs);
     req.setTimeout(timeoutMs, function () {
         req.destroy(new Error('deepseek idle timeout'));
@@ -836,8 +835,15 @@ function handleChoice(res, state) {
     ];
     var rounds = 0;
     var startTime = Date.now();
-    TURN_DEADLINE = turnCapMs(state) > 0 ? (startTime + turnCapMs(state)) : 0;   // callDeepSeek 用它压单请求硬超时
-    dsRequests = 0;                                                   // 本回合实际发出的 DeepSeek 请求数（含重试），写进日志便于查"重试链吃掉了多少时间"
+    var requestState = {
+        phase: 'initial',
+        deadlinePhase: 'initial',
+        deadline: turnCapMs(state) > 0 ? (startTime + turnCapMs(state)) : 0,
+        requests: 0,
+        retryUsed: false,
+        retryReason: '',
+        fallbackReason: ''
+    };
     var toolLog = [];        // 记录每轮 tool 调用
     var lastUsage = null;
     var lastReply = '';
@@ -860,8 +866,11 @@ function handleChoice(res, state) {
             toolLog: toolLog,
             usage: lastUsage,
             fallback: !!action.fallback,
-            fallbackReason: action.fallback ? (action.reason || '?') : '',   // 之前只记 `true`，看不出是 parse_failed / error / budget_exhausted
-            dsRequests: dsRequests,                                          // 本回合发出的 DeepSeek 请求数（含重试）—— 用于查"重试链吃掉了多少时间"
+            dsRequests: requestState.requests,
+            deadlinePhase: requestState.deadlinePhase,
+            deadlineRetryUsed: requestState.retryUsed,
+            fallbackReason: action.fallback ? (action.reason || requestState.fallbackReason || '?') : '',
+            retryReason: requestState.retryReason || '',
             gateUnmet: !!action.gateUnmet,
             gateBypassed: gateBypassed,
             ledger: ledger,
@@ -873,7 +882,11 @@ function handleChoice(res, state) {
         });
     }
 
+    var responded = false;
     function respond(action, reply) {
+        if (responded) return;
+        responded = true;
+        requestState.fallbackReason = action.fallback ? (action.reason || 'fallback') : '';
         console.log('[choice] => ' + JSON.stringify(action) + (action.fallback ? ' (FALLBACK)' : '') + ' rounds=' + rounds);
         logEntry(reply, action);
         res.setHeader('Access-Control-Allow-Origin', '*');
@@ -884,8 +897,30 @@ function handleChoice(res, state) {
 
     function loop() {
         rounds++;
-        // 快到点：剩余预算不够再跑一轮 tool，直接 no-think 收尾（messages 已含前面所有 tool 结果）
+        // 第一阶段到点后切换到独立的最终答案阶段；该阶段复用 messages，但禁止思考和 tool calls。
+        if (requestState.phase === 'initial' && requestState.deadline > 0 && Date.now() >= requestState.deadline) {
+            console.log('[choice] turn=' + state.turn + ' deadlinePhase=initial hit, final JSON phase starts');
+            requestState.phase = 'final';
+            requestState.deadlinePhase = 'final';
+            requestState.deadline = Date.now() + 120000;
+            requestState.finalStarted = true;
+            if (ENABLE_PREDICT_GATE && ledger) gateBypassed = true;
+            finalizeNoThink('initial_deadline');
+            return;
+        }
+        // 最终阶段预算耗尽只能 fallback；不能再发第二个最终请求。
+        if (requestState.phase === 'final' && requestState.deadline > 0 && Date.now() >= requestState.deadline) {
+            respond(fallbackAction(state, 'final_deadline_exceeded'), 'ERROR: final JSON deadline exceeded');
+            return;
+        }
+        // 快到首阶段截止时间：由上面的分支进入 final no-think 收尾。
         var capMs = turnCapMs(state);
+        if (requestState.phase === 'initial' && capMs > 0 && (Date.now() - startTime) >= capMs) {
+            requestState.deadline = Date.now();
+            loop();
+            return;
+        }
+        if (requestState.phase === 'final') return;
         if (capMs > 0 && (Date.now() - startTime) >= capMs) {
             console.log('[choice] turn=' + state.turn + ' deadline ' + capMs + 'ms hit, final no-think');
             // 这条路径**绕过**最终答案层的门禁（它不经过 actionGateCheck）—— 如实标记，便于统计"有多少决策是被兜底放过的"
@@ -905,7 +940,8 @@ function handleChoice(res, state) {
     // 本轮工作暂存（worklog）：LLM 用 update_worklog 覆盖写入；每次请求把它注入 system，
     // 使它在本次决策的后续所有 tool 轮次里始终可见，且不会随轮数累积膨胀。
     var worklog = '';
-    function callDS(noThink, cb) {
+    function callDS(noThink, cb, options) {
+        options = options || {};
         var msgs = messages;
         if (ENABLE_WORKLOG && worklog) {
             msgs = messages.slice();
@@ -914,13 +950,24 @@ function handleChoice(res, state) {
                 content: SYSTEM_PROMPT + '\n\n[WORKLOG — your working state for this turn; refresh it with update_worklog as you progress]\n' + worklog
             };
         }
-        callDeepSeek(msgs, noThink, cb, turnThinkingOpts);
+        var callOpts = {
+            thinking: options.thinking !== undefined ? options.thinking : (turnThinkingOpts ? turnThinkingOpts.thinking : undefined),
+            effort: options.effort !== undefined ? options.effort : (turnThinkingOpts ? turnThinkingOpts.effort : undefined),
+            allowTools: requestState.phase !== 'final' && options.allowTools !== false,
+            deadline: requestState.deadline
+        };
+        callDeepSeek(msgs, noThink, cb, callOpts);
     }
 
     // 最后兜底：关思考（no-think）快速要一个答案，不再继续 tool loop
     // reasonTag 用于区分触发路径（超时 / 工具轮次用尽），写进 fallback 的 reason 便于复盘
     function finalizeNoThink(reasonTag) {
         var tag = reasonTag || 'timeout';
+        requestState.phase = 'final';
+        requestState.deadlinePhase = 'final';
+        requestState.deadline = Date.now() + 120000;
+        requestState.finalStarted = true;
+        messages.push({ role: 'user', content: 'Using everything already gathered, output ONLY the final JSON object {"choice": <number>} now. Do not call tools. No explanation or preamble.' });
         callDS(true, function (err, statusCode, data) {
             var reply = '';
             if (!err && statusCode === 200) {
@@ -928,7 +975,7 @@ function handleChoice(res, state) {
                 reply = msg2.content || '';
             }
             var action = parseAction(reply, state);
-            if (!action) action = fallbackAction(state, err ? (tag + '_noThink_error') : (tag + '_parse_failed'));
+            if (!action) action = fallbackAction(state, err ? (tag + '_error') : (tag + '_parse_failed'));
             respond(action, reply);
         });
     }
@@ -938,16 +985,23 @@ function handleChoice(res, state) {
     function attempt(retryIdx) {
         var noThink = retryIdx >= RETRY_DELAYS.length;   // 最后一次重试用 no think
         var t0 = Date.now();
-        dsRequests++;
+        requestState.requests++;
+        if (retryIdx > 0) requestState.retryUsed = true;
         callDS(noThink, function (err, statusCode, data) {
             var ms = Date.now() - t0;
 
             if (err || statusCode !== 200) {
                 // 预算已用尽（或即将用尽）：**不再重试**，直接 fallback —— 否则重试链会把整回合拖过 MAX_TURN_MS。
-                var remaining = TURN_DEADLINE > 0 ? (TURN_DEADLINE - Date.now()) : Infinity;
+                var remaining = requestState.deadline > 0 ? (requestState.deadline - Date.now()) : Infinity;
+                requestState.retryReason = err ? err.message : ('http ' + statusCode);
                 if (remaining < 15000) {
-                    console.log('[choice] fail ' + ms + 'ms (' + (err ? err.message : ('http ' + statusCode)) + '), budget left ' + Math.round(remaining / 1000) + 's -> no retry, fallback');
-                    respond(fallbackAction(state, 'budget_exhausted'), 'ERROR: ' + (err ? err.message : ('http ' + statusCode)));
+                    console.log('[choice] fail ' + ms + 'ms (' + (err ? err.message : ('http ' + statusCode)) + '), budget left ' + Math.round(remaining / 1000) + 's -> finalize JSON phase');
+                    if (requestState.phase === 'initial') {
+                        requestState.deadline = Date.now();
+                        loop();
+                    } else {
+                        respond(fallbackAction(state, 'final_error'), 'ERROR: ' + (err ? err.message : ('http ' + statusCode)));
+                    }
                     return;
                 }
                 if (retryIdx < RETRY_DELAYS.length) {

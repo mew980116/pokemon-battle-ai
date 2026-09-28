@@ -504,8 +504,13 @@ var TOOL_DEFS = [
 
 // 类型克制（移植主脚本 typechart）
 function getTypeMatchup(args, ctx) {
-    var ai = typeIndex(args.attack_type);
-    if (ai < 0) return { error: 'unknown attack_type: ' + args.attack_type };
+    var attackType = args.attack_type || args.move_type || args.type;
+    var ai = typeIndex(attackType);
+    if (ai < 0) {
+        var move = moveById(attackType);
+        if (move && move.type) ai = typeIndex(move.type);
+    }
+    if (ai < 0) return { error: 'unknown attack_type/type: ' + attackType };
     var m = 1;
     var types = args.defend_types || [];
     for (var i = 0; i < types.length; i++) {
@@ -779,7 +784,12 @@ function slotEntry(team, slot) {
 // 我方某槽位的已知能力值（state.myStats）与道具名（state.me / state.bench）—— 系统已知，以 state 为准
 function myStatOf(state, slot) {
     var arr = (state && state.myStats) || [];
-    for (var i = 0; i < arr.length; i++) if (Number(arr[i].slot) === Number(slot)) return arr[i];
+    for (var i = 0; i < arr.length; i++) {
+        if (Number(arr[i].slot) === Number(slot)) return arr[i];
+    }
+    for (var j = 0; j < arr.length; j++) {
+        if (arr[j].legacySlot !== undefined && Number(arr[j].legacySlot) === Number(slot)) return arr[j];
+    }
     return null;
 }
 function myItemOf(state, slot) {
@@ -800,7 +810,9 @@ function oppSpeedRange(pokeName) {
 function mySpeedOf(state, slot, boosts) {
     var ms = myStatOf(state, slot);
     if (!ms || !ms.name) return null;
-    var r = resolvePokemonInput({ poke: ms.name });
+    if (ms.spe !== undefined && ms.spe !== null) return Number(ms.spe);
+    if (ms.stats && ms.stats.spe !== undefined && ms.stats.spe !== null) return Number(ms.stats.spe);
+    var r = resolvePokemonInput({ poke: ms.name, gen: state && state.gen });
     if (!r || r.error || !r.baseStats) return null;
     var spe = null;
     try {
@@ -1845,6 +1857,8 @@ var STAT_NAMES = ['hp', 'atk', 'def', 'spa', 'spd', 'spe'];
 // 返回 {baseStats, types, name} 或 {error}
 function resolvePokemonInput(spec) {
     if (!spec) return { error: 'attacker/defender missing' };
+    var requestedGen = spec.gen || spec.generation || null;
+    if (requestedGen && Number(requestedGen) !== 8) return { error: 'unsupported generation: gen' + requestedGen + ' (damage data is modeled for gen8 only)' };
     if (spec.base_stats && spec.base_stats.length === 6) {
         return { baseStats: spec.base_stats, types: spec.types || [], name: null };
     }
@@ -1882,8 +1896,14 @@ function resolvePokemonInput(spec) {
 // 按名字查表时一并带回 num/crit_rate/hits/variable_power/pp，供 calcOneLeg 做属性替换/暴击/连击判断
 function resolveMoveInput(spec) {
     if (!spec) return { error: 'move missing' };
+    if (spec.gen || spec.generation) {
+        var moveGen = Number(spec.gen || spec.generation);
+        if (moveGen !== 8) return { error: 'unsupported generation: gen' + moveGen + ' (move data is modeled for gen8 only)' };
+    }
     if (spec.name) {
         var name = String(spec.name);
+        var normalizedName = name.toLowerCase().replace(/[’']/g, '').replace(/[^a-z0-9]+/g, ' ').trim();
+        if (normalizedName === 'tera blast' || normalizedName === 'terablast') name = 'Tera Blast';
         var lower = name.toLowerCase();
         for (var k in MOVES) {
             var m = MOVES[k];
@@ -1895,6 +1915,7 @@ function resolveMoveInput(spec) {
                 };
             }
         }
+        if (normalizedName === 'tera blast' || normalizedName === 'terablast') return { error: 'unsupported move for gen8 calculator: Tera Blast is a Gen9 move; pass explicit power/category/type only when the type is known' };
         return { error: 'unknown move: ' + spec.name };
     }
     if (spec.power !== undefined && spec.category && spec.type) {
@@ -2404,7 +2425,7 @@ function applyFromState(state, spec, who, slot) {
 
     if (who === 'opp') {
         if (isBench) {
-            var oe = (state.oppTeam || [])[slot];
+            var oe = slotEntry(state.oppTeam, slot);
             if (!oe) {
                 src.poke = 'NOT found — opponent team slot ' + slot + ' is out of range (0-5)';
             } else if (!oe.revealed || !oe.name) {
@@ -2446,6 +2467,13 @@ function applyFromState(state, spec, who, slot) {
         if (ms2) {
             takeFromState(out, src, 'poke', ms2.name, 'state.myStats[' + slot + '].name (my bench)');
             if (ms2.level) takeFromState(out, src, 'level', ms2.level, 'state.myStats[' + slot + '].level');
+            if (ms2.hp !== undefined) takeFromState(out, src, 'hp', ms2.hp, 'state.myStats[' + slot + '].hp');
+            if (ms2.atk !== undefined) takeFromState(out, src, 'atk', ms2.atk, 'state.myStats[' + slot + '].atk');
+            if (ms2.def !== undefined) takeFromState(out, src, 'def', ms2.def, 'state.myStats[' + slot + '].def');
+            if (ms2.spa !== undefined) takeFromState(out, src, 'spa', ms2.spa, 'state.myStats[' + slot + '].spa');
+            if (ms2.spd !== undefined) takeFromState(out, src, 'spd', ms2.spd, 'state.myStats[' + slot + '].spd');
+            if (ms2.spe !== undefined) takeFromState(out, src, 'spe', ms2.spe, 'state.myStats[' + slot + '].spe');
+            if (ms2.stats) { for (var ds = 0; ds < STAT_NAMES.length; ds++) { if (out[STAT_NAMES[ds]] === undefined && ms2.stats[STAT_NAMES[ds]] !== undefined) takeFromState(out, src, STAT_NAMES[ds], ms2.stats[STAT_NAMES[ds]], 'state.myStats[' + slot + '].stats.' + STAT_NAMES[ds]); } }
             if (ms2.ev) takeFromState(out, src, 'ev', ms2.ev, 'state.myStats[' + slot + '].ev');
             if (ms2.iv) takeFromState(out, src, 'iv', ms2.iv, 'state.myStats[' + slot + '].iv');
             if (ms2.nature !== undefined && ms2.nature !== null) takeFromState(out, src, 'nature', ms2.nature, 'state.myStats[' + slot + '].nature');
@@ -2466,11 +2494,24 @@ function applyFromState(state, spec, who, slot) {
     } else {
         var me = state.me || {};
         var ms = null, arr = state.myStats || [];
-        for (var i = 0; i < arr.length; i++) { if (String(arr[i].slot) === '0') ms = arr[i]; }
+        for (var i = 0; i < arr.length; i++) {
+            if (arr[i] && arr[i].name && me.name && pklmNormName(arr[i].name) === pklmNormName(me.name)) {
+                ms = arr[i];
+                break;
+            }
+        }
+        if (!ms) for (var j = 0; j < arr.length; j++) { if (String(arr[j].slot) === '0' || String(arr[j].legacySlot) === '0') ms = arr[j]; }
         if (!ms && arr.length) ms = arr[0];
         takeFromState(out, src, 'poke', me.name, 'state.me.name');
         if (ms) {
             if (ms.level) takeFromState(out, src, 'level', ms.level, 'state.myStats.level');
+            if (ms.hp !== undefined) takeFromState(out, src, 'hp', ms.hp, 'state.myStats.hp');
+            if (ms.atk !== undefined) takeFromState(out, src, 'atk', ms.atk, 'state.myStats.atk');
+            if (ms.def !== undefined) takeFromState(out, src, 'def', ms.def, 'state.myStats.def');
+            if (ms.spa !== undefined) takeFromState(out, src, 'spa', ms.spa, 'state.myStats.spa');
+            if (ms.spd !== undefined) takeFromState(out, src, 'spd', ms.spd, 'state.myStats.spd');
+            if (ms.spe !== undefined) takeFromState(out, src, 'spe', ms.spe, 'state.myStats.spe');
+            if (ms.stats) { for (var ds2 = 0; ds2 < STAT_NAMES.length; ds2++) { if (out[STAT_NAMES[ds2]] === undefined && ms.stats[STAT_NAMES[ds2]] !== undefined) takeFromState(out, src, STAT_NAMES[ds2], ms.stats[STAT_NAMES[ds2]], 'state.myStats.stats.' + STAT_NAMES[ds2]); } }
             if (ms.ev) takeFromState(out, src, 'ev', ms.ev, 'state.myStats.ev');
             if (ms.iv) takeFromState(out, src, 'iv', ms.iv, 'state.myStats.iv');
             if (ms.nature !== undefined && ms.nature !== null) takeFromState(out, src, 'nature', ms.nature, 'state.myStats.nature');
@@ -2536,7 +2577,7 @@ function resolveSlotByName(st, who, name) {
         var ot = st.oppTeam || [];
         for (var k = 0; k < ot.length; k++) {
             if (ot[k] && ot[k].name && ot[k].revealed !== false && pklmNormName(ot[k].name) === want) {
-                return { slot: k, from: 'state.oppTeam[' + k + '].name (revealed)' };
+                return { slot: (ot[k].slot !== undefined ? ot[k].slot : k + 1), from: 'state.oppTeam[' + k + '].name (revealed)' };
             }
         }
     }
@@ -2629,6 +2670,11 @@ function fromStateHint(leg, side) {
 function calcOneLeg(leg, idx, ctx) {
     leg = applyStateToLeg(leg, ctx);
     if (leg._fromStateMissing) return { index: idx, error: 'from_state needs the live battle state, which is not available on this call path (e.g. run_js) — pass the pokemon/params explicitly instead' };
+    if (ctx && ctx.state && ctx.state.gen) {
+        if (leg.attacker && leg.attacker.gen === undefined) leg.attacker.gen = ctx.state.gen;
+        if (leg.defender && leg.defender.gen === undefined) leg.defender.gen = ctx.state.gen;
+        if (leg.move && leg.move.gen === undefined) leg.move.gen = ctx.state.gen;
+    }
     var atk = resolvePokemonInput(leg.attacker);
     if (atk.error) return { index: idx, error: atk.error + fromStateHint(leg, 'attacker') };
     var def = resolvePokemonInput(leg.defender);
