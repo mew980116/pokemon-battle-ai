@@ -436,6 +436,25 @@
 - [ ] 🟡 **`simulate_turn` 的 move 参数易写错**：battle68 T22 实测它连发 30 次 tool 调用仍没定稿（`{"move":"TeraBlast"}`、`"太晶爆发"`、`{"move":"Tera Blast","terastallize":"Flying"}`、`{"move":851}`），最后被回合预算掐掉走兜底。方向：给 move 参数加更硬的校验与示例（只接受动作表里的原始名字或编号），或在报错时直接回「请用动作表里的名字」。
 - [ ] ⚪ **小瑕疵**：`Calm Mind:Acc:101%` —— PO 招式数据里「必中」用 101 编码，prompt 里显示成 101% 有点怪，可考虑渲染成「必中」。
 
+**分层与「按账号选接入方式」（2026-09-30 讨论定调）**：
+
+> 起因：先问「po-pokellmon-tool 能否按账号选接入方式（llm/foulplay/random）」，再问「把项目切成前端（PO/PS 对战）+ 后端（pokellmon/foulplay）是否合理」。以下是结论，记下来免得重复讨论。
+
+- **定调：「前端 / 后端」二分只在契约层成立，且 `foulplay` 不落在后端一侧**。正确的切法是三层：
+  1. **平台适配层**（前端）：PO 脚本 / PS 客户端 —— 各自负责协议 + 采集 + 推断，**互不共享代码**（PO 是 QScript、pre-ES6 单文件，物理上共享不了）
+  2. **契约层**：`state JSON → choice`，本机 HTTP（`127.0.0.1:8092/choice`），无状态 —— 唯一需要冻结的接口
+  3. **provider 层**（后端）：`llm` / `random` / `rules` / `foulplay`（包装后）
+- **三处不成立**（记下来免得重复讨论）：
+  1. **`foulplay` 不是 provider，是另一个前端** —— 它是自带引擎的完整客户端（自己连 PS、自己维护战斗状态），**没有 `state → choice` 接口**。要在后端里跑，前提是后端**自己拥有一个 PS 战斗流**，即下方「simulate_turn 内核换 PS 引擎」那条。
+  2. **前端不瘦，反而是最重的一块**：PO 侧 [po-script.js](po-pokellmon/po-script.js) 承担对手招式/使用次数/道具/特性/双墙/陷阱/完整战报的采集与推断；PS 侧 [decision-bridge.js](po-pokellmon-tool/platform/ps/decision-bridge.js) 的 `buildState` 同理。边界应画在「采集+推断 / 推理+决策」之间（与 [modular-ai-architecture.md](docs/architecture/modular-ai-architecture.md) 的 5 模块一致），**不是「对战 / AI」之间**。
+  3. **两个前端能力不等价**：PO 只给「PO 愿意给的」，PS 能给完整 `request`。前端对后端**是能力约束**，不是透明管道 —— 同一个 provider 在两边表现必然不同。
+- **现状盘点**：PS 的 [decision-bridge.js](po-pokellmon-tool/platform/ps/decision-bridge.js) 有 `agent: 'llm' | 'random'`，但那是**进程级**（`PS_DECISION` 环境变量），且 `random` **跑在客户端**、不请求服务；PO 侧**没有「接入方式」这个概念**、也没有 `random`（webCall 失败走 `pklmFallbackAttack`）；[server.js](po-pokellmon-tool/server.js) 只把 `state.account` 写进日志，**不做任何路由**。账号来源：PO 已进 `state.account`（[po-script.js](po-pokellmon/po-script.js) 采集），PS 是 `PSClient.username`（**尚未进 state**）。
+
+- [ ] ⚪ **按账号选接入方式（llm/random）**：在契约上挂一张 `account → provider` 路由表。PO 侧零改动（`state.account` 已在传）；PS 侧需在 `buildState` 补 `account` 字段。**同时要把 PS 的 `random` 从客户端挪到服务端**，否则同一张表要拆两处（服务端一份、PS 客户端一份）。顺带把 `decision-bridge` 里 `agent === 'random'` 那个内联分支抽成 provider 表，否则加第三个后端就是 if 叠 if。
+- [ ] ⚪ **目录：`platform/ps/` 从 `po-pokellmon-tool/` 里提出来** —— 现在后端目录里躺着一个前端，正是这个二分没拉直的证据。真按三层切：`platform/` 提到顶层，`po-pokellmon-tool/` 缩回纯 provider。
+- [ ] ⚪ **`foulplay` 定位二选一（未定）**：**① 并排客户端**（当下可行 —— 单独 `platform/ps/foulplay/`，用另一个账号连同一台 PS 服务器；不参与契约、也不参与按账号路由）；**② 升级成 provider**（等 PS 引擎进后端之后，才真和 `llm` 同层、可进同一张路由表）。**PO 侧不适用** —— PO 没有 battle stream 可以喂给它。
+- **安全注记**：`state.account` 是**客户端自报**的。服务只绑 `127.0.0.1` 时无意义；一旦对外暴露，就能靠改 account 选到「随机」这类低配模式绕过 AI。
+
 ---
 
 ## 历史条目（早期路线 / 暂缓追踪）
