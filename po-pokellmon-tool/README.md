@@ -3,6 +3,10 @@
 移植 PokeLLMon 的第三条基础路线：**思考模式 + function calling / tool**。
 把主脚本 [20201227_v1.3.1.js](../20201227_v1.3.1.js) 里的确定性计算封装成 tool，供 DeepSeek 在决策前动态调用（类似 coding agent 的 tool 模式）。
 
+当前整体架构、服务器拓扑和测试矩阵见根目录
+[ARCHITECTURE.md](../ARCHITECTURE.md)。本 README 重点说明决策服务本身，以及它如何接入
+PO、PS 私服和官方 PS。
+
 ## 与 po-pokellmon（路线 1）的关系
 
 | | po-pokellmon（无思考） | po-pokellmon-tool（本目录） |
@@ -254,6 +258,20 @@ node po-pokellmon-tool/test-predict-gate.js
 1. **自动加成**：道具/特性/天气/场地/烧伤/暴击等目前需 LLM 手动填 `extra` 系数，后续可逐个自动识别（读 state 里的 ability/item/weather/terrain）。
 2. **换人/变化招评估 tool**：见 [TODO.md](../TODO.md) 的「评估依据 tool」清单。
 
+## 部署与测试矩阵
+
+近期推荐按以下顺序推进：
+
+1. **私服 random vs random**：验证 PS WebSocket、request 解析、动作契约和对局收尾。
+2. **私服 random vs LLM**：验证决策服务、LLM provider、fallback 和日志。
+3. **私服 LLM vs 人工**：PS 私服和自动客户端在服务器上运行，人工从另一台电脑的浏览器进入。
+4. **私服 LLM A vs LLM B**：两个 PS 账号分别配置不同 provider、profile 或模型。
+5. **私服 LLM vs foul-play**：待 foul-play 接入统一的 PS action adapter 后进行。
+6. **官方 PS rating**：使用独立测试账号和 `PS_SEARCH_FORMAT`，不依赖本地私服。
+
+每场测试都应记录房间 ID、双方账号/provider、format、state/actions、fallback、耗时和胜负。
+完整拓扑与验收标准见 [ARCHITECTURE.md](../ARCHITECTURE.md)。
+
 ## 使用方法
 
 1. 启动（复用 po-pokellmon 的 apikey.txt）：
@@ -276,7 +294,7 @@ node po-pokellmon-tool/server.js
 3. 起客户端：
 
 ```powershell
-node po-pokellmon-tool/platform/ps/run-shadow.js
+node platform/ps/run-shadow.js
 ```
 
 环境变量：
@@ -287,24 +305,66 @@ node po-pokellmon-tool/platform/ps/run-shadow.js
 | `PS_RIVAL` | `III.Columbina` | 定向挑战的对手；`none` / `off` = 不主动挑战（只等别人来挑战，配合 `PS_AUTO_ACCEPT`） |
 | `PS_CHALLENGE_FORMAT` | `gen8randombattle` | 定向挑战的分级 |
 | `PS_SHADOW` | 关 | `1` / `true` 时只输出建议、不发送动作（影子模式） |
-| `PS_DECISION` | `llm` | `random` = 纯本地随机合法动作（不请求决策服务，用于先把 PS 链路跑通）；`llm` 模式下决策服务报错/返回不可用响应时也会自动退回本地随机，避免不发动作卡住 |
+| `PS_DECISION` | `llm` | 决策方式提示：`llm` / `random`。现在 random 由决策服务端执行；账号路由表优先于此提示。旧的 `PS_DECISION=random` 仍可用于本机快速验证 |
 | `PS_SKIP_LOGIN` | 关 | `1` = 跳过官方登录服务器，收到 challstr 后直接 `/trn <用户名>,0,`（只对开了 `noguestsecurity` 的自建服有效） |
 | `PS_AUTO_ACCEPT` | 关 | `1` = 自动接受他人挑战（自己发出的那份不会触发） |
 | `PS_SERVER` / `PS_WS_URL` | `play.pokemonshowdown.com` / `sim3.psim.us` | 登录服 / 对战服（自建服填 `ws://127.0.0.1:8000/showdown/websocket`） |
 | `POKELLMON_TOOL_URL` | `http://127.0.0.1:8092/choice` | 决策服务地址 |
 
+决策服务的 `/choice` 推荐使用 `POST` JSON state；旧版 `GET /choice?state=...` 仍保留兼容。
+
+LLM 对战 smoke test 可临时覆盖服务端预算；不设置时保持默认生产行为：
+
+```powershell
+$env:POKELLMON_PREDICT_GATE = '0'
+$env:POKELLMON_MAX_TURN_MS = '30000'
+$env:POKELLMON_MAX_TURN_MS_T0 = '30000'
+node po-pokellmon-tool/server.js
+```
+
+支持的变量：`POKELLMON_PREDICT_GATE`、`POKELLMON_MAX_TURN_MS`、
+`POKELLMON_MAX_TURN_MS_T0`、`POKELLMON_MAX_TOOL_ROUNDS`、
+`POKELLMON_MAX_GATE_REJECTIONS`。其中时间单位为毫秒，`0` 表示不限。
+
+### 按账号选择决策方式
+
+决策服务通过 `state.account` 选择 provider。复制
+`decision-routing.example.json` 为 `decision-routing.json` 后按实际账号修改：
+
+```json
+{
+  "default": "llm",
+  "allowClientHint": true,
+  "accounts": {
+    "random-bot": "random",
+    "rules-bot": "rules"
+  }
+}
+```
+
+已实现的服务端 provider：
+
+- `llm`：当前 tool/LLM 决策链路
+- `random`：从平台提交的合法动作候选中随机选择
+
+`rules` 暂作为保留名称；现有 `20201227.js` 依赖 PO 运行时对象，尚未包装成
+`state -> choice` 服务。`foul-play` 不参与此路由。
+
+账号映射优先于 `PS_DECISION` 的兼容提示。服务只监听 `127.0.0.1` 时可保留
+`allowClientHint: true`；若服务需要对外暴露，应设为 `false`，避免客户端伪造 provider。
+
 例（打 gen8 Random Battle 天梯，可用来自己双号对排）：
 
 ```powershell
 $env:PS_SEARCH_FORMAT="gen8randombattle"
-node po-pokellmon-tool/platform/ps/run-shadow.js
+node platform/ps/run-shadow.js
 ```
 
 例（不接 LLM，只验证 PS 链路能通：进队列 → 配对 → 出招）：
 
 ```powershell
 $env:PS_SEARCH_FORMAT="gen8randombattle"; $env:PS_DECISION="random"
-node po-pokellmon-tool/platform/ps/run-shadow.js
+node platform/ps/run-shadow.js
 ```
 
 **PS 账号门槛（实测踩过）**：PS 的 `autoconfirmed` 判定 = **注册满 7 天** 且 **赢过 1 场排位**（登录服务器 `ntbb-session.lib.php`；定向挑战是非排位、不计数）。不满足时若 IP 被判为垃圾/代理来源（报错 `spam from your internet provider`），账号会被半锁（身份显示为 `!`），**不能主动挑战、也不能聊天**；天梯匹配与定向挑战是两条路径，受限情况可能不同。协议与决策日志见 `platform/logs/ps-*.jsonl`。
@@ -314,16 +374,42 @@ node po-pokellmon-tool/platform/ps/run-shadow.js
 官方服上「自己打自己」走不通：天梯**同 IP 不能互配**（`server/ladders.ts` 的 `matchmakingOK` 硬判 `latestIp` 不能相同），定向挑战又被 IP 级反垃圾半锁。本地自建服关掉这些限制后，可以随便自己打自己、也不受 7 天门槛影响：
 
 ```powershell
-pwsh -File platform\ps\local-server\setup-server.ps1    # 一次性：clone + npm install + build + 写开发用 config
-cd "$env:USERPROFILE\ps-sim"; node pokemon-showdown start --skip-build   # 启动服务器（这个终端一直开着）
-pwsh -File platform\ps\local-server\selfplay.ps1        # 另开终端：起两个客户端自打自（默认两侧随机出招）
-pwsh -File platform\ps\local-server\selfplay.ps1 -AIDecision llm        # AI 侧接 8092 决策服务，陪练侧随机
+# 一次性：本地服目录不存在时执行
+Set-Location D:\Other\ai\pokemon-battle-ai
+pwsh -File .\platform\ps\local-server\setup-server.ps1 -Dir D:\Other\ai\ps-sim
+
+# 终端 A：启动 PS 私服（这个终端一直开着）
+Set-Location D:\Other\ai\ps-sim
+node pokemon-showdown start --skip-build
+
+# 终端 B：启动决策服务（需要 LLM 时）
+Set-Location D:\Other\ai\pokemon-battle-ai
+node .\po-pokellmon-tool\server.js
+
+# 终端 C：启动两个客户端自打自
+$env:POKELLMON_TOOL_URL = 'http://127.0.0.1:8092/choice'
+pwsh -File .\platform\ps\local-server\selfplay.ps1
+pwsh -File .\platform\ps\local-server\selfplay.ps1 -AIDecision llm
 ```
 
 - `setup-server.ps1` 会在本地服的 `config/config.js` 末尾追加：`noipchecks`（关同 IP 检查）、`nothrottle`（关限流）、`noguestsecurity`（允许 `/trn 名字` 无登录服务器起名）、`backdoor = false`。
 - 已知点：PS master 的 network worker 会把监听地址覆盖成 `0.0.0.0`（`sockets.ts` 里 `PM.env` 用 `Config.bindaddress || '0.0.0.0'`），所以 `Config.bindaddress = '127.0.0.1'` 不生效；本机开发够用，但别在不信任的网络里开着这个服。
 
+服务器上运行私服和自动客户端时，用户电脑可以直接用浏览器访问：
+
+```text
+http://<服务器IP>:8000/
+```
+
+自动客户端仍连接服务器本机地址：
+
+```text
+PS_WS_URL=ws://127.0.0.1:8000/showdown/websocket
+```
+
+只建议在可信内网或 VPN 中使用；不要把开启 `noguestsecurity` 的开发服暴露到公网。
+
 ## 版本管理
 
-- [server.js](server.js) `SERVER_VERSION`、[tools.js](tools.js) 与 `platform/ps/*` 无独立版本号（随 server 记录）
+- [server.js](server.js) `SERVER_VERSION`、[tools.js](tools.js) 与 [platform/ps/*](../platform/ps/) 无独立版本号（随 server 记录）
 - 改代码后 bump `SERVER_VERSION` + 更新本 README，并 git commit（见仓库根 [CLAUDE.md](../CLAUDE.md) 规范）

@@ -16,7 +16,7 @@ function hpPercent(pokemon) {
 var CALC_DEX = null;
 function calcDex() {
     if (!CALC_DEX) {
-        var calc = require('../../vendor/smogon-calc/index.js');
+        var calc = require('../../po-pokellmon-tool/vendor/smogon-calc/index.js');
         CALC_DEX = calc.Generations.get(9) || calc.Generations.get(8);
     }
     return CALC_DEX;
@@ -108,6 +108,8 @@ function DecisionBridge(options) {
     this.url = options.url || process.env.POKELLMON_TOOL_URL || 'http://127.0.0.1:8092/choice';
     this.shadow = options.shadow !== undefined ? !!options.shadow : process.env.PS_SHADOW !== '0' && process.env.PS_SHADOW !== 'false';
     this.request = options.request || null;
+    this.account = options.account || process.env.PS_ACCOUNT || '';
+    this.providerHint = options.providerHint || '';
     // 决策来源：'llm'（默认，调决策服务）| 'random'（纯本地随机合法动作，不请求服务）
     this.agent = options.agent || 'llm';
     this.client = null;
@@ -147,7 +149,10 @@ DecisionBridge.prototype.buildState = function (session, request, actions) {
     var format = detectFormat(request, session);
     var detectedGen = detectGen(request, session, format);
     var state = {
+        schemaVersion: 'battle-state/v1',
         platform: 'ps',
+        account: this.account || (this.client && this.client.username) || '',
+        providerHint: this.providerHint || undefined,
         turn: session.turn,
         battleId: session.roomId,
         gen: detectedGen || undefined,
@@ -167,6 +172,12 @@ DecisionBridge.prototype.buildState = function (session, request, actions) {
         bench: [],
         request: request || null,
         actions: actions || [],
+        capabilities: {
+            hasFullRequest: true,
+            hasOpponentMoves: 'observed',
+            canSimulate: false,
+            canExecute: true
+        },
         teamPreview: !!(request && request.teamPreview),   // PO 的同名字段：决策服务据此走「开局选人」分支
         log: true   // 让决策服务把本回合（prompt / usage / toolLog）写进 logs/deepseek_tool_*.log，便于看 token 开销
     };
@@ -260,12 +271,16 @@ DecisionBridge.prototype.buildState = function (session, request, actions) {
 DecisionBridge.prototype.fetchChoiceOnce = function (state, job) {
     var target = url.parse(this.url);
     var transport = target.protocol === 'https:' ? https : http;
-    var query = (target.search ? target.search + '&' : '?') + 'state=' + encodeURIComponent(JSON.stringify(state));
+    var body = JSON.stringify(state);
     var options = {
         hostname: target.hostname,
         port: target.port || (target.protocol === 'https:' ? 443 : 80),
-        path: target.pathname + query,
-        method: 'GET',
+        path: target.pathname + (target.search || ''),
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': Buffer.byteLength(body)
+        },
         agent: false   // 不复用 keep-alive 连接：服务端空闲关连接后再复用会 ECONNRESET
     };
     var requester = this.request || transport.request;
@@ -284,7 +299,7 @@ DecisionBridge.prototype.fetchChoiceOnce = function (state, job) {
             if (job && job.cancelled) return reject(error);
             reject(error);
         });
-        req.end();
+        req.end(body);
     });
 };
 

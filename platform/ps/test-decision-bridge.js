@@ -17,7 +17,10 @@ function fakeResponse(body) {
 function fakeRequest(options, callback) {
     fakeRequest.options = options;
     callback(fakeResponse({ type: 'attack', attackSlot: 2 }));
-    return { on: function () {}, end: function () {} };
+    return {
+        on: function () {},
+        end: function (body) { fakeRequest.body = body; }
+    };
 }
 
 var session = new adapter.BattleSession('battle-bridge');
@@ -34,7 +37,10 @@ var client = { onRequest: function () {}, chooseAction: function (action, room) 
 var bridge = new bridgeModule.DecisionBridge({ url: 'http://127.0.0.1:8092/choice', request: fakeRequest, shadow: true });
 bridge.attachClient(client);
 return bridge.handleRequest(request, actions, session).then(function (record) {
-    assert.strictEqual(fakeRequest.options.path.indexOf('/choice?state='), 0);
+    assert.strictEqual(fakeRequest.options.path, '/choice');
+    assert.strictEqual(fakeRequest.options.method, 'POST');
+    assert.strictEqual(fakeRequest.options.headers['Content-Type'], 'application/json');
+    assert.strictEqual(JSON.parse(fakeRequest.body).battleId, 'battle-bridge');
     var state = record.state;
     assert.strictEqual(state.turn, 3);
     assert.strictEqual(state.battleId, 'battle-bridge');

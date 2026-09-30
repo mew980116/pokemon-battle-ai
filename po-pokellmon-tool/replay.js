@@ -77,12 +77,16 @@ async function run() {
         const state = Object.assign({}, e.state);
         state.battleId = tag;                 // 关键：写到独立日志文件，不污染原日志
         state.replayOfTurn = e.turn;
-        const url = opts.url + '/choice?state=' + encodeURIComponent(JSON.stringify(state));
         const t0 = Date.now();
         process.stdout.write('T' + e.turn + ' 重放中… ');
         let action = null, err = null;
         try {
-            const res = await fetch(url, { signal: AbortSignal.timeout(opts.timeout * 1000) });
+            const res = await fetch(opts.url + '/choice', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(state),
+                signal: AbortSignal.timeout(opts.timeout * 1000)
+            });
             action = await res.json();
         } catch (ex) { err = ex && ex.message ? ex.message : String(ex); }
         const ms = Date.now() - t0;

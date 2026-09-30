@@ -9,7 +9,8 @@
 //
 // Endpoints:
 //   GET /health              -> "ok"
-//   GET /choice?state=JSON   -> 返回 {"type":"move"/"switch", ...}
+//   POST /choice (JSON state) -> 返回 {"type":"move"/"switch", ...}
+//   GET /choice?state=JSON    -> 兼容旧版调用
 
 var http = require('http');
 var https = require('https');
@@ -17,6 +18,8 @@ var url = require('url');
 var fs = require('fs');
 var path = require('path');
 var tools = require('./tools.js');
+var contract = require('./decision-contract.js');
+var decisionRouter = require('./decision-router.js');
 
 function readJsonFile(file) {
     try {
@@ -96,7 +99,7 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.9.7';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
+var SERVER_VERSION = '0.9.9';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
 
 // ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
 // 对战主脑用 v4-flash：这个场景（超大计算量 + 幻觉高发）里 pro 的"深想"反而被门禁压制，
@@ -106,6 +109,15 @@ var MODEL = process.env.POKELLMON_MODEL || LLM.model || 'deepseek-v4-flash';
 var API_HOST = process.env.POKELLMON_API_HOST || LLM.api_host || (PROVIDER === 'mify' ? 'api.llm.mioffice.cn' : 'api.deepseek.com');
 var API_PATH = process.env.POKELLMON_API_PATH || LLM.api_path || (PROVIDER === 'mify' ? '/v1/chat/completions' : '/chat/completions');
 var REQUEST_OPTIONS = LLM.request_options || {};
+function envNumber(name, fallback) {
+    if (process.env[name] === undefined || process.env[name] === '') return fallback;
+    var value = Number(process.env[name]);
+    return isFinite(value) && value >= 0 ? value : fallback;
+}
+function envBoolean(name, fallback) {
+    if (process.env[name] === undefined) return fallback;
+    return process.env[name] === '1' || process.env[name] === 'true';
+}
 // 思考/模型都可用环境变量覆盖 —— 目的是能同时起多个不同配置的 server 做 A/B 复测
 // （例：`POKELLMON_MODEL=deepseek-v4-flash POKELLMON_THINKING=1 POKELLMON_EFFORT=low POKELLMON_TOOL_PORT=8094 node server.js`）
 // ⚠ 无环境变量时行为与以前完全一致（思考默认关闭）。
@@ -116,13 +128,13 @@ var FIRST_TURN_THINKING = process.env.POKELLMON_FIRST_THINKING ? (process.env.PO
 var FIRST_TURN_EFFORT = process.env.POKELLMON_FIRST_EFFORT || LLM.first_effort || 'low';
 var MAX_TOKENS = null;                  // 不限制输出 token（思考链 + 最终答案）
 var TIMEOUT_MS = 240000;                // 单次请求的硬墙钟上限（不设 max_tokens，8192 是服务端默认）
-var MAX_TOOL_ROUNDS = 35;               // 最多 function calling 轮数，超过则 no-think 收敛（门禁要 predict+验算+可能打回，25 实测会被打满）
+var MAX_TOOL_ROUNDS = envNumber('POKELLMON_MAX_TOOL_ROUNDS', 35); // 最多 function calling 轮数，超过则 no-think 收敛
 // 单回合总时长上限：到点走 finalizeNoThink()（关思考、用已有 tool 结果收答案）。
 // 2026-09-20 统计（当前架构 battle93-98，n=137）：中位 36s、平均 54s，>120s 只有 5%（7 个，且都是最难/轮数最多的回合）。
 // 之前是 0（禁用），结果 battle98 T11 跑了 663s 才结束 —— 单请求超时管不到整回合，必须有这道闸。
-var MAX_TURN_MS = 120000;
+var MAX_TURN_MS = envNumber('POKELLMON_MAX_TURN_MS', 120000);
 // 首回合（唯一开思考的回合，FIRST_TURN_THINKING）与普通回合使用相同的 120s 上限。
-var MAX_TURN_MS_T0 = 120000;
+var MAX_TURN_MS_T0 = envNumber('POKELLMON_MAX_TURN_MS_T0', 120000);
 // 本回合的绝对截止时刻（0=不限）。callDeepSeek 用它把单请求硬超时压成 min(TIMEOUT_MS, 剩余预算)，
 // 这样"超时后重试 3 次"也不会把整回合撑爆（否则最坏 3×240s）。
 // 每个 handleChoice 请求拥有独立的 deadline/请求计数，禁止并发回合互相覆盖。
@@ -153,11 +165,11 @@ var ENABLE_WORKLOG = false;
 //   true  = 暴露 simulate_turn；save_strategy 要求 action/branch/outcome 与仿真一致；最终答案前要求被选中的
 //           动作已经被仿真过。允许炮灰（如实写 faints 即可通过）。
 //   false = 完全退回原行为（simulate_turn 不暴露、不建账本、不拦）。
-var ENABLE_PREDICT_GATE = true;
+var ENABLE_PREDICT_GATE = envBoolean('POKELLMON_PREDICT_GATE', true);
 // 旧的 predict/claim 握手（0.4.14-0.4.15）：实测太脆（模型常忘带 claim_id → claim 永远 unresolved → 在拒绝里打转），
 // 已由 simulate_turn 取代；保留代码但默认关闭。
 var ENABLE_PREDICT_CLAIMS = false;
-var MAX_GATE_REJECTIONS = 2;   // 同一回合内最多打回几次（防死锁；超限放行并标 gateUnmet）
+var MAX_GATE_REJECTIONS = envNumber('POKELLMON_MAX_GATE_REJECTIONS', 2); // 同一回合内最多打回几次（防死锁；超限放行并标 gateUnmet）
 
 var WORKLOG_STEP = '(1) OPEN WORKLOG — this must be your FIRST action every turn. Call update_worklog with a short scratchpad for THIS turn: the goal, the current situation, confirmed facts, open questions and your next action. Treat it as your working memory: the server injects the latest worklog back into your context on every following tool call, so it is what keeps your plan alive across a long tool-calling loop (reasoning is off, so nothing else preserves it). Overwrite the whole text whenever the plan changes or a fact is confirmed; keep it compact and never let it go stale, and update it again before you finish. ';
 // REVIEW 的序号：带 worklog 时是 (2)，屏蔽后是 (1)
@@ -818,7 +830,7 @@ function appendSummary(battleId, result, winner) {
     delete notesStore[id];
 }
 
-function handleChoice(res, state) {
+function handleLlmChoice(res, state) {
     var notes = getNotes(state.battleId);
     var prompt = buildPrompt(state, notes);
     var constraint = 'Choose the best action. Output ONLY a JSON object: {"choice": <number>} where <number> is the number of the action you choose. No other text.\n';
@@ -886,6 +898,7 @@ function handleChoice(res, state) {
     function respond(action, reply) {
         if (responded) return;
         responded = true;
+        if (action && !action.decisionProvider) action.decisionProvider = 'llm';
         requestState.fallbackReason = action.fallback ? (action.reason || 'fallback') : '';
         console.log('[choice] => ' + JSON.stringify(action) + (action.fallback ? ' (FALLBACK)' : '') + ' rounds=' + rounds);
         logEntry(reply, action);
@@ -1075,6 +1088,9 @@ function handleChoice(res, state) {
 
             // 最终答案
             var action = parseAction(reply, state);
+            if (action && !contract.validateResponseAction(action, state)) {
+                action = null;
+            }
             if (!action) {
                 action = fallbackAction(state, 'parse_failed');
             } else if (ENABLE_PREDICT_GATE && ledger) {
@@ -1097,6 +1113,52 @@ function handleChoice(res, state) {
     }
 
     loop();
+}
+
+function respondDirect(res, action) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.writeHead(200);
+    res.end(JSON.stringify(action));
+}
+
+function handleChoice(res, state) {
+    state = contract.normalizeState(state);
+    var requestedProvider = decisionRouter.resolveProvider(state);
+    state.decisionProvider = requestedProvider;
+
+    if (requestedProvider === 'random') {
+        var randomAction = decisionRouter.randomAction(state);
+        if (!randomAction) randomAction = fallbackAction(state, 'random_no_legal_action');
+        randomAction.decisionProvider = 'random';
+        if (state.log) {
+            writeLog({
+                type: 'turn',
+                ts: new Date().toISOString(),
+                serverVersion: SERVER_VERSION,
+                scriptVersion: state.scriptVersion || '',
+                account: state.account || '',
+                decisionProvider: 'random',
+                turn: state.turn,
+                totalMs: 0,
+                fallback: !!randomAction.fallback,
+                fallbackReason: randomAction.fallback ? (randomAction.reason || '') : '',
+                state: state,
+                action: randomAction
+            });
+        }
+        respondDirect(res, randomAction);
+        return;
+    }
+
+    if (requestedProvider !== 'llm') {
+        var unsupported = fallbackAction(state, 'unsupported_decision_provider_' + requestedProvider);
+        unsupported.decisionProvider = requestedProvider;
+        respondDirect(res, unsupported);
+        return;
+    }
+
+    handleLlmChoice(res, state);
 }
 
 var server = http.createServer({ maxHeaderSize: 65536 }, function (req, res) {
@@ -1127,6 +1189,33 @@ var server = http.createServer({ maxHeaderSize: 65536 }, function (req, res) {
             }
         }
         handleChoice(res, state);
+        return;
+    }
+
+    if (req.method === 'POST' && u.pathname === '/choice') {
+        var body = '';
+        var tooLarge = false;
+        req.setEncoding('utf8');
+        req.on('data', function (chunk) {
+            if (tooLarge) return;
+            body += chunk;
+            if (body.length > 4 * 1024 * 1024) {
+                tooLarge = true;
+                res.writeHead(413);
+                res.end('state body too large');
+                req.destroy();
+            }
+        });
+        req.on('end', function () {
+            if (tooLarge) return;
+            var state = {};
+            try { state = body ? JSON.parse(body) : {}; } catch (e) {
+                res.writeHead(400);
+                res.end('invalid state JSON');
+                return;
+            }
+            handleChoice(res, state);
+        });
         return;
     }
 
@@ -1169,7 +1258,7 @@ var server = http.createServer({ maxHeaderSize: 65536 }, function (req, res) {
 
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
     res.writeHead(200);
-    res.end('po-pokellmon-tool server. use GET /health or GET /choice?state=...');
+    res.end('po-pokellmon-tool server. use GET /health or POST /choice');
 });
 
 server.on('error', function (err) {
@@ -1184,7 +1273,7 @@ server.on('error', function (err) {
 server.listen(PORT, HOST, function () {
     console.log('po-pokellmon-tool server (route 3: thinking + tool)');
     console.log('  health : http://' + HOST + ':' + PORT + '/health');
-    console.log('  choice : http://' + HOST + ':' + PORT + '/choice?state=...');
+    console.log('  choice : POST http://' + HOST + ':' + PORT + '/choice');
     console.log('  provider: ' + PROVIDER + (LLM.profile ? ' / profile ' + LLM.profile : ''));
     console.log('  model  : ' + MODEL);
     console.log('  thinking: ' + (THINKING_ENABLED ? 'enabled / ' + REASONING_EFFORT : 'disabled'));

@@ -1,0 +1,8 @@
+{
+  "default": "llm",
+  "allowClientHint": true,
+  "accounts": {
+    "random-bot": "random",
+    "rules-bot": "rules"
+  }
+}

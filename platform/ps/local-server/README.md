@@ -17,19 +17,64 @@
 ## 一次性准备
 
 ```powershell
-pwsh -File setup-server.ps1                    # 装到 $env:USERPROFILE\ps-sim
-pwsh -File setup-server.ps1 -Dir D:\ps-sim     # 指定目录（放本机盘，别放网络盘）
-pwsh -File setup-server.ps1 -Force             # 删掉重装
+pwsh -File .\setup-server.ps1 -Dir D:\Other\ai\ps-sim
 ```
 
 做四件事：`git clone --depth 1` → `npm install` → `node build`（esbuild 打包）→ 往本地服的 `config/config.js` 末尾追加开发用覆盖。
 
+如果目录已经存在，跳过这一步；`-Force` 会删除并重装整个目录，不要在不确认目录内容时使用。
+
 ## 启动
 
 ```powershell
-cd "$env:USERPROFILE\ps-sim"
+cd D:\Other\ai\ps-sim
 node pokemon-showdown start --skip-build     # 这个终端一直开着；监听 8000
 ```
+
+另开终端确认私服已启动：
+
+```powershell
+Invoke-WebRequest -UseBasicParsing http://127.0.0.1:8000/ | Select-Object StatusCode
+```
+
+## 决策服务启动
+
+在项目根目录另开一个终端：
+
+```powershell
+cd D:\Other\ai\pokemon-battle-ai
+node .\po-pokellmon-tool\server.js
+```
+
+默认监听 `127.0.0.1:8092`，并读取
+`po-pokellmon-tool\llm-config.json` 的 active profile。检查：
+
+```powershell
+Invoke-WebRequest -UseBasicParsing http://127.0.0.1:8092/health
+```
+
+显式启动 Mify Mimo flash（关闭 thinking）：
+
+```powershell
+$env:POKELLMON_TOOL_PORT = '8092'
+$env:POKELLMON_PROVIDER = 'mify'
+$env:POKELLMON_MODEL = 'xiaomi/mimo-v2.6-flash'
+$env:POKELLMON_THINKING = '0'
+node .\po-pokellmon-tool\server.js
+```
+
+显式启动 DeepSeek flash（low thinking）：
+
+```powershell
+$env:POKELLMON_TOOL_PORT = '8094'
+$env:POKELLMON_PROVIDER = 'mify'
+$env:POKELLMON_MODEL = 'deepseek/deepseek-flash'
+$env:POKELLMON_THINKING = '1'
+$env:POKELLMON_EFFORT = 'low'
+node .\po-pokellmon-tool\server.js
+```
+
+credential 从 `po-pokellmon-tool\llm-credentials.json` 读取，不要在命令行或文档中填写 key。
 
 ## 客户端侧开关（以下命令都在 `po-pokellmon-tool/` 下执行）
 
@@ -54,6 +99,39 @@ pwsh -File platform\ps\local-server\selfplay.ps1 -Format gen9randombattle
 
 陪练侧固定 `random`（不烧 token），只有 AI 侧读 `PS_DECISION`。
 `-AIDecision llm` 需要 8092 决策服务在跑：`node server.js`（在 `po-pokellmon-tool/` 下）。
+
+## 服务器私服 + 用户电脑人工对战
+
+近期推荐的部署方式是：
+
+```text
+服务器：
+  PS 私服                 :8000
+  po-pokellmon-tool       :8092
+  platform/ps/run-shadow  自动客户端
+
+用户电脑：
+  浏览器访问 http://<服务器IP>:8000/
+  在私服中手动挑战自动客户端
+```
+
+服务器上的自动客户端连接本机 WebSocket：
+
+```powershell
+$env:PS_WS_URL = 'ws://127.0.0.1:8000/showdown/websocket'
+$env:PS_SKIP_LOGIN = '1'
+$env:PS_USERNAME = 'LLM-Bot'
+node platform\ps\run-shadow.js
+```
+
+用户电脑不需要安装项目依赖，只需要能访问服务器的 8000 端口。
+如果私服和决策服务不在同一台机器，设置 `POKELLMON_TOOL_URL` 指向决策服务地址。
+
+安全要求：
+
+- 该开发服启用了 `noguestsecurity`，只允许可信内网或 VPN 访问。
+- PS worker 可能监听 `0.0.0.0`，应使用防火墙限制 8000 来源。
+- 不要把这个开发服直接暴露到公网。
 
 ## 看对局
 
@@ -95,16 +173,21 @@ exports.backdoor = false;         // 不让官方 sysop 拿到本地控制台
 ## 从零复现整条链路
 
 ```powershell
-# 1) 本地服（终端 A，一直开着）
-pwsh -File po-pokellmon-tool\platform\ps\local-server\setup-server.ps1
-cd "$env:USERPROFILE\ps-sim"; node pokemon-showdown start --skip-build
+# 1) 一次性安装（目录不存在时执行）
+pwsh -File .\platform\ps\local-server\setup-server.ps1 -Dir D:\Other\ai\ps-sim
 
-# 2) 决策服务（终端 B）—— 只有要 LLM 决策时才需要
-node po-pokellmon-tool\server.js
+# 2) 本地服（终端 A，一直开着）
+cd D:\Other\ai\ps-sim
+node pokemon-showdown start --skip-build
 
-# 3) 自打自（终端 C）
-pwsh -File po-pokellmon-tool\platform\ps\local-server\selfplay.ps1 -AIDecision llm
+# 3) 决策服务（终端 B）—— 只有要 LLM 决策时才需要
+cd D:\Other\ai\pokemon-battle-ai
+node .\po-pokellmon-tool\server.js
 
-# 4) 看对局（终端 D）→ 浏览器 http://127.0.0.1:8093/
+# 4) 自打自（终端 C）
+$env:POKELLMON_TOOL_URL = 'http://127.0.0.1:8092/choice'
+pwsh -File .\platform\ps\local-server\selfplay.ps1 -AIDecision llm
+
+# 5) 看对局（终端 D）→ 浏览器 http://127.0.0.1:8093/
 node po-pokellmon-view\server.js
 ```

@@ -315,8 +315,12 @@ function requestActions(request) {
             }
         }
     }
-    var bench = benchSwitches(request);
-    for (var b = 0; b < bench.length; b++) actions.push(bench[b]);
+    // 被困住时 PS 不允许换人；否则随机策略可能选中无效的 switch，
+    // 收到 [Invalid choice] 后同一个 rqid 不会再次触发决策，对局会卡住。
+    if (!active || !active.trapped) {
+        var bench = benchSwitches(request);
+        for (var b = 0; b < bench.length; b++) actions.push(bench[b]);
+    }
     return actions;
 }
 

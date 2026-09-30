@@ -94,6 +94,20 @@ assert.deepStrictEqual(adapter.requestActions({
     { type: 'switch', slot: 2 }
 ]);
 
+// 被困住时不能把替补席加入候选，否则发出非法 switch 后对局会卡在同一个 rqid
+assert.deepStrictEqual(adapter.requestActions({
+    side: { id: 'p1', pokemon: [
+        { ident: 'p1: Pikachu', condition: '100/100', active: true },
+        { ident: 'p1: Charizard', condition: '100/100', active: false }
+    ] },
+    active: [{
+        trapped: true,
+        moves: [{ move: 'Tackle', id: 'tackle', disabled: false }]
+    }]
+}), [
+    { type: 'move', slot: 1, id: 'tackle', name: 'Tackle' }
+]);
+
 // 极巨化 / 钛晶化：作为独立选项出现，命令是 /choose move N dynamax | terastallize
 var gen8 = {
     side: { id: 'p1', pokemon: [{ ident: 'p1: Cresselia', condition: '100/100', active: true }] },

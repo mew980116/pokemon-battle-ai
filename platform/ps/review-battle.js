@@ -21,7 +21,7 @@ var outIdx = process.argv.indexOf('--out');
 var outFile = outIdx !== -1 ? process.argv[outIdx + 1] : null;
 
 var clientLogDir = path.join(__dirname, '..', 'logs');   // platform/logs（run-shadow.js 写这里）
-var serviceLogDir = path.join(__dirname, '..', '..', 'logs');   // po-pokellmon-tool/logs
+var serviceLogDir = path.join(__dirname, '..', '..', 'po-pokellmon-tool', 'logs');   // po-pokellmon-tool/logs
 
 function readJsonl(file) {
     var text;

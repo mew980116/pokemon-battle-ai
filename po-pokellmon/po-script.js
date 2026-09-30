@@ -1019,7 +1019,31 @@ function pklmCollectState() {
         } catch (e) {}
     }
 
+    var myActive = pklmCollectMyActive();
+    var myBench = pklmCollectBench();
+    var actions = [];
+    if (!myActive.fainted) {
+        for (var ai = 0; ai < myActive.moves.length; ai++) {
+            actions.push({
+                id: "move:" + myActive.moves[ai].slot,
+                type: "move",
+                slot: myActive.moves[ai].slot,
+                name: myActive.moves[ai].name
+            });
+        }
+    }
+    for (var si = 0; si < myBench.length; si++) {
+        actions.push({
+            id: "switch:" + myBench[si].slot,
+            type: "switch",
+            slot: myBench[si].slot,
+            name: myBench[si].name
+        });
+    }
+
     return {
+        schemaVersion: "battle-state/v1",
+        platform: "po",
         account: pklmAccount,
         log: pklmLogEnabled,
         battleId: battle.id,
@@ -1053,10 +1077,17 @@ function pklmCollectState() {
         opp: pklmCollectOppActive(),
         oppTeam: pklmCollectOppTeam(),
         oppSeen: pklmOppSeen.slice(),
-        me: pklmCollectMyActive(),
+        me: myActive,
         myTeam: pklmCollectMyTeam(),
         myStats: pklmCollectMyStats(),
-        bench: pklmCollectBench(),
+        bench: myBench,
+        actions: actions,
+        capabilities: {
+            hasFullRequest: false,
+            hasOpponentMoves: "inferred",
+            canSimulate: false,
+            canExecute: true
+        },
         itemProbe: pklmItemProbe.slice()   // 临时探针（判 poke.item 在 Trick/Switcheroo 后是否可读）；结案后删
     };
 }

@@ -67,7 +67,7 @@ function PSClient(options) {
     var credentials = readCredentialsFile();
     this.username = options.username || process.env.PS_USERNAME || credentials.username || '';
     this.password = options.password || process.env.PS_PASSWORD || credentials.password || '';
-    this.rival = options.rival || process.env.PS_RIVAL || '';
+    this.rival = options.rival !== undefined ? options.rival : (process.env.PS_RIVAL || '');
     this.challengeFormat = options.challengeFormat || process.env.PS_CHALLENGE_FORMAT || 'gen8randombattle';
     // 设了就登录后走天梯匹配（/search），优先于定向挑战（/challenge）
     this.searchFormat = options.searchFormat || process.env.PS_SEARCH_FORMAT || '';

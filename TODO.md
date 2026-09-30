@@ -4,6 +4,8 @@
 >
 > **当前活跃路线**：po-pokellmon / po-pokellmon-tool（LLM 决策），见下「po-pokellmon（PokeLLMon 路线，LLM 决策）」章节。
 > **归档**：早期主脚本（20201227.js）优化、字段语义映射、旧 DeepSeek 接入（deepseek-bridge/）等条目归入文末「历史条目（早期路线 / 暂缓追踪）」，当前不活跃，保留备查。
+>
+> **当前架构入口**：先读 [ARCHITECTURE.md](ARCHITECTURE.md)，再按本文档的阶段待办推进。
 
 ---
 
@@ -26,11 +28,83 @@
 - [poke-engine](https://github.com/mew980116/poke-engine)：Rust 战斗搜索引擎（expectiminimax / MCTS / 伤害计算）→ hybrid 预计算参考
 - 本地 [20201227.js](20201227.js)：PO 主脚本，规则 AI 基线，路线 B 的持续优化对象
 
-**分阶段路线**：
+**原分阶段路线**（PO 优先、PS 迁移）已被当前目标替代。2026-09-30 起，近期主线改为
+「PS 私服 / 人工客户端 / 多 provider 测试基础设施」，PO 继续作为已有平台和状态采集实现保留。
 
-1. 短期（PO 验证）：DeepSeek 决策链路 + 场况注入 + KAG 克制 / Effect（见下「DeepSeek 接入」）
-2. 中期：PO 服务化机器人（双路线并行）
-3. 长期：迁移 PS，做竞技 AI
+---
+
+## 当前阶段：PS 多对战方测试基础设施（2026-09-30）
+
+### 目标
+
+在一台服务器上运行 PS 私服、决策服务和一个自动客户端；用户从自己的电脑连接该私服，
+作为人工对手。随后用同一套接口覆盖不同 provider 和部署方式。
+
+详细拓扑、目录职责和启动方式见 [ARCHITECTURE.md](ARCHITECTURE.md)。
+
+### P0：运行环境与最小链路
+
+- [x] 本机安装 PS 私服依赖：`D:\Other\ai\ps-sim`，含 `node_modules` 和构建产物。
+- [x] PS WebSocket 客户端、PS request adapter、统一 action contract。
+- [x] 决策服务按账号 / provider 路由：`llm`、`random`。
+- [x] `random vs random` 私服对局实测完成。
+- [x] 长 state 改用 `POST /choice`，保留 GET 兼容，避免长对局触发 URL/header 上限。
+- [x] 被困住时不再生成非法 `switch` 候选。
+- [x] Mify credential 已验证可用：`xiaomi/mimo-v2.6-flash` 返回 HTTP 200；credential 内容不写入文档。
+- [x] 实际 PS state fixture：Mimo flash 关闭 thinking 可返回合法 `attack`，单回合约 125 秒。
+- [x] 实际 PS state fixture：DeepSeek flash + `low` thinking 可返回合法 `attack`，单回合约 54 秒。
+- [x] `selfplay.ps1` 改用 PS HTTP 根路径健康检查，避免 Windows 权限受限时 `Get-NetTCPConnection` 误报。
+
+### P1：服务器私服 + 用户电脑人工对战
+
+- [ ] 在服务器上固定启动 PS 私服（端口 8000）。
+- [ ] 在服务器上固定启动 `po-pokellmon-tool/server.js`（端口 8092）。
+- [ ] 服务器上的自动客户端可以用 LLM / random provider 完成对战。
+- [ ] 用户电脑通过 `http://<服务器IP>:8000/` 进入私服。
+- [ ] 用户电脑可以挑战服务器上的自动客户端并完成至少一局。
+- [ ] 配置防火墙，仅允许用户电脑或可信内网访问 8000。
+- [ ] 补充服务器部署脚本、日志目录和进程守护方式。
+
+### P2：provider 对战矩阵
+
+- [ ] `random vs random`：作为每次代码改动后的 smoke test。
+- [x] `LLM vs random`：已完成至少一整局，LLM 连续返回合法动作且未出现 fallback；多局稳定性和决策质量仍需继续评测。
+  - 2026-09-30 本机 `battle-gen8randombattle-45`：LLM 连续 8 次决策、0 次 fallback；为控制耗时，未等待整局结束。
+  - 2026-09-30 本机 `battle-gen8randombattle-47`：DeepSeek flash + low thinking 完成 25 回合，DeepSeek 6-0 获胜，25 次决策 0 次 fallback；平均单回合约 26.8 秒。决策质量仍需多局复测，不能仅凭一局评价。
+- [ ] `LLM vs 人工`：记录人工操作和 LLM 决策日志，确认双方视角一致。
+- [ ] `LLM A vs LLM B`：支持两个账号分别指定模型/profile/credential。
+- [ ] `LLM vs foul-play`：设计 foul-play 的 PS action adapter；当前不纳入 decision-router。
+- [ ] 批量运行上述组合，输出胜率、平均回合数、fallback 率、平均决策耗时。
+
+### P3：LLM provider 与凭据
+
+- [x] 更新并验证 `po-pokellmon-tool/llm-credentials.json` 中的 Mify credential（仅记录验证结果，不记录 key）。
+- [x] 单独做 `/choice` LLM smoke test，区分网络不可达、HTTP 401、超时、解析失败。
+- [x] 为本地测试增加回合预算和 `simulate_turn` 门禁的环境变量覆盖，默认生产行为不变。
+- [ ] 为 LLM A / LLM B 增加独立 profile 或端口配置，避免共享状态和日志互相覆盖。
+- [ ] 明确 shadow 模式、真实执行模式和 fallback 的验收日志格式。
+
+### P4：官方 PS rating
+
+- [ ] 使用独立测试账号完成正常登录，不使用 `PS_SKIP_LOGIN=1`。
+- [ ] 使用 `PS_SEARCH_FORMAT` 进入官方 rating 对战。
+- [ ] 先 shadow 观察，再允许真实出招。
+- [ ] 记录 rating、账号、format、对局 ID 和服务端错误；禁止使用生产账号做自动化压力测试。
+- [ ] 明确官方服限制：同 IP 双号不能作为自打自方案，rating 测试只保留单个自动客户端。
+
+### P5：评测与可观测性
+
+- [ ] 每局统一记录：房间、format、双方账号、provider、模型/profile、state、actions、最终 action。
+- [ ] viewer 支持按 provider、账号和 fallback 筛选对局。
+- [ ] 增加对局结果汇总脚本，支持按 matchup 统计。
+- [ ] 增加失败分类：非法 action、断线、LLM 401、LLM 超时、服务崩溃、PS 规则拒绝。
+- [ ] 将 `random vs random`、`random vs LLM` 纳入最小回归清单。
+
+### 当前明确不做
+
+- [ ] 暂不把 `foul-play` 混入当前 `llm/random` 路由，先完成 PS adapter 设计。
+- [ ] 暂不把官方 rating 当作本地自打自方案。
+- [ ] 暂不大规模重写旧 PO 规则 AI；只维护其作为 PO provider / baseline 所需的接口。
 
 ---
 
@@ -446,12 +520,12 @@
   3. **provider 层**（后端）：`llm` / `random` / `rules` / `foulplay`（包装后）
 - **三处不成立**（记下来免得重复讨论）：
   1. **`foulplay` 不是 provider，是另一个前端** —— 它是自带引擎的完整客户端（自己连 PS、自己维护战斗状态），**没有 `state → choice` 接口**。要在后端里跑，前提是后端**自己拥有一个 PS 战斗流**，即下方「simulate_turn 内核换 PS 引擎」那条。
-  2. **前端不瘦，反而是最重的一块**：PO 侧 [po-script.js](po-pokellmon/po-script.js) 承担对手招式/使用次数/道具/特性/双墙/陷阱/完整战报的采集与推断；PS 侧 [decision-bridge.js](po-pokellmon-tool/platform/ps/decision-bridge.js) 的 `buildState` 同理。边界应画在「采集+推断 / 推理+决策」之间（与 [modular-ai-architecture.md](docs/architecture/modular-ai-architecture.md) 的 5 模块一致），**不是「对战 / AI」之间**。
+  2. **前端不瘦，反而是最重的一块**：PO 侧 [po-script.js](po-pokellmon/po-script.js) 承担对手招式/使用次数/道具/特性/双墙/陷阱/完整战报的采集与推断；PS 侧 [decision-bridge.js](platform/ps/decision-bridge.js) 的 `buildState` 同理。边界应画在「采集+推断 / 推理+决策」之间（与 [modular-ai-architecture.md](docs/architecture/modular-ai-architecture.md) 的 5 模块一致），**不是「对战 / AI」之间**。
   3. **两个前端能力不等价**：PO 只给「PO 愿意给的」，PS 能给完整 `request`。前端对后端**是能力约束**，不是透明管道 —— 同一个 provider 在两边表现必然不同。
-- **现状盘点**：PS 的 [decision-bridge.js](po-pokellmon-tool/platform/ps/decision-bridge.js) 有 `agent: 'llm' | 'random'`，但那是**进程级**（`PS_DECISION` 环境变量），且 `random` **跑在客户端**、不请求服务；PO 侧**没有「接入方式」这个概念**、也没有 `random`（webCall 失败走 `pklmFallbackAttack`）；[server.js](po-pokellmon-tool/server.js) 只把 `state.account` 写进日志，**不做任何路由**。账号来源：PO 已进 `state.account`（[po-script.js](po-pokellmon/po-script.js) 采集），PS 是 `PSClient.username`（**尚未进 state**）。
+- **已完成（2026-09-30）**：新增 `battle-state/v1` 基础契约、统一合法动作候选、服务端 `account → provider` 路由；PO/PS 都传 `platform`、`account`、`capabilities` 和 `actions`。`random` 已从 PS 客户端挪到决策服务端，`PS_DECISION` 仅作为本机兼容提示；服务端 provider 已有 `llm` / `random`。`rules` 暂留名，因 `20201227.js` 依赖 PO 运行时对象，尚未包装成 `state → choice` 服务。
 
 - [ ] ⚪ **按账号选接入方式（llm/random）**：在契约上挂一张 `account → provider` 路由表。PO 侧零改动（`state.account` 已在传）；PS 侧需在 `buildState` 补 `account` 字段。**同时要把 PS 的 `random` 从客户端挪到服务端**，否则同一张表要拆两处（服务端一份、PS 客户端一份）。顺带把 `decision-bridge` 里 `agent === 'random'` 那个内联分支抽成 provider 表，否则加第三个后端就是 if 叠 if。
-- [ ] ⚪ **目录：`platform/ps/` 从 `po-pokellmon-tool/` 里提出来** —— 现在后端目录里躺着一个前端，正是这个二分没拉直的证据。真按三层切：`platform/` 提到顶层，`po-pokellmon-tool/` 缩回纯 provider。
+- [x] ✅ **目录：`platform/ps/` 已从 `po-pokellmon-tool/` 提到项目顶层（2026-09-30）** —— `po-pokellmon-tool/` 缩回纯 provider；PS 对计算器、决策服务和日志的路径引用已同步调整。
 - [ ] ⚪ **`foulplay` 定位二选一（未定）**：**① 并排客户端**（当下可行 —— 单独 `platform/ps/foulplay/`，用另一个账号连同一台 PS 服务器；不参与契约、也不参与按账号路由）；**② 升级成 provider**（等 PS 引擎进后端之后，才真和 `llm` 同层、可进同一张路由表）。**PO 侧不适用** —— PO 没有 battle stream 可以喂给它。
 - **安全注记**：`state.account` 是**客户端自报**的。服务只绑 `127.0.0.1` 时无意义；一旦对外暴露，就能靠改 account 选到「随机」这类低配模式绕过 AI。
 

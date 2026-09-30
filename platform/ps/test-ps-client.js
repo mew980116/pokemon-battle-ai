@@ -81,6 +81,25 @@ return Promise.resolve().then(function () {
     return Promise.resolve().then(function () {
         searchSocket.emit('message', '|updateuser|SearchUser|1');
         assert.deepStrictEqual(searchSocket.sent, ['|/trn SearchUser,0,assertion-search', '|/search gen8randombattle']);
-        console.log('PS client tests passed');
+
+        var oldRival = process.env.PS_RIVAL;
+        process.env.PS_RIVAL = 'none';
+        var noChallengeSocket = new FakeSocket();
+        var noChallengeClient = new clientModule.PSClient({
+            username: 'NoChallengeUser',
+            rival: '',
+            shadowMode: true,
+            loginRequest: function () { return Promise.resolve('assertion-no-challenge'); }
+        });
+        noChallengeClient.connect(noChallengeSocket);
+        noChallengeSocket.emit('open');
+        noChallengeSocket.emit('message', '|challstr|abc|123');
+        return Promise.resolve().then(function () {
+            noChallengeSocket.emit('message', '|updateuser|NoChallengeUser|1');
+            assert.deepStrictEqual(noChallengeSocket.sent, ['|/trn NoChallengeUser,0,assertion-no-challenge']);
+            if (oldRival === undefined) delete process.env.PS_RIVAL;
+            else process.env.PS_RIVAL = oldRival;
+            console.log('PS client tests passed');
+        });
     });
 });

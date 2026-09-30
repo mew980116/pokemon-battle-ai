@@ -68,7 +68,7 @@ var client = new clientModule.PSClient({
     }
 });
 console.log('[ps mode] ' + (searchFormat ? 'ladder search: ' + searchFormat : 'challenge: ' + rival + ' (' + challengeFormat + ')')
-    + ' | decision: ' + (decisionMode === 'random' ? 'random (local, no LLM)' : 'llm ' + (process.env.POKELLMON_TOOL_URL || 'http://127.0.0.1:8092/choice'))
+    + ' | decision: ' + (decisionMode === 'random' ? 'random (server provider hint)' : 'llm ' + (process.env.POKELLMON_TOOL_URL || 'http://127.0.0.1:8092/choice'))
     + ' | login: ' + (skipLogin ? 'skip (local server)' : 'official ' + (process.env.PS_WS_URL || 'wss://sim3.psim.us/showdown/websocket'))
     + (autoAccept ? ' | auto-accept' : '')
     + (shadowMode ? ' | shadow' : ''));
@@ -77,7 +77,11 @@ var chatMessage = process.env.PS_CHAT_MESSAGE || '';
 var bridge = new bridgeModule.DecisionBridge({
     url: process.env.POKELLMON_TOOL_URL,
     shadow: client.shadowMode,
-    agent: decisionMode,
+    // random now runs in the decision service. Keep agent for old tests;
+    // production requests always go through /choice.
+    agent: 'llm',
+    account: process.env.PS_ACCOUNT || client.username,
+    providerHint: decisionMode,
     onSuggestion: function (entry) {
         if (entry.error) {
             console.log('[ps decision error] ' + entry.error + (entry.room ? ' (' + entry.room + ')' : ''));

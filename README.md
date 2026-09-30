@@ -1,5 +1,9 @@
 # 宝可梦战斗AI系统
 
+> 当前架构总览请先阅读 [ARCHITECTURE.md](ARCHITECTURE.md)。
+> 本项目当前同时支持 PO 与 Pokémon Showdown（PS）两种平台，并通过统一的
+> `battle-state/v1` 接入 `random`、`llm` 等决策 provider。
+
 ## 项目作用
 
 本项目是一个宝可梦战斗AI系统，主要用于在宝可梦对战中自动分析战场情况、评估双方精灵属性、预测对手行动，并做出最优的战斗决策。系统能够根据战场实时数据，计算伤害、分析速度、评估交换精灵的利弊，从而帮助玩家获得战斗优势。
@@ -55,9 +59,137 @@
 
 ## 项目结构
 
-- **20201227.js** - 主战斗AI逻辑文件
-- **movedata.json** - 技能数据文件
-- **db/pokes/weight.txt** - 宝可梦体重数据
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - 当前系统架构、部署拓扑和测试矩阵
+- **po-pokellmon/** - PO 侧状态采集与 LLM 接入
+- **po-pokellmon-tool/** - 统一决策服务、provider 路由和 tool
+- **platform/ps/** - PS WebSocket 客户端、适配器和本地私服脚本
+- **po-pokellmon-view/** - 对局与决策日志查看
+- **20201227.js** - 旧版 PO 规则 AI 基线
+- **movedata.json / po-data/** - 对战数据与知识库
+
+## 当前推荐入口
+
+- 想了解整体结构：阅读 [ARCHITECTURE.md](ARCHITECTURE.md)
+- 想启动决策服务：阅读 [po-pokellmon-tool/README.md](po-pokellmon-tool/README.md)
+- 想搭建 PS 私服、自打自或让人工电脑接入：阅读
+  [platform/ps/local-server/README.md](platform/ps/local-server/README.md)
+- 想查看当前阶段和待办：[TODO.md](TODO.md)
+
+## PS 私服与决策服务启动
+
+以下命令适用于 Windows PowerShell。建议使用 3 个终端分别运行；不要关闭正在运行
+PS 私服和决策服务的终端。
+
+### 一次性安装 PS 私服
+
+如果 `D:\Other\ai\ps-sim` 尚未存在：
+
+```powershell
+pwsh -File .\platform\ps\local-server\setup-server.ps1 -Dir D:\Other\ai\ps-sim
+```
+
+脚本会完成 clone、`npm install`、构建，并写入本地开发服配置。
+
+### 终端 A：启动 PS 私服
+
+```powershell
+Set-Location D:\Other\ai\ps-sim
+node pokemon-showdown start --skip-build
+```
+
+默认地址：
+
+```text
+网页：http://127.0.0.1:8000/
+WebSocket：ws://127.0.0.1:8000/showdown/websocket
+```
+
+另开终端检查：
+
+```powershell
+Invoke-WebRequest -UseBasicParsing http://127.0.0.1:8000/ | Select-Object StatusCode
+```
+
+### 终端 B：启动 LLM 决策服务
+
+回到项目根目录，使用当前 `llm-config.json` 的 active profile：
+
+```powershell
+Set-Location D:\Other\ai\pokemon-battle-ai
+node .\po-pokellmon-tool\server.js
+```
+
+默认服务地址为 `http://127.0.0.1:8092`。也可以显式指定 Mify
+`mimo-v2.6-flash`（关闭 thinking）：
+
+```powershell
+$env:POKELLMON_TOOL_PORT = '8092'
+$env:POKELLMON_PROVIDER = 'mify'
+$env:POKELLMON_MODEL = 'xiaomi/mimo-v2.6-flash'
+$env:POKELLMON_THINKING = '0'
+node .\po-pokellmon-tool\server.js
+```
+
+检查服务：
+
+```powershell
+Invoke-WebRequest -UseBasicParsing http://127.0.0.1:8092/health
+```
+
+如果需要 DeepSeek flash + low thinking，可改用端口 8094：
+
+```powershell
+$env:POKELLMON_TOOL_PORT = '8094'
+$env:POKELLMON_PROVIDER = 'mify'
+$env:POKELLMON_MODEL = 'deepseek/deepseek-flash'
+$env:POKELLMON_THINKING = '1'
+$env:POKELLMON_EFFORT = 'low'
+node .\po-pokellmon-tool\server.js
+```
+
+服务会从 `po-pokellmon-tool\llm-credentials.json` 读取 credential，不要把 key
+写入命令行、README 或日志。
+
+### 终端 C：启动自动对战客户端
+
+先做 random vs random 链路验证：
+
+```powershell
+Set-Location D:\Other\ai\pokemon-battle-ai
+pwsh -File .\platform\ps\local-server\selfplay.ps1 -AIDecision random
+```
+
+LLM vs random：
+
+```powershell
+$env:POKELLMON_TOOL_URL = 'http://127.0.0.1:8092/choice'
+pwsh -File .\platform\ps\local-server\selfplay.ps1 -AIDecision llm
+```
+
+### 服务器自动客户端与另一台电脑人工对战
+
+服务器上启动一个只等待挑战的 LLM 客户端：
+
+```powershell
+$env:PS_WS_URL = 'ws://127.0.0.1:8000/showdown/websocket'
+$env:PS_SKIP_LOGIN = '1'
+$env:PS_USERNAME = 'LLM-Bot'
+$env:PS_RIVAL = 'none'
+$env:PS_AUTO_ACCEPT = '1'
+$env:PS_DECISION = 'llm'
+$env:POKELLMON_TOOL_URL = 'http://127.0.0.1:8092/choice'
+node .\platform\ps\run-shadow.js
+```
+
+用户电脑只需在浏览器打开：
+
+```text
+http://<服务器IP>:8000/
+```
+
+然后在私服中挑战 `LLM-Bot`。决策服务 8092 不需要对用户电脑开放；
+服务器防火墙只应允许可信内网或 VPN 访问 8000。该开发服启用了
+`noguestsecurity`，禁止直接暴露到公网。
 
 ## 使用方法
 

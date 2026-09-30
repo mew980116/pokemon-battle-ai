@@ -17,8 +17,16 @@ param(
 $ErrorActionPreference = 'Stop'
 $clientRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..\..')).Path
 
-if (-not (Get-NetTCPConnection -LocalPort $ServerPort -State Listen -ErrorAction SilentlyContinue)) {
-    throw "本地 PS 服没在端口 $ServerPort 上跑。先执行: cd <ps-sim>; node pokemon-showdown start --skip-build"
+$psUri = [Uri]$PSUrl
+$healthScheme = if ($psUri.Scheme -eq 'wss') { 'https' } else { 'http' }
+$healthUrl = $healthScheme + '://' + $psUri.Authority + '/'
+try {
+    $health = Invoke-WebRequest -UseBasicParsing -Uri $healthUrl -TimeoutSec 5
+    if ($health.StatusCode -lt 200 -or $health.StatusCode -ge 500) {
+        throw "unexpected HTTP status $($health.StatusCode)"
+    }
+} catch {
+    throw "PS server health check failed at $healthUrl. Start the server first: cd <ps-sim>; node pokemon-showdown start --skip-build. Details: $($_.Exception.Message)"
 }
 
 function Start-LocalPlayer {
@@ -47,7 +55,7 @@ function Start-LocalPlayer {
     [System.Diagnostics.Process]::Start($startInfo) | Out-Null
 }
 
-Write-Host "陪练 $RivalPlayer 先起（自动接受挑战、随机出招）..."
+Write-Host "陪练 $RivalPlayer 先起（自动接受挑战、服务端 random provider）..."
 Start-LocalPlayer -Name $RivalPlayer -Rival '' -Decision 'random' -AutoAccept
 Start-Sleep -Seconds 3
 
