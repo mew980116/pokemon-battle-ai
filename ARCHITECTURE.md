@@ -18,7 +18,8 @@
    - LLM / random / foul-play 等多种 provider 互战
    - LLM 参加官方 PS rating 对战
 
-其中 `random` 已经可以作为链路 smoke test；`foul-play` 尚未接入当前 provider 路由。
+其中 `random` 已经可以作为链路 smoke test；`foul-play` 采用并排 PS 客户端方式接入，
+不直接接入当前 `state -> choice` provider 路由。
 
 ## 2. 总体数据流
 
@@ -84,6 +85,7 @@ PO battle/sys API
 | `platform/ps/adapter.js` | PS 协议和 request 转换为统一状态/动作 |
 | `platform/ps/decision-bridge.js` | PS request 调用决策服务并提交合法动作 |
 | `platform/ps/run-shadow.js` | PS 自动客户端入口，支持真实执行和 shadow |
+| `platform/ps/foul-play/` | 预留 foul-play 并排客户端部署目录；foul-play 自己连接 PS、维护状态并提交动作 |
 | `platform/ps/local-server/` | PS 私服安装、自打自和复现脚本 |
 | `po-pokellmon-view/` | 对局和 LLM 决策日志查看 |
 
@@ -112,6 +114,32 @@ PS_WS_URL=ws://127.0.0.1:8000/showdown/websocket
 ```
 
 用户电脑通过浏览器访问服务器的 PS HTTP 端口，进入同一个私服房间并挑战自动客户端。
+
+### 4.3 LLM 调试期间的 foul-play 并排服务
+
+foul-play 是自带 PS 客户端和战斗引擎的完整对战程序，不是当前决策服务可以直接调用的
+`state -> choice` provider。因此调试 LLM 时，建议在同一台服务器上另开一个 foul-play
+客户端账号，作为独立对手：
+
+```text
+服务器
+├── PS 私服 :8000
+├── LLM 决策服务 :8092
+├── LLM 自动客户端（platform/ps/run-shadow.js）
+└── foul-play 客户端（独立账号，连接同一 PS 私服）
+```
+
+推荐运行方式：
+
+- foul-play 使用 `accept_challenge` / 自动接受挑战模式；
+- LLM 客户端向 foul-play 账号发起定向挑战，或由人工账号挑战 foul-play；
+- foul-play 对局结束后按 `run-count` 决定退出还是继续寻找下一场；
+- 默认 `run-count=1` 时只打一场，持续调试需要配置较大的 `run-count` 或连续运行模式；
+- foul-play 不进入 `decision-router`，也不复用当前 `battle-state/v1`。
+
+这套方式的价值是：LLM 调试期间可以让 foul-play 作为稳定、可重复的自动对手，
+同时不影响现有 `llm` / `random` provider 路由。foul-play 当前不支持 Dynamax / Z-Moves，
+因此测试 format 应与其能力保持一致，不能把它当作完整 Gen8 Dynamax 对手。
 
 安全要求：
 
@@ -173,7 +201,7 @@ platform/ps/run-shadow.js
 | `random` | 可用 | 只从平台给出的合法动作中随机选择 |
 | `llm` | 可用但依赖 credential | 当前走 `po-pokellmon-tool` 的 prompt/tool 链路 |
 | `rules` | 预留 | 旧 PO 规则 AI 还没有包装成统一服务 |
-| `foul-play` | 未接入 | 需要 PS 客户端或 server-side adapter |
+| `foul-play` | 并排客户端方案已确定 | 独立连接 PS 的客户端；当前不进入 `decision-router` |
 
 `/choice` 推荐使用：
 
@@ -193,7 +221,7 @@ Body: battle state JSON
 | P1 | random vs LLM | 私服 / 本机 | LLM 请求、合法 action、fallback、日志完整 |
 | P2 | LLM vs 人工 | 服务器私服 + 用户电脑 | 人工能从浏览器进入并完成挑战 |
 | P3 | LLM A vs LLM B | 私服 | 两个账号可独立配置模型/profile/provider |
-| P4 | LLM vs foul-play | 私服 | foul-play 能通过统一动作边界提交决策 |
+| P4 | LLM vs foul-play | 私服 | 服务器部署独立 foul-play 客户端，自动接受挑战并完成连续多场对战 |
 | P5 | LLM vs random / foul-play 批量评测 | 私服 | 可重复运行、保存对局和统计结果 |
 | P6 | LLM official rating | 官服 | 独立测试账号正常登录、search、完成 rating 对战 |
 
@@ -212,4 +240,3 @@ Body: battle state JSON
 - [po-pokellmon-tool README](po-pokellmon-tool/README.md)：决策服务、LLM/tool、PO/PS 接入
 - [PS 私服 README](platform/ps/local-server/README.md)：私服安装、启动、自打自
 - [TODO](TODO.md)：当前阶段、测试矩阵和未完成事项
-

@@ -60,6 +60,7 @@
 - [ ] 在服务器上固定启动 PS 私服（端口 8000）。
 - [ ] 在服务器上固定启动 `po-pokellmon-tool/server.js`（端口 8092）。
 - [ ] 服务器上的自动客户端可以用 LLM / random provider 完成对战。
+- [ ] 在服务器上部署独立 foul-play 客户端账号，启用自动接受挑战，作为 LLM 调试期间的长期自动对手。
 - [ ] 用户电脑通过 `http://<服务器IP>:8000/` 进入私服。
 - [ ] 用户电脑可以挑战服务器上的自动客户端并完成至少一局。
 - [ ] 配置防火墙，仅允许用户电脑或可信内网访问 8000。
@@ -73,7 +74,7 @@
   - 2026-09-30 本机 `battle-gen8randombattle-47`：DeepSeek flash + low thinking 完成 25 回合，DeepSeek 6-0 获胜，25 次决策 0 次 fallback；平均单回合约 26.8 秒。决策质量仍需多局复测，不能仅凭一局评价。
 - [ ] `LLM vs 人工`：记录人工操作和 LLM 决策日志，确认双方视角一致。
 - [ ] `LLM A vs LLM B`：支持两个账号分别指定模型/profile/credential。
-- [ ] `LLM vs foul-play`：设计 foul-play 的 PS action adapter；当前不纳入 decision-router。
+- [ ] `LLM vs foul-play`：采用独立 PS 客户端并排部署，不纳入 `decision-router`；foul-play 自动接受 LLM 客户端的挑战。
 - [ ] 批量运行上述组合，输出胜率、平均回合数、fallback 率、平均决策耗时。
 
 ### P3：LLM provider 与凭据
@@ -100,9 +101,19 @@
 - [ ] 增加失败分类：非法 action、断线、LLM 401、LLM 超时、服务崩溃、PS 规则拒绝。
 - [ ] 将 `random vs random`、`random vs LLM` 纳入最小回归清单。
 
+### Foul-play 部署结论（2026-09-30）
+
+- [x] 确认 foul-play 是自带 PS 客户端和战斗引擎的完整客户端，不是当前 `state -> choice` provider。
+- [x] 确认最小接入方式是：foul-play 使用独立账号连接同一台 PS 私服，与 `platform/ps/run-shadow.js` 并排运行。
+- [x] 确认 foul-play 可以使用自动接受挑战模式作为 LLM 调试期间的自动对手。
+- [x] 确认 foul-play 对局结束后是否继续由 `run-count` 控制：默认通常只运行一场，连续测试需要显式配置多场次数或连续运行方式。
+- [x] 记录能力边界：当前 foul-play 不支持 Dynamax / Z-Moves；涉及这些机制的 PS 对局不能直接作为等价对照。
+- [ ] 增加服务器部署脚本、foul-play 配置模板、日志目录和进程守护。
+- [ ] 增加 LLM 客户端发起挑战、foul-play 自动接受、对局结束后继续下一场的端到端验收。
+
 ### 当前明确不做
 
-- [ ] 暂不把 `foul-play` 混入当前 `llm/random` 路由，先完成 PS adapter 设计。
+- [ ] 暂不把 `foul-play` 混入当前 `llm/random` 路由；优先完成独立客户端部署和自动接受挑战链路。
 - [ ] 暂不把官方 rating 当作本地自打自方案。
 - [ ] 暂不大规模重写旧 PO 规则 AI；只维护其作为 PO provider / baseline 所需的接口。
 
@@ -526,7 +537,7 @@
 
 - [ ] ⚪ **按账号选接入方式（llm/random）**：在契约上挂一张 `account → provider` 路由表。PO 侧零改动（`state.account` 已在传）；PS 侧需在 `buildState` 补 `account` 字段。**同时要把 PS 的 `random` 从客户端挪到服务端**，否则同一张表要拆两处（服务端一份、PS 客户端一份）。顺带把 `decision-bridge` 里 `agent === 'random'` 那个内联分支抽成 provider 表，否则加第三个后端就是 if 叠 if。
 - [x] ✅ **目录：`platform/ps/` 已从 `po-pokellmon-tool/` 提到项目顶层（2026-09-30）** —— `po-pokellmon-tool/` 缩回纯 provider；PS 对计算器、决策服务和日志的路径引用已同步调整。
-- [ ] ⚪ **`foulplay` 定位二选一（未定）**：**① 并排客户端**（当下可行 —— 单独 `platform/ps/foulplay/`，用另一个账号连同一台 PS 服务器；不参与契约、也不参与按账号路由）；**② 升级成 provider**（等 PS 引擎进后端之后，才真和 `llm` 同层、可进同一张路由表）。**PO 侧不适用** —— PO 没有 battle stream 可以喂给它。
+- [x] ✅ **`foulplay` 定位已确定（2026-09-30）**：采用并排客户端方案——单独账号连接同一台 PS 服务器，作为 LLM 调试期间的自动对手；不参与契约、不参与按账号路由。后续只有在 PS 引擎进入后端后，才重新评估是否升级成 provider。**PO 侧不适用** —— PO 没有 battle stream 可以喂给它。
 - **安全注记**：`state.account` 是**客户端自报**的。服务只绑 `127.0.0.1` 时无意义；一旦对外暴露，就能靠改 account 选到「随机」这类低配模式绕过 AI。
 
 ---

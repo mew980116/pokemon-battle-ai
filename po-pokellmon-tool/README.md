@@ -266,7 +266,8 @@ node po-pokellmon-tool/test-predict-gate.js
 2. **私服 random vs LLM**：验证决策服务、LLM provider、fallback 和日志。
 3. **私服 LLM vs 人工**：PS 私服和自动客户端在服务器上运行，人工从另一台电脑的浏览器进入。
 4. **私服 LLM A vs LLM B**：两个 PS 账号分别配置不同 provider、profile 或模型。
-5. **私服 LLM vs foul-play**：待 foul-play 接入统一的 PS action adapter 后进行。
+5. **私服 LLM vs foul-play**：foul-play 作为独立 PS 客户端并排部署，使用自动接受挑战模式；
+   不接入当前统一 `state -> choice` provider 路由。
 6. **官方 PS rating**：使用独立测试账号和 `PS_SEARCH_FORMAT`，不依赖本地私服。
 
 每场测试都应记录房间 ID、双方账号/provider、format、state/actions、fallback、耗时和胜负。
@@ -348,7 +349,15 @@ node po-pokellmon-tool/server.js
 - `random`：从平台提交的合法动作候选中随机选择
 
 `rules` 暂作为保留名称；现有 `20201227.js` 依赖 PO 运行时对象，尚未包装成
-`state -> choice` 服务。`foul-play` 不参与此路由。
+`state -> choice` 服务。`foul-play` 不参与此路由，而是作为独立 PS 客户端运行。
+
+LLM 调试期间，推荐在同一台 PS 私服服务器上运行一个独立 foul-play 账号：
+
+- foul-play 使用自动接受挑战模式；
+- LLM 客户端向该账号发起定向挑战；
+- 对局结束后由 foul-play 的 `run-count` 或连续运行配置决定是否开始下一场；
+- 默认单次运行通常只打一场，批量测试必须显式设置多场次数；
+- foul-play 当前不支持 Dynamax / Z-Moves，测试 format 需要考虑这一能力边界。
 
 账号映射优先于 `PS_DECISION` 的兼容提示。服务只监听 `127.0.0.1` 时可保留
 `allowClientHint: true`；若服务需要对外暴露，应设为 `false`，避免客户端伪造 provider。
