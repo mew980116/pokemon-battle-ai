@@ -55,6 +55,11 @@
 - [x] 实际 PS state fixture：DeepSeek flash + `low` thinking 可返回合法 `attack`，单回合约 54 秒。
 - [x] `selfplay.ps1` 改用 PS HTTP 根路径健康检查，避免 Windows 权限受限时 `Get-NetTCPConnection` 误报。
 
+### P0.5：PS 协议解析 bug（高优先，直接污染决策输入与观战数据）
+
+- [ ] **boosts 累加无上限（且疑似重复计数）**：[adapter.js](platform/ps/adapter.js) L240 的 boost/unboost 直接 `+= amount`，不夹到 [-6, +6]，也没有和后到的 `-unboost`/`-setboost`/`-clearboost`/`-clearallboost` 做完整对账。实测（battle-gen8battlefactory-14 T35）：`opp.boosts: ["atk+7","def+7","accuracy+7","evasion-1"]`（对手 Zygarde），三项 +7 已超 +6 上限。修复时除夹取外，需排查同一 `|boost|` 消息是否被处理两次（3×Coil 理论上只有 +3，涨到 +7 的路径对不上），并对照 PS 协议补齐 setboost/clearboost/clearallboost 的处理。
+- [ ] **形态宝可梦在队伍列表里重复计入，总数超 6**：[adapter.js](platform/ps/adapter.js) 的 Pokemon upsert（L134 / L207 一带）按名字匹配；同一只宝可梦在 PS 消息里先后以**形态名**和**基础名**出现（`Darmanitan-Galar` ↔ `Darmanitan`、`Zamazenta-Crowned` ↔ `Zamazenta`、`Xerneas-*` ↔ `Xerneas`）时被当成两只新开条目。实测（battle-14）：`myTeam` 8 条（Heatran/Zamazenta-Crowned/Darmanitan-Galar/Ho-Oh/Zekrom/Kyogre/**Darmanitan**/**Zamazenta**）、`oppTeam` 7 条（含 `Xerneas-*` 与 `Xerneas`）。该污染影响 bench 推导、换人候选生成、random provider 的合法动作集合与 viewer 展示；归并需用 ident/slot 优先、名字做 toID + 砍形态后缀的两级匹配（可参考 po-pokellmon-tool `tools.js` 的 SPECIES_ALIAS 思路）。
+
 ### P1：服务器私服 + 用户电脑人工对战
 
 - [ ] 在服务器上固定启动 PS 私服（端口 8000）。
