@@ -99,7 +99,7 @@ process.on('unhandledRejection', function (reason) {
 
 var PORT = Number(process.env.POKELLMON_TOOL_PORT) || 8092;
 var HOST = '127.0.0.1';
-var SERVER_VERSION = '0.9.9';   // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
+var SERVER_VERSION = '0.9.11';  // tool 分支版本（改动时 bump，随日志记录；大改 +0.1.0）
 
 // ==== DeepSeek 模型参数（tool 分支：tool 调用 + 可开关思考链）====
 // 对战主脑用 v4-flash：这个场景（超大计算量 + 幻觉高发）里 pro 的"深想"反而被门禁压制，
@@ -126,7 +126,7 @@ var THINKING_ENABLED = process.env.POKELLMON_THINKING !== undefined ?
 var REASONING_EFFORT = process.env.POKELLMON_EFFORT || LLM.effort || 'low';
 var FIRST_TURN_THINKING = process.env.POKELLMON_FIRST_THINKING ? (process.env.POKELLMON_FIRST_THINKING === '1') : true;
 var FIRST_TURN_EFFORT = process.env.POKELLMON_FIRST_EFFORT || LLM.first_effort || 'low';
-var MAX_TOKENS = null;                  // 不限制输出 token（思考链 + 最终答案）
+var MAX_TOKENS = envNumber('POKELLMON_MAX_TOKENS', 0) || null; // 0/null=走 profile 的 max_tokens（默认 8192）；撞顶不上调，由 finish_reason=length 触发 finalizeNoThink 收敛（0.9.10）
 var TIMEOUT_MS = 240000;                // 单次请求的硬墙钟上限（不设 max_tokens，8192 是服务端默认）
 var MAX_TOOL_ROUNDS = envNumber('POKELLMON_MAX_TOOL_ROUNDS', 35); // 最多 function calling 轮数，超过则 no-think 收敛
 // 单回合总时长上限：到点走 finalizeNoThink()（关思考、用已有 tool 结果收答案）。
@@ -303,6 +303,14 @@ function extractMessage(data) {
     } catch (e) {
         return { content: data };
     }
+}
+
+function extractFinishReason(data) {
+    try {
+        var obj = JSON.parse(data);
+        if (obj.choices && obj.choices[0]) return obj.choices[0].finish_reason || '';
+    } catch (e) {}
+    return '';
 }
 
 function extractUsage(data) {
@@ -1035,6 +1043,21 @@ function handleLlmChoice(res, state) {
             var reply = msg.content || '';
             lastReply = reply;
             var toolCalls = msg.tool_calls;
+            var finishReason = extractFinishReason(data);
+
+            // 输出撞 max_tokens 上限（finish_reason=length）：content 通常被截断（思考模式下常整个为空，
+            // 因为 token 全被 reasoning 吃掉），tool_calls 也可能是半截 JSON —— 都不可信。
+            // 与超时/轮次耗尽同一处理：finalizeNoThink 关思考、用已有 tool 结果直接收最终 JSON（0.9.10）。
+            // 此前方案是把上限 8192→16384，实测只是推迟撞顶且拉长耗时，改回收敛路径。
+            if (finishReason === 'length' && requestState.phase !== 'final') {
+                console.log('[choice] turn=' + state.turn + ' max_tokens cap hit (finish_reason=length), ' + ms + 'ms -> finalize no-think');
+                if (ENABLE_PREDICT_GATE && ledger) {
+                    gateBypassed = true;
+                    console.log('[gate] turn=' + state.turn + ' gate BYPASSED by max_tokens finalization');
+                }
+                finalizeNoThink('max_tokens_reached');
+                return;
+            }
 
             if (toolCalls && toolCalls.length) {
                 // DS 想调 tool：记录并执行，把结果追加进 messages，继续下一轮

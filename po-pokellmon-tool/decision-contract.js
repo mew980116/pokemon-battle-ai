@@ -131,7 +131,11 @@ function validateResponseAction(action, state) {
         if (candidateType !== responseType) continue;
         if (candidateType === 'team') {
             if (candidate.lead === undefined || normalized.lead === undefined) return true;
-            return Number(candidate.lead) === Number(normalized.lead);
+            // 不能直接 return 比较结果：team preview 有 N 个候选，第一个不匹配就 return false
+            // 会把 LLM 选的非 1 号首发误判为非法（0.9.11 修：battle-gen8battlefactory-11 实测，
+            // LLM 选 lead 5 被判 parse_failed → fallback 成 switch，team preview 卡死）
+            if (Number(candidate.lead) === Number(normalized.lead)) return true;
+            continue;
         }
         if (Number(candidate.slot) === Number(normalized.slot)) return true;
     }

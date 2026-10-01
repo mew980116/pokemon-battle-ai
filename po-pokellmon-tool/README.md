@@ -95,6 +95,15 @@ PO、PS 私服和官方 PS。
 - **DeepSeek 请求必须压「硬墙钟」超时（0.6.1，真 bug）**：原来只有 `req.setTimeout(TIMEOUT_MS)`——那是**空闲超时**（socket idle），连接上只要有零星保活/分块流量就**永远不触发**。
   - 实测（2026-09-20 battle98 T11）：`api.deepseek.com`（117.185.125.154）的连接从 23:42:00 建起到 23:51:24 **仍 Established（564s）**，240s 空闲超时没掐，PO 侧 `sys.synchronousWebCall` 一直阻塞，面板停在「实时 503s 思考中…」。
   - 现在另加一个 `setTimeout` 硬墙钟 deadline（同一时长，`done()` 保证 cb 只回调一次、`res.on('error')` 也接住）。PO 侧兜底：**单次失败→`pklmFallbackAttack()`**，连续 3 次且跨度 >15s 才会认输。
+- **team preview 动作校验 bug：非 1 号首发被误判非法（tool 0.9.11，PS 平台实测）**
+  - 起因（battle-gen8battlefactory-13 前身 battle-11 实测）：LLM 在 team preview 输出了合法的 `{"choice": 5}`（选 Weezing 首发），却报 `parse_failed` → fallback 成 `switch pokeSlot:2`，PS 侧 team 阶段不认换人指令，对局卡死在选人。
+  - 根因：`contract.validateResponseAction` 的 team 候选分支写成了 `return Number(candidate.lead) === Number(normalized.lead)` —— team preview 有 N 个候选（lead 1..N），**第一个候选不匹配就直接 return false**，根本轮不到后面的候选。以前没暴露纯粹因为 LLM 恰好都选了 1 号首发；attack/switch 候选走的是「匹配才 return true、循环尾 return false」，只有 team 分支写法错了。
+  - 修：改成与其它类型一致的「匹配才 return true，否则 continue」。同样影响 PO 平台的 team preview。
+  - 回归：battlefactory-13/14 team 阶段选 lead=5/6 均正常通过；`node --check` 通过。
+- **max_tokens 撞顶改走 finalizeNoThink 收敛，不再上调上限（tool 0.9.10）**
+  - 背景：low 思考下 reasoning 偶尔撞 `max_tokens: 8192` 上限（`finish_reason: length`），content 被截断 → parse_failed（battle-8 实测 3 次，全在残局）。最初对策是 `POKELLMON_MAX_TOKENS=16384`（battle-9 fallback 3→1），但只是推迟撞顶且拉长耗时（均 59.5s→70.4s）。
+  - 修：上限回归默认 8192；`attempt()` 成功回调里先查 `finish_reason === 'length'` 且非 final 阶段 → 与超时/轮次耗尽同路径 `finalizeNoThink('max_tokens_reached')`（关思考、用已有 tool 结果直接收 `{"choice": n}`，gate 如实标 `gateBypassed`）。截断的 content / 半截 tool_calls 不再进入解析。
+  - 新增 `extractFinishReason()`；`POKELLMON_MAX_TOKENS` 环境变量保留但注释写明「撞顶不上调」。
 - **「特性造成的免疫」不能只特判 Wonder Guard（tool 0.8.10，把 0.8.9 的修法泛化）**
   - 起因（用户问「这些特性是否被破格类特性/招式无视有没有表述」）：查这条时实测发现，**同一族的免疫全都被我们写错**——旧代码只看属性倍率，于是把「特性把伤害归零」当成「算不出的固定伤害」：`地震 vs 洗衣机（Levitate）`、`喷射火焰 vs 火钢兽（Flash Fire）`、`冲浪 vs 水精灵（Water Absorb）`、`十万伏特 vs 雷精灵（Volt Absorb）`、`木槌 vs 玛力露丽（Sap Sipper）` —— **全部**印成 `CANNOT be computed (fixed / current-HP-dependent damage) — reason it manually`。0.8.9 只特判了 Wonder Guard。
   - 修：`max === 0` 且属性倍率 > 0 时，只要 `applied.defenderAbility` 有值，就是这个特性造成的免疫 → desc 写 `no effect — <Ability> (this ability blocks that move)`；note 里点名，并写明**穿透方式**（Mold Breaker / Teravolt / Turboblaze，或 Moongeist Beam / Sunsteel Strike / Photon Geyser / Light That Burns the Sky / Menacing Moonraze Maelstrom / Searing Sunraze Smash；对面持 **Ability Shield** 时不可穿透）。
