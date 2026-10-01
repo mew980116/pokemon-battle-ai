@@ -357,7 +357,7 @@ LLM 调试期间，推荐在同一台 PS 私服服务器上运行一个独立 fo
 - LLM 客户端向该账号发起定向挑战；
 - 对局结束后由 foul-play 的 `run-count` 或连续运行配置决定是否开始下一场；
 - 默认单次运行通常只打一场，批量测试必须显式设置多场次数；
-- foul-play 当前不支持 Dynamax / Z-Moves，测试 format 需要考虑这一能力边界。
+- foul-play 支持 Dynamax / Mega / Ultra Burst / 太晶化 / Z-Moves；Dynamax 仅在最后一只宝可梦触发，Z-Moves 在可 Z 化时自动使用。
 
 账号映射优先于 `PS_DECISION` 的兼容提示。服务只监听 `127.0.0.1` 时可保留
 `allowClientHint: true`；若服务需要对外暴露，应设为 `false`，避免客户端伪造 provider。

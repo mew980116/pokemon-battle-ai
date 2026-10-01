@@ -1,0 +1,17 @@
+logs/
+.venv/
+venv/
+dist/
+.idea/
+**/actual_states/*
+**/__pycache__/*
+creds
+*.xlsx
+*.txt
+!requirements.txt
+!requirements-dev.txt
+suspect_decisions.py
+teams/teams
+data/smogon_stats_cache
+data/pkmn_sets_cache
+data/local_data

@@ -138,8 +138,10 @@ foul-play 是自带 PS 客户端和战斗引擎的完整对战程序，不是当
 - foul-play 不进入 `decision-router`，也不复用当前 `battle-state/v1`。
 
 这套方式的价值是：LLM 调试期间可以让 foul-play 作为稳定、可重复的自动对手，
-同时不影响现有 `llm` / `random` provider 路由。foul-play 当前不支持 Dynamax / Z-Moves，
-因此测试 format 应与其能力保持一致，不能把它当作完整 Gen8 Dynamax 对手。
+同时不影响现有 `llm` / `random` provider 路由。foul-play 支持 Dynamax / Mega /
+Ultra Burst / 太晶化 / Z-Moves；其中 Dynamax 的策略是「仅在最后一只宝可梦时触发」，
+Z-Moves 在招式可 Z 化时自动使用，太晶化由搜索决策主动评估（见
+`fp/run_battle.py:format_decision`）。
 
 安全要求：
 

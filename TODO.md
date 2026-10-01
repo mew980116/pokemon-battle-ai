@@ -107,7 +107,7 @@
 - [x] 确认最小接入方式是：foul-play 使用独立账号连接同一台 PS 私服，与 `platform/ps/run-shadow.js` 并排运行。
 - [x] 确认 foul-play 可以使用自动接受挑战模式作为 LLM 调试期间的自动对手。
 - [x] 确认 foul-play 对局结束后是否继续由 `run-count` 控制：默认通常只运行一场，连续测试需要显式配置多场次数或连续运行方式。
-- [x] 记录能力边界：当前 foul-play 不支持 Dynamax / Z-Moves；涉及这些机制的 PS 对局不能直接作为等价对照。
+- [x] 记录能力边界：foul-play 支持 Dynamax / Mega / Ultra Burst / 太晶化 / Z-Moves（`fp/run_battle.py:format_decision`）；Dynamax 仅在最后一只宝可梦触发，Z-Moves 在可 Z 化时自动使用，太晶化由搜索决策主动评估。
 - [ ] 增加服务器部署脚本、foul-play 配置模板、日志目录和进程守护。
 - [ ] 增加 LLM 客户端发起挑战、foul-play 自动接受、对局结束后继续下一场的端到端验收。
 

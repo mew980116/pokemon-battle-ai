@@ -61,3 +61,6 @@ po-data/**/*.png
 # 临时调试脚本（本地草稿，不进 git）
 po-pokellmon-tool/_*.js
 po-pokellmon-tool/test-timeout-server.js
+
+# PS 私服（第三方 Pokemon Showdown 克隆，262MB，独立部署，不进 git）
+pokemon-showdown/
