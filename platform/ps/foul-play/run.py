@@ -86,9 +86,11 @@ async def run_foul_play():
                 FoulPlayConfig.pokemon_format,
             )
         elif FoulPlayConfig.bot_mode == BotModes.accept_challenge:
-            await ps_websocket_client.accept_challenge(
+            actual_format = await ps_websocket_client.accept_challenge(
                 FoulPlayConfig.pokemon_format, FoulPlayConfig.room_name
             )
+            if actual_format:
+                FoulPlayConfig.pokemon_format = actual_format
         elif FoulPlayConfig.bot_mode == BotModes.search_ladder:
             await ps_websocket_client.search_for_match(FoulPlayConfig.pokemon_format)
         else:

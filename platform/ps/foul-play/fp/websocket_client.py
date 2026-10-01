@@ -162,6 +162,7 @@ class PSWebsocketClient:
             )
         )
         username = None
+        actual_format = battle_format
         while username is None:
             msg = await self.receive_message()
             split_msg = msg.split("|")
@@ -174,14 +175,16 @@ class PSWebsocketClient:
                 and (accept_any or split_msg[5] == battle_format)
             ):
                 username = split_msg[2].strip()
+                actual_format = split_msg[5]
                 logger.info(
                     "Accepted challenge from {} (format: {})".format(
-                        username, split_msg[5]
+                        username, actual_format
                     )
                 )
 
         message = ["/accept " + username]
         await self.send_message("", message)
+        return actual_format
 
     async def search_for_match(self, battle_format):
         logger.info("Searching for ranked {} match".format(battle_format))
