@@ -60,7 +60,32 @@ pokemon-battle-experiments
 9. 修改后先运行最小相关测试，再进行 live 对战。
 10. 不把未验证的候选版本称为冻结版本。
 
-## 2. 当前固定版本
+## 2. 全量项目迁移矩阵
+
+新设备需要接管的不只有两个主要代码仓库。推荐按下面的方式迁移：
+
+| 项目 | 新设备处理方式 | 是否上传 GitHub |
+|---|---|---|
+| `pokemon-battle-ai` | clone `main` | 是 |
+| `foul-play-lab` | clone `codex/dual-view-foul-play` | 是 |
+| `foul-play` | clone并固定 baseline commit | 直接使用 upstream/fork |
+| `poke-engine` | clone并固定 engine commit | 直接使用 upstream/fork |
+| `ps-sim` | clone并固定 Showdown commit | 直接使用 upstream |
+| `pokemon-battle-experiments` | 从旧设备复制完整实验目录或选择性复制 | 不建议上传 |
+
+其中：
+
+1. `pokemon-battle-ai` 和 `foul-play-lab` 是当前主要开发代码，必须从 GitHub
+   获取最新提交。
+2. `foul-play` 和 `poke-engine` 是固定版本依赖，不应混入 DualView 改动。
+3. `ps-sim` 是可选的本地服务端；使用远程私服测试时，可以先不安装。
+4. `pokemon-battle-experiments` 约 0.9 GB，包含大量 JSONL、replay 和历史
+   benchmark，不适合直接放进代码仓库。需要保留实验可追溯性时，应通过移动硬盘、
+   局域网或其他文件传输方式复制。
+5. 旧设备上的 `foul-play\docs\` 未跟踪文档和 `ps-sim\package-lock.json`
+   的本地改动不会出现在普通 clone 中，必须按本文的“本地文件迁移”步骤单独保留。
+
+## 3. 当前固定版本
 
 迁移时应保留以下基线版本：
 
@@ -92,7 +117,7 @@ foul-play-lab:
 - 8099 forced-recharge 修复候选在迁移前需要重新进行 live smoke；
 - online win-rate 不是当前迁移后的第一验证目标。
 
-## 3. 旧设备迁移前操作
+## 4. 旧设备迁移前操作
 
 ### 3.1 检查 Git 状态
 
@@ -259,7 +284,7 @@ git push -u origin codex/dual-view-foul-play
 如果 `origin` 指向公开 fork，而实验代码不希望公开，应先在 GitHub
 创建私有仓库，再修改 remote。不要把 token 写入 remote URL。
 
-## 4. GitHub 账户准备
+## 5. GitHub 账户准备
 
 新设备推荐使用 SSH：
 
@@ -287,7 +312,7 @@ gh auth status
 - 日志；
 - AI 的 system prompt。
 
-## 5. 新设备安装环境
+## 6. 新设备安装环境
 
 安装：
 
@@ -314,7 +339,7 @@ cargo --version
 Rust 和 C++ Build Tools 用于在没有可用 wheel 时构建 `poke-engine` Python
 binding。不要因为安装失败就修改 `poke-engine` 或切换到未经记录的 engine 版本。
 
-## 6. 新设备 clone
+## 7. 新设备 clone
 
 建议继续使用目录 `D:\Other\ai`，这样现有文档和脚本中的路径无需大范围修改：
 
@@ -325,7 +350,7 @@ Set-Location D:\Other\ai
 git clone git@github.com:mew980116/pokemon-battle-ai.git pokemon-battle-ai
 git clone --branch codex/dual-view-foul-play --single-branch `
   git@github.com:mew980116/foul-play.git foul-play-lab
-git clone https://github.com/pmariglia/foul-play.git foul-play
+git clone https://github.com/mew980116/foul-play.git foul-play
 git clone https://github.com/mew980116/poke-engine.git poke-engine
 ```
 
@@ -346,7 +371,7 @@ git clone https://github.com/smogon/pokemon-showdown.git ps-sim
 git -C D:\Other\ai\ps-sim checkout a5df8274e85b0889bf2a9b3422a08b39732374fc
 ```
 
-## 7. 安装依赖和本地配置
+## 8. 安装依赖和本地配置
 
 ### 7.1 Node 依赖
 
@@ -406,7 +431,88 @@ D:\Other\ai\foul-play-lab\data\pkmn_sets_cache\gen9randombattle.json
 新设备首次运行时重新下载或生成。也可以通过受控的文件复制迁移该单个缓存，
 但不要把整个缓存目录提交到 GitHub。
 
-## 8. 新设备第一次验证
+## 9. 本地文件和实验数据迁移
+
+以下内容不会随 GitHub clone 自动出现，但它们属于当前开发环境的一部分。
+
+### 9.1 实验目录
+
+在旧设备上先记录目录大小和重要实验：
+
+```powershell
+Get-ChildItem D:\Other\ai\pokemon-battle-experiments -Directory
+Get-ChildItem D:\Other\ai\pokemon-battle-experiments\dual-view-v0 -Directory
+```
+
+将以下目录从旧设备复制到新设备的同一路径：
+
+```text
+D:\Other\ai\pokemon-battle-experiments
+```
+
+复制时必须保留：
+
+- `dual-view-v0\reference-performance-control-20261005\`；
+- `dual-view-v0\reference-8098-20-20261005\`；
+- `dual-view-v0\reference-8099-recharge-smoke-20261005\`（如果已经生成）；
+- `dual-view-v0\live-audit-20-20261004\`；
+- `dual-view-v0\ablation-strength-0-postfix-20261004\`；
+- `manifests\` 和 `reports\`。
+
+不要迁移或提交：
+
+- 密码、token、API key；
+- `.venv`；
+- Rust `target`；
+- 临时日志；
+- 不需要的缓存；
+- 正在写入中的 live 输出目录。
+
+如果实验数据过大，可以只迁移上述目录；但必须把未迁移的范围记录下来，
+不能把“没有迁移历史数据”误报为“实验数据已经完整迁移”。
+
+### 9.2 baseline 的未跟踪文档
+
+旧设备当前有以下 baseline 本地文档：
+
+```text
+D:\Other\ai\foul-play\docs\decision-analysis.md
+```
+
+该文件不属于 upstream clone。应通过移动硬盘、局域网或其他安全文件传输方式
+复制到新设备的：
+
+```text
+D:\Other\ai\foul-play\docs\decision-analysis.md
+```
+
+不要为了迁移它而清理、重置或改写 baseline 仓库。
+
+### 9.3 ps-sim 的本地 package-lock 改动
+
+旧设备当前保留一处未提交修改：
+
+```diff
+- "node": ">=16.0.0"
++ "node": ">=22.18.0"
+```
+
+新设备默认先 clone 固定的 Showdown commit。只有确实需要复现旧设备本地
+`ps-sim` 环境时，才从旧设备导出这一个差异并人工复核后应用。不要在新设备
+直接覆盖或回滚旧设备的 `package-lock.json`。
+
+### 9.4 Random Battle 数据缓存
+
+以下文件也需要单独复制或重新下载：
+
+```text
+D:\Other\ai\foul-play-lab\data\pkmn_sets_cache\gen9randombattle.json
+```
+
+该缓存不进入 GitHub。建议优先在新设备重新生成；复制旧缓存时只复制这个文件，
+不要复制整个 `.venv`、`target` 或缓存目录。
+
+## 10. 新设备第一次验证
 
 不要直接开始线上对战。按以下顺序验证。
 
@@ -457,7 +563,7 @@ Test-NetConnection 218.244.153.64 -Port 8000
 网络可达不等于账号可登录。登录和挑战测试必须使用本地凭据，并且不能把
 凭据写入实验结果。
 
-## 9. 服务启动和第一个 live smoke
+## 11. 服务启动和第一个 live smoke
 
 本地服务端口不是迁移资产。换设备后需要重新启动。
 
@@ -524,7 +630,7 @@ Set-Location D:\Other\ai\foul-play-lab
 不要仅凭端口可访问就宣布 Dual 已经验证。需要检查 health、日志、合法动作、
 reference 错误、fallback 和完整对局结果。
 
-## 10. 新 AI 的启动提示词
+## 12. 新 AI 的启动提示词
 
 将下面的内容作为 DeepSeek harness 的首条项目指令，或者保存为新设备上的
 本地 prompt。路径和版本信息必须以仓库实际内容为准。
@@ -584,7 +690,7 @@ reference 错误、fallback 和完整对局结果。
 不要把“服务启动成功”描述成“算法冻结”，不要把小样本胜率描述成性能结论。
 ```
 
-## 11. 迁移后的推荐开发顺序
+## 13. 迁移后的推荐开发顺序
 
 1. 仓库和依赖版本审计；
 2. 运行离线测试；
@@ -600,11 +706,15 @@ reference 错误、fallback 和完整对局结果。
 不要在迁移后第一步直接跑 20 局或 100 局。先排除环境、版本、状态转译和
 服务生命周期问题，否则对战结果无法解释。
 
-## 12. 迁移完成定义
+## 14. 迁移完成定义
 
 只有满足以下条件，才算迁移基本完成：
 
-- 两个主要仓库已经从 GitHub clone；
+- `pokemon-battle-ai` 已从 GitHub clone，且为最新 `main`；
+- `foul-play-lab` 已从 GitHub clone，且为最新 `codex/dual-view-foul-play`；
+- `foul-play`、`poke-engine`、`ps-sim` 已 clone 或明确记录为暂不需要；
+- `pokemon-battle-experiments` 已完整迁移，或已明确记录选择性迁移范围；
+- baseline 的未跟踪 `docs/decision-analysis.md` 已单独迁移，或已明确暂不需要；
 - baseline 和 engine commit 正确；
 - Python、Node、Rust 版本已记录；
 - `.venv` 和 Node 依赖可用；
