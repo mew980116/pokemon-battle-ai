@@ -70,6 +70,14 @@ def battle_is_finished(battle_tag, msg):
     )
 
 
+def battle_room_expired(battle_tag, msg):
+    # 对手中途跑路、房间长时间无人操作时，PS 会直接 |expire|/|deinit| 销毁房间，
+    # 不产生 win/tie 消息，不识别会永久卡死
+    return msg.startswith(">{}".format(battle_tag)) and (
+        "|expire|" in msg or "|deinit" in msg
+    )
+
+
 def extract_battle_factory_tier_from_msg(msg):
     start = msg.find("Battle Factory Tier: ") + len("Battle Factory Tier: ")
     end = msg.find("</b>", start)
@@ -342,6 +350,9 @@ async def pokemon_battle(ps_websocket_client, pokemon_battle_type, team_dict):
                 await ps_websocket_client.save_replay(battle.battle_tag)
             await ps_websocket_client.leave_battle(battle.battle_tag)
             return winner
+        elif battle_room_expired(battle.battle_tag, msg):
+            logger.info("Battle room expired without result (opponent left/afk)")
+            return None
         else:
             action_required = await async_update_battle(battle, msg)
             if action_required and not battle.wait:
