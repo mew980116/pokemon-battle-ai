@@ -33,10 +33,62 @@ function typesOf(name) {
 function moveTypeOf(idOrName) {
     if (!idOrName) return null;
     try {
-        var mv = calcDex().moves.get(String(idOrName));
+        var moveId = String(idOrName).toLowerCase().replace(/[^a-z0-9]+/g, '');
+        var mv = calcDex().moves.get(moveId);
         if (mv && mv.exists !== false && mv.type) return mv.type;
     } catch (e) { /* 查不到就不给 */ }
     return null;
+}
+
+function nameId(value) {
+    return String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, '');
+}
+
+function requestActivePokemon(side, request) {
+    var requestTeam = request && request.side && Array.isArray(request.side.pokemon) ?
+        request.side.pokemon : [];
+    var team = side && Array.isArray(side.team) ? side.team : [];
+    for (var i = 0; i < requestTeam.length; i++) {
+        if (!requestTeam[i].active) continue;
+        var detailsName = String(requestTeam[i].details || '').split(',')[0].trim();
+        for (var j = 0; j < team.length; j++) {
+            if (nameId(team[j].name) === nameId(detailsName)) return team[j];
+        }
+    }
+    return null;
+}
+
+function requestCondition(value) {
+    var text = String(value || '').trim();
+    if (!text) return { current: null, max: null, hpPct: null, fainted: false };
+    if (text.indexOf('fnt') !== -1 || text === '0') {
+        return { current: 0, max: null, hpPct: 0, fainted: true };
+    }
+    var match = text.match(/^(\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)/);
+    if (!match) return { current: null, max: null, hpPct: null, fainted: false };
+    var current = Number(match[1]);
+    var max = Number(match[2]);
+    return {
+        current: current,
+        max: max,
+        hpPct: max > 0 ? Math.round(current / max * 1000) / 10 : null,
+        fainted: current <= 0
+    };
+}
+
+function applyRequestSnapshot(target, requestPokemon, slot) {
+    if (!target || !requestPokemon) return;
+    var hp = requestCondition(requestPokemon.condition);
+    if (hp.current !== null) target.hp = hp.current;
+    if (hp.max !== null) target.maxHp = hp.max;
+    if (hp.hpPct !== null) target.hpPct = hp.hpPct;
+    target.fainted = !!hp.fainted;
+    target.ko = !!hp.fainted;
+    target.slot = slot;
+    if (requestPokemon.details) {
+        target.details = requestPokemon.details;
+        target.name = String(requestPokemon.details).split(',')[0].trim();
+    }
 }
 
 function levelOf(details) {
@@ -52,6 +104,16 @@ function detectFormat(request, session) {
 function detectGen(request, session, format) {
     var value = request && (request.gen || request.generation);
     if (value === undefined && session) value = session.gen || session.generation;
+    if (value === undefined && session && Array.isArray(session.history)) {
+        for (var i = session.history.length - 1; i >= 0; i--) {
+            var event = session.history[i];
+            if (event && event.type === 'gen' && event.args && event.args[0]) {
+                value = event.args[0];
+                break;
+            }
+        }
+    }
+    if (value !== undefined && value !== null && /^\d+$/.test(String(value))) return Number(value);
     var m = String(value || format || '').toLowerCase().match(/(?:gen|generation)[-_ ]?(\d+)/);
     return m ? Number(m[1]) : null;
 }
@@ -61,9 +123,14 @@ function pokemonState(pokemon, reveal) {
     var result = {
         name: reveal ? pokemon.name : null,
         hpPct: hpPercent(pokemon),
+        hp: pokemon.hp && pokemon.hp.current !== null ? pokemon.hp.current : null,
+        maxHp: pokemon.hp && pokemon.hp.max !== null ? pokemon.hp.max : null,
         status: pokemon.status || null,
         boosts: [],
         moves: [],
+        moveDetails: {},
+        volatile: {},
+        substituteHit: !!pokemon.substituteHit,
         fainted: !!pokemon.fainted,
         ko: !!pokemon.fainted,
         revealed: !!reveal,
@@ -86,21 +153,255 @@ function pokemonState(pokemon, reveal) {
             result.moves.push({ name: pokemon.moves[m], type: mt || '?', slot: m + 1 });
         }
     }
+    if (pokemon.moveDetails) result.moveDetails = Object.assign({}, pokemon.moveDetails);
+    if (pokemon.volatile) {
+        result.volatile = {
+            active: Object.keys(pokemon.volatile),
+            durations: Object.assign({}, pokemon.volatileDurations || {}),
+            movesUsedSinceSwitchIn: (pokemon.movesUsedSinceSwitchIn || []).slice(),
+            lastUsedMove: pokemon.lastUsedMove ? Object.assign({}, pokemon.lastUsedMove) : null,
+            substituteHit: !!pokemon.substituteHit
+        };
+    }
     return result;
 }
 
-function sideHazards(side) {
+function normalizeConditionId(value) {
+    return String(value || '').toLowerCase().replace(/^move:\s*/, '').replace(/[^a-z0-9]+/g, '');
+}
+
+function sideHazards(side, session, sideId) {
     var result = [];
     var conditions = side && side.sideConditions ? side.sideConditions : {};
     var keys = Object.keys(conditions);
-    for (var i = 0; i < keys.length; i++) result.push(keys[i]);
+    for (var i = 0; i < keys.length; i++) {
+        var key = keys[i];
+        var id = normalizeConditionId(key);
+        var count = 1;
+        // PS 用重复 sidestart 表示 Spikes/Toxic Spikes 的层数。adapter
+        // 的 sideConditions 只保留存在性，因此这里从已保存协议事件恢复层数。
+        if (session && session.history && (id === 'spikes' || id === 'toxicspikes')) {
+            count = 0;
+            for (var j = 0; j < session.history.length; j++) {
+                var event = session.history[j];
+                if (!event || event.type !== 'sidestart' || event.side !== sideId) continue;
+                if (normalizeConditionId(event.effect) === id) count++;
+            }
+            if (!count) count = 1;
+            for (var k = session.history.length - 1; k >= 0; k--) {
+                var endEvent = session.history[k];
+                if (!endEvent || endEvent.type !== 'sideend' || endEvent.side !== sideId) continue;
+                if (normalizeConditionId(endEvent.effect) === id) {
+                    count = 0;
+                    for (var m = k + 1; m < session.history.length; m++) {
+                        var later = session.history[m];
+                        if (later && later.type === 'sidestart' &&
+                            later.side === sideId &&
+                            normalizeConditionId(later.effect) === id) count++;
+                    }
+                    break;
+                }
+            }
+            if (!count) count = 1;
+        }
+        for (var repeat = 0; repeat < count; repeat++) result.push(key);
+    }
     return result;
+}
+
+function sideScreens(side) {
+    var result = [];
+    var conditions = side && side.sideConditions ? side.sideConditions : {};
+    var keys = Object.keys(conditions);
+    for (var i = 0; i < keys.length; i++) {
+        var id = String(keys[i]).toLowerCase().replace(/[^a-z0-9]+/g, '');
+        if (id.indexOf('reflect') !== -1 ||
+            id.indexOf('lightscreen') !== -1 ||
+            id.indexOf('auroraveil') !== -1 ||
+            id.indexOf('tailwind') !== -1) {
+            result.push(keys[i]);
+        }
+    }
+    return result;
+}
+
+function toxicCountForSide(session, sideId) {
+    var count = 0;
+    var history = session && session.history ? session.history : [];
+    for (var i = 0; i < history.length; i++) {
+        var event = history[i];
+        if (!event) continue;
+        if ((event.type === 'switch' || event.type === 'drag' || event.type === 'replace') &&
+            event.actor && event.actor.side === sideId) {
+            count = 0;
+            continue;
+        }
+        if (event.type === 'curestatus' &&
+            event.target && event.target.side === sideId) {
+            count = 0;
+            continue;
+        }
+        if (event.type !== 'damage' || !event.target || event.target.side !== sideId) {
+            continue;
+        }
+        var args = event.args || [];
+        var condition = String(args[1] || '');
+        var fromPoison = args.some(function (value) {
+            return String(value || '').toLowerCase() === '[from] psn';
+        });
+        if (fromPoison && /\btox\b/i.test(condition)) count += 1;
+    }
+    return count;
+}
+
+function protectCountForSide(session, sideId) {
+    var count = 0;
+    var protectEffects = {
+        protect: true,
+        detect: true,
+        kingsshield: true,
+        spikyshield: true,
+        banefulbunker: true,
+        silktrap: true,
+        burningbulwark: true
+    };
+    var history = session && session.history ? session.history : [];
+    for (var i = 0; i < history.length; i++) {
+        var event = history[i];
+        if (!event) continue;
+        if (event.type === 'singleturn' &&
+            event.target && event.target.side === sideId &&
+            protectEffects[normalizeConditionId(event.effect)]) {
+            count += 2;
+        } else if (event.type === 'upkeep') {
+            count = Math.max(0, count - 1);
+        }
+    }
+    return count;
+}
+
+function sideConditionDetails(side, session) {
+    var result = {};
+    var details = side && side.sideConditionDetails ? side.sideConditionDetails : {};
+    var keys = Object.keys(details);
+    for (var i = 0; i < keys.length; i++) {
+        var key = keys[i];
+        var detail = Object.assign({}, details[key]);
+        if (detail.startedTurn !== undefined && detail.startedTurn !== null &&
+            session && session.turn !== undefined && session.turn !== null) {
+            detail.turn = session.turn;
+        }
+        var conditionId = normalizeConditionId(key);
+        var durationDefaults = {
+            reflect: 5,
+            lightscreen: 5,
+            auroraveil: 5,
+            safeguard: 5,
+            mist: 5,
+            tailwind: 4
+        };
+        if (detail.turnsRemaining === null &&
+            detail.startedTurn !== undefined &&
+            detail.startedTurn !== null &&
+            durationDefaults[conditionId] !== undefined) {
+            var duration = detail.duration === undefined || detail.duration === null ?
+                durationDefaults[conditionId] : detail.duration;
+            var elapsed = Math.max(0, Number(session.turn || 0) - Number(detail.startedTurn));
+            detail.turnsRemaining = Math.max(0, duration - elapsed);
+        }
+        result[key] = detail;
+    }
+    var toxicCount = toxicCountForSide(session, side && side.id);
+    if (toxicCount > 0) {
+        result.toxic_count = {
+            id: 'toxic_count',
+            count: toxicCount,
+            startedTurn: null,
+            turnsRemaining: null
+        };
+    }
+    var protectCount = protectCountForSide(session, side && side.id);
+    if (protectCount > 0) {
+        result.protect = {
+            id: 'protect',
+            count: protectCount,
+            startedTurn: null,
+            turnsRemaining: null
+        };
+    }
+    return result;
+}
+
+function liveFieldState(session) {
+    var fieldState = session && session.fieldState ? session.fieldState : {};
+    var fieldKeys = Object.keys(session && session.field || {});
+    var terrain = fieldState.terrain || null;
+    if (!terrain) {
+        for (var i = 0; i < fieldKeys.length; i++) {
+            var fieldId = normalizeConditionId(fieldKeys[i]);
+            if (fieldId.indexOf('terrain') !== -1) {
+                terrain = fieldKeys[i];
+                break;
+            }
+        }
+    }
+    return {
+        terrain: terrain,
+        terrainTurnsRemaining: fieldState.terrainTurnsRemaining === undefined ?
+            null : fieldState.terrainTurnsRemaining,
+        trickRoom: !!fieldState.trickRoom,
+        trickRoomTurnsRemaining: fieldState.trickRoomTurnsRemaining === undefined ?
+            0 : fieldState.trickRoomTurnsRemaining,
+        gravity: !!fieldState.gravity
+    };
+}
+
+function liveWeatherState(session) {
+    var state = session && session.weatherState ? session.weatherState : {};
+    return {
+        name: session && session.weather ? session.weather : null,
+        turnsRemaining: state.turnsRemaining === undefined ? null : state.turnsRemaining,
+        source: state.source || null
+    };
+}
+
+function sideEffectDetails(side) {
+    var effects = side && side.effects ? side.effects : {};
+    var wish = effects.wish || {};
+    var futureSight = effects.futureSight || {};
+    return {
+        wish: {
+            turnsRemaining: Number(wish.turnsRemaining || 0),
+            amount: Number(wish.amount || 0),
+            source: wish.source || null
+        },
+        futureSight: {
+            turnsRemaining: Number(futureSight.turnsRemaining || 0),
+            source: futureSight.source || null
+        },
+        healingWish: Number(effects.healingWish || 0),
+        batonPassing: !!effects.batonPassing,
+        shedTailing: !!effects.shedTailing
+    };
+}
+
+function pokemonVolatileState(pokemon) {
+    if (!pokemon) return {};
+    return {
+        active: Object.keys(pokemon.volatile || {}),
+        durations: Object.assign({}, pokemon.volatileDurations || {}),
+        movesUsedSinceSwitchIn: (pokemon.movesUsedSinceSwitchIn || []).slice(),
+        lastUsedMove: pokemon.lastUsedMove ? Object.assign({}, pokemon.lastUsedMove) : null
+    };
 }
 
 function eventText(event) {
     if (!event) return '';
     var args = event.args || [];
-    return '|' + event.type + (args.length ? '|' + args.join('|') : '');
+    // Preserve the raw protocol type. The leading '-' distinguishes PS
+    // state modifiers such as -boost, -damage, -ability, and -weather.
+    var rawType = event.rawType || event.type;
+    return '|' + rawType + (args.length ? '|' + args.join('|') : '');
 }
 
 function DecisionBridge(options) {
@@ -115,6 +416,7 @@ function DecisionBridge(options) {
     this.client = null;
     this.onRequest = options.onRequest || function () {};
     this.onSuggestion = options.onSuggestion || function () {};
+    this.onPreCommit = options.onPreCommit || function () {};
     this.suggestions = [];
     this.jobs = {};
     this.activeByBattle = {};
@@ -144,7 +446,11 @@ DecisionBridge.prototype.buildState = function (session, request, actions) {
     var oppSide = meSide === 'p1' ? 'p2' : 'p1';
     var me = session.sides[meSide] || { team: [] };
     var opp = session.sides[oppSide] || { team: [] };
-    var activeMe = me.active || (me.team && me.team[0]);
+    // request.side.pokemon[].active is authoritative after a switch. The
+    // adapter's side.active can still point at the previous object until the
+    // next protocol event is folded into the session.
+    var activeMe = requestActivePokemon(me, request) ||
+        me.active || (me.team && me.team[0]);
     var activeOpp = opp.active || (opp.team && opp.team[0]);
     var format = detectFormat(request, session);
     var detectedGen = detectGen(request, session, format);
@@ -160,11 +466,25 @@ DecisionBridge.prototype.buildState = function (session, request, actions) {
         rqid: request && request.rqid !== undefined ? request.rqid : undefined,
         history: session.history.map(eventText),
         fullHistory: session.history.map(eventText),
+        lastSelectedMove: session.sides[meSide] && session.sides[meSide].lastSelectedMove ?
+            Object.assign({}, session.sides[meSide].lastSelectedMove) : null,
+        lastUsedMove: session.sides[meSide] && session.sides[meSide].lastUsedMove ?
+            Object.assign({}, session.sides[meSide].lastUsedMove) : null,
         weather: session.weather || null,
+        weatherState: liveWeatherState(session),
         terrain: null,
-        myHazards: sideHazards(me),
-        oppHazards: sideHazards(opp),
-        screens: { me: [], opp: [] },
+        fieldState: liveFieldState(session),
+        myHazards: sideHazards(me, session, meSide),
+        oppHazards: sideHazards(opp, session, oppSide),
+        screens: { me: sideScreens(me), opp: sideScreens(opp) },
+        sideConditionDetails: {
+            me: sideConditionDetails(me, session),
+            opp: sideConditionDetails(opp, session)
+        },
+        sideEffectDetails: {
+            me: sideEffectDetails(me),
+            opp: sideEffectDetails(opp)
+        },
         me: pokemonState(activeMe, true) || {},
         opp: pokemonState(activeOpp, true) || {},
         myTeam: [],
@@ -181,8 +501,7 @@ DecisionBridge.prototype.buildState = function (session, request, actions) {
         teamPreview: !!(request && request.teamPreview),   // PO 的同名字段：决策服务据此走「开局选人」分支
         log: true   // 让决策服务把本回合（prompt / usage / toolLog）写进 logs/deepseek_tool_*.log，便于看 token 开销
     };
-    var fieldKeys = Object.keys(session.field || {});
-    for (var f = 0; f < fieldKeys.length; f++) if (fieldKeys[f].toLowerCase().indexOf('terrain') !== -1) state.terrain = fieldKeys[f];
+    state.terrain = state.fieldState.terrain;
     // 出战槽位以 request 为准（adapter 的 side.active 在换人后可能指向旧的）；
     // team preview 的 request 没有 active 标记（activeSlots 为空）→ 退回对象身份判断
     var activeSlots = {};
@@ -192,16 +511,48 @@ DecisionBridge.prototype.buildState = function (session, request, actions) {
     }
     var useSlots = false;
     for (var sk in activeSlots) { useSlots = true; break; }
+    var myTeamIndexBySlot = {};
     for (var i = 0; i < (me.team || []).length; i++) {
         var mine = pokemonState(me.team[i], true);
+        mine.volatile = pokemonVolatileState(me.team[i]);
         var slot = me.team[i].slot || (i + 1);
+        if (myTeamIndexBySlot[slot] !== undefined) {
+            // formechange 可能让 adapter 暂时保留旧对象；同一队伍槽只保留最新信息，
+            // 避免替补列表出现重复 slot，进而选错换人目标。
+            var previous = state.myTeam[myTeamIndexBySlot[slot]];
+            var merged = Object.assign({}, previous, mine);
+            if ((!mine.moves || !mine.moves.length) && previous.moves) merged.moves = previous.moves;
+            if ((!mine.types || !mine.types.length) && previous.types) merged.types = previous.types;
+            state.myTeam[myTeamIndexBySlot[slot]] = merged;
+            continue;
+        }
+        myTeamIndexBySlot[slot] = state.myTeam.length;
         state.myTeam.push(mine);
-        // 替补席：排除出战中的和已濒死的（之前用对象身份判断，导致出战那只自己也出现在替补里）
-        if (useSlots ? !!activeSlots[slot] : me.team[i] === activeMe) continue;
-        if (me.team[i].fainted) continue;
-        state.bench.push(mine);
     }
-    for (var j = 0; j < (opp.team || []).length; j++) state.oppTeam.push(pokemonState(opp.team[j], true));
+    // 替补席：排除出战中的和已濒死的。
+    for (var bi = 0; bi < state.myTeam.length; bi++) {
+        var benchPokemon = state.myTeam[bi];
+        var benchSlot = benchPokemon.slot || (bi + 1);
+        if (useSlots ? !!activeSlots[benchSlot] : benchPokemon.name === (state.me && state.me.name)) continue;
+        if (benchPokemon.fainted) continue;
+        state.bench.push(benchPokemon);
+    }
+    var oppTeamIndexBySlot = {};
+    for (var j = 0; j < (opp.team || []).length; j++) {
+        var opponentPokemon = pokemonState(opp.team[j], true);
+        opponentPokemon.volatile = pokemonVolatileState(opp.team[j]);
+        var opponentSlot = opp.team[j].slot || (j + 1);
+        if (oppTeamIndexBySlot[opponentSlot] !== undefined) {
+            state.oppTeam[oppTeamIndexBySlot[opponentSlot]] = Object.assign(
+                {},
+                state.oppTeam[oppTeamIndexBySlot[opponentSlot]],
+                opponentPokemon
+            );
+        } else {
+            oppTeamIndexBySlot[opponentSlot] = state.oppTeam.length;
+            state.oppTeam.push(opponentPokemon);
+        }
+    }
     // 对手道具/特性是「战报已证实」的推断值：决策服务的 from_state 读的是 *Inferred 字段
     for (var inf = 0; inf < state.oppTeam.length; inf++) {
         if (state.oppTeam[inf].item) state.oppTeam[inf].itemInferred = state.oppTeam[inf].item;
@@ -254,15 +605,89 @@ DecisionBridge.prototype.buildState = function (session, request, actions) {
         if (reqActive.canDynamax) state.me.canDynamax = true;
         if (reqActive.canTerastallize) state.me.canTerastallize = reqActive.canTerastallize;
     }
-    // 开局选人：把候选的等级 + 招式 id 带上（PS 的 request.side.pokemon[].details / .moves），
-    // 决策服务据此拼出「Lv / 属性 / 招式」候选行（属性由它查图鉴）
-    if (request && request.teamPreview && requestTeam) {
+    // request.side.pokemon[].moves 对整队都可用；补到 myTeam，规则算法在换人时
+    // 才能评估换入后的输出伤害，而不是把所有替补都当成没有招式。
+    if (requestTeam) {
         for (var ti = 0; ti < state.myTeam.length; ti++) {
             var cand = state.myTeam[ti];
             var rp = requestTeam[(cand.slot || (ti + 1)) - 1];
             if (!rp) continue;
             cand.details = rp.details || '';
             cand.moveIds = rp.moves || [];
+            cand.moves = [];
+            for (var mi = 0; mi < (rp.moves || []).length; mi++) {
+                var moveValue = rp.moves[mi];
+                cand.moves.push({
+                    name: moveValue,
+                    id: moveValue,
+                    type: moveTypeOf(moveValue) || '?',
+                    slot: mi + 1
+                });
+            }
+        }
+        for (var rsi = 0; rsi < requestTeam.length; rsi++) {
+            var requestPokemon = requestTeam[rsi];
+            if (!requestPokemon) continue;
+            var requestSlot = rsi + 1;
+            for (var tsi = 0; tsi < state.myTeam.length; tsi++) {
+                var teamEntry = state.myTeam[tsi];
+                var sameSlot = Number(teamEntry.slot) === requestSlot;
+                var requestName = String(requestPokemon.details || '').split(',')[0].trim();
+                var sameName = requestName && nameId(teamEntry.name) === nameId(requestName);
+                if (sameSlot || sameName) {
+                    applyRequestSnapshot(teamEntry, requestPokemon, requestSlot);
+                    break;
+                }
+            }
+        }
+        // The adapter can retain an older active object while the request
+        // already contains the authoritative HP and active slot. Rebind
+        // state.me to the merged team entry so damage and survival decisions
+        // do not use stale full HP after taking damage or healing.
+        var requestActiveIndex = -1;
+        for (var rai = 0; rai < requestTeam.length; rai++) {
+            if (requestTeam[rai] && requestTeam[rai].active) {
+                requestActiveIndex = rai;
+                break;
+            }
+        }
+        if (requestActiveIndex >= 0) {
+            var requestActiveSlot = requestActiveIndex + 1;
+            var mergedActive = null;
+            for (var mai = 0; mai < state.myTeam.length; mai++) {
+                if (Number(state.myTeam[mai].slot) === requestActiveSlot) {
+                    mergedActive = state.myTeam[mai];
+                    break;
+                }
+            }
+            if (!mergedActive) {
+                var requestActiveName = String(requestTeam[requestActiveIndex].details || '')
+                    .split(',')[0].trim();
+                for (var mni = 0; mni < state.myTeam.length; mni++) {
+                    if (nameId(state.myTeam[mni].name) === nameId(requestActiveName)) {
+                        mergedActive = state.myTeam[mni];
+                        break;
+                    }
+                }
+            }
+            if (mergedActive) {
+                state.me = Object.assign({}, mergedActive);
+                state.me.slot = requestActiveSlot;
+                var activeRequest = request && request.active && request.active[0];
+                if (activeRequest && Array.isArray(activeRequest.moves)) {
+                    state.me.moves = [];
+                    for (var ami = 0; ami < activeRequest.moves.length; ami++) {
+                        if (activeRequest.moves[ami].disabled) continue;
+                        var activeMove = activeRequest.moves[ami];
+                        state.me.moves.push({
+                            name: activeMove.move || activeMove.id,
+                            id: activeMove.id || activeMove.move,
+                            type: moveTypeOf(activeMove.id || activeMove.move) || '?',
+                            slot: ami + 1
+                        });
+                    }
+                }
+            }
         }
     }
     return state;
@@ -290,7 +715,10 @@ DecisionBridge.prototype.fetchChoiceOnce = function (state, job) {
             res.setEncoding('utf8');
             res.on('data', function (chunk) { body += chunk; });
             res.on('end', function () {
-                if (res.statusCode < 200 || res.statusCode >= 300) return reject(new Error('decision service HTTP ' + res.statusCode));
+                if (res.statusCode < 200 || res.statusCode >= 300) {
+                    var detail = body ? ' ' + body.slice(0, 500) : '';
+                    return reject(new Error('decision service HTTP ' + res.statusCode + detail));
+                }
                 try { resolve(JSON.parse(body)); } catch (error) { reject(new Error('decision service returned invalid JSON')); }
             });
         });
@@ -376,6 +804,12 @@ DecisionBridge.prototype.recordResult = function (state, session, suggestion, ac
         suggestion: suggestion, action: action, shadow: this.shadow
     };
     if (fallback) record.fallback = true;
+    // 在实际发送前通知 shadow observer，使参考策略面对同一个不可变 state。
+    // observer 只读取并记录，不拥有发送动作的权限。
+    this.onPreCommit(record);
+    if (session && typeof session.recordSelectedAction === 'function' && action) {
+        session.recordSelectedAction(request, action);
+    }
     // 先发送再回调：否则日志里的 sent 永远是"没发"（回调读取时还没赋值）
     if (!this.shadow && action && this.client) record.sent = this.client.chooseAction(action, session.roomId, request && request.rqid, { requestKey: this.requestKey(request, session) });
     this.suggestions.push(record);

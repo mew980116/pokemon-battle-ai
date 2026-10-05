@@ -32,13 +32,178 @@ var session = new adapter.BattleSession('battle-test');
 session.apply(protocol);
 assert.strictEqual(session.roomId, 'battle-test');
 assert.strictEqual(session.turn, 1);
-assert.strictEqual(session.weather, 'RainDance');
+assert.strictEqual(session.weather, 'raindance');
 assert.strictEqual(session.field['Electric Terrain'], true);
 assert.strictEqual(session.sides.p1.active.name, 'Pikachu');
 assert.strictEqual(session.sides.p1.active.moves[0], 'Thunderbolt');
 assert.strictEqual(session.sides.p2.active.hp.percent, 0);
 assert.strictEqual(session.sides.p2.active.fainted, true);
 assert.strictEqual(session.sides.p2.sideConditions['Stealth Rock'], true);
+
+// 形态变化必须更新当前公开名称，不能继续使用 ident 中的基础形态名。
+var formeSession = new adapter.BattleSession('battle-forme');
+formeSession.apply([
+    '|switch|p2a: Terapagos|Terapagos, L77, F|100/100',
+    '|detailschange|p2a: Terapagos|Terapagos-Terastal, L77, F'
+].join('\n'));
+assert.strictEqual(formeSession.sides.p2.active.name, 'Terapagos-Terastal');
+
+// 倒下后不能把上一条战报中的 boost 带到后续状态。
+var faintBoostSession = new adapter.BattleSession('battle-faint-boost');
+faintBoostSession.apply([
+    '|switch|p1a: Armarouge|Armarouge, L80, F|100/100',
+    '|-boost|p1a: Armarouge|spa|1',
+    '|-damage|p1a: Armarouge|0 fnt',
+    '|faint|p1a: Armarouge'
+].join('\n'));
+assert.deepStrictEqual(faintBoostSession.sides.p1.active.boosts, {});
+
+// 状态字段统一保存为 Foul Play 可识别的内部 id。
+var fieldSession = new adapter.BattleSession('battle-field');
+fieldSession.apply([
+    '|-weather|RainDance',
+    '|-fieldstart|move: Electric Terrain'
+].join('\n'));
+assert.strictEqual(fieldSession.weather, 'raindance');
+assert.strictEqual(fieldSession.fieldState.terrain, 'electricterrain');
+
+// 屏障持续时间必须在设置时记录，不能因为持有 Light Clay 的宝可梦随后换下而缩短。
+var screenSession = new adapter.BattleSession('battle-screen-duration');
+screenSession.applyRequest({
+    rqid: 1,
+    side: {
+        id: 'p1',
+        pokemon: [{
+            ident: 'p1: Abomasnow',
+            details: 'Abomasnow, L84, F',
+            condition: '287/287',
+            active: true,
+            item: 'lightclay'
+        }]
+    },
+    active: [{ moves: [{ move: 'Aurora Veil', id: 'auroraveil' }] }]
+});
+screenSession.apply([
+    '|turn|9',
+    '|-sidestart|p1: Alice|move: Aurora Veil',
+    '|switch|p1a: Pikachu|Pikachu, L50|100/100'
+].join('\n'));
+assert.strictEqual(
+    screenSession.sides.p1.sideConditionDetails['move: Aurora Veil'].duration,
+    8
+);
+
+// 高风险战斗状态：Substitute 命中、Wish/Future Sight 计时以及 Baton Pass 保留 boosts。
+var volatileSession = new adapter.BattleSession('battle-volatile-state');
+volatileSession.apply([
+    '|turn|1',
+    '|switch|p1a: Ninjask|Ninjask, L80|100/100',
+    '|switch|p2a: Garchomp|Garchomp, L80|100/100',
+    '|move|p1a: Ninjask|Substitute|p1a: Ninjask',
+    '|-start|p1a: Ninjask|Substitute',
+    '|-activate|p1a: Ninjask|Substitute|[damage]',
+    '|move|p1a: Ninjask|Baton Pass|p1a: Ninjask',
+    '|switch|p1a: Scizor|Scizor, L80|100/100|[from] Baton Pass',
+    '|move|p1a: Scizor|Wish|p1a: Scizor',
+    '|move|p1a: Scizor|Future Sight|p2a: Garchomp',
+    '|-start|p2a: Garchomp|Future Sight',
+    '|move|p1a: Scizor|Healing Wish|p1a: Scizor'
+].join('\n'));
+assert.strictEqual(volatileSession.sides.p1.active.name, 'Scizor');
+assert.strictEqual(volatileSession.sides.p1.active.volatile.substitute, true);
+// 与 Foul Play battle_modifier 对齐：Baton Pass 传递 Substitute，
+// 但新宝可梦的 substitute_hit 标记从 false 开始。
+assert.strictEqual(volatileSession.sides.p1.active.substituteHit, false);
+volatileSession.sides.p1.active.boosts.spe = 2;
+// 用真实的 pending 状态重新触发一次 Baton Pass，验证新对象能继承旧对象的 boosts。
+volatileSession.sides.p1.active.boosts.spa = 1;
+volatileSession.apply([
+    '|move|p1a: Scizor|Baton Pass|p1a: Scizor',
+    '|switch|p1a: Rotom|Rotom, L80|100/100|[from] Baton Pass'
+].join('\n'));
+assert.strictEqual(volatileSession.sides.p1.active.name, 'Rotom');
+assert.strictEqual(volatileSession.sides.p1.active.boosts.spa, 1);
+assert.strictEqual(volatileSession.sides.p1.active.substituteHit, false);
+assert.strictEqual(volatileSession.sides.p1.effects.batonPassing, false);
+
+// Shed Tail 只传递 Substitute，不传递 boosts。
+var shedTailSession = new adapter.BattleSession('battle-shed-tail');
+shedTailSession.apply([
+    '|switch|p1a: Cyclizar|Cyclizar, L80|100/100',
+    '|-boost|p1a: Cyclizar|spe|2',
+    '|move|p1a: Cyclizar|Substitute|p1a: Cyclizar',
+    '|-start|p1a: Cyclizar|Substitute',
+    '|-activate|p1a: Cyclizar|Substitute|[damage]',
+    '|move|p1a: Cyclizar|Shed Tail|p1a: Cyclizar',
+    '|switch|p1a: Baxcalibur|Baxcalibur, L80|100/100|[from] Shed Tail'
+].join('\n'));
+assert.strictEqual(shedTailSession.sides.p1.active.name, 'Baxcalibur');
+assert.deepStrictEqual(shedTailSession.sides.p1.active.boosts, {});
+assert.strictEqual(shedTailSession.sides.p1.active.volatile.substitute, true);
+assert.strictEqual(shedTailSession.sides.p1.active.substituteHit, false);
+assert.strictEqual(shedTailSession.sides.p1.effects.shedTailing, false);
+
+// 普通换人不能继承上一只宝可梦的 boosts 或 volatile。
+var ordinarySwitchSession = new adapter.BattleSession('battle-ordinary-switch');
+ordinarySwitchSession.apply([
+    '|switch|p1a: Ninjask|Ninjask, L80|100/100',
+    '|-boost|p1a: Ninjask|spe|2',
+    '|-start|p1a: Ninjask|Substitute',
+    '|switch|p1a: Scizor|Scizor, L80|100/100'
+].join('\n'));
+assert.deepStrictEqual(ordinarySwitchSession.sides.p1.team[0].boosts, {});
+assert.deepStrictEqual(ordinarySwitchSession.sides.p1.team[0].volatile, {});
+assert.deepStrictEqual(ordinarySwitchSession.sides.p1.active.boosts, {});
+assert.deepStrictEqual(ordinarySwitchSession.sides.p1.active.volatile, {});
+assert.strictEqual(ordinarySwitchSession.sides.p1.active.substituteHit, false);
+
+// Transform/Imposter 在变身时复制目标已有的能力等级。
+var transformSession = new adapter.BattleSession('battle-transform-boosts');
+transformSession.apply([
+    '|switch|p1a: Crawdaunt|Crawdaunt, L84|100/100',
+    '|-unboost|p1a: Crawdaunt|def|1',
+    '|-unboost|p1a: Crawdaunt|spd|1',
+    '|switch|p2a: Ditto|Ditto, L87|100/100',
+    '|-transform|p2a: Ditto|p1a: Crawdaunt|[from] ability: Imposter'
+].join('\n'));
+assert.strictEqual(transformSession.sides.p1.active.boosts.def, -1);
+assert.strictEqual(transformSession.sides.p1.active.boosts.spd, -1);
+assert.strictEqual(transformSession.sides.p2.active.boosts.def, -1);
+assert.strictEqual(transformSession.sides.p2.active.boosts.spd, -1);
+
+var effectSession = new adapter.BattleSession('battle-side-effects');
+effectSession.apply([
+    '|switch|p1a: Jirachi|Jirachi, L80|100/100',
+    '|move|p1a: Jirachi|Wish|p1a: Jirachi',
+    '|move|p1a: Jirachi|Future Sight|p2a: Garchomp',
+    '|move|p1a: Jirachi|Healing Wish|p1a: Jirachi'
+].join('\n'));
+assert.strictEqual(effectSession.sides.p1.effects.wish.turnsRemaining, 2);
+assert.strictEqual(effectSession.sides.p1.effects.wish.source, 'Jirachi');
+assert.strictEqual(effectSession.sides.p1.effects.futureSight.turnsRemaining, 3);
+assert.strictEqual(effectSession.sides.p1.effects.healingWish, 1);
+
+var volatileDurationSession = new adapter.BattleSession('battle-volatile-duration');
+volatileDurationSession.apply([
+    '|switch|p1a: Gengar|Gengar, L80|100/100',
+    '|-start|p1a: Gengar|Encore',
+    '|move|p1a: Gengar|Shadow Ball|p2a: Garchomp',
+    '|-start|p1a: Gengar|Taunt',
+    '|move|p1a: Gengar|Shadow Ball|p2a: Garchomp',
+    '|upkeep'
+].join('\n'));
+assert.strictEqual(volatileDurationSession.sides.p1.active.volatileDurations.Encore, 2);
+assert.strictEqual(volatileDurationSession.sides.p1.active.volatileDurations.Taunt, 1);
+
+var volatileAliasEndSession = new adapter.BattleSession('battle-volatile-alias-end');
+volatileAliasEndSession.apply([
+    '|switch|p1a: Gengar|Gengar, L80|100/100',
+    '|-start|p1a: Gengar|move: Substitute',
+    '|-activate|p1a: Gengar|Substitute|[damage]',
+    '|-end|p1a: Gengar|Substitute'
+].join('\n'));
+assert.deepStrictEqual(volatileAliasEndSession.sides.p1.active.volatile, {});
+assert.strictEqual(volatileAliasEndSession.sides.p1.active.substituteHit, false);
 
 var request = {
     rqid: 7,
@@ -148,6 +313,52 @@ assert.deepStrictEqual(adapter.requestActions(preview), [
 ]);
 assert.strictEqual(adapter.actionToCommand({ type: 'team', lead: 2, order: '213' }), '/choose team 213');
 
+// 更完整的 PS battle protocol：效果事件保留 rawType，并更新状态、形态和结果。
+var extended = adapter.parseProtocol([
+    '|gen|8',
+    '|tier|[Gen 8] Random Battle',
+    '|switch|p1a: Pikachu|Pikachu, L50|100/100',
+    '|-start|p1a: Pikachu|Substitute',
+    '|-boost|p1a: Pikachu|spe|2',
+    '|-damage|p1a: Pikachu|75/100|[from] ps',
+    '|-sethp|p1a: Pikachu|50/100',
+    '|-formechange|p1a: Pikachu|Pikachu-Gmax, L50',
+    '|-terastallize|p1a: Pikachu|Electric',
+    '|-end|p1a: Pikachu|Substitute',
+    '|win|Alice'
+].join('\n'));
+assert.strictEqual(extended[2].rawType, 'switch');
+assert.strictEqual(extended[3].type, 'start');
+assert.strictEqual(extended[6].type, 'sethp');
+assert.strictEqual(extended[8].form, 'Electric');
+assert.strictEqual(extended[7].details, 'Pikachu-Gmax, L50');
+assert.strictEqual(extended[10].subject, 'Alice');
+
+var extendedSession = new adapter.BattleSession('battle-extended');
+extendedSession.apply(extended.reduce(function (text, event) {
+    return text + '|' + event.rawType + (event.args.length ? '|' + event.args.join('|') : '') + '\n';
+}, ''));
+assert.strictEqual(extendedSession.gen, 8);
+assert.strictEqual(extendedSession.format, '[Gen 8] Random Battle');
+assert.strictEqual(extendedSession.sides.p1.active.name, 'Pikachu-Gmax');
+assert.strictEqual(extendedSession.sides.p1.active.hp.percent, 50);
+assert.strictEqual(extendedSession.sides.p1.active.boosts.spe, 2);
+assert.strictEqual(extendedSession.sides.p1.active.teraType, 'Electric');
+assert.strictEqual(extendedSession.sides.p1.active.volatile.Substitute, undefined);
+assert.strictEqual(extendedSession.ended, true);
+assert.deepStrictEqual(extendedSession.result, { type: 'win', winner: 'Alice' });
+
+// team preview 的 active:true 只是预览标记，不应伪造当前出战宝可梦。
+var previewSession = new adapter.BattleSession('battle-preview-active');
+previewSession.applyRequest({
+    teamPreview: true,
+    side: { id: 'p1', pokemon: [
+        { ident: 'p1: A', details: 'A', condition: '100/100', active: true },
+        { ident: 'p1: B', details: 'B', condition: '100/100', active: true }
+    ] }
+});
+assert.strictEqual(previewSession.sides.p1.active, null);
+
 // |poke| 事件：开局亮出的对手成员要记进队伍（工厂/team preview 才发）
 var pokeSession = new adapter.BattleSession('battle-poke');
 pokeSession.apply('|player|p2|Bob|\n|poke|p2|Gourgeist-*, M|\n|poke|p2|Jolteon, F|');
@@ -171,5 +382,20 @@ assert.strictEqual(infoSession.sides.p2.team[0].ability, 'Intimidate');
 assert.strictEqual(infoSession.sides.p2.team[0].item, 'Leftovers');
 infoSession.apply('|-enditem|p2a: Gyarados|Leftovers|[from] move: Knock Off');
 assert.strictEqual(infoSession.sides.p2.team[0].item, null);
+
+// PS 的 stat stage 不能超过 [-6, 6]，重复降速事件也不能生成非法值。
+var boostClampSession = new adapter.BattleSession('battle-boost-clamp');
+boostClampSession.apply('|switch|p1a: Pikachu|Pikachu, L50|100/100');
+boostClampSession.apply(
+    '|-unboost|p1a: Pikachu|spe|1\n' +
+    '|-unboost|p1a: Pikachu|spe|1\n' +
+    '|-unboost|p1a: Pikachu|spe|1\n' +
+    '|-unboost|p1a: Pikachu|spe|1\n' +
+    '|-unboost|p1a: Pikachu|spe|1\n' +
+    '|-unboost|p1a: Pikachu|spe|1\n' +
+    '|-unboost|p1a: Pikachu|spe|1\n' +
+    '|-unboost|p1a: Pikachu|spe|1'
+);
+assert.strictEqual(boostClampSession.sides.p1.active.boosts.spe, -6);
 
 console.log('PS adapter tests passed');

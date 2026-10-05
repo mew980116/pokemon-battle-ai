@@ -15,6 +15,7 @@ var requests = [];
 var starts = [];
 var ends = [];
 var protocols = [];
+var connectionEvents = [];
 var client = new clientModule.PSClient({
     username: 'TestUser',
     password: 'not-stored',
@@ -27,7 +28,8 @@ var client = new clientModule.PSClient({
     onRequest: function (request, actions) { starts.push({ request: request, actions: actions }); },
     onBattleStart: function (session) { starts.push(session.roomId); },
     onBattleEnd: function (session) { ends.push(session.roomId); },
-    onProtocol: function (event) { protocols.push(event.type); }
+    onProtocol: function (event) { protocols.push(event.type); },
+    onConnection: function (type) { connectionEvents.push(type); }
 });
 var socket = new FakeSocket();
 client.connect(socket);
@@ -48,7 +50,10 @@ return Promise.resolve().then(function () {
     client.joinRoom('battle-test');
     client.search('gen8randombattle');
     client.cancelSearch();
-    assert.deepStrictEqual(socket.sent.slice(1), ['|/challenge Rival', '|/accept Rival', '|/pm Rival, hello', 'battle-test|public hello', '|/join battle-test', '|/search gen8randombattle', '|/cancelsearch']);
+    client.cancelChallenge('Rival');
+    assert.deepStrictEqual(socket.sent.slice(1), ['|/challenge Rival', '|/accept Rival', '|/pm Rival, hello', 'battle-test|public hello', '|/join battle-test', '|/search gen8randombattle', '|/cancelsearch', '|/cancelchallenge Rival']);
+    assert.ok(connectionEvents.indexOf('challengeSent') !== -1);
+    assert.ok(connectionEvents.indexOf('challengeAccepted') !== -1);
 
     socket.emit('message', '>battle-test\n|player|p1|TestUser|1|\n|request|{"rqid":1,"side":{"id":"p1","pokemon":[{"ident":"p1: Pikachu","details":"Pikachu, L50","condition":"100/100","active":true}]},"active":[{"moves":[{"id":"thunderbolt","move":"Thunderbolt","disabled":false}]}]}');
     assert.ok(client.sessions['battle-test']);
@@ -64,6 +69,12 @@ return Promise.resolve().then(function () {
     assert.strictEqual(client.sessions['battle-test'], undefined);
     assert.deepStrictEqual(ends, ['battle-test']);
     assert.ok(protocols.indexOf('request') !== -1);
+
+    // win + deinit 同包时，deinit 不能重新触发 battle_start。
+    socket.emit('message', '>battle-lifecycle\n|player|p1|TestUser|1|\n|win|TestUser\n|deinit|battle-lifecycle');
+    assert.strictEqual(starts.filter(function (item) { return item === 'battle-lifecycle'; }).length, 1);
+    assert.deepStrictEqual(ends, ['battle-test', 'battle-lifecycle']);
+    assert.strictEqual(client.sessions['battle-lifecycle'], undefined);
 
     // searchFormat 优先于 rival：登录后应走 /search，而不是 /challenge
     var searchSocket = new FakeSocket();
@@ -82,6 +93,25 @@ return Promise.resolve().then(function () {
         searchSocket.emit('message', '|updateuser|SearchUser|1');
         assert.deepStrictEqual(searchSocket.sent, ['|/trn SearchUser,0,assertion-search', '|/search gen8randombattle']);
 
+        var challengeSocket = new FakeSocket();
+        var challengeClient = new clientModule.PSClient({
+            username: 'ChallengeUser',
+            password: 'not-stored',
+            rival: 'Rival',
+            challengeFormat: 'gen9randombattle',
+            shadowMode: true,
+            loginRequest: function () { return Promise.resolve('assertion-challenge'); }
+        });
+        challengeClient.connect(challengeSocket);
+        challengeSocket.emit('open');
+        challengeSocket.emit('message', '|challstr|abc|123');
+        return Promise.resolve().then(function () {
+            challengeSocket.emit('message', '|updateuser|ChallengeUser|1');
+            assert.deepStrictEqual(challengeSocket.sent, [
+                '|/trn ChallengeUser,0,assertion-challenge',
+                '|/challenge Rival, gen9randombattle'
+            ]);
+
         var oldRival = process.env.PS_RIVAL;
         process.env.PS_RIVAL = 'none';
         var noChallengeSocket = new FakeSocket();
@@ -94,12 +124,13 @@ return Promise.resolve().then(function () {
         noChallengeClient.connect(noChallengeSocket);
         noChallengeSocket.emit('open');
         noChallengeSocket.emit('message', '|challstr|abc|123');
-        return Promise.resolve().then(function () {
+            return Promise.resolve().then(function () {
             noChallengeSocket.emit('message', '|updateuser|NoChallengeUser|1');
             assert.deepStrictEqual(noChallengeSocket.sent, ['|/trn NoChallengeUser,0,assertion-no-challenge']);
             if (oldRival === undefined) delete process.env.PS_RIVAL;
             else process.env.PS_RIVAL = oldRival;
             console.log('PS client tests passed');
+            });
         });
     });
 });

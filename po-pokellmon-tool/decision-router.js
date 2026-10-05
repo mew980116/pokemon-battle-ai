@@ -3,6 +3,7 @@
 var fs = require('fs');
 var path = require('path');
 var contract = require('./decision-contract.js');
+var rules = require('./rules-provider.js');
 
 function readJson(file) {
     try {
@@ -57,5 +58,9 @@ module.exports = {
     loadConfig: loadConfig,
     normalizeAccount: normalizeAccount,
     randomAction: randomAction,
+    rulesAction: function (state) {
+        var selected = rules.rulesAction(state || {});
+        return contract.toResponseAction(selected, state && state.platform);
+    },
     resolveProvider: resolveProvider
 };

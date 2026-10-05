@@ -141,8 +141,22 @@ PSClient.prototype.sendPrivateMessage = function (username, message) {
 PSClient.prototype.joinRoom = function (room) { this.sendGlobal('join ' + room); this.currentRoom = room; };
 PSClient.prototype.leaveRoom = function (room) { room = room || this.currentRoom; if (room) this.sendGlobal('leave ' + room); if (room === this.currentRoom) this.currentRoom = null; };
 PSClient.prototype.close = function () { if (this.socket && typeof this.socket.close === 'function') this.socket.close(); };
-PSClient.prototype.challenge = function (username) { this.sendGlobal('challenge ' + username); };
-PSClient.prototype.acceptChallenge = function (username) { this.sendGlobal('accept ' + username); };
+PSClient.prototype.challenge = function (username, format) {
+    var command = 'challenge ' + username;
+    if (format) command += ', ' + format;
+    this.sendGlobal(command);
+    if (this.onConnection) this.onConnection('challengeSent', { username: username, format: format || null });
+};
+PSClient.prototype.cancelChallenge = function (username) {
+    var command = 'cancelchallenge';
+    if (username) command += ' ' + username;
+    this.sendGlobal(command);
+    if (this.onConnection) this.onConnection('challengeCancelled', { username: username || null });
+};
+PSClient.prototype.acceptChallenge = function (username) {
+    this.sendGlobal('accept ' + username);
+    if (this.onConnection) this.onConnection('challengeAccepted', { username: username });
+};
 // 天梯匹配：登录同一分级队列，由服务器配到对手（rated，计入排位胜场）
 PSClient.prototype.search = function (format) {
     if (!format) throw new Error('format is required');
@@ -169,7 +183,7 @@ PSClient.prototype.handleMessage = function (raw) {
         if (this.searchFormat) {
             this.search(this.searchFormat);
         } else if (this.rival) {
-            this.sendGlobal('challenge ' + this.rival + ', ' + this.challengeFormat);
+            this.challenge(this.rival, this.challengeFormat);
         }
     }
     var challenge = payload.match(/\|challstr\|([^\n]*)\|([^\n]*)/);
@@ -214,13 +228,19 @@ PSClient.prototype.guestLogin = function () {
 
 PSClient.prototype.handleBattlePayload = function (room, payload) {
     var session = this.sessions[room];
-    if (!session) {
-        session = this.sessions[room] = new adapter.BattleSession(room);
-        this.onBattleStart(session, room);
-    }
     var events = adapter.parseProtocol(payload);
     for (var i = 0; i < events.length; i++) {
         var event = events[i];
+        // 同一条消息常见为 |win|... 后紧跟 |deinit|battle。
+        // win 会删除 session；deinit 不能因此又创建一个空的新对局。
+        if (!session && event.type === 'deinit') {
+            this.onProtocol(event, room, null);
+            continue;
+        }
+        if (!session) {
+            session = this.sessions[room] = new adapter.BattleSession(room);
+            this.onBattleStart(session, room);
+        }
         this.onProtocol(event, room, session);
         if (event.type === 'request') {
             var incomingRqid = event.request && event.request.rqid;
@@ -232,7 +252,10 @@ PSClient.prototype.handleBattlePayload = function (room, payload) {
             this.lastActions[room] = actions;
             this.onRequest(event.request, actions, session, room);
         } else session.applyEvent(event);
-        if (event.type === 'win' || event.type === 'tie' || event.type === 'deinit') this.endBattle(room, session, event);
+        if (event.type === 'win' || event.type === 'tie' || event.type === 'deinit') {
+            this.endBattle(room, session, event);
+            session = null;
+        }
     }
 };
 
