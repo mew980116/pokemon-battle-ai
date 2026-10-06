@@ -7,7 +7,7 @@ from copy import deepcopy
 from config import FoulPlayConfig, init_logging, BotModes
 
 from teams import load_team, TeamListIterator
-from fp.run_battle import pokemon_battle
+from fp.run_battle import pokemon_battle, ChallengeCancelled
 from fp.websocket_client import PSWebsocketClient
 
 from data import all_move_json
@@ -80,13 +80,15 @@ async def run_foul_play():
         else:
             await ps_websocket_client.update_team("None")
 
+        opponent_username = None
         if FoulPlayConfig.bot_mode == BotModes.challenge_user:
             await ps_websocket_client.challenge_user(
                 FoulPlayConfig.user_to_challenge,
                 FoulPlayConfig.pokemon_format,
             )
+            opponent_username = FoulPlayConfig.user_to_challenge
         elif FoulPlayConfig.bot_mode == BotModes.accept_challenge:
-            actual_format = await ps_websocket_client.accept_challenge(
+            actual_format, opponent_username = await ps_websocket_client.accept_challenge(
                 FoulPlayConfig.pokemon_format, FoulPlayConfig.room_name
             )
             if actual_format:
@@ -96,9 +98,16 @@ async def run_foul_play():
         else:
             raise ValueError("Invalid Bot Mode: {}".format(FoulPlayConfig.bot_mode))
 
-        winner = await pokemon_battle(
-            ps_websocket_client, FoulPlayConfig.pokemon_format, team_dict
-        )
+        try:
+            winner = await pokemon_battle(
+                ps_websocket_client,
+                FoulPlayConfig.pokemon_format,
+                team_dict,
+                opponent_username,
+            )
+        except ChallengeCancelled:
+            logger.info("Challenge was cancelled before the room started; waiting again")
+            continue
         if winner == FoulPlayConfig.username:
             wins += 1
             logger.info("Won with team: {}".format(team_file_name))

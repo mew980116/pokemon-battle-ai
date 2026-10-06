@@ -130,7 +130,13 @@ async def handle_team_preview(battle, ps_websocket_client):
     await ps_websocket_client.send_message(battle.battle_tag, message)
 
 
-async def get_battle_tag_and_opponent(ps_websocket_client: PSWebsocketClient):
+class ChallengeCancelled(Exception):
+    """accept 已发出但挑战在开房前被取消（访客改名/手动取消）"""
+
+
+async def get_battle_tag_and_opponent(
+    ps_websocket_client: PSWebsocketClient, accepted_username
+):
     while True:
         msg = await ps_websocket_client.receive_message()
         split_msg = msg.split("|")
@@ -144,11 +150,39 @@ async def get_battle_tag_and_opponent(ps_websocket_client: PSWebsocketClient):
             logger.info("Initialized {} against: {}".format(battle_tag, opponent_name))
             return battle_tag, opponent_name
 
+        # 访客在被接受后改名或手动取消：PM 通知挑战作废，房间不会再创建，
+        # 不识别会永久卡死；一次 receive 可能含多条 PM，逐行检查
+        for line in msg.split("\n"):
+            pm_parts = line.split("|")
+            if (
+                len(pm_parts) >= 5
+                and pm_parts[1] == "pm"
+                and pm_parts[2].strip() == accepted_username
+                and (
+                    "cancelled the challenge" in line
+                    or "Challenge cancelled" in line
+                )
+            ):
+                raise ChallengeCancelled(line)
+
+        # 挑战在 /accept 前就已失效时，服务器以 popup 报错且不开房
+        msg_parts = msg.split("|")
+        if (
+            len(msg_parts) >= 3
+            and msg_parts[1] == "popup"
+            and "is not challenging you" in msg
+        ):
+            raise ChallengeCancelled(msg)
+
 
 async def start_battle_common(
-    ps_websocket_client: PSWebsocketClient, pokemon_battle_type
+    ps_websocket_client: PSWebsocketClient,
+    pokemon_battle_type,
+    accepted_username,
 ):
-    battle_tag, opponent_name = await get_battle_tag_and_opponent(ps_websocket_client)
+    battle_tag, opponent_name = await get_battle_tag_and_opponent(
+        ps_websocket_client, accepted_username
+    )
     if FoulPlayConfig.log_to_file:
         FoulPlayConfig.file_log_handler.do_rollover(
             "{}_{}.log".format(battle_tag, opponent_name)
@@ -189,9 +223,13 @@ async def get_first_request_json(
 
 
 async def start_random_battle(
-    ps_websocket_client: PSWebsocketClient, pokemon_battle_type
+    ps_websocket_client: PSWebsocketClient,
+    pokemon_battle_type,
+    accepted_username,
 ):
-    battle, msg = await start_battle_common(ps_websocket_client, pokemon_battle_type)
+    battle, msg = await start_battle_common(
+        ps_websocket_client, pokemon_battle_type, accepted_username
+    )
     battle.battle_type = BattleType.RANDOM_BATTLE
     RandomBattleTeamDatasets.initialize(battle.generation)
 
@@ -222,9 +260,14 @@ async def start_random_battle(
 
 
 async def start_standard_battle(
-    ps_websocket_client: PSWebsocketClient, pokemon_battle_type, team_dict
+    ps_websocket_client: PSWebsocketClient,
+    pokemon_battle_type,
+    team_dict,
+    accepted_username,
 ):
-    battle, msg = await start_battle_common(ps_websocket_client, pokemon_battle_type)
+    battle, msg = await start_battle_common(
+        ps_websocket_client, pokemon_battle_type, accepted_username
+    )
     battle.user.team_dict = team_dict
     if "battlefactory" in pokemon_battle_type:
         battle.battle_type = BattleType.BATTLE_FACTORY
@@ -310,12 +353,19 @@ async def start_standard_battle(
     return battle
 
 
-async def start_battle(ps_websocket_client, pokemon_battle_type, team_dict):
+async def start_battle(
+    ps_websocket_client, pokemon_battle_type, team_dict, accepted_username
+):
     if "random" in pokemon_battle_type:
-        battle = await start_random_battle(ps_websocket_client, pokemon_battle_type)
+        battle = await start_random_battle(
+            ps_websocket_client, pokemon_battle_type, accepted_username
+        )
     else:
         battle = await start_standard_battle(
-            ps_websocket_client, pokemon_battle_type, team_dict
+            ps_websocket_client,
+            pokemon_battle_type,
+            team_dict,
+            accepted_username,
         )
 
     await ps_websocket_client.send_message(battle.battle_tag, ["hf"])
@@ -324,8 +374,18 @@ async def start_battle(ps_websocket_client, pokemon_battle_type, team_dict):
     return battle
 
 
-async def pokemon_battle(ps_websocket_client, pokemon_battle_type, team_dict):
-    battle = await start_battle(ps_websocket_client, pokemon_battle_type, team_dict)
+async def pokemon_battle(
+    ps_websocket_client,
+    pokemon_battle_type,
+    team_dict,
+    accepted_username,
+):
+    battle = await start_battle(
+        ps_websocket_client,
+        pokemon_battle_type,
+        team_dict,
+        accepted_username,
+    )
     while True:
         msg = await ps_websocket_client.receive_message()
         if battle_is_finished(battle.battle_tag, msg):

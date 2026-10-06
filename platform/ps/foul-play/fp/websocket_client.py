@@ -184,7 +184,7 @@ class PSWebsocketClient:
 
         message = ["/accept " + username]
         await self.send_message("", message)
-        return actual_format
+        return actual_format, username
 
     async def search_for_match(self, battle_format):
         logger.info("Searching for ranked {} match".format(battle_format))
