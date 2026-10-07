@@ -369,7 +369,7 @@ async def start_battle(
         )
 
     await ps_websocket_client.send_message(battle.battle_tag, ["hf"])
-    await ps_websocket_client.send_message(battle.battle_tag, ["/timer off"])
+    await ps_websocket_client.send_message(battle.battle_tag, ["/timer on"])
 
     return battle
 
